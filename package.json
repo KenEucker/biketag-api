@@ -1,0 +1,19 @@
+{
+  "name": "biketag-api",
+  "version": "0.0.1",
+  "description": "The Javascript client API for BikeTag Games",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keneucker/biketag-api.git"
+  },
+  "author": "Ken Eucker",
+  "license": "CC-BY-SA-4.0",
+  "bugs": {
+    "url": "https://github.com/keneucker/biketag-api/issues"
+  },
+  "homepage": "https://github.com/keneucker/biketag-api#readme"
+}

@@ -1,0 +1,1 @@
+The new BikeTag javascript client, written entirely in typescript.
