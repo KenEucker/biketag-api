@@ -15,6 +15,7 @@ import {
   // AlbumData,
   ImageData,
   BikeTagApiResponse,
+  Payload,
 } from './common/types';
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)';

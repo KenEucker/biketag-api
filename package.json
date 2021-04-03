@@ -21,7 +21,7 @@
     "typecheck": "npx tsc --noEmit --emitDeclarationOnly false",
     "clean": "rm -rf lib",
     "prepare": "npx husky install",
-    "lint": "npx eslint --ignore-path .gitignore . --ext .ts && prettier --check . && npm run typecheck",
+    "lint": "npx eslint --ignore-path .gitignore . --ext .ts && npx prettier --check . && npm run typecheck",
     "commit": "npx cz",
     "postinstall": "npm run test"
   },

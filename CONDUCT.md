@@ -14,9 +14,9 @@ Have fun, be kind to one another, keep yourself safe.
 
 # 2. Core Values
 
--   Inclusive
--   Community Driven
--   Open Collaboration
+- Inclusive
+- Community Driven
+- Open Collaboration
 
 # 3. Expected Behavior
 
