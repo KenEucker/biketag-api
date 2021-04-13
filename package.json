@@ -26,8 +26,10 @@
     "postinstall": "npm run test"
   },
   "dependencies": {
+    "@sanity/client": "^2.7.1",
     "form-data": "^4.0.0",
-    "got": "^11.8.1"
+    "got": "^11.8.1",
+    "imgur": "^2.0.0-next.5"
   },
   "devDependencies": {
     "@babel/cli": "^7.13.10",

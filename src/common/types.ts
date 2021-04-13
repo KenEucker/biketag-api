@@ -1,3 +1,71 @@
+export interface ImgurAccessToken {
+  accessToken: string;
+}
+
+export interface ImgurClientId {
+  clientId: string;
+}
+
+export interface ImgurLogin extends ImgurClientId {
+  username: string;
+  password: string;
+}
+
+export type ImgurCredentials = ImgurAccessToken | ImgurClientId | ImgurLogin;
+
+export function isImgurAccessToken(arg: unknown): arg is ImgurAccessToken {
+  return (arg as ImgurAccessToken).accessToken !== undefined;
+}
+
+export function isImgurClientId(arg: unknown): arg is ImgurClientId {
+  return (arg as ImgurClientId).clientId !== undefined;
+}
+
+export function isImgurLogin(arg: unknown): arg is ImgurLogin {
+  return (
+    (arg as ImgurLogin).clientId !== undefined &&
+    (arg as ImgurLogin).username !== undefined &&
+    (arg as ImgurLogin).password !== undefined
+  );
+}
+export interface ImgurClient {
+  client: any;
+}
+
+export interface SanityAccessToken {
+  accessToken: string;
+}
+
+export interface SanityClientId {
+  clientId: string;
+}
+
+export interface SanityLogin extends SanityClientId {
+  username: string;
+  password: string;
+}
+
+export type SanityCredentials = SanityAccessToken | SanityClientId | SanityLogin;
+
+export function isSanityAccessToken(arg: unknown): arg is SanityAccessToken {
+  return (arg as SanityAccessToken).accessToken !== undefined;
+}
+
+export function isSanityClientId(arg: unknown): arg is SanityClientId {
+  return (arg as SanityClientId).clientId !== undefined;
+}
+
+export function isSanityLogin(arg: unknown): arg is SanityLogin {
+  return (
+    (arg as SanityLogin).clientId !== undefined &&
+    (arg as SanityLogin).username !== undefined &&
+    (arg as SanityLogin).password !== undefined
+  );
+}
+export interface SanityClient {
+  client: any;
+}
+
 export interface AccessToken {
   accessToken: string;
 }
@@ -11,17 +79,17 @@ export interface Login extends ClientId {
   password: string;
 }
 
-export type Credentials = AccessToken | ClientId | Login;
+export type BikeTagCredentials = AccessToken | ClientId | Login;
 
-export function isAccessToken(arg: unknown): arg is AccessToken {
+export function isBikeTagAccessToken(arg: unknown): arg is AccessToken {
   return (arg as AccessToken).accessToken !== undefined;
 }
 
-export function isClientId(arg: unknown): arg is ClientId {
+export function isBikeTagClientId(arg: unknown): arg is ClientId {
   return (arg as ClientId).clientId !== undefined;
 }
 
-export function isLogin(arg: unknown): arg is Login {
+export function isBikeTagLogin(arg: unknown): arg is Login {
   return (
     (arg as Login).clientId !== undefined &&
     (arg as Login).username !== undefined &&
@@ -44,82 +112,20 @@ interface CommonData {
   datetime: number;
   link: string;
 
-  ad_config?: {
-    safeFlags: string[];
-    highRiskFlags: string[];
-    unsafeFlags: string[];
-    wallUnsafeFlags: string[];
-    showsAds: boolean;
-  };
-  ad_type: number;
-  ad_url: string;
-
   account_url: string | null;
   account_id: string | null;
-  favorite: boolean;
-  is_ad: boolean;
-  is_album: boolean;
-  in_gallery: boolean;
-  in_most_viral: boolean;
-  nsfw: boolean | null;
-  section: string | null;
-  tags: Array<{
-    name: string;
-    display_name: string;
-    followers: number;
-    total_items: number;
-    following: boolean;
-    is_whitelisted: boolean;
-    background_hash: string;
-    thumbnail_hash: string | null;
-    accent: string;
-    background_is_animated: boolean;
-    thumbnail_is_animated: boolean;
-    is_promoted: boolean;
-    description: string;
-    logo_hash: string | null;
-    logo_destination_url: string | null;
-    description_annotations: Record<string, unknown>;
-  }>;
-  topic: string | null;
-  topic_id: string | null;
-  vote: null;
-
-  comment_count: number | null;
-  favorite_count: number | null;
-  ups: number | null;
-  downs: number | null;
-  score: number | null;
-  points: number | null;
-  views: number;
 }
-export interface ImageData extends CommonData {
+export interface TagData extends CommonData {
   type: string;
   width: number;
   height: number;
   size: number;
-  deletehash?: string;
-  bandwidth: number;
-  animated: boolean;
-  has_sound: boolean;
-  edited: string;
-  mp4_size?: number;
-  mp4?: string;
-  gifv?: string;
-  hls?: string;
-  looping?: boolean;
-  processing?: {
-    status: 'pending' | 'completed';
-  };
 }
 
 export interface AlbumData extends CommonData {
   cover: string | null;
   cover_width: number | null;
   cover_height: number | null;
-  layout: string;
-  privacy: string;
-  include_album_ads: boolean;
   images: ImageData[];
   images_count: number;
 }
@@ -132,5 +138,4 @@ export interface Payload {
   title?: string;
   description?: string;
   album?: string;
-  disable_audio?: '1' | '0';
 }
