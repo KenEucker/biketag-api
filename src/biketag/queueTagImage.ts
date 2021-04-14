@@ -1,13 +1,13 @@
 import { BikeTagClient } from '../client';
 import { createForm, getSource } from '../common/utils';
-import { Payload, BikeTagApiResponse, ImageData } from '../common/types';
+import { Payload, BikeTagApiResponse, TagData } from '../common/types';
 import { UPLOAD_ENDPOINT } from '../common/endpoints';
 import { Progress } from 'got';
 
-export async function upload(
+export async function queueTagImage(
   client: BikeTagClient,
   payload: string | string[] | Payload | Payload[]
-): Promise<BikeTagApiResponse<ImageData> | BikeTagApiResponse<ImageData>[]> {
+): Promise<BikeTagApiResponse<TagData> | BikeTagApiResponse<TagData>[]> {
   if (Array.isArray(payload)) {
     const promises = payload.map((p: string | Payload) => {
       const form = createForm(p);
@@ -22,7 +22,7 @@ export async function upload(
         client.emit('uploadProgress', { ...progress, id });
       });
 
-      return (req as unknown) as Promise<BikeTagApiResponse<ImageData>>;
+      return (req as unknown) as Promise<BikeTagApiResponse<TagData>>;
     });
     return await Promise.all(promises);
   }
@@ -35,9 +35,9 @@ export async function upload(
   });
 
   const id = getSource(payload);
-  req.on('uploadProgress', (progress) => {
+  req.on('uploadProgress', (progress: Progress) => {
     client.emit('uploadProgress', { ...progress, id });
   });
 
-  return ((await req) as unknown) as BikeTagApiResponse<ImageData>;
+  return ((await req) as unknown) as BikeTagApiResponse<TagData>;
 }
