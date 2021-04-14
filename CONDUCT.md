@@ -2,6 +2,13 @@
 
 BikeTag’s Mission is to support the game of BikeTag all over the world. Our volunteer team is distributed and we donate our time towards our mission from all over the world for those games of BikeTag that are supported worldwide. As such, we are committed to adhering to a friendly, safe and welcoming environment for all, regardless of gender, sexual orientation, ability, ethnicity, socioeconomic status, and religion (or lack thereof).
 
+We as members, contributors, and leaders pledge to make participation in our
+community a harassment-free experience for everyone, regardless of age, body
+size, visible or invisible disability, ethnicity, sex characteristics, gender
+identity and expression, level of experience, education, socio-economic status,
+nationality, personal appearance, race, caste, color, religion, or sexual identity
+and orientation.
+
 This code of conduct outlines our expectations for the images and location information submitted to the biketag.org website as well as representatives and volunteers at official BikeTag events.
 
 We invite all those who participate in our game of BikeTag, within each of the regional BikeTag communities, and on platforms that facilitate communication within the community; to help us create safe and positive experiences for everyone.
@@ -76,6 +83,54 @@ Unacceptable behavior from any community member, including players and those wit
 
 If a community member engages in unacceptable behavior, we may take any action deemed appropriate, up to and including a temporary ban or permanent expulsion of the ability to submit new rounds of BikeTag or comment on BikeTag posts. Community members are encouraged to address issues within themselves and to resolve these matters with the community at large. Individuals who fail to uphold the reasonable expectations of this code of conduct will be contacted privately regarding reports made or situations observed. These contacted individuals may respond to the reports privately, but there is no guarantee of an audience from the BikeTag team regarding the matter moving forward.
 
+Community leaders have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, and will communicate reasons for moderation decisions when appropriate.
+
+## Enforcement Guidelines
+
+Community leaders will follow these Community Impact Guidelines in determining
+the consequences for any action they deem in violation of this Code of Conduct:
+
+### 1. Correction
+
+**Community Impact**: Use of inappropriate language or other behavior deemed
+unprofessional or unwelcome in the community.
+
+**Consequence**: A private, written warning from community leaders, providing
+clarity around the nature of the violation and an explanation of why the
+behavior was inappropriate. A public apology may be requested.
+
+### 2. Warning
+
+**Community Impact**: A violation through a single incident or series
+of actions.
+
+**Consequence**: A warning with consequences for continued behavior. No
+interaction with the people involved, including unsolicited interaction with
+those enforcing the Code of Conduct, for a specified period of time. This
+includes avoiding interactions in community spaces as well as external channels
+like social media. Violating these terms may lead to a temporary or
+permanent ban.
+
+### 3. Temporary Ban
+
+**Community Impact**: A serious violation of community standards, including
+sustained inappropriate behavior.
+
+**Consequence**: A temporary ban from any sort of interaction or public
+communication with the community for a specified period of time. No public or
+private interaction with the people involved, including unsolicited interaction
+with those enforcing the Code of Conduct, is allowed during this period.
+Violating these terms may lead to a permanent ban.
+
+### 4. Permanent Ban
+
+**Community Impact**: Demonstrating a pattern of violation of community
+standards, including sustained inappropriate behavior, harassment of an
+individual, or aggression toward or disparagement of classes of individuals.
+
+**Consequence**: A permanent ban from any sort of public interaction within
+the community.
+
 # 9. Reporting Guidelines
 
 For all matters pertainting to behavior outlined in this document, please send an email to ambassadors@biketag.org. When reporting issues of violation to this Code of Conduct, please include the following information:
@@ -94,7 +149,7 @@ BikeTag Team: hello@biketag.org
 
 This Code of Conduct is distributed under a Creative Commons Attribution-ShareAlike license.
 
-Portions of text derived directly from the Shift Code of Conduct which included text derived from Stumptown Syndicate Code of Conduct which includes text derived from the Django Code of Conduct and the Geek Feminism Anti-Harassment Policy.
+Portions of text derived directly from the Shift Code of Conduct which included text derived from Stumptown Syndicate Code of Conduct which includes text derived from the Django Code of Conduct and the Geek Feminism Anti-Harassment Policy. Additional portions of this text have been adapted from the [Contributor Covenant][contributorcovenant].
 
 # 12. Glossary of Terms
 
@@ -113,3 +168,5 @@ Providing personal information of another, without explicit consent, to the publ
 BikeTag App
 
 The app, the website, and any other medium in which BikeTag rounds can be played online.
+
+[contributorcovenant]: https://www.contributor-covenant.org

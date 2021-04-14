@@ -8,7 +8,7 @@ export interface UpdateTagPayload
 
 export async function updateTag(
   client: SanityClient,
-  payload: UpdateTagPayload | UpdateTagPayload[]
+  // payload: UpdateTagPayload | UpdateTagPayload[]
 ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  return ({} as BikeTagApiResponse<boolean>)  
+  return ({client} as any) as BikeTagApiResponse<boolean>;
 }

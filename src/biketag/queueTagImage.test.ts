@@ -1,5 +1,5 @@
-import { BikeTagClient } from '../client';
-import { queueTagImage } from './queueTagImage';
+// import { BikeTagClient } from '../client';
+// import { queueTagImage } from './queueTagImage';
 
 test('upload works successfully', async () => { expect(true).toBeTruthy() })
 

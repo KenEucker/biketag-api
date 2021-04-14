@@ -1,5 +1,5 @@
-import { ImgurClient } from 'imgur';
-import { uploadTagImage } from './uploadTagImage';
+// import { ImgurClient } from 'imgur';
+// import { uploadTagImage } from './uploadTagImage';
 
 test('upload works successfully', async () => { expect(true).toBeTruthy() })
 

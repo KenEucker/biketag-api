@@ -1,0 +1,236 @@
+openapi: 3.0.0
+info:
+  title: Converted from types.yaml with typeconv
+  version: '1'
+paths: {}
+$id: common/types.yaml
+$comment: >-
+  Generated from src/common/types.ts by core-types-json-schema
+  (https://github.com/grantila/core-types-json-schema) on behalf of typeconv
+  (https://github.com/grantila/typeconv)
+components:
+  schemas:
+    ImgurAccessToken:
+      properties:
+        accessToken:
+          type: string
+      required:
+        - accessToken
+      additionalProperties: false
+      type: object
+    ImgurClientId:
+      properties:
+        clientId:
+          type: string
+      required:
+        - clientId
+      additionalProperties: false
+      type: object
+    ImgurLogin:
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+      additionalProperties: false
+      type: object
+    ImgurCredentials:
+      anyOf:
+        - $ref: '#/components/schema/ImgurAccessToken'
+        - $ref: '#/components/schema/ImgurClientId'
+        - $ref: '#/components/schema/ImgurLogin'
+    ImgurClient:
+      properties:
+        client: {}
+      required:
+        - client
+      additionalProperties: false
+      type: object
+    SanityAccessToken:
+      properties:
+        accessToken:
+          type: string
+      required:
+        - accessToken
+      additionalProperties: false
+      type: object
+    SanityClientId:
+      properties:
+        clientId:
+          type: string
+      required:
+        - clientId
+      additionalProperties: false
+      type: object
+    SanityLogin:
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+      additionalProperties: false
+      type: object
+    SanityCredentials:
+      anyOf:
+        - $ref: '#/components/schema/SanityAccessToken'
+        - $ref: '#/components/schema/SanityClientId'
+        - $ref: '#/components/schema/SanityLogin'
+    SanityClient:
+      properties:
+        client: {}
+      required:
+        - client
+      additionalProperties: false
+      type: object
+    AccessToken:
+      properties:
+        accessToken:
+          type: string
+      required:
+        - accessToken
+      additionalProperties: false
+      type: object
+    ClientId:
+      properties:
+        clientId:
+          type: string
+      required:
+        - clientId
+      additionalProperties: false
+      type: object
+    Login:
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+      additionalProperties: false
+      type: object
+    BikeTagCredentials:
+      anyOf:
+        - $ref: '#/components/schema/AccessToken'
+        - $ref: '#/components/schema/ClientId'
+        - $ref: '#/components/schema/Login'
+    Credentials:
+      anyOf:
+        - $ref: '#/components/schema/BikeTagCredentials'
+        - $ref: '#/components/schema/SanityCredentials'
+        - $ref: '#/components/schema/ImgurCredentials'
+        - items:
+            - anyOf:
+                - $ref: '#/components/schema/BikeTagCredentials'
+                - $ref: '#/components/schema/SanityCredentials'
+                - $ref: '#/components/schema/ImgurCredentials'
+          additionalItems: false
+          minItems: 1
+          type: array
+    geopoint:
+      properties:
+        lat:
+          type: number
+        long:
+          type: number
+        alt:
+          type: number
+      required:
+        - lat
+        - long
+        - alt
+      additionalProperties: false
+      type: object
+    TagData:
+      properties:
+        tagnumber:
+          type: string
+        mysteryImage:
+          type: string
+        mysteryImageUrl:
+          type: string
+        game:
+          type: string
+        player:
+          type: string
+        hint:
+          type: string
+        discussionUrl:
+          type: string
+        foundLocation:
+          type: string
+        gps:
+          $ref: '#/components/schema/geopoint'
+        foundImage:
+          type: string
+        foundImageUrl:
+          type: string
+      required:
+        - tagnumber
+        - mysteryImage
+        - mysteryImageUrl
+        - game
+        - player
+        - hint
+        - discussionUrl
+        - foundLocation
+        - gps
+        - foundImage
+        - foundImageUrl
+      additionalProperties: false
+      type: object
+    AlbumData:
+      properties:
+        cover:
+          nullable: true
+          type: string
+        cover_width:
+          nullable: true
+          type: number
+        cover_height:
+          nullable: true
+          type: number
+        images:
+          items:
+            $ref: '#/components/schema/TagData'
+          type: array
+        images_count:
+          type: number
+      required:
+        - cover
+        - cover_width
+        - cover_height
+        - images
+        - images_count
+      additionalProperties: false
+      type: object
+    Payload:
+      properties:
+        image:
+          type: string
+        video:
+          type: string
+        type:
+          anyOf:
+            - const: file
+              type: string
+            - const: url
+              type: string
+            - const: base64
+              type: string
+        name:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        album:
+          type: string
+      additionalProperties: false
+      type: object

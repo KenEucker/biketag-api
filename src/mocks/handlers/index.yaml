@@ -1,0 +1,13 @@
+openapi: 3.0.0
+info:
+  title: Converted from index.yaml with typeconv
+  version: '1'
+paths: {}
+$id: mocks/handlers/index.yaml
+$comment: >-
+  Generated from src/mocks/handlers/index.ts by core-types-json-schema
+  (https://github.com/grantila/core-types-json-schema) on behalf of typeconv
+  (https://github.com/grantila/typeconv)
+components:
+  schemas:
+    Handler: {}

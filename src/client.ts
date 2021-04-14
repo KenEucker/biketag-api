@@ -3,13 +3,9 @@ import got, { CancelableRequest, ExtendOptions, Response, Got } from 'got'
 import { getAuthorizationHeader } from './getAuthorizationHeader'
 import { BIKETAG_API_PREFIX } from './common/endpoints'
 import {
-  BikeTagCredentials,
   Credentials,
-  ImgurCredentials,
-  SanityCredentials,
   TagData,
   BikeTagApiResponse,
-  Payload,
 } from './common/types'
 
 import * as sanityApi from './sanity'

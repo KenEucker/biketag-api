@@ -1,5 +1,6 @@
-import { BikeTagClient } from '../client';
-import { favoriteImage } from './favoriteImage';
+// import { BikeTagClient } from '../client';
+// import { favoriteImage } from './favoriteImage';
+
 test('favorite works successfully', async () => { expect(true).toBeTruthy() })
 
 // test('favorite works successfully', async () => {

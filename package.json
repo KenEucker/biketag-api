@@ -15,34 +15,33 @@
   },
   "homepage": "https://github.com/keneucker/biketag-api#readme",
   "scripts": {
+    "dev": "npx eleventy --serve",
     "test": "npx jest",
-    "build": "npx babel --extensions '.ts' src --out-dir lib && npm run types",
-    "types": "npx tsc --build tsconfig.json",
-    "typecheck": "npx tsc --noEmit --emitDeclarationOnly false",
-    "clean": "rm -rf lib",
+    "test:ci": "npx jest --ci --coverage --runInBand",
+    "build": "npx tsc",
+    "typecheck": "npx tsc --noEmit",
+    "clean": "rm -rf lib && rm -rf _site",
     "prepare": "npx husky install",
-    "lint": "npx eslint --ignore-path .gitignore . --ext .ts && npx prettier --check . && npm run typecheck",
+    "lint": "npx eslint . && prettier --check . && npm run typecheck",
     "commit": "npx cz",
-    "postinstall": "npm run test"
+    "postinstall": "npm run test",
+    "convert": "npx typeconv -f ts -t oapi -o openapi 'src/**/*.ts'"
   },
   "dependencies": {
     "@sanity/client": "^2.7.1",
     "form-data": "^4.0.0",
     "got": "^11.8.1",
-    "imgur": "^2.0.0-next.5"
+    "imgur": "^2.0.0-next.5",
+    "typeconv": "^1.4.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.13.10",
-    "@babel/core": "^7.13.10",
-    "@babel/preset-env": "^7.13.10",
-    "@babel/preset-typescript": "^7.13.0",
+    "@11ty/eleventy": "^0.12.1",
     "@commitlint/cli": "^12.0.1",
     "@commitlint/config-conventional": "^12.0.1",
-    "@types/jest": "^26.0.21",
+    "@types/jest": "^26.0.22",
     "@types/mock-fs": "^4.13.0",
     "@typescript-eslint/eslint-plugin": "^4.20.0",
     "@typescript-eslint/parser": "^4.20.0",
-    "babel-jest": "^26.6.3",
     "commitizen": "^4.2.3",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.20.0",
@@ -54,11 +53,12 @@
     "msw": "^0.28.1",
     "prettier": "^2.2.1",
     "semantic-release": "^17.4.1",
+    "ts-jest": "^26.5.4",
     "typescript": "^4.2.3"
   },
   "lint-staged": {
     "*.ts": [
-      "eslint --ignore-path .gitignore . --ext .ts --fix",
+      "eslint . --fix",
       "jest --bail --findRelatedTests"
     ],
     "*.{js,css,md,yml,yaml,json}": "prettier --write"

@@ -10,10 +10,10 @@ export async function uploadTagImage(
   if (Array.isArray(payload)) {
     const promises = payload.map((p: string | Payload) => {
 
-      return (req as unknown) as Promise<BikeTagApiResponse<TagData>>;
+      return (p as unknown) as Promise<BikeTagApiResponse<TagData>>;
     });
     return await Promise.all(promises);
   }
 
-  return ((await req) as unknown) as BikeTagApiResponse<TagData>;
+  return ((await {client, req} as any) as unknown) as BikeTagApiResponse<TagData>;
 }

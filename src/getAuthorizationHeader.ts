@@ -1,13 +1,13 @@
-import {
-  AccessToken,
-} from './common/types';
+// import {
+//   AccessToken, BikeTagCredentials,
+// } from './common/types';
 import {
   isBikeTagAccessToken,
   isBikeTagClientId,
   isBikeTagLogin,
 } from './common/methods';
 import { BikeTagClient } from './client';
-import { BIKETAG_API_PREFIX, AUTHORIZE_ENDPOINT } from './common/endpoints';
+// import { BIKETAG_API_PREFIX, AUTHORIZE_ENDPOINT } from './common/endpoints';
 
 export async function getAuthorizationHeader(
   client: BikeTagClient
@@ -20,62 +20,64 @@ export async function getAuthorizationHeader(
     return `Client-ID ${client.credentials.clientId}`;
   }
 
-  const { clientId, username, password } = client.credentials;
+  const accessToken = "test"
 
-  const options: Record<string, unknown> = {
-    prefixUrl: BIKETAG_API_PREFIX,
-    searchParams: {
-      client_id: clientId,
-      response_type: 'token',
-    },
-  };
+//   const { clientId, username, password } = client.credentials as BikeTagCredentials;
 
-  let response = await client.plainRequest(AUTHORIZE_ENDPOINT, options);
+//   const options: Record<string, unknown> = {
+//     prefixUrl: BIKETAG_API_PREFIX,
+//     searchParams: {
+//       client_id: clientId,
+//       response_type: 'token',
+//     },
+//   };
 
-  const cookies = Array.isArray(response.headers['set-cookie'])
-    ? response.headers['set-cookie'][0]
-    : response.headers['set-cookie'];
+//   let response = await client.plainRequest(AUTHORIZE_ENDPOINT, options);
 
-  if (!cookies) {
-    throw new Error('No cookies were set during authorization');
-  }
+//   const cookies = Array.isArray(response.headers['set-cookie'])
+//     ? response.headers['set-cookie'][0]
+//     : response.headers['set-cookie'];
 
-  const matches = cookies.match('(^|;)[s]*authorize_token=([^;]*)');
+//   if (!cookies) {
+//     throw new Error('No cookies were set during authorization');
+//   }
 
-  if (!matches || matches.length < 3) {
-    throw new Error('Unable to find authorize_token cookie');
-  }
+//   const matches = cookies.match('(^|;)[s]*authorize_token=([^;]*)');
 
-  const authorizeToken = matches[2];
+//   if (!matches || matches.length < 3) {
+//     throw new Error('Unable to find authorize_token cookie');
+//   }
 
-  options.method = 'POST';
-  options.form = {
-    username,
-    password,
-    allow: authorizeToken,
-  };
+//   const authorizeToken = matches[2];
 
-  options.followRedirect = false;
-  options.headers = {
-    cookie: `authorize_token=${authorizeToken}`,
-  };
+//   options.method = 'POST';
+//   options.form = {
+//     username,
+//     password,
+//     allow: authorizeToken,
+//   };
 
-  response = await client.plainRequest(AUTHORIZE_ENDPOINT, options);
-  const location = response.headers.location;
-  if (!location) {
-    throw new Error('Unable to parse location');
-  }
+//   options.followRedirect = false;
+//   options.headers = {
+//     cookie: `authorize_token=${authorizeToken}`,
+//   };
 
-  const token = JSON.parse(
-    '{"' +
-      decodeURI(location.slice(location.indexOf('#') + 1))
-        .replace(/"/g, '\\"')
-        .replace(/&/g, '","')
-        .replace(/=/g, '":"') +
-      '"}'
-  );
+//   response = await client.plainRequest(AUTHORIZE_ENDPOINT, options);
+//   const location = response.headers.location;
+//   if (!location) {
+//     throw new Error('Unable to parse location');
+//   }
 
-  const accessToken = token.access_token;
-  ((client.credentials as unknown) as AccessToken).accessToken = accessToken;
+//   const token = JSON.parse(
+//     '{"' +
+//       decodeURI(location.slice(location.indexOf('#') + 1))
+//         .replace(/"/g, '\\"')
+//         .replace(/&/g, '","')
+//         .replace(/=/g, '":"') +
+//       '"}'
+//   );
+
+//   const accessToken = token.access_token;
+//   ((client.credentials as unknown) as AccessToken).accessToken = accessToken;
   return `Bearer ${accessToken}`;
 }

@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: Converted from updateTag.yaml with typeconv
+  version: '1'
+paths: {}
+$id: biketag/updateTag.yaml
+$comment: >-
+  Generated from src/biketag/updateTag.ts by core-types-json-schema
+  (https://github.com/grantila/core-types-json-schema) on behalf of typeconv
+  (https://github.com/grantila/typeconv)
+components:
+  schemas:
+    UpdateTagPayload:
+      properties:
+        imageHash:
+          type: string
+      required:
+        - imageHash
+      additionalProperties: false
+      type: object
