@@ -83,7 +83,6 @@ export interface TagData extends CommonData {
       foundImage: string
       foundImageUrl: string
 }
-
 export interface AlbumData extends CommonData {
   cover: string | null
   cover_width: number | null

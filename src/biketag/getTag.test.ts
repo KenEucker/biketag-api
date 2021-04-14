@@ -1,5 +1,5 @@
 import { BikeTagClient } from '../client';
-import { getImage } from './getImage';
+import { getTag } from './getTag';
 
 test('get image works successfully', async () => { expect(true).toBeTruthy() })
 
