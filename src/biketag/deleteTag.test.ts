@@ -1,5 +1,5 @@
 import { BikeTagClient } from '../client';
-import { deleteImage } from './deleteImage';
+import { deleteTag } from './deleteTag';
 
 test('delete works successfully', async () => { expect(true).toBeTruthy() })
 

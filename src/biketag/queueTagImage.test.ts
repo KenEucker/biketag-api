@@ -1,12 +1,12 @@
-import { ImgurClient } from 'imgur';
-import { uploadTag } from './uploadTag';
+import { BikeTagClient } from '../client';
+import { queueTagImage } from './queueTagImage';
 
 test('upload works successfully', async () => { expect(true).toBeTruthy() })
 
 // describe('test file uploads', () => {
 //   test('upload one image via path string, receive one response', async () => {
 //     const accessToken = 'abc123';
-//     const client = new ImgurClient({ accessToken });
+//     const client = new BikeTagClient({ accessToken });
 //     const response = await upload(client, '/home/user/biketag-game-1.jpg');
 //     expect(response).toMatchInlineSnapshot(`
 //       Object {
@@ -24,7 +24,7 @@ test('upload works successfully', async () => { expect(true).toBeTruthy() })
 
 //   test('upload multiple images via array of path strings, receive multiple responses', async () => {
 //     const accessToken = 'abc123';
-//     const client = new ImgurClient({ accessToken });
+//     const client = new BikeTagClient({ accessToken });
 //     const response = await upload(client, [
 //       '/home/user/biketag-game-1.jpg',
 //       '/home/user/biketag-game-1-found.jpg',
@@ -57,7 +57,7 @@ test('upload works successfully', async () => { expect(true).toBeTruthy() })
 
 //   test('upload one image via payload type, receive one response', async () => {
 //     const accessToken = 'abc123';
-//     const client = new ImgurClient({ accessToken });
+//     const client = new BikeTagClient({ accessToken });
 //     const response = await upload(client, {
 //       image: '/home/user/meme.jpg',
 //       title: 'dank meme',
@@ -79,7 +79,7 @@ test('upload works successfully', async () => { expect(true).toBeTruthy() })
 
 //   test('upload multiple images via an array of payload type, receive multiple response', async () => {
 //     const accessToken = 'abc123';
-//     const client = new ImgurClient({ accessToken });
+//     const client = new BikeTagClient({ accessToken });
 //     const response = await upload(client, [
 //       {
 //         image: '/home/user/biketag-game-1.jpg',
@@ -120,7 +120,7 @@ test('upload works successfully', async () => { expect(true).toBeTruthy() })
 
 //   test('upload a video, disable sound', async () => {
 //     const accessToken = 'abc123';
-//     const client = new ImgurClient({ accessToken });
+//     const client = new BikeTagClient({ accessToken });
 //     const response = await upload(client, {
 //       video: '/home/user/trailer.mp4',
 //       title: 'trailer for my new stream',
@@ -143,7 +143,7 @@ test('upload works successfully', async () => { expect(true).toBeTruthy() })
 //   test('upload progress event emitter', async () => {
 //     const accessToken = 'abc123';
 //     const video = '/home/user/trailer.mp4';
-//     const client = new ImgurClient({ accessToken });
+//     const client = new BikeTagClient({ accessToken });
 //     const eventHandler = jest.fn();
 //     client.on('uploadProgress', eventHandler);
 

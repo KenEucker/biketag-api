@@ -4,13 +4,18 @@ import { getAuthorizationHeader } from './getAuthorizationHeader'
 import { BIKETAG_API_PREFIX } from './common/endpoints'
 import {
   BikeTagCredentials,
-  // AlbumData,
+  Credentials,
+  ImgurCredentials,
+  SanityCredentials,
   TagData,
   BikeTagApiResponse,
-  // ImgurClient,
-  // SanityClient,
   Payload,
 } from './common/types'
+
+import * as sanityApi from './sanity'
+import * as imgurApi from './imgur'
+import * as biketagApi from './biketag'
+
 import { ImgurClient } from 'imgur'
 import sanityClient, { SanityClient } from '@sanity/client'
 
@@ -23,7 +28,7 @@ export class BikeTagClient extends EventEmitter {
   private imgurClient: ImgurClient
   private sanityClient: SanityClient
 
-  constructor(readonly credentials: BikeTagCredentials) {
+  constructor(readonly credentials: Credentials) {
     super()
 
     this.mostAvailableApi = ""
@@ -39,7 +44,7 @@ export class BikeTagClient extends EventEmitter {
       responseType: 'json',
       hooks: {
         beforeRequest: [
-          async (options) => {
+          async (options: any) => {
             options.headers['authorization'] = await getAuthorizationHeader(
               this
             )
@@ -69,7 +74,7 @@ export class BikeTagClient extends EventEmitter {
     })
   }
   
-  chooseMostAvailableAPI(): string {
+  private getMostAvailableAPI(): string {
     if (this.mostAvailableApi.length) {
       return this.mostAvailableApi
     }
@@ -77,7 +82,7 @@ export class BikeTagClient extends EventEmitter {
     /// TODO: determine if a biketag server is available
     /// TODO: determine if sanity permissions are available
     /// TODO: default to imgur api
-    return "imgur"
+    return this.mostAvailableApi = "imgur"
   }
 
   plainRequest(
@@ -95,7 +100,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   // deleteImage(imageHash: string): Promise<BikeTagApiResponse<boolean>> {
-  //   switch (this.chooseMostAvailableAPI()) {
+  //   switch (this.getMostAvailableAPI()) {
   //     case "imgur":
   //       return imgur.deleteImage(this, imageHash)
   //     break
@@ -107,9 +112,25 @@ export class BikeTagClient extends EventEmitter {
   //   return getArchive(this, options)
   // }
 
-  // getImage(imageHash: string): Promise<BikeTagApiResponse<TagData>> {
-  //   return getImage(this, imageHash)
-  // }
+  getTag(tagnumber: number): Promise<BikeTagApiResponse<TagData>> {
+    const clientString = this.getMostAvailableAPI()
+    let client: any = null
+
+    switch (clientString) {
+      case "sanity":
+        client = sanityApi
+        break
+      case "imgur":
+        client = imgurApi
+        break
+      default:
+      case "biketag":
+        client = biketagApi
+        break
+    }
+
+    return client.getTag(client, tagnumber)
+  }
 
   // updateImage(
   //   payload: UpdateImagePayload | UpdateImagePayload[]
@@ -126,7 +147,7 @@ export class BikeTagClient extends EventEmitter {
   // getBikeTag(
   //   payload: UpdateImagePayload | UpdateImagePayload[]
   // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  //   switch (this.chooseMostAvailableAPI()) {
+  //   switch (this.getMostAvailableAPI()) {
   //     case "imgur":
   //       return getBikeTag(this, payload)
   //       break

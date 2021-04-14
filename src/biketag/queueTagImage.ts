@@ -4,7 +4,7 @@ import { Payload, BikeTagApiResponse, TagData } from '../common/types';
 import { UPLOAD_ENDPOINT } from '../common/endpoints';
 import { Progress } from 'got';
 
-export async function upload(
+export async function queueTagImage(
   client: BikeTagClient,
   payload: string | string[] | Payload | Payload[]
 ): Promise<BikeTagApiResponse<TagData> | BikeTagApiResponse<TagData>[]> {

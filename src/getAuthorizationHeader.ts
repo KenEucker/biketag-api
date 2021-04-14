@@ -1,9 +1,11 @@
 import {
   AccessToken,
+} from './common/types';
+import {
   isBikeTagAccessToken,
   isBikeTagClientId,
   isBikeTagLogin,
-} from './common/types';
+} from './common/methods';
 import { BikeTagClient } from './client';
 import { BIKETAG_API_PREFIX, AUTHORIZE_ENDPOINT } from './common/endpoints';
 

@@ -3,7 +3,7 @@ import { createForm, getSource } from '../common/utils';
 import { Payload, BikeTagApiResponse, TagData } from '../common/types';
 import { Progress } from 'got';
 
-export async function uploadTag(
+export async function uploadTagImage(
   client: ImgurClient,
   payload: string | string[] | Payload | Payload[]
 ): Promise<BikeTagApiResponse<TagData> | BikeTagApiResponse<TagData>[]> {

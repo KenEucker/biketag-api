@@ -2,7 +2,7 @@ import { BikeTagClient } from '../client';
 import { IMAGE_ENDPOINT } from '../common/endpoints';
 import { BikeTagApiResponse } from '../common/types';
 
-export async function deleteImage(
+export async function deleteTag(
   client: BikeTagClient,
   imageHash: string
 ): Promise<BikeTagApiResponse<boolean>> {
