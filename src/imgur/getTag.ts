@@ -1,3 +1,4 @@
+// @ts-ignore
 import { ImgurClient } from 'imgur';
 import { BikeTagApiResponse, TagData } from '../common/types';
 

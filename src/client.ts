@@ -1,6 +1,6 @@
+import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
 import { EventEmitter } from 'events'
-import got, { CancelableRequest, ExtendOptions, Response, Got } from 'got'
-import { getAuthorizationHeader } from './getAuthorizationHeader'
+// import { getAuthorizationHeader } from './getAuthorizationHeader'
 import { BIKETAG_API_PREFIX } from './common/endpoints'
 import {
   Credentials,
@@ -12,14 +12,14 @@ import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 
+// @ts-ignore
 import { ImgurClient } from 'imgur'
 import sanityClient, { SanityClient } from '@sanity/client'
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
 
 export class BikeTagClient extends EventEmitter {
-  private got: Got
-  private gotExtended: Got
+  private fetcher: AxiosInstance
   private mostAvailableApi: string
   private imgurClient: ImgurClient
   private sanityClient: SanityClient
@@ -31,22 +31,21 @@ export class BikeTagClient extends EventEmitter {
     this.imgurClient = this.initializeImgurApi({})
     this.sanityClient = this.initializeSanityApi({})
 
-    this.got = got.extend()
-    this.gotExtended = this.got.extend({
-      prefixUrl: BIKETAG_API_PREFIX,
+    this.fetcher = axios.create({
+      baseURL: BIKETAG_API_PREFIX,
       headers: {
         'user-agent': USERAGENT,
       },
       responseType: 'json',
-      hooks: {
-        beforeRequest: [
-          async (options: any) => {
-            options.headers['authorization'] = await getAuthorizationHeader(
-              this
-            )
-          },
-        ],
-      },
+      // hooks: {
+      //   beforeRequest: [
+      //     async (options: any) => {
+      //       options.headers['authorization'] = await getAuthorizationHeader(
+      //         this
+      //       )
+      //     },
+      //   ],
+      // },
     })
   }
 
@@ -82,17 +81,15 @@ export class BikeTagClient extends EventEmitter {
   }
 
   plainRequest(
-    url: string,
-    options: ExtendOptions = {}
-  ): CancelableRequest<Response<unknown>> {
-    return this.got.extend(options)(url)
+    options: AxiosRequestConfig = {}
+  ): Promise<AxiosResponse<any>> {
+    return this.fetcher(options).then(response => response.data)
   }
 
   request(
-    url: string,
-    options: ExtendOptions = {}
-  ): CancelableRequest<Response<string>> {
-    return this.gotExtended.extend(options)(url)
+    options: AxiosRequestConfig = {}
+  ): Promise<AxiosResponse<string>> {
+    return this.fetcher(options)
   }
 
   // deleteImage(imageHash: string): Promise<BikeTagApiResponse<boolean>> {

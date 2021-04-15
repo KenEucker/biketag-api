@@ -7,7 +7,5 @@ export async function deleteTag(
   imageHash: string
 ): Promise<BikeTagApiResponse<boolean>> {
   const url = `${IMAGE_ENDPOINT}/${imageHash}`;
-  return (await client
-    .request(url, { method: 'DELETE' })
-    .json()) as BikeTagApiResponse<boolean>;
+  return ((await client.request({ url, method: 'DELETE' })).data as unknown) as BikeTagApiResponse<boolean>;
 }

@@ -1,4 +1,3 @@
-import { createReadStream } from 'fs';
 import FormData from 'form-data';
 import { Payload } from './types';
 
@@ -26,14 +25,14 @@ export function createForm(payload: string | Payload): FormData {
   const form = new FormData();
 
   if (typeof payload === 'string') {
-    form.append('image', createReadStream(payload));
+    form.append('image', payload);
     return form;
   }
 
   for (const [key, value] of Object.entries(payload)) {
     if (key === 'image' || key === 'video') {
       if (!payload.type || payload.type === 'file')
-        form.append(key, createReadStream(value));
+        form.append(key, payload);
     } else {
       form.append(key, value);
     }

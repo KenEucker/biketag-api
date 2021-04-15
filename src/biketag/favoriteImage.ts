@@ -7,7 +7,5 @@ export async function favoriteImage(
   imageHash: string
 ): Promise<BikeTagApiResponse<'favorited'>> {
   const url = `${IMAGE_ENDPOINT}/${imageHash}/favorite`;
-  return (await client
-    .request(url, { method: 'POST' })
-    .json()) as BikeTagApiResponse<'favorited'>;
+  return ((await client.request({ url, method: 'POST' })).data as unknown) as BikeTagApiResponse<'favorited'>
 }

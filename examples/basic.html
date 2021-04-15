@@ -1,1 +1,18 @@
-Hi there!
+<html style="font-size: 16px;" class="u-responsive-xl"><head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <title>BikeTag API test</title>
+    <script type="text/javascript" src="/dist/bundle.js"></script>
+</head>
+  <body>
+  <script>
+   (() => {
+      const biketagAPI = new biketag.BikeTagClient({
+        username: 'u',
+        password: 'p',
+      })
+      console.log({biketagAPI})
+    })()
+  </script>
+</body>
+</html>

@@ -3,9 +3,8 @@
   "exclude": ["src/coverage/", "src/mocks/", "src/**/*.test.ts"],
   "compilerOptions": {
     "moduleResolution": "node",
-    "module": "CommonJS",
-    "target": "ES2019",
-    "lib": ["ES2019"],
+    "target": "es6",
+    "lib": ["es2019", "dom"],
     "rootDir": "./src",
     "outDir": "lib",
     "importHelpers": true,

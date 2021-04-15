@@ -6,6 +6,6 @@ export async function getTag(
   client: BikeTagClient,
   imageHash: string
 ): Promise<BikeTagApiResponse<TagData>> {
-  const url = `${IMAGE_ENDPOINT}/${imageHash}`;
-  return (await client.request(url).json()) as BikeTagApiResponse<TagData>;
+  const url = `${IMAGE_ENDPOINT}/${imageHash}`
+  return ((await client.request({ url })).data as unknown) as BikeTagApiResponse<TagData>
 }

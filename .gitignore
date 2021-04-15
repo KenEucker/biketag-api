@@ -3,3 +3,5 @@ lib
 src/coverage
 *.code-workspace
 _site
+dist
+.DS_Store
