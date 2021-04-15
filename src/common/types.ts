@@ -21,15 +21,28 @@ export interface SanityAccessToken {
 }
 
 export interface SanityClientId {
-  clientId: string
+  projectId: string
 }
 
 export interface SanityLogin extends SanityClientId {
+  dataset: string
+  apiVersion: string
+  useCdn: boolean
   username: string
   password: string
 }
 
-export type SanityCredentials = SanityAccessToken | SanityClientId | SanityLogin
+export type SanityCredentials = {
+  accessToken: string
+  projectId: string
+  dataset: string
+  apiVersion: string
+  useCdn: boolean
+  username: string
+  password: string
+}
+
+//SanityAccessToken | SanityClientId | SanityLogin
 export interface SanityClient {
   client: any
 }

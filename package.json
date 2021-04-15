@@ -21,7 +21,7 @@
     "build": "npx tsc",
     "compile": "npx webpack",
     "typecheck": "npx tsc --noEmit",
-    "clean": "rm -rf lib && rm -rf _site",
+    "clean": "rm -rf lib dist _site",
     "prepare": "npx husky install",
     "lint": "npx eslint . && prettier --check . && npm run typecheck",
     "commit": "npx cz",

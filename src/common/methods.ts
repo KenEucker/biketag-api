@@ -31,12 +31,12 @@ export function isSanityAccessToken(arg: unknown): arg is SanityAccessToken {
 }
 
 export function isSanityClientId(arg: unknown): arg is SanityClientId {
-  return (arg as SanityClientId).clientId !== undefined
+  return (arg as SanityClientId).projectId !== undefined
 }
 
 export function isSanityLogin(arg: unknown): arg is SanityLogin {
   return (
-    (arg as SanityLogin).clientId !== undefined &&
+    (arg as SanityLogin).projectId !== undefined &&
     (arg as SanityLogin).username !== undefined &&
     (arg as SanityLogin).password !== undefined
   )

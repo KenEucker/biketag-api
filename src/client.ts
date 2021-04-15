@@ -6,6 +6,7 @@ import {
   Credentials,
   TagData,
   BikeTagApiResponse,
+  SanityCredentials,
 } from './common/types'
 
 import * as sanityApi from './sanity'
@@ -59,12 +60,13 @@ export class BikeTagClient extends EventEmitter {
   }
 
   private initializeSanityApi(options: any): SanityClient {
+    const sanityCredentials = this.credentials as SanityCredentials
     return sanityClient({
-      projectId: 'your-project-id',
-      dataset: 'bikeshop',
-      apiVersion: '2019-01-29', // use current UTC date - see "specifying API version"!
-      token: 'sanity-auth-token', // or leave blank for unauthenticated usage
-      useCdn: true, // `false` if you want to ensure fresh data
+      projectId: sanityCredentials.projectId,
+      token: sanityCredentials.accessToken,
+      dataset: sanityCredentials.dataset || 'develop',
+      apiVersion: sanityCredentials.apiVersion || '2019-01-29', // use current UTC date - see "specifying API version"!
+      useCdn: typeof sanityCredentials.useCdn !== 'undefined' ? sanityCredentials.useCdn : true, // `false` if you want to ensure fresh data
       ...options,
     })
   }
@@ -77,7 +79,7 @@ export class BikeTagClient extends EventEmitter {
     /// TODO: determine if a biketag server is available
     /// TODO: determine if sanity permissions are available
     /// TODO: default to imgur api
-    return this.mostAvailableApi = "imgur"
+    return this.mostAvailableApi = "sanity"
   }
 
   plainRequest(
@@ -108,21 +110,24 @@ export class BikeTagClient extends EventEmitter {
   getTag(tagnumber: number): Promise<BikeTagApiResponse<TagData>> {
     const clientString = this.getMostAvailableAPI()
     let client: any = null
+    let api: any = null
 
     switch (clientString) {
       case "sanity":
-        client = sanityApi
+        client = this.sanityClient
+        api = sanityApi
         break
       case "imgur":
-        client = imgurApi
+        client = this.imgurClient
+        api = imgurApi
         break
       default:
       case "biketag":
-        client = biketagApi
+        client = api = biketagApi
         break
     }
 
-    return client.getTag(client, tagnumber)
+    return api.getTag(client, tagnumber)
   }
 
   // updateImage(

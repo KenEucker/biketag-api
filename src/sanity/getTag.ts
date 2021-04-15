@@ -8,8 +8,10 @@ export async function getTag(
   // fields?: string[],
   ): Promise<BikeTagApiResponse<TagData>> {
 
-
-  return ({client, slug} as any) as BikeTagApiResponse<TagData>;
-
-  
+    const query = `*[_type == "tag" && slug.current == "${slug}" ]`
+    const params = {}
+    return client.fetch(query, params).then((tags) => {
+      console.log({tags, slug})
+      return tags as BikeTagApiResponse<TagData>
+    })
 }

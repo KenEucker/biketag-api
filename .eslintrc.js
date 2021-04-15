@@ -9,6 +9,9 @@ module.exports = {
     node: true,
     jest: true,
   },
+  rules: {
+    '@typescript-eslint/ban-ts-comment': 'off',
+  },
   plugins: ['@typescript-eslint'],
   extends: [
     'eslint:recommended',
