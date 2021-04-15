@@ -107,7 +107,7 @@ export class BikeTagClient extends EventEmitter {
   //   return getArchive(this, options)
   // }
 
-  getTag(tagnumber: number): Promise<BikeTagApiResponse<TagData>> {
+  getTag(tagnumber: number | any): Promise<BikeTagApiResponse<TagData>> {
     const clientString = this.getMostAvailableAPI()
     let client: any = null
     let api: any = null
