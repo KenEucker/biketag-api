@@ -1,26 +1,26 @@
 // import {
 //   AccessToken, BikeTagCredentials,
 // } from './common/types';
-import {
-  isBikeTagAccessToken,
-  isBikeTagClientId,
-  isBikeTagLogin,
-} from './common/methods';
+// import {
+//   isBikeTagAccessToken,
+//   isBikeTagClientId,
+//   isBikeTagLogin,
+// } from './common/methods';
 import { BikeTagClient } from './client';
 // import { BIKETAG_API_PREFIX, AUTHORIZE_ENDPOINT } from './common/endpoints';
 
 export async function getAuthorizationHeader(
   client: BikeTagClient
 ): Promise<string> {
-  if (isBikeTagAccessToken(client.credentials)) {
-    return `Bearer ${client.credentials.accessToken}`;
-  }
+  // if (isBikeTagAccessToken(client.credentials)) {
+  //   return `Bearer ${client.credentials.accessToken}`;
+  // }
 
-  if (isBikeTagClientId(client.credentials) && !isBikeTagLogin(client.credentials)) {
-    return `Client-ID ${client.credentials.clientId}`;
-  }
+  // if (isBikeTagClientId(client.credentials) && !isBikeTagLogin(client.credentials)) {
+  //   return `Client-ID ${client.credentials.clientId}`;
+  // }
 
-  const accessToken = "test"
+  const accessToken = client.toString()
 
 //   const { clientId, username, password } = client.credentials as BikeTagCredentials;
 
