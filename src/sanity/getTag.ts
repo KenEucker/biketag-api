@@ -40,12 +40,13 @@ export async function getTag(
         foundLocation: tag.foundLocation,
         gps: tag.gps,
         foundImage: tag.foundImage,
-        foundImageUrl: tag.foundImageUrl
+        foundImageUrl: tag.foundImageUrl,
       }
       // wrap tag in BikeTagApiResponse
       // return BikeTagApiResponse
 
-      console.log(tag, tagData)
+      console.log("hello, world*!", {tag, tagData})
+
 
       return (tagData as any) as BikeTagApiResponse<TagData>
     })

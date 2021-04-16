@@ -7,4 +7,5 @@ export async function deleteTags(
   // tagSlugs?: string[],
 ): Promise<BikeTagApiResponse<boolean>> {
   return ({}) as BikeTagApiResponse<boolean>;
+  
 }

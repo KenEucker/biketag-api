@@ -1,7 +1,5 @@
 node_modules
 lib
-src/coverage
-*.code-workspace
 _site
 dist
-.DS_Store
+*.DS_Store
