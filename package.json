@@ -15,7 +15,7 @@
   },
   "homepage": "https://github.com/keneucker/biketag-api#readme",
   "scripts": {
-    "dev": "npm run watch & npx eleventy --serve",
+    "dev": "npm run compile & npx eleventy --serve",
     "test": "npx jest",
     "test:ci": "npx jest --ci --coverage --runInBand",
     "build": "npx tsc",
