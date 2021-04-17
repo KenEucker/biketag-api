@@ -1,6 +1,6 @@
 
 // @ts-ignore
-import { ImgurClient } from 'imgur';
+import { ImgurClient } from './imgurClient';
 // import { createForm } from '../common/utils';
 import { Payload, BikeTagApiResponse } from '../common/types';
 

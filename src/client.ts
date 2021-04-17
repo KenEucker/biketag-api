@@ -14,7 +14,7 @@ import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 
 // @ts-ignore
-import { ImgurClient } from 'imgur'
+import { ImgurClient } from './imgurClient'
 import sanityClient, { SanityClient } from '@sanity/client'
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
