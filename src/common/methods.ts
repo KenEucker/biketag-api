@@ -1,21 +1,22 @@
-import { 
-    AccessToken,
-    ClientId,
-    Login,
-    SanityLogin,
-    SanityClientId,
-    SanityAccessToken,
-    ImgurAccessToken,
-    ImgurLogin,
-    ImgurClientId,
+import {
+  AccessToken,
+  ClientId,
+  Login,
+  SanityLogin,
+  SanityClientId,
+  SanityAccessToken,
+  ImgurAccessToken,
+  ImgurLogin,
+  ImgurClientId,
 } from './types'
+import { tagDataReferenceFields } from './data'
 
 export function isBikeTagAccessToken(arg: unknown): arg is AccessToken {
-  return (arg as AccessToken).accessToken !== undefined;
+  return (arg as AccessToken).accessToken !== undefined
 }
 
 export function isBikeTagClientId(arg: unknown): arg is ClientId {
-  return (arg as ClientId).clientId !== undefined;
+  return (arg as ClientId).clientId !== undefined
 }
 
 export function isBikeTagLogin(arg: unknown): arg is Login {
@@ -23,7 +24,7 @@ export function isBikeTagLogin(arg: unknown): arg is Login {
     (arg as Login).clientId !== undefined &&
     (arg as Login).username !== undefined &&
     (arg as Login).password !== undefined
-  );
+  )
 }
 
 export function isSanityAccessToken(arg: unknown): arg is SanityAccessToken {
@@ -56,4 +57,28 @@ export function isImgurLogin(arg: unknown): arg is ImgurLogin {
     (arg as ImgurLogin).username !== undefined &&
     (arg as ImgurLogin).password !== undefined
   )
+}
+
+export function constructTagDataObject(data: any, fields = []): any {
+  const tagData = fields.length
+    ? fields.reduce((o: any, f: any) => {
+        o[f] = data[f]
+        return o
+      }, {})
+    : data
+
+  tagDataReferenceFields.forEach((f) => {
+    if (typeof tagData[f] !== 'undefined') {
+      tagData[f] = tagData[f].name
+    }
+  })
+
+  // tagData.slug = tagData.slug?.current ? tagData.slug.current : undefined // Undefined would be a problem
+  tagData.slug = tagData.slug.current
+
+  return tagData
+}
+
+export function constructTagNumberSlug(number: number, game = 'portland'): string {
+  return `${game}-tag-${number}` 
 }

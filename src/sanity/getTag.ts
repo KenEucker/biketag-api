@@ -1,25 +1,7 @@
 import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, TagData } from '../common/types'
-
-const tagDataFields = [
-  "slug",
-  "tagnumber",
-  "mysteryImage",
-  "mysteryImageUrl",
-  "game",
-  "player",
-  "hint",
-  "discussionUrl",
-  "foundLocation",
-  "gps",
-  "foundImage",
-  "foundImageUrl",
-];
-
-const tagDataReferenceFields = [
-  "game",
-  "player"
-]
+import { constructTagDataObject } from '../common/methods'
+import { tagDataReferenceFields } from '../common/data'
 
 export async function getTag(
   client: SanityClient,
@@ -28,11 +10,6 @@ export async function getTag(
   if (!options) {
     throw new Error('no options')
   }
-
-  options = typeof options === 'string' ? { slug: options } : options
-  options = typeof options === 'number' ? { slug: `portland-tag-${options}` } : options
-  options.slug = options.slug ? options.slug : `portland-tag-${options.tagnumber}`
-  options.fields = options.fields ? options.fields : tagDataFields
 
   if (!options.slug.length) {
     throw new Error('no slug')
@@ -49,18 +26,7 @@ export async function getTag(
 
   return client.fetch(query, params).then((tag) => {
     // construct tagData object from tag
-    const tagData = options.fields?.length
-      ? options.fields.reduce((o: any, f: any) => {
-          o[f] = tag[f]
-          return o
-        }, {})
-      : tag
-
-    tagDataReferenceFields.forEach(f => {
-      if (typeof tagData[f] !== 'undefined') {
-        tagData[f] = tagData[f].name
-      }
-    })
+    const tagData = constructTagDataObject(tag, options.fields)
 
     // wrap tag in BikeTagApiResponse
     const response = {

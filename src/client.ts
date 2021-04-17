@@ -8,6 +8,8 @@ import {
   BikeTagApiResponse,
   SanityCredentials,
 } from './common/types'
+import { tagDataFields } from './common/data'
+import { constructTagNumberSlug } from './common/methods'
 
 import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
@@ -107,10 +109,15 @@ export class BikeTagClient extends EventEmitter {
   //   return getArchive(this, options)
   // }
 
-  getTag(tagnumber: number | any): Promise<BikeTagApiResponse<TagData>> {
+  getTag(options: number | string | any): Promise<BikeTagApiResponse<TagData>> {
     const clientString = this.getMostAvailableAPI()
     let client: any = null
     let api: any = null
+
+    options = typeof options === 'string' ? { slug: options } : options
+    options = typeof options === 'number' ? { slug: constructTagNumberSlug(options) } : options
+    options.slug = options.slug ? options.slug : constructTagNumberSlug(options.tagnumber, options.game)
+    options.fields = options.fields ? options.fields : tagDataFields
 
     switch (clientString) {
       case "sanity":
@@ -127,7 +134,7 @@ export class BikeTagClient extends EventEmitter {
         break
     }
 
-    return api.getTag(client, tagnumber)
+    return api.getTag(client, options)
   }
 
   // updateImage(
