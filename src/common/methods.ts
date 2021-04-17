@@ -2,8 +2,6 @@ import {
   AccessToken,
   ClientId,
   Login,
-  SanityLogin,
-  SanityClientId,
   SanityAccessToken,
   ImgurAccessToken,
   ImgurLogin,
@@ -31,17 +29,17 @@ export function isSanityAccessToken(arg: unknown): arg is SanityAccessToken {
   return (arg as SanityAccessToken).accessToken !== undefined
 }
 
-export function isSanityClientId(arg: unknown): arg is SanityClientId {
-  return (arg as SanityClientId).projectId !== undefined
-}
+// export function isSanityClientId(arg: unknown): arg is SanityClientId {
+//   return (arg as SanityClientId).projectId !== undefined
+// }
 
-export function isSanityLogin(arg: unknown): arg is SanityLogin {
-  return (
-    (arg as SanityLogin).projectId !== undefined &&
-    (arg as SanityLogin).username !== undefined &&
-    (arg as SanityLogin).password !== undefined
-  )
-}
+// export function isSanityLogin(arg: unknown): arg is SanityLogin {
+//   return (
+//     (arg as SanityLogin).projectId !== undefined &&
+//     (arg as SanityLogin).username !== undefined &&
+//     (arg as SanityLogin).password !== undefined
+//   )
+// }
 
 export function isImgurAccessToken(arg: unknown): arg is ImgurAccessToken {
   return (arg as ImgurAccessToken).accessToken !== undefined

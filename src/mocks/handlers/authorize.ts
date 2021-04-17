@@ -1,4 +1,5 @@
 import { Handler } from './';
+// import { URLSearchParams } from 'url';
 
 const RequiredFieldErrorResponse = (method: string) => {
   return {
@@ -34,17 +35,16 @@ export const postHandler: Handler = (req, res, ctx) => {
     return res(ctx.status(400), ctx.json(RequiredFieldErrorResponse('POST')));
   }
 
-  const { username, password, allow } = Object.fromEntries(
-    new URLSearchParams(req.body as string)
-  );
+  const { username, password, allow } = req.body as any
 
   if (!(username && password && allow)) {
     return res(ctx.status(403), ctx.json(UnauthorizedErrorResponse));
   }
 
+  const redirectUrl = createRedirectUrl(username)
   return res(
-    ctx.status(302),
-    ctx.set('Location', createRedirectUrl(username)),
+    ctx.status(200),
+    ctx.set('Location', redirectUrl),
     ctx.cookie('authorize_token', allow)
   );
 };
@@ -70,7 +70,7 @@ export const getHandler: Handler = (req, res, ctx) => {
   return res(
     ctx.cookie('authorize_token', mockAuthorizeToken, {
       path: '/oauth2',
-      domain: '.api.biketag.org',
+      domain: '.api.imgur.com',
       secure: true,
       httpOnly: true,
     }),

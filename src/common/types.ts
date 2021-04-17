@@ -1,9 +1,12 @@
+import { Readable } from "stream";
+
 export interface ImgurAccessToken {
   accessToken: string
 }
 
 export interface ImgurClientId {
   clientId: string
+  clientSecret?: string
 }
 
 export interface ImgurLogin extends ImgurClientId {
@@ -12,39 +15,18 @@ export interface ImgurLogin extends ImgurClientId {
 }
 
 export type ImgurCredentials = ImgurAccessToken | ImgurClientId | ImgurLogin
-export interface ImgurClient {
-  client: any
-}
 
 export interface SanityAccessToken {
   accessToken: string
 }
 
-export interface SanityClientId {
-  projectId: string
-}
-
-export interface SanityLogin extends SanityClientId {
-  dataset: string
-  apiVersion: string
-  useCdn: boolean
-  username: string
-  password: string
-}
-
-export type SanityCredentials = {
-  accessToken: string
+export interface SanityCredentials extends SanityAccessToken {
   projectId: string
   dataset: string
   apiVersion: string
   useCdn: boolean
   username: string
   password: string
-}
-
-//SanityAccessToken | SanityClientId | SanityLogin
-export interface SanityClient {
-  client: any
 }
 
 export interface AccessToken {
@@ -62,7 +44,7 @@ export interface Login extends ClientId {
 
 export type BikeTagCredentials = AccessToken | ClientId | Login
 
-export type Credentials = BikeTagCredentials | SanityCredentials | ImgurCredentials | [ BikeTagCredentials | SanityCredentials | ImgurCredentials ]
+export type Credentials = BikeTagCredentials | SanityCredentials | ImgurCredentials
 
 export interface BikeTagApiResponse<
   T = Record<string, unknown> | Record<string, unknown>[] | string | boolean
@@ -105,11 +87,13 @@ export interface AlbumData extends CommonData {
 }
 
 export interface Payload {
-  image?: string
-  video?: string
-  type?: 'file' | 'url' | 'base64'
-  name?: string
-  title?: string
-  description?: string
-  album?: string
+  image?: string;
+  base64?: string;
+  type?: 'stream' | 'url' | 'base64';
+  name?: string;
+  title?: string;
+  description?: string;
+  album?: string;
+  stream?: Readable;
+  disable_audio?: '1' | '0';
 }

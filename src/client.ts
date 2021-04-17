@@ -7,6 +7,7 @@ import {
   TagData,
   BikeTagApiResponse,
   SanityCredentials,
+  ImgurCredentials,
 } from './common/types'
 import { tagDataFields } from './common/data'
 import { constructTagNumberSlug } from './common/methods'
@@ -16,8 +17,8 @@ import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 
 // @ts-ignore
-import { ImgurClient } from './imgurClient'
-import sanityClient, { SanityClient } from '@sanity/client'
+import { ImgurClient, ImgurConfig } from './imgurClient'
+import sanityClient, { SanityClient, ClientConfig as SanityConfig } from '@sanity/client'
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
 
@@ -25,14 +26,19 @@ export class BikeTagClient extends EventEmitter {
   private fetcher: AxiosInstance
   private mostAvailableApi: string
   private imgurClient: ImgurClient
+  private imgurConfig: ImgurConfig
   private sanityClient: SanityClient
+  private sanityConfig: SanityConfig
 
   constructor(readonly credentials: Credentials) {
     super()
 
     this.mostAvailableApi = ""
-    this.imgurClient = this.initializeImgurApi({})
-    this.sanityClient = this.initializeSanityApi({})
+    
+    this.imgurConfig = credentials as ImgurCredentials
+    this.imgurClient = new ImgurClient(this.imgurConfig)
+    this.sanityConfig = credentials as SanityCredentials
+    this.sanityClient = sanityClient(this.sanityConfig)
 
     this.fetcher = axios.create({
       baseURL: BIKETAG_API_PREFIX,
@@ -52,25 +58,12 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  private initializeImgurApi(options: any): ImgurClient {
-    return new ImgurClient({
-      username: 'this.credentials.',
-      password: 'process.env.PASSWORD',
-      clientId: 'process.env.CLIENT_ID',
-      ...options,
-    })
+  private initializeImgurApi(options: ImgurCredentials): ImgurClient {
+    return new ImgurClient(options)
   }
 
-  private initializeSanityApi(options: any): SanityClient {
-    const sanityCredentials = this.credentials as SanityCredentials
-    return sanityClient({
-      projectId: sanityCredentials.projectId,
-      token: sanityCredentials.accessToken,
-      dataset: sanityCredentials.dataset || 'develop',
-      apiVersion: sanityCredentials.apiVersion || '2019-01-29', // use current UTC date - see "specifying API version"!
-      useCdn: typeof sanityCredentials.useCdn !== 'undefined' ? sanityCredentials.useCdn : true, // `false` if you want to ensure fresh data
-      ...options,
-    })
+  private initializeSanityApi(options: SanityCredentials): SanityClient {
+    return sanityClient(options)
   }
   
   private getMostAvailableAPI(): string {
@@ -82,6 +75,14 @@ export class BikeTagClient extends EventEmitter {
     /// TODO: determine if sanity permissions are available
     /// TODO: default to imgur api
     return this.mostAvailableApi = "sanity"
+  }
+
+  getConfiguration() {
+    return {
+      sanity: this.sanityConfig,
+      imgur: this.imgurConfig,
+      // sanity: this.sanityConfig,
+    }
   }
 
   plainRequest(

@@ -1,7 +1,5 @@
 // @ts-ignore
 import { ImgurClient } from './imgurClient';
-// import { createForm, getSource } from '../common/utils';
-import { getSource } from '../common/utils';
 import { Payload, BikeTagApiResponse, TagData } from '../common/types';
 // import { Progress } from 'axios';
 
@@ -18,7 +16,7 @@ export async function uploadTagImage(
       //   resolveBodyOnly: true,
       // });
 
-      const id = getSource(p);
+      const id = "a" + p
       // req.on('uploadProgress', (progress: Progress) => {
       //   client.emit('uploadProgress', { ...progress, id });
       // });
@@ -35,7 +33,7 @@ export async function uploadTagImage(
   //   resolveBodyOnly: true,
   // });
 
-  const id = getSource(payload);
+  const id = "Ads"
   // req.on('uploadProgress', (progress: Progress) => {
   //   client.emit('uploadProgress', { ...progress, id });
   // });

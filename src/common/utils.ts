@@ -1,24 +1,28 @@
 import FormData from 'form-data';
 import { Payload } from './types';
 
-export function isVideo(payload: string | Payload): boolean {
+export function isBase64(payload: string | Payload): boolean {
   if (typeof payload === 'string') {
     return false;
   }
 
-  return typeof payload.video === 'string';
+  return typeof payload.base64 !== 'undefined';
 }
 
-export function getSource(payload: string | Payload): string {
+export function isImageUrl(payload: string | Payload): boolean {
   if (typeof payload === 'string') {
-    return payload;
+    return true;
   }
 
-  if (isVideo(payload)) {
-    return payload.video as string;
-  } else {
-    return payload.image as string;
+  return typeof payload.image !== 'undefined' && typeof payload === 'string';
+}
+
+export function isStream(payload: string | Payload): boolean {
+  if (typeof payload === 'string') {
+    return false;
   }
+
+  return typeof payload.stream !== 'undefined';
 }
 
 export function createForm(payload: string | Payload): FormData {
@@ -30,9 +34,11 @@ export function createForm(payload: string | Payload): FormData {
   }
 
   for (const [key, value] of Object.entries(payload)) {
-    if (key === 'image' || key === 'video') {
-      if (!payload.type || payload.type === 'file')
+    const supportedUploadObjectTypes = ['base64', 'stream']
+    if (supportedUploadObjectTypes.indexOf(key) !== -1) {
+      if (supportedUploadObjectTypes.indexOf(payload.type as string) !== -1) {
         form.append(key, payload);
+      }
     } else {
       form.append(key, value);
     }

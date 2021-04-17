@@ -1,9 +1,6 @@
 import { BikeTagClient } from '../client';
-// import { createForm, getSource } from '../common/utils';
-import { getSource } from '../common/utils';
 import { Payload, BikeTagApiResponse, TagData } from '../common/types';
 // import { UPLOAD_ENDPOINT } from '../common/endpoints';
-// import { Progress } from 'got';
 
 export async function queueTagImage(
   client: BikeTagClient,
@@ -18,12 +15,12 @@ export async function queueTagImage(
       //   resolveBodyOnly: true,
       // });
 
-      const id = getSource(p);
+      // const id = ;
       // req.on('uploadProgress', (progress: Progress) => {
       //   client.emit('uploadProgress', { ...progress, id });
       // });
 
-      return (id as unknown) as Promise<BikeTagApiResponse<TagData>>;
+      return (p as unknown) as Promise<BikeTagApiResponse<TagData>>;
     });
     return await Promise.all(promises);
   }
@@ -35,7 +32,6 @@ export async function queueTagImage(
   //   resolveBodyOnly: true,
   // });
 
-  // const id = getSource(payload);
   // req.on('uploadProgress', (progress: Progress) => {
   //   client.emit('uploadProgress', { ...progress, id });
   // });

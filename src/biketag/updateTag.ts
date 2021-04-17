@@ -39,13 +39,5 @@ export async function updateTag(
   }
 
   const url = `${IMAGE_ENDPOINT}/${payload.slug}`;
-  // import { createForm, getSource } from '../common/utils';
   return ((await client.request({ url, method: 'DELETE' })).data as unknown) as BikeTagApiResponse<boolean>;
-
-  // const form = createForm(payload);
-  // return ((await client.request(url, {
-  //   method: 'POST',
-  //   body: form,
-  //   resolveBodyOnly: true,
-  // })) as unknown) as BikeTagApiResponse<boolean>;
 }
