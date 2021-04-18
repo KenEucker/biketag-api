@@ -32,6 +32,7 @@ export interface AccessToken {
   clientToken: string
 }
 export interface ClientKey extends AccessToken {
+  game: string
   clientKey: string
 }
 

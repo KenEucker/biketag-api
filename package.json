@@ -28,7 +28,7 @@
     "typecheck": "npx tsc --noEmit",
     "clean": "rm -rf lib dist _site",
     "prepare": "npx husky install",
-    "lint": "npx eslint . && prettier --check . && npm run typecheck",
+    "lint": "prettier --check . && npx eslint . && npm run typecheck",
     "lint:write": "npx prettier . --write && npx eslint . --fix",
     "commit": "npx cz",
     "postinstall": "npm run test",
