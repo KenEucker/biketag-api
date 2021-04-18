@@ -6,15 +6,11 @@ export interface ImgurAccessToken {
 
 export interface ImgurClientId {
   clientId: string
-  clientSecret?: string
 }
 
-export interface ImgurLogin extends ImgurClientId {
-  username: string
-  password: string
+export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
+  clientSecret: string
 }
-
-export type ImgurCredentials = ImgurAccessToken | ImgurClientId | ImgurLogin
 
 export interface SanityAccessToken {
   accessToken: string
@@ -44,7 +40,7 @@ export interface Login extends ClientId {
 
 export type BikeTagCredentials = AccessToken | ClientId | Login
 
-export type Credentials = BikeTagCredentials | SanityCredentials | ImgurCredentials
+export type Credentials = BikeTagCredentials & SanityCredentials & ImgurCredentials
 
 export interface BikeTagApiResponse<
   T = Record<string, unknown> | Record<string, unknown>[] | string | boolean

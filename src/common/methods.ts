@@ -4,8 +4,9 @@ import {
   Login,
   SanityAccessToken,
   ImgurAccessToken,
-  ImgurLogin,
   ImgurClientId,
+  ImgurCredentials,
+  SanityCredentials,
 } from './types'
 import { tagDataReferenceFields } from './data'
 
@@ -49,14 +50,6 @@ export function isImgurClientId(arg: unknown): arg is ImgurClientId {
   return (arg as ImgurClientId).clientId !== undefined
 }
 
-export function isImgurLogin(arg: unknown): arg is ImgurLogin {
-  return (
-    (arg as ImgurLogin).clientId !== undefined &&
-    (arg as ImgurLogin).username !== undefined &&
-    (arg as ImgurLogin).password !== undefined
-  )
-}
-
 export function constructTagDataObject(data: any, fields = []): any {
   const tagData = fields.length
     ? fields.reduce((o: any, f: any) => {
@@ -79,4 +72,12 @@ export function constructTagDataObject(data: any, fields = []): any {
 
 export function constructTagNumberSlug(number: number, game = 'portland'): string {
   return `${game}-tag-${number}` 
+}
+
+export function isImgurCredentials(credentials: unknown): boolean {
+  return !!((credentials as ImgurCredentials).clientId  !== undefined || (credentials as ImgurCredentials).clientSecret !== undefined)
+}
+
+export function isSanityCredentials(credentials: SanityCredentials): boolean {
+  return !!(credentials.projectId && credentials.accessToken)
 }

@@ -17,6 +17,8 @@
   "scripts": {
     "dev": "npm-run-all --parallel watch serve",
     "serve": "npx eleventy --serve",
+    "serve:prod": "npx eleventy --serve --port=80",
+    "start": "npm-run-all --parallel watch serve:prod",
     "test": "npx jest",
     "test:dev": "npx jest --silent=false",
     "test:ci": "npx jest --ci --coverage --runInBand",
