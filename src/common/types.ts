@@ -28,15 +28,17 @@ export interface SanityCredentials extends SanityAccessToken, SanityClientId {
   password: string
 }
 
-export interface AccessToken {
+export interface Game {
+  game: string
+}
+export interface AccessToken extends Game {
   clientToken: string
 }
 export interface ClientKey extends AccessToken {
-  game: string
   clientKey: string
 }
 
-export type BikeTagCredentials = ClientKey | AccessToken
+export type BikeTagCredentials = (ClientKey | AccessToken) & Game
 
 export type Credentials = BikeTagCredentials &
   SanityCredentials &

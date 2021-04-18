@@ -6,13 +6,15 @@ import {
   Credentials,
   TagData,
   BikeTagApiResponse,
-  SanityCredentials,
   ImgurCredentials,
   BikeTagCredentials,
 } from './common/types'
 import { tagDataFields } from './common/data'
 import {
   constructTagNumberSlug,
+  assignImgurCredentials,
+  assignSanityCredentials,
+  assignBikeTagCredentials,
   isImgurCredentials,
   isSanityCredentials,
   isBikeTagCredentials,
@@ -47,15 +49,9 @@ export class BikeTagClient extends EventEmitter {
     super()
 
     this.mostAvailableApi = ''
-    this.biketagConfig = isBikeTagCredentials(credentials as BikeTagCredentials)
-      ? credentials
-      : undefined
-    this.imgurConfig = isImgurCredentials(credentials)
-      ? (credentials as ImgurCredentials)
-      : undefined
-    this.sanityConfig = isSanityCredentials(credentials as SanityCredentials)
-      ? (credentials as SanityCredentials)
-      : undefined
+    this.biketagConfig = assignBikeTagCredentials(credentials)
+    this.imgurConfig = assignImgurCredentials(credentials)
+    this.sanityConfig = assignSanityCredentials(credentials)
 
     if (this.imgurConfig) {
       this.imgurClient = new ImgurClient(this.imgurConfig)
@@ -107,8 +103,15 @@ export class BikeTagClient extends EventEmitter {
     options = typeof options === 'string' ? { slug: options } : options
     options =
       typeof options === 'number'
-        ? { slug: constructTagNumberSlug(options) }
+        ? {
+            slug: constructTagNumberSlug(
+              options,
+              (this.credentials as BikeTagCredentials).game
+            ),
+          }
         : options
+
+    options.game = options.game ? options.game : this.credentials.game
     options.slug = options.slug
       ? options.slug
       : constructTagNumberSlug(options.tagnumber, options.game)
@@ -141,7 +144,7 @@ export class BikeTagClient extends EventEmitter {
       return this.mostAvailableApi
     }
 
-    if (this.biketagConfig) {
+    if (this.biketagConfig && isBikeTagCredentials(this.biketagConfig)) {
       return (this.mostAvailableApi = 'biketag')
     } else if (this.imgurConfig) {
       return (this.mostAvailableApi = 'imgur')

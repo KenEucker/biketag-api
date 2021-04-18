@@ -28,7 +28,7 @@
     "typecheck": "npx tsc --noEmit",
     "clean": "rm -rf lib dist _site",
     "prepare": "npx husky install",
-    "lint": "prettier --check . && npx eslint . && npm run typecheck",
+    "lint": "prettier --check . && npx eslint . && npm run typecheck && echo '🤖 linter and compilation successful 🤖!'",
     "lint:write": "npx prettier . --write && npx eslint . --fix",
     "commit": "npx cz",
     "postinstall": "npm run test",
@@ -73,7 +73,7 @@
       "eslint . --fix",
       "jest --bail --findRelatedTests"
     ],
-    "*.{js,css,md,yml,yaml,json}": "prettier --write"
+    "*.{js,css,md,yml,yaml,json}": "prettier . --write"
   },
   "config": {
     "commitizen": {

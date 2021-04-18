@@ -101,10 +101,7 @@ export function constructTagDataObject(data: any, fields = []): any {
   return tagData
 }
 
-export function constructTagNumberSlug(
-  number: number,
-  game = 'portland'
-): string {
+export function constructTagNumberSlug(number: number, game = ''): string {
   return `${game}-tag-${number}`
 }
 
@@ -125,6 +122,51 @@ export function isBikeTagCredentials(credentials: BikeTagCredentials): boolean {
     credentials.clientToken !== undefined &&
     (credentials as ClientKey).clientKey !== undefined
   )
+}
+
+export function assignImgurCredentials(
+  credentials: ImgurCredentials
+): ImgurCredentials {
+  const imgurCredentials = isImgurCredentials(credentials as ImgurCredentials)
+    ? {
+        clientId: credentials.clientId,
+        clientSecret: credentials.clientSecret,
+      }
+    : undefined
+
+  return imgurCredentials as ImgurCredentials
+}
+
+export function assignSanityCredentials(
+  credentials: SanityCredentials
+): SanityCredentials {
+  const sanityCredentials = isSanityCredentials(
+    credentials as SanityCredentials
+  )
+    ? {
+        projectId: credentials.projectId,
+        useCdn: credentials.useCdn || true,
+        dataset: credentials.dataset || 'development',
+        accessToken: credentials.accessToken || '',
+        password: credentials.password,
+        username: credentials.username,
+        apiVersion: credentials.apiVersion || '2021-03-25',
+      }
+    : undefined
+
+  return sanityCredentials as SanityCredentials
+}
+
+export function assignBikeTagCredentials(
+  credentials: BikeTagCredentials
+): BikeTagCredentials {
+  const biketagCredentials = isBikeTagCredentials(
+    credentials as BikeTagCredentials
+  )
+    ? credentials
+    : ({ game: credentials.game } as BikeTagCredentials)
+
+  return biketagCredentials
 }
 
 export function getImgurPictures(): any[] {

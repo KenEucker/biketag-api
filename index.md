@@ -4,16 +4,16 @@
 
 <p align="center">
     <span>
-        <a href="/examples/basic/">Basic</a>
+        <a href="/examples/">Dashboard</a>
         <br>
-        A basic example of setting up the BikeTag API
+        An advanced example of using the BikeTag API
     </span>
 </p>
 <p align="center">
     <span>
-        <a href="/examples/advanced/">Advanced</a>
+        <a href="/examples/basic/">Basic</a>
         <br>
-        An advancewd example of using the BikeTag API
+        A basic example of setting up the BikeTag API
     </span>
 </p>
 <p align="center">
@@ -25,7 +25,7 @@
 </p>
 <p align="center">
     <span>
-        <a href="/examples/imgur/">Sanity</a>
+        <a href="/examples/sanity/">Sanity</a>
         <br>
         An example of setting up the BikeTag API using only Sanity credentials
     </span>
