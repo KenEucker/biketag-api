@@ -27,6 +27,8 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build --if-present
+      - name: Compile
+        run: npm run compile
       - name: Release
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
