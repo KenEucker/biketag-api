@@ -1,7 +1,9 @@
-import { BikeTagClient } from '../client';
-import { deleteTag } from './deleteTag';
+// import { BikeTagClient } from '../client';
+// import { deleteTag } from './deleteTag';
 
-test('delete works successfully', async () => { expect(true).toBeTruthy() })
+test('delete works successfully', async () => {
+  expect(true).toBeTruthy()
+})
 
 // test('delete works successfully', async () => {
 //   const accessToken = 'abc123';

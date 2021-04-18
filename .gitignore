@@ -1,2 +1,5 @@
 node_modules
 lib
+_site
+dist
+*.DS_Store

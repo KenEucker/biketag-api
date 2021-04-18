@@ -1,16 +1,11 @@
-import { SanityClient } from '@sanity/client';
-import { BikeTagApiResponse, TagData } from '../common/types';
+// import { SanityClient } from '@sanity/client';
+import { BikeTagApiResponse, TagData } from '../common/types'
 
-export async function getTags(
-  client: SanityClient,
-  slugs?: string[],
-  tagnumbers?: number[],
-  fields: string[],
-  game: string,
-): Promise<BikeTagApiResponse<TagData[]>> {
-
-
-  return ({}) as BikeTagApiResponse<TagData[]>;
-
-  
+export async function getTags(): Promise<BikeTagApiResponse<TagData[]>> {
+  // client: SanityClient,
+  // slugs?: string[],
+  // tagnumbers?: number[],
+  // fields: string[],
+  // game: string,
+  return {} as BikeTagApiResponse<TagData[]>
 }

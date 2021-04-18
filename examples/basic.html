@@ -1,0 +1,31 @@
+<html style="font-size: 16px" class="u-responsive-xl">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <title>BikeTag API test</title>
+    <script type="text/javascript" src="/dist/bundle.js"></script>
+  </head>
+  <body>
+    <div id="data" widht="600"></div>
+    <script>
+      ;(async () => {
+        const biketagAPI = new biketag.BikeTagClient({
+          projectId: 'x37ikhvs',
+          accessToken:
+            'skT5BHdVV4KxSzf2ugg1gg8P7fR1ws22Yk0Al3H2fEsSJ3KvAmR4TivtHlHeV5Ww9kIiO36TsPkEofZ39IBxZ03GKcOZqeExE2mgHXxEv9KuslRJezBQK55oYXll9kQqKwHSU3skZ3plLzRsRPosiOiyn8BJg43xcsyQuvovXKxFg4Bh907n',
+          dataset: 'production',
+          useCdn: false,
+          clientId: '',
+          game: 'portland',
+
+          clientId: '4fa12c6ce36984b',
+          clientSecret: '14dd920076de25884a1b900341022a84d78076bf',
+        })
+
+        const config = biketagAPI.getConfiguration()
+        document.getElementById('data').innerHTML = JSON.stringify(config)
+        console.log('BikeTag Config', config)
+      })()
+    </script>
+  </body>
+</html>

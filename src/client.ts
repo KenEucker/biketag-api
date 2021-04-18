@@ -1,102 +1,178 @@
+import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
 import { EventEmitter } from 'events'
-import got, { CancelableRequest, ExtendOptions, Response, Got } from 'got'
-import { getAuthorizationHeader } from './getAuthorizationHeader'
+// import { getAuthorizationHeader } from './getAuthorizationHeader'
 import { BIKETAG_API_PREFIX } from './common/endpoints'
 import {
-  BikeTagCredentials,
   Credentials,
-  ImgurCredentials,
-  SanityCredentials,
   TagData,
   BikeTagApiResponse,
-  Payload,
+  ImgurCredentials,
+  BikeTagCredentials,
 } from './common/types'
+import { tagDataFields } from './common/data'
+import {
+  constructTagNumberSlug,
+  assignImgurCredentials,
+  assignSanityCredentials,
+  assignBikeTagCredentials,
+  isImgurCredentials,
+  isSanityCredentials,
+  isBikeTagCredentials,
+} from './common/methods'
+import { setup } from 'axios-cache-adapter'
 
 import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 
-import { ImgurClient } from 'imgur'
-import sanityClient, { SanityClient } from '@sanity/client'
+// @ts-ignore
+import { ImgurClient } from './imgurClient'
+import sanityClient, {
+  SanityClient,
+  ClientConfig as SanityConfig,
+} from '@sanity/client'
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
 
 export class BikeTagClient extends EventEmitter {
-  private got: Got
-  private gotExtended: Got
+  private fetcher: AxiosInstance
+  private plainFetcher: AxiosInstance
+  private cachedFetcher: AxiosInstance
   private mostAvailableApi: string
-  private imgurClient: ImgurClient
-  private sanityClient: SanityClient
+  private imgurClient?: typeof ImgurClient
+  private sanityClient?: SanityClient
+  private sanityConfig?: SanityConfig | void
+  private imgurConfig?: ImgurCredentials | void
+  private biketagConfig?: BikeTagCredentials | void
 
   constructor(readonly credentials: Credentials) {
     super()
 
-    this.mostAvailableApi = ""
-    this.imgurClient = this.initializeImgurApi({})
-    this.sanityClient = this.initializeSanityApi({})
+    this.mostAvailableApi = ''
+    this.biketagConfig = assignBikeTagCredentials(credentials)
+    this.imgurConfig = assignImgurCredentials(credentials)
+    this.sanityConfig = assignSanityCredentials(credentials)
 
-    this.got = got.extend()
-    this.gotExtended = this.got.extend({
-      prefixUrl: BIKETAG_API_PREFIX,
+    if (this.imgurConfig) {
+      this.imgurClient = new ImgurClient(this.imgurConfig)
+    }
+
+    if (this.sanityConfig) {
+      this.sanityClient = sanityClient(this.sanityConfig)
+    }
+
+    /// Configure separate fetching strategies: plain, authed (default), cached (authed)
+    this.plainFetcher = axios.create({
       headers: {
         'user-agent': USERAGENT,
       },
       responseType: 'json',
-      hooks: {
-        beforeRequest: [
-          async (options: any) => {
-            options.headers['authorization'] = await getAuthorizationHeader(
-              this
-            )
-          },
-        ],
+    })
+
+    this.fetcher = axios.create({
+      baseURL: BIKETAG_API_PREFIX,
+      headers: {
+        'user-agent': USERAGENT,
       },
+      responseType: 'json',
+    })
+
+    this.cachedFetcher = setup({
+      baseURL: BIKETAG_API_PREFIX,
+      cache: {
+        maxAge: 15 * 60 * 1000,
+        exclude: {
+          // Only exclude PUT, PATCH and DELETE methods from cache
+          methods: ['put', 'patch', 'delete'],
+        },
+      },
+      headers: {
+        'user-agent': USERAGENT,
+      },
+      responseType: 'json',
     })
   }
 
-  private initializeImgurApi(options: any): ImgurClient {
-    return new ImgurClient({
-      username: 'this.credentials.',
-      password: 'process.env.PASSWORD',
-      clientId: 'process.env.CLIENT_ID',
-      ...options,
-    })
+  private getDefaultAPI(options: any): any {
+    const availableAPI = options.forceAPI
+      ? options.forceAPI
+      : this.getMostAvailableAPI()
+    let client: any = null
+    let api: any = null
+
+    options = typeof options === 'string' ? { slug: options } : options
+    options =
+      typeof options === 'number'
+        ? {
+            slug: constructTagNumberSlug(
+              options,
+              (this.credentials as BikeTagCredentials).game
+            ),
+          }
+        : options
+
+    options.game = options.game ? options.game : this.credentials.game
+    options.slug = options.slug
+      ? options.slug
+      : constructTagNumberSlug(options.tagnumber, options.game)
+    options.fields = options.fields ? options.fields : tagDataFields
+
+    switch (availableAPI) {
+      case 'sanity':
+        client = this.sanityClient
+        api = sanityApi
+        break
+      case 'imgur':
+        client = this.imgurClient
+        api = imgurApi
+        break
+      default:
+      case 'biketag':
+        client = api = biketagApi
+        break
+    }
+
+    return {
+      client,
+      api,
+      options,
+    }
   }
 
-  private initializeSanityApi(options: any): SanityClient {
-    return sanityClient({
-      projectId: 'your-project-id',
-      dataset: 'bikeshop',
-      apiVersion: '2019-01-29', // use current UTC date - see "specifying API version"!
-      token: 'sanity-auth-token', // or leave blank for unauthenticated usage
-      useCdn: true, // `false` if you want to ensure fresh data
-      ...options,
-    })
-  }
-  
   private getMostAvailableAPI(): string {
     if (this.mostAvailableApi.length) {
       return this.mostAvailableApi
     }
 
-    /// TODO: determine if a biketag server is available
-    /// TODO: determine if sanity permissions are available
-    /// TODO: default to imgur api
-    return this.mostAvailableApi = "imgur"
+    if (this.biketagConfig && isBikeTagCredentials(this.biketagConfig)) {
+      return (this.mostAvailableApi = 'biketag')
+    } else if (this.imgurConfig) {
+      return (this.mostAvailableApi = 'imgur')
+    } else if (this.sanityConfig) {
+      return (this.mostAvailableApi = 'sanity')
+    }
+
+    return ''
   }
 
-  plainRequest(
-    url: string,
-    options: ExtendOptions = {}
-  ): CancelableRequest<Response<unknown>> {
-    return this.got.extend(options)(url)
+  getConfiguration() {
+    return {
+      sanity: this.sanityConfig,
+      imgur: this.imgurConfig,
+      biketag: this.biketagConfig,
+    }
   }
 
-  request(
-    url: string,
-    options: ExtendOptions = {}
-  ): CancelableRequest<Response<string>> {
-    return this.gotExtended.extend(options)(url)
+  plainRequest(options: AxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
+    return this.plainFetcher(options)
+  }
+
+  cachedRequest(options: AxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
+    return this.cachedFetcher(options)
+  }
+
+  request(options: AxiosRequestConfig = {}): Promise<AxiosResponse<string>> {
+    return this.fetcher(options)
   }
 
   // deleteImage(imageHash: string): Promise<BikeTagApiResponse<boolean>> {
@@ -112,24 +188,10 @@ export class BikeTagClient extends EventEmitter {
   //   return getArchive(this, options)
   // }
 
-  getTag(tagnumber: number): Promise<BikeTagApiResponse<TagData>> {
-    const clientString = this.getMostAvailableAPI()
-    let client: any = null
+  getTag(opts: number | string | any): Promise<BikeTagApiResponse<TagData>> {
+    const { client, options, api } = this.getDefaultAPI(opts)
 
-    switch (clientString) {
-      case "sanity":
-        client = sanityApi
-        break
-      case "imgur":
-        client = imgurApi
-        break
-      default:
-      case "biketag":
-        client = biketagApi
-        break
-    }
-
-    return client.getTag(client, tagnumber)
+    return api.getTag(client, options)
   }
 
   // updateImage(
@@ -152,7 +214,7 @@ export class BikeTagClient extends EventEmitter {
   //       return getBikeTag(this, payload)
   //       break
   //     case "sanity":
-  //       return 
+  //       return
   //   }
   // }
 
@@ -205,19 +267,19 @@ export class BikeTagClient extends EventEmitter {
   // }
 
   content(options: any = {}): SanityClient {
-    if (!options || !Object.keys(options).length) {
-      return this.sanityClient
+    if (isSanityCredentials(options)) {
+      return sanityClient(options)
     }
 
-    return this.initializeSanityApi(options)
+    throw new Error('options are invalid for creating a sanity client')
   }
 
-  images(options: any = {}): ImgurClient {
-    if (!options || !Object.keys(options).length) {
-      return this.imgurClient
+  images(options: any = {}): typeof ImgurClient {
+    if (isImgurCredentials(options)) {
+      return new ImgurClient(options)
     }
-    
-    return this.initializeImgurApi(options)
+
+    throw new Error('options are invalid for creating an imgur client')
   }
 
   data(): BikeTagClient {

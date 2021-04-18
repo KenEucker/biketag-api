@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <title>BikeTag Example Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script type="text/javascript" src="/dist/bundle.js"></script>
+  <body>
+    <div id="container"></div>
+
+    <script>
+      ;(async () => {
+        const biketagAPI = new biketag.BikeTagClient({
+          projectId: 'x37ikhvs',
+          accessToken:
+            'skT5BHdVV4KxSzf2ugg1gg8P7fR1ws22Yk0Al3H2fEsSJ3KvAmR4TivtHlHeV5Ww9kIiO36TsPkEofZ39IBxZ03GKcOZqeExE2mgHXxEv9KuslRJezBQK55oYXll9kQqKwHSU3skZ3plLzRsRPosiOiyn8BJg43xcsyQuvovXKxFg4Bh907n',
+          dataset: 'production',
+          useCdn: false,
+          game: 'portland',
+        })
+
+        console.log('BikeTag Config', biketagAPI.getConfiguration())
+
+        const tag5 = await biketagAPI.getTag({ tagnumber: 3, fields: ['slug'] })
+        const tag4 = await biketagAPI.getTag({ tagnumber: 3 })
+        const tag3 = await biketagAPI.getTag({ slug: 'portland-tag-3' })
+        const tag2 = await biketagAPI.getTag(2)
+        const tag1 = await biketagAPI.getTag('portland-tag-1')
+        const tags = [tag1, tag2, tag3]
+
+        console.log({ tags })
+
+        const showImagesAndData = (tags, id) => {
+          const container = document.getElementById(id)
+
+          const appendTagImageAndData = (tag) => {
+            console.log({ tag })
+            const inner = document.createElement('div')
+
+            const img1 = document.createElement('img')
+            const img2 = document.createElement('img')
+
+            img1.src = tag.foundImageUrl
+            img1.width = '300'
+            img2.src = tag.mysteryImageUrl
+            img2.width = '300'
+
+            const dataDiv = document.createElement('div')
+            dataDiv.innerHTML = JSON.stringify(tag)
+
+            inner.appendChild(img1)
+            inner.appendChild(img2)
+            inner.appendChild(dataDiv)
+
+            return inner
+          }
+
+          tags.map((tag) =>
+            container.appendChild(appendTagImageAndData(tag.data))
+          )
+        }
+
+        const outputTagTable = (tags, id) => {
+          let txt = '<table>'
+
+          tags.forEach((tag) => {
+            for (key in tag) {
+              txt += '<tr><td><strong>' + key + '</strong></td></tr>'
+              txt +=
+                '<tr><td>' +
+                (tag[key] ? tag[key].toString() : 'undefined') +
+                '</td></tr>'
+            }
+          })
+          txt += '</table>'
+          document.getElementById(id).innerHTML = txt
+        }
+
+        showImagesAndData(tags, 'container')
+      })()
+    </script>
+  </body>
+</html>

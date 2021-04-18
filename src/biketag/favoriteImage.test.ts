@@ -1,6 +1,9 @@
-import { BikeTagClient } from '../client';
-import { favoriteImage } from './favoriteImage';
-test('favorite works successfully', async () => { expect(true).toBeTruthy() })
+// import { BikeTagClient } from '../client';
+// import { favoriteImage } from './favoriteImage';
+
+test('favorite works successfully', async () => {
+  expect(true).toBeTruthy()
+})
 
 // test('favorite works successfully', async () => {
 //   const accessToken = 'abc123';

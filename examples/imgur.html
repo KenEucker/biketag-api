@@ -1,0 +1,41 @@
+<html style="font-size: 16px" class="u-responsive-xl">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <title>BikeTag API test</title>
+    <script type="text/javascript" src="/dist/bundle.js"></script>
+  </head>
+  <body>
+    <div id="data"></div>
+    <script>
+      ;(async () => {
+        const biketagAPI = new biketag.BikeTagClient({
+          // accessToken: '96cd9fd2e2df631a0eb5e9730b4ede091e59a8b2',
+          clientId: '4fa12c6ce36984b',
+          clientSecret: '14dd920076de25884a1b900341022a84d78076bf',
+        })
+
+        // const tag5 = await biketagAPI.getTag({tagnumber: 3, fields: ["slug"]})
+        // const tag4 = await biketagAPI.getTag({tagnumber: 3})
+        const tag3 = await biketagAPI.getTag({ slug: 'dGjjvnT' })
+        // const tag2 = await biketagAPI.getTag(3)
+        const tag1 = await biketagAPI.getTag('dGjjvnT')
+        const tags = [tag1, tag3]
+        console.log({ biketagAPI, tags })
+
+        let txt = '<table>'
+        tags.forEach((tag) => {
+          for (key in tag) {
+            txt += '<tr><td><strong>' + key + '</strong></td></tr>'
+            txt +=
+              '<tr><td>' +
+              (tag[key] ? tag[key].toString() : 'undefined') +
+              '</td></tr>'
+          }
+        })
+        txt += '</table>'
+        document.getElementById('data').innerHTML = txt
+      })()
+    </script>
+  </body>
+</html>

@@ -1,5 +1,5 @@
-import { SanityClient } from '@sanity/client';
-import { Payload, BikeTagApiResponse, TagData } from '../common/types';
+import { SanityClient } from '@sanity/client'
+import { Payload, BikeTagApiResponse, TagData } from '../common/types'
 
 export async function uploadTagImage(
   client: SanityClient,
@@ -9,11 +9,13 @@ export async function uploadTagImage(
 
   if (Array.isArray(payload)) {
     const promises = payload.map((p: string | Payload) => {
-
-      return (req as unknown) as Promise<BikeTagApiResponse<TagData>>;
-    });
-    return await Promise.all(promises);
+      return (p as unknown) as Promise<BikeTagApiResponse<TagData>>
+    })
+    return await Promise.all(promises)
   }
 
-  return ((await req) as unknown) as BikeTagApiResponse<TagData>;
+  return (((await {
+    client,
+    req,
+  }) as any) as unknown) as BikeTagApiResponse<TagData>
 }

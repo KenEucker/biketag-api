@@ -1,7 +1,9 @@
-import { ImgurClient } from 'imgur';
-import { updateTag } from './updateTag';
+// import { ImgurClient } from './imgurClient';
+// import { updateTag } from './updateTag';
 
-test('update works successfully', async () => { expect(true).toBeTruthy() })
+test('update works successfully', async () => {
+  expect(true).toBeTruthy()
+})
 
 // test('update one image with all props', async () => {
 //   const accessToken = 'abc123';
