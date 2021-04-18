@@ -4,10 +4,21 @@ The new BikeTag javascript client, written entirely in typescript.
 
 ## Getting started
 
-1. install via npm: `npm install biketag --save`
+1. install via npm: 
+
+```npm install biketag --save```
+
 2. import/require:
-`import {BikeTagClient} from 'biketag'` or `const {BikeTagClient} = require('biketag')`
+
+```import {BikeTagClient} from 'biketag'```
+
+or
+
+```const {BikeTagClient} = require('biketag')```
+
+
 3. configure:
+
 ```
 const biketagAPI = new BikeTagClient({
     game: 'portland',
