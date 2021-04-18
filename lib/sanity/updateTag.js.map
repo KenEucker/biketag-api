@@ -1,1 +1,1 @@
-{"version":3,"file":"updateTag.js","sourceRoot":"","sources":["../../src/sanity/updateTag.ts"],"names":[],"mappings":";AAQA,MAAM,UAAgB,SAAS,CAC7B,MAAoB;;QAGpB,OAAQ,EAAC,MAAM,EAAwC,CAAC;IAC1D,CAAC;CAAA"}
+{"version":3,"file":"updateTag.js","sourceRoot":"","sources":["../../src/sanity/updateTag.ts"],"names":[],"mappings":";AAQA,MAAM,UAAgB,SAAS,CAC7B,MAAoB;AACpB,iDAAiD;;;QAEjD,OAAQ,EAAE,MAAM,EAAyC,CAAA;IAC3D,CAAC;CAAA"}

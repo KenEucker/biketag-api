@@ -1,6 +1,11 @@
-import { AccessToken, ClientKey, SanityAccessToken, ImgurAccessToken, ImgurClientId, ImgurCredentials, SanityCredentials, SanityClientId, BikeTagCredentials } from './types';
-export declare function isBikeTagAccessToken(arg: unknown): arg is AccessToken;
-export declare function isBikeTagClientKey(arg: unknown): arg is ClientKey;
+import { AccessToken, ClientKey, SanityAccessToken, ImgurAccessToken, ImgurClientId, ImgurCredentials, SanityCredentials, SanityClientId, BikeTagCredentials, Payload } from './types';
+import FormData from 'form-data';
+export declare function isBase64(payload: string | Payload): boolean;
+export declare function isImageUrl(payload: string | Payload): boolean;
+export declare function isStream(payload: string | Payload): boolean;
+export declare function createForm(payload: string | Payload): FormData;
+export declare function isAccessToken(arg: unknown): arg is AccessToken;
+export declare function isClientKey(arg: unknown): arg is ClientKey;
 export declare function isSanityAccessToken(arg: unknown): arg is SanityAccessToken;
 export declare function isSanityClientId(arg: unknown): arg is SanityClientId;
 export declare function isImgurAccessToken(arg: unknown): arg is ImgurAccessToken;
@@ -10,3 +15,7 @@ export declare function constructTagNumberSlug(number: number, game?: string): s
 export declare function isImgurCredentials(credentials: ImgurCredentials): boolean;
 export declare function isSanityCredentials(credentials: SanityCredentials): boolean;
 export declare function isBikeTagCredentials(credentials: BikeTagCredentials): boolean;
+export declare function assignImgurCredentials(credentials: ImgurCredentials): ImgurCredentials;
+export declare function assignSanityCredentials(credentials: SanityCredentials): SanityCredentials;
+export declare function assignBikeTagCredentials(credentials: BikeTagCredentials): BikeTagCredentials;
+export declare function getImgurPictures(): any[];

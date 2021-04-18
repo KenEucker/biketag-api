@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { Readable } from "stream";
+import { Readable } from 'stream';
 export interface ImgurAccessToken {
     accessToken: string;
 }
@@ -22,19 +22,22 @@ export interface SanityCredentials extends SanityAccessToken, SanityClientId {
     username: string;
     password: string;
 }
-export interface AccessToken {
+export interface Game {
+    game: string;
+}
+export interface AccessToken extends Game {
     clientToken: string;
 }
 export interface ClientKey extends AccessToken {
     clientKey: string;
 }
-export declare type BikeTagCredentials = ClientKey | AccessToken;
+export declare type BikeTagCredentials = (ClientKey | AccessToken) & Game;
 export declare type Credentials = BikeTagCredentials & SanityCredentials & ImgurCredentials;
 export interface BikeTagApiResponse<T = Record<string, unknown> | Record<string, unknown>[] | string | boolean> {
     data: T;
     status: number;
     success: boolean;
-    source: "biketag" | "imgur" | "sanity";
+    source: 'biketag' | 'imgur' | 'sanity';
 }
 export declare type geopoint = {
     lat: number;

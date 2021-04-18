@@ -1,1 +1,1 @@
-{"version":3,"file":"deleteTag.js","sourceRoot":"","sources":["../../src/sanity/deleteTag.ts"],"names":[],"mappings":";AAGA,MAAM,UAAgB,SAAS,CAC7B,MAAoB;;QAIpB,OAAQ,EAAC,MAAM,EAAwC,CAAC;IAC1D,CAAC;CAAA"}
+{"version":3,"file":"deleteTag.js","sourceRoot":"","sources":["../../src/sanity/deleteTag.ts"],"names":[],"mappings":";AAGA,MAAM,UAAgB,SAAS,CAC7B,MAAoB;AACpB,iBAAiB;AACjB,sBAAsB;;;QAEtB,OAAQ,EAAE,MAAM,EAAyC,CAAA;IAC3D,CAAC;CAAA"}
