@@ -1,19 +1,19 @@
-import { Handler } from './';
+import { Handler } from './'
 
 const SuccessResponse = {
   data: true,
   success: true,
   status: 200,
-};
+}
 
 const FavoriteSuccessResponse = {
   data: 'favorited',
   success: true,
   status: 200,
-};
+}
 
 export const getHandler: Handler = (req, res, ctx) => {
-  const { id } = req.params;
+  const { id } = req.params
   const response = {
     data: {
       id,
@@ -22,18 +22,18 @@ export const getHandler: Handler = (req, res, ctx) => {
     },
     success: true,
     status: 200,
-  };
-  return res(ctx.json(response));
-};
+  }
+  return res(ctx.json(response))
+}
 
 export const postHandler: Handler = (_req, res, ctx) => {
-  return res(ctx.json(SuccessResponse));
-};
+  return res(ctx.json(SuccessResponse))
+}
 
 export const deleteHandler: Handler = (_req, res, ctx) => {
-  return res(ctx.json(SuccessResponse));
-};
+  return res(ctx.json(SuccessResponse))
+}
 
 export const postFavoriteHandler: Handler = (_req, res, ctx) => {
-  return res(ctx.json(FavoriteSuccessResponse));
-};
+  return res(ctx.json(FavoriteSuccessResponse))
+}

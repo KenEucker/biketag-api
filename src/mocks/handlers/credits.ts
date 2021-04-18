@@ -1,4 +1,4 @@
-import { Handler } from './';
+import { Handler } from './'
 
 const AuthenticationRequiredResponse = {
   data: {
@@ -8,7 +8,7 @@ const AuthenticationRequiredResponse = {
   },
   success: false,
   status: 401,
-};
+}
 
 const SuccessResponse = {
   data: {
@@ -20,12 +20,12 @@ const SuccessResponse = {
   },
   success: true,
   status: 200,
-};
+}
 
 export const getHandler: Handler = (req, res, ctx) => {
   if (!req.headers.has('authorization')) {
-    return res(ctx.status(401), ctx.json(AuthenticationRequiredResponse));
+    return res(ctx.status(401), ctx.json(AuthenticationRequiredResponse))
   }
 
-  return res(ctx.json(SuccessResponse));
-};
+  return res(ctx.json(SuccessResponse))
+}

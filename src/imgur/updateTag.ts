@@ -1,12 +1,10 @@
-
 // @ts-ignore
-import { ImgurClient } from './imgurClient';
-// import { createForm } from '../common/utils';
-import { Payload, BikeTagApiResponse } from '../common/types';
+import { ImgurClient } from './imgurClient'
+import { Payload, BikeTagApiResponse } from '../common/types'
 
 export interface UpdateTagPayload
   extends Pick<Payload, 'title' | 'description'> {
-  imageHash: string;
+  imageHash: string
 }
 
 // function isValidUpdatePayload(p: UpdateTagPayload) {
@@ -44,6 +42,6 @@ export async function updateTag(
   //   body: form,
   //   resolveBodyOnly: true,
   // })) as unknown) as BikeTagApiResponse<boolean>;
-  return ((await client.request({ url: payload, method: 'POST' })).data as unknown) as BikeTagApiResponse<boolean>;
-
+  return ((await client.request({ url: payload, method: 'POST' }))
+    .data as unknown) as BikeTagApiResponse<boolean>
 }

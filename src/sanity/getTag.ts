@@ -15,10 +15,12 @@ export async function getTag(
     throw new Error('no slug')
   }
 
-  const fields = options.fields.reduce((o: any, f: any) => {
-    o += `${f}${tagDataReferenceFields.indexOf(f) != -1 ? '->{name}' : ''},`
-    return o
-  }, '').slice(0, -1)
+  const fields = options.fields
+    .reduce((o: any, f: any) => {
+      o += `${f}${tagDataReferenceFields.indexOf(f) != -1 ? '->{name}' : ''},`
+      return o
+    }, '')
+    .slice(0, -1)
 
   const query = `*[_type == "tag" && slug.current == "${options.slug}"][0]{${fields}}`
 

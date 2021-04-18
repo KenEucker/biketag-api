@@ -1,6 +1,6 @@
 // @ts-ignore
-import { ImgurClient } from './imgurClient';
-import { Payload, BikeTagApiResponse, TagData } from '../common/types';
+import { ImgurClient } from './imgurClient'
+import { Payload, BikeTagApiResponse, TagData } from '../common/types'
 // import { Progress } from 'axios';
 
 export async function uploadTagImage(
@@ -16,14 +16,14 @@ export async function uploadTagImage(
       //   resolveBodyOnly: true,
       // });
 
-      const id = "a" + p
+      const id = 'a' + p
       // req.on('uploadProgress', (progress: Progress) => {
       //   client.emit('uploadProgress', { ...progress, id });
       // });
 
-      return (id as unknown) as Promise<BikeTagApiResponse<TagData>>;
-    });
-    return await Promise.all(promises);
+      return (id as unknown) as Promise<BikeTagApiResponse<TagData>>
+    })
+    return await Promise.all(promises)
   }
 
   // const form = createForm(payload);
@@ -33,10 +33,10 @@ export async function uploadTagImage(
   //   resolveBodyOnly: true,
   // });
 
-  const id = "Ads"
+  const id = 'Ads'
   // req.on('uploadProgress', (progress: Progress) => {
   //   client.emit('uploadProgress', { ...progress, id });
   // });
 
-  return (id as unknown) as BikeTagApiResponse<TagData>;
+  return (id as unknown) as BikeTagApiResponse<TagData>
 }

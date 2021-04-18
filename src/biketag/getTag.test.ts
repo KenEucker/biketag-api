@@ -1,7 +1,9 @@
 // import { BikeTagClient } from '../client';
 // import { getTag } from './getTag';
 
-test('get image works successfully', async () => { expect(true).toBeTruthy() })
+test('get image works successfully', async () => {
+  expect(true).toBeTruthy()
+})
 
 // test('returns an image response', async () => {
 //   const accessToken = 'abc123';

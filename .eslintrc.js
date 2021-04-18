@@ -11,6 +11,7 @@ module.exports = {
   },
   rules: {
     '@typescript-eslint/ban-ts-comment': 'off',
+    semi: 'off',
   },
   plugins: ['@typescript-eslint'],
   extends: [

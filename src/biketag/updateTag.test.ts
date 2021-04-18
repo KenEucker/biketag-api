@@ -1,7 +1,9 @@
 // import { BikeTagClient } from '../client';
 // import { updateTag } from './updateTag';
 
-test('update tag works successfully', async () => { expect(true).toBeTruthy() })
+test('update tag works successfully', async () => {
+  expect(true).toBeTruthy()
+})
 
 // test('update one image with all props', async () => {
 //   const accessToken = 'abc123';

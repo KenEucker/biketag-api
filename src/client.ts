@@ -11,7 +11,12 @@ import {
   BikeTagCredentials,
 } from './common/types'
 import { tagDataFields } from './common/data'
-import { constructTagNumberSlug, isImgurCredentials, isSanityCredentials, isBikeTagCredentials } from './common/methods'
+import {
+  constructTagNumberSlug,
+  isImgurCredentials,
+  isSanityCredentials,
+  isBikeTagCredentials,
+} from './common/methods'
 import { setup } from 'axios-cache-adapter'
 
 import * as sanityApi from './sanity'
@@ -20,7 +25,10 @@ import * as biketagApi from './biketag'
 
 // @ts-ignore
 import { ImgurClient } from './imgurClient'
-import sanityClient, { SanityClient, ClientConfig as SanityConfig } from '@sanity/client'
+import sanityClient, {
+  SanityClient,
+  ClientConfig as SanityConfig,
+} from '@sanity/client'
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
 
@@ -38,10 +46,16 @@ export class BikeTagClient extends EventEmitter {
   constructor(readonly credentials: Credentials) {
     super()
 
-    this.mostAvailableApi = ""
-    this.biketagConfig = isBikeTagCredentials(credentials as BikeTagCredentials) ? credentials : undefined
-    this.imgurConfig = isImgurCredentials(credentials) ? (credentials as ImgurCredentials) : undefined
-    this.sanityConfig = isSanityCredentials(credentials as SanityCredentials) ? (credentials as SanityCredentials) : undefined
+    this.mostAvailableApi = ''
+    this.biketagConfig = isBikeTagCredentials(credentials as BikeTagCredentials)
+      ? credentials
+      : undefined
+    this.imgurConfig = isImgurCredentials(credentials)
+      ? (credentials as ImgurCredentials)
+      : undefined
+    this.sanityConfig = isSanityCredentials(credentials as SanityCredentials)
+      ? (credentials as SanityCredentials)
+      : undefined
 
     if (this.imgurConfig) {
       this.imgurClient = new ImgurClient(this.imgurConfig)
@@ -51,7 +65,7 @@ export class BikeTagClient extends EventEmitter {
       this.sanityClient = sanityClient(this.sanityConfig)
     }
 
-    /// Configure separate fetching strategies: plain, authed (default), cached (authed) 
+    /// Configure separate fetching strategies: plain, authed (default), cached (authed)
     this.plainFetcher = axios.create({
       headers: {
         'user-agent': USERAGENT,
@@ -84,49 +98,58 @@ export class BikeTagClient extends EventEmitter {
   }
 
   private getDefaultAPI(options: any): any {
-    const availableAPI = options.forceAPI ? options.forceAPI : this.getMostAvailableAPI()
+    const availableAPI = options.forceAPI
+      ? options.forceAPI
+      : this.getMostAvailableAPI()
     let client: any = null
     let api: any = null
 
     options = typeof options === 'string' ? { slug: options } : options
-    options = typeof options === 'number' ? { slug: constructTagNumberSlug(options) } : options
-    options.slug = options.slug ? options.slug : constructTagNumberSlug(options.tagnumber, options.game)
+    options =
+      typeof options === 'number'
+        ? { slug: constructTagNumberSlug(options) }
+        : options
+    options.slug = options.slug
+      ? options.slug
+      : constructTagNumberSlug(options.tagnumber, options.game)
     options.fields = options.fields ? options.fields : tagDataFields
 
     switch (availableAPI) {
-      case "sanity":
+      case 'sanity':
         client = this.sanityClient
         api = sanityApi
         break
-      case "imgur":
+      case 'imgur':
         client = this.imgurClient
         api = imgurApi
         break
       default:
-      case "biketag":
+      case 'biketag':
         client = api = biketagApi
         break
     }
 
     return {
-      client, api, options
+      client,
+      api,
+      options,
     }
   }
-  
+
   private getMostAvailableAPI(): string {
     if (this.mostAvailableApi.length) {
       return this.mostAvailableApi
     }
 
     if (this.biketagConfig) {
-      return this.mostAvailableApi = "biketag"
+      return (this.mostAvailableApi = 'biketag')
     } else if (this.imgurConfig) {
-      return this.mostAvailableApi = "imgur"
+      return (this.mostAvailableApi = 'imgur')
     } else if (this.sanityConfig) {
-      return this.mostAvailableApi = "sanity"
+      return (this.mostAvailableApi = 'sanity')
     }
 
-    return ""
+    return ''
   }
 
   getConfiguration() {
@@ -137,21 +160,15 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  plainRequest(
-    options: AxiosRequestConfig = {}
-  ): Promise<AxiosResponse<any>> {
+  plainRequest(options: AxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
     return this.plainFetcher(options)
   }
 
-  cachedRequest(
-    options: AxiosRequestConfig = {}
-  ): Promise<AxiosResponse<any>> {
+  cachedRequest(options: AxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
     return this.cachedFetcher(options)
   }
 
-  request(
-    options: AxiosRequestConfig = {}
-  ): Promise<AxiosResponse<string>> {
+  request(options: AxiosRequestConfig = {}): Promise<AxiosResponse<string>> {
     return this.fetcher(options)
   }
 
@@ -194,7 +211,7 @@ export class BikeTagClient extends EventEmitter {
   //       return getBikeTag(this, payload)
   //       break
   //     case "sanity":
-  //       return 
+  //       return
   //   }
   // }
 

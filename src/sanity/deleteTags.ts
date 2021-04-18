@@ -1,11 +1,9 @@
 // import { SanityClient } from '@sanity/client';
-import { BikeTagApiResponse } from '../common/types';
+import { BikeTagApiResponse } from '../common/types'
 
-export async function deleteTags(
-  // client: SanityClient,
-  // tagnumbers?: number[],
-  // tagSlugs?: string[],
-): Promise<BikeTagApiResponse<boolean>> {
-  return ({}) as BikeTagApiResponse<boolean>;
-  
+export async function deleteTags(): Promise<BikeTagApiResponse<boolean>> {
+// client: SanityClient,
+// tagnumbers?: number[],
+// tagSlugs?: string[],
+  return {} as BikeTagApiResponse<boolean>
 }

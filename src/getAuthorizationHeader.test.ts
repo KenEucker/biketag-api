@@ -1,7 +1,9 @@
 // import { BikeTagClient } from './client';
 // import { getAuthorizationHeader } from './getAuthorizationHeader';
 
-test('get authorization works successfully', async () => { expect(true).toBeTruthy() })
+test('get authorization works successfully', async () => {
+  expect(true).toBeTruthy()
+})
 
 // test('returns provided access code in bearer header', async () => {
 //   const accessToken = 'abc123';

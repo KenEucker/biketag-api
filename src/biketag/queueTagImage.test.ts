@@ -1,7 +1,9 @@
 // import { BikeTagClient } from '../client';
 // import { queueTagImage } from './queueTagImage';
 
-test('upload works successfully', async () => { expect(true).toBeTruthy() })
+test('upload works successfully', async () => {
+  expect(true).toBeTruthy()
+})
 
 // describe('test file uploads', () => {
 //   test('upload one image via path string, receive one response', async () => {

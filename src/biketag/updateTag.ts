@@ -1,7 +1,6 @@
-import { BikeTagClient } from '../client';
-import { IMAGE_ENDPOINT } from '../common/endpoints';
-// import { createForm } from '../common/utils';
-import { Payload, BikeTagApiResponse } from '../common/types';
+import { BikeTagClient } from '../client'
+import { IMAGE_ENDPOINT } from '../common/endpoints'
+import { Payload, BikeTagApiResponse } from '../common/types'
 
 export interface UpdateTagPayload
   extends Pick<Payload, 'title' | 'description'> {
@@ -9,7 +8,7 @@ export interface UpdateTagPayload
 }
 
 function isValidUpdatePayload(p: UpdateTagPayload) {
-  return typeof p.title === 'string' || typeof p.description === 'string';
+  return typeof p.title === 'string' || typeof p.description === 'string'
 }
 
 export async function updateTag(
@@ -35,9 +34,10 @@ export async function updateTag(
   // }
 
   if (!isValidUpdatePayload(payload)) {
-    throw new Error('Update requires a title and/or description');
+    throw new Error('Update requires a title and/or description')
   }
 
-  const url = `${IMAGE_ENDPOINT}/${payload.slug}`;
-  return ((await client.request({ url, method: 'DELETE' })).data as unknown) as BikeTagApiResponse<boolean>;
+  const url = `${IMAGE_ENDPOINT}/${payload.slug}`
+  return ((await client.request({ url, method: 'DELETE' }))
+    .data as unknown) as BikeTagApiResponse<boolean>
 }

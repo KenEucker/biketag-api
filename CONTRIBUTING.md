@@ -21,11 +21,11 @@ const handlers = [
         },
         success: true,
         status: 200,
-      };
-      return res(ctx.json(response));
+      }
+      return res(ctx.json(response))
     }
   ),
-];
+]
 ```
 
 ## Submitting Changes
