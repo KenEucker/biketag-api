@@ -12,8 +12,10 @@ export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
 export interface SanityAccessToken {
     accessToken: string;
 }
-export interface SanityCredentials extends SanityAccessToken {
+export interface SanityClientId {
     projectId: string;
+}
+export interface SanityCredentials extends SanityAccessToken, SanityClientId {
     dataset: string;
     apiVersion: string;
     useCdn: boolean;
@@ -21,16 +23,12 @@ export interface SanityCredentials extends SanityAccessToken {
     password: string;
 }
 export interface AccessToken {
-    accessToken: string;
+    clientToken: string;
 }
-export interface ClientId {
-    clientId: string;
+export interface ClientKey extends AccessToken {
+    clientKey: string;
 }
-export interface Login extends ClientId {
-    username: string;
-    password: string;
-}
-export declare type BikeTagCredentials = AccessToken | ClientId | Login;
+export declare type BikeTagCredentials = ClientKey | AccessToken;
 export declare type Credentials = BikeTagCredentials & SanityCredentials & ImgurCredentials;
 export interface BikeTagApiResponse<T = Record<string, unknown> | Record<string, unknown>[] | string | boolean> {
     data: T;

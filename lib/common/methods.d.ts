@@ -1,11 +1,12 @@
-import { AccessToken, ClientId, Login, SanityAccessToken, ImgurAccessToken, ImgurClientId, SanityCredentials } from './types';
+import { AccessToken, ClientKey, SanityAccessToken, ImgurAccessToken, ImgurClientId, ImgurCredentials, SanityCredentials, SanityClientId, BikeTagCredentials } from './types';
 export declare function isBikeTagAccessToken(arg: unknown): arg is AccessToken;
-export declare function isBikeTagClientId(arg: unknown): arg is ClientId;
-export declare function isBikeTagLogin(arg: unknown): arg is Login;
+export declare function isBikeTagClientKey(arg: unknown): arg is ClientKey;
 export declare function isSanityAccessToken(arg: unknown): arg is SanityAccessToken;
+export declare function isSanityClientId(arg: unknown): arg is SanityClientId;
 export declare function isImgurAccessToken(arg: unknown): arg is ImgurAccessToken;
 export declare function isImgurClientId(arg: unknown): arg is ImgurClientId;
 export declare function constructTagDataObject(data: any, fields?: never[]): any;
 export declare function constructTagNumberSlug(number: number, game?: string): string;
-export declare function isImgurCredentials(credentials: unknown): boolean;
+export declare function isImgurCredentials(credentials: ImgurCredentials): boolean;
 export declare function isSanityCredentials(credentials: SanityCredentials): boolean;
+export declare function isBikeTagCredentials(credentials: BikeTagCredentials): boolean;
