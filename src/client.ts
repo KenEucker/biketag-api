@@ -8,9 +8,10 @@ import {
   BikeTagApiResponse,
   SanityCredentials,
   ImgurCredentials,
+  BikeTagCredentials,
 } from './common/types'
 import { tagDataFields } from './common/data'
-import { constructTagNumberSlug, isImgurCredentials, isSanityCredentials } from './common/methods'
+import { constructTagNumberSlug, isImgurCredentials, isSanityCredentials, isBikeTagCredentials } from './common/methods'
 
 import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
@@ -26,23 +27,24 @@ export class BikeTagClient extends EventEmitter {
   private fetcher: AxiosInstance
   private mostAvailableApi: string
   private imgurClient?: ImgurClient
-  private imgurConfig?: ImgurConfig
   private sanityClient?: SanityClient
-  private sanityConfig?: SanityConfig
+  private sanityConfig?: SanityConfig | void
+  private imgurConfig?: ImgurConfig | void
+  private biketagConfig?: BikeTagCredentials | void
 
   constructor(readonly credentials: Credentials) {
     super()
 
     this.mostAvailableApi = ""
+    this.biketagConfig = isBikeTagCredentials(credentials as BikeTagCredentials) ? credentials : undefined
+    this.imgurConfig = isImgurCredentials(credentials) ? (credentials as ImgurCredentials) : undefined
+    this.sanityConfig = isSanityCredentials(credentials as SanityCredentials) ? (credentials as SanityCredentials) : undefined
 
-    
-    if (isImgurCredentials(credentials)) {
-      this.imgurConfig = credentials as ImgurCredentials
+    if (this.imgurConfig) {
       this.imgurClient = new ImgurClient(this.imgurConfig)
     }
 
-    if (isSanityCredentials(credentials)) {
-      this.sanityConfig = credentials as SanityCredentials
+    if (this.sanityConfig) {
       this.sanityClient = sanityClient(this.sanityConfig)
     }
 
@@ -63,23 +65,58 @@ export class BikeTagClient extends EventEmitter {
       // },
     })
   }
+
+  private getDefaultAPI(options: any): any {
+    const availableAPI = options.forceAPI ? options.forceAPI : this.getMostAvailableAPI()
+    let client: any = null
+    let api: any = null
+
+    options = typeof options === 'string' ? { slug: options } : options
+    options = typeof options === 'number' ? { slug: constructTagNumberSlug(options) } : options
+    options.slug = options.slug ? options.slug : constructTagNumberSlug(options.tagnumber, options.game)
+    options.fields = options.fields ? options.fields : tagDataFields
+
+    switch (availableAPI) {
+      case "sanity":
+        client = this.sanityClient
+        api = sanityApi
+        break
+      case "imgur":
+        client = this.imgurClient
+        api = imgurApi
+        break
+      default:
+      case "biketag":
+        client = api = biketagApi
+        break
+    }
+
+    return {
+      client, api, options
+    }
+  }
   
   private getMostAvailableAPI(): string {
     if (this.mostAvailableApi.length) {
       return this.mostAvailableApi
     }
 
-    /// TODO: determine if a biketag server is available
-    /// TODO: determine if sanity permissions are available
-    /// TODO: default to imgur api
-    return this.mostAvailableApi = "imgur"
+    if (this.biketagConfig) {
+      return this.mostAvailableApi = "biketag"
+    } else if (this.imgurConfig) {
+      return this.mostAvailableApi = "imgur"
+    } else if (this.sanityConfig) {
+      return this.mostAvailableApi = "sanity"
+    }
+
+    return ""
   }
 
   getConfiguration() {
     return {
       sanity: this.sanityConfig,
       imgur: this.imgurConfig,
-      // sanity: this.sanityConfig,
+      biketag: this.biketagConfig,
     }
   }
 
@@ -108,30 +145,8 @@ export class BikeTagClient extends EventEmitter {
   //   return getArchive(this, options)
   // }
 
-  getTag(options: number | string | any): Promise<BikeTagApiResponse<TagData>> {
-    const clientString = this.getMostAvailableAPI()
-    let client: any = null
-    let api: any = null
-
-    options = typeof options === 'string' ? { slug: options } : options
-    options = typeof options === 'number' ? { slug: constructTagNumberSlug(options) } : options
-    options.slug = options.slug ? options.slug : constructTagNumberSlug(options.tagnumber, options.game)
-    options.fields = options.fields ? options.fields : tagDataFields
-
-    switch (clientString) {
-      case "sanity":
-        client = this.sanityClient
-        api = sanityApi
-        break
-      case "imgur":
-        client = this.imgurClient
-        api = imgurApi
-        break
-      default:
-      case "biketag":
-        client = api = biketagApi
-        break
-    }
+  getTag(opts: number | string | any): Promise<BikeTagApiResponse<TagData>> {
+    const { client, options, api } = this.getDefaultAPI(opts)
 
     return api.getTag(client, options)
   }

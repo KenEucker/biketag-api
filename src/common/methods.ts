@@ -1,38 +1,31 @@
 import {
   AccessToken,
-  ClientId,
-  Login,
+  ClientKey,
   SanityAccessToken,
   ImgurAccessToken,
   ImgurClientId,
   ImgurCredentials,
   SanityCredentials,
+  SanityClientId,
+  BikeTagCredentials,
 } from './types'
 import { tagDataReferenceFields } from './data'
 
 export function isBikeTagAccessToken(arg: unknown): arg is AccessToken {
-  return (arg as AccessToken).accessToken !== undefined
+  return (arg as AccessToken).clientToken !== undefined
 }
 
-export function isBikeTagClientId(arg: unknown): arg is ClientId {
-  return (arg as ClientId).clientId !== undefined
-}
-
-export function isBikeTagLogin(arg: unknown): arg is Login {
-  return (
-    (arg as Login).clientId !== undefined &&
-    (arg as Login).username !== undefined &&
-    (arg as Login).password !== undefined
-  )
+export function isBikeTagClientKey(arg: unknown): arg is ClientKey {
+  return (arg as ClientKey).clientKey !== undefined
 }
 
 export function isSanityAccessToken(arg: unknown): arg is SanityAccessToken {
   return (arg as SanityAccessToken).accessToken !== undefined
 }
 
-// export function isSanityClientId(arg: unknown): arg is SanityClientId {
-//   return (arg as SanityClientId).projectId !== undefined
-// }
+export function isSanityClientId(arg: unknown): arg is SanityClientId {
+  return (arg as SanityClientId).projectId !== undefined
+}
 
 // export function isSanityLogin(arg: unknown): arg is SanityLogin {
 //   return (
@@ -74,10 +67,14 @@ export function constructTagNumberSlug(number: number, game = 'portland'): strin
   return `${game}-tag-${number}` 
 }
 
-export function isImgurCredentials(credentials: unknown): boolean {
-  return !!((credentials as ImgurCredentials).clientId  !== undefined || (credentials as ImgurCredentials).clientSecret !== undefined)
+export function isImgurCredentials(credentials: ImgurCredentials): boolean {
+  return !!(credentials.clientId  !== undefined || credentials.clientSecret !== undefined)
 }
 
 export function isSanityCredentials(credentials: SanityCredentials): boolean {
-  return !!(credentials.projectId && credentials.accessToken)
+  return !!(credentials.projectId !== undefined && credentials.accessToken !== undefined)
+}
+
+export function isBikeTagCredentials(credentials: BikeTagCredentials): boolean {
+  return !!(credentials.clientToken !== undefined && (credentials as ClientKey).clientKey !== undefined)
 }
