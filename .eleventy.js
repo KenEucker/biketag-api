@@ -3,4 +3,8 @@ module.exports = function (eleventyConfig) {
   // eleventyConfig.setUseGitIgnore(false)
   eleventyConfig.addWatchTarget('dist')
   eleventyConfig.addPassthroughCopy('dist')
+  eleventyConfig.setBrowserSyncConfig({
+    notify: true,
+    host: '0.0.0.0',
+  })
 }

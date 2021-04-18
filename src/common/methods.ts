@@ -11,11 +11,11 @@ import {
 } from './types'
 import { tagDataReferenceFields } from './data'
 
-export function isBikeTagAccessToken(arg: unknown): arg is AccessToken {
+export function isAccessToken(arg: unknown): arg is AccessToken {
   return (arg as AccessToken).clientToken !== undefined
 }
 
-export function isBikeTagClientKey(arg: unknown): arg is ClientKey {
+export function isClientKey(arg: unknown): arg is ClientKey {
   return (arg as ClientKey).clientKey !== undefined
 }
 

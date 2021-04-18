@@ -12,24 +12,27 @@ import {
 } from './common/types'
 import { tagDataFields } from './common/data'
 import { constructTagNumberSlug, isImgurCredentials, isSanityCredentials, isBikeTagCredentials } from './common/methods'
+import { setup } from 'axios-cache-adapter'
 
 import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 
 // @ts-ignore
-import { ImgurClient, ImgurConfig } from './imgurClient'
+import { ImgurClient } from './imgurClient'
 import sanityClient, { SanityClient, ClientConfig as SanityConfig } from '@sanity/client'
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
 
 export class BikeTagClient extends EventEmitter {
   private fetcher: AxiosInstance
+  private plainFetcher: AxiosInstance
+  private cachedFetcher: AxiosInstance
   private mostAvailableApi: string
-  private imgurClient?: ImgurClient
+  private imgurClient?: typeof ImgurClient
   private sanityClient?: SanityClient
   private sanityConfig?: SanityConfig | void
-  private imgurConfig?: ImgurConfig | void
+  private imgurConfig?: ImgurCredentials | void
   private biketagConfig?: BikeTagCredentials | void
 
   constructor(readonly credentials: Credentials) {
@@ -48,21 +51,35 @@ export class BikeTagClient extends EventEmitter {
       this.sanityClient = sanityClient(this.sanityConfig)
     }
 
+    /// Configure separate fetching strategies: plain, authed (default), cached (authed) 
+    this.plainFetcher = axios.create({
+      headers: {
+        'user-agent': USERAGENT,
+      },
+      responseType: 'json',
+    })
+
     this.fetcher = axios.create({
       baseURL: BIKETAG_API_PREFIX,
       headers: {
         'user-agent': USERAGENT,
       },
       responseType: 'json',
-      // hooks: {
-      //   beforeRequest: [
-      //     async (options: any) => {
-      //       options.headers['authorization'] = await getAuthorizationHeader(
-      //         this
-      //       )
-      //     },
-      //   ],
-      // },
+    })
+
+    this.cachedFetcher = setup({
+      baseURL: BIKETAG_API_PREFIX,
+      cache: {
+        maxAge: 15 * 60 * 1000,
+        exclude: {
+          // Only exclude PUT, PATCH and DELETE methods from cache
+          methods: ['put', 'patch', 'delete'],
+        },
+      },
+      headers: {
+        'user-agent': USERAGENT,
+      },
+      responseType: 'json',
     })
   }
 
@@ -123,7 +140,13 @@ export class BikeTagClient extends EventEmitter {
   plainRequest(
     options: AxiosRequestConfig = {}
   ): Promise<AxiosResponse<any>> {
-    return this.fetcher(options).then(response => response.data)
+    return this.plainFetcher(options)
+  }
+
+  cachedRequest(
+    options: AxiosRequestConfig = {}
+  ): Promise<AxiosResponse<any>> {
+    return this.cachedFetcher(options)
   }
 
   request(
@@ -231,7 +254,7 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating a sanity client')
   }
 
-  images(options: any = {}): ImgurClient {
+  images(options: any = {}): typeof ImgurClient {
     if (isImgurCredentials(options)) {
       return new ImgurClient(options)
     }
