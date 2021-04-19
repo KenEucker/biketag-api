@@ -10,22 +10,30 @@ The new BikeTag javascript client, written entirely in typescript. This API uses
 
 2. import/require:
 
-`import {BikeTagClient} from 'biketag'`
+`import { BikeTagClient } from 'biketag'`
 
 or
 
-`const {BikeTagClient} = require('biketag')`
+`const { BikeTagClient, BikeTagCredentials } = require('biketag')`
 
 3. configure:
 
 ```
+// according to the type of BikeTagCredentials, which is what you pass to the BikeTagClient constructor, the 'game' field is required
 const biketagAPI = new BikeTagClient({
     game: 'portland',
     clientKey: 'biketag-dev',
     clientToken: 'your-client-token',
 })
 
+// retrieves the "latest" BikeTag for the 'portland' game
+const biketagPortland1 = await biketagAPI.getTag()
+
+// retrieves the BikeTag #1 for the 'portland' game
 const biketagPortland1 = await biketagAPI.getTag(1)
+
+// retrieves the all BikeTags for the 'portland' game
+const allPortlandTags = await biketagAPI.getTags()
 ```
 
 ## Credits
