@@ -25,7 +25,11 @@ const biketagAPI = new BikeTagClient({
     clientKey: 'biketag-dev',
     clientToken: 'your-client-token',
 })
+```
 
+4. Usage:
+
+```
 // retrieves the "latest" BikeTag for the 'portland' game
 const biketagPortland1 = await biketagAPI.getTag()
 
