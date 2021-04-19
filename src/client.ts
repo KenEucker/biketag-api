@@ -35,6 +35,7 @@ import sanityClient, {
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
 
+export type BikeTagCredentials = BikeTagCredentials
 export class BikeTagClient extends EventEmitter {
   private fetcher: AxiosInstance
   private plainFetcher: AxiosInstance
