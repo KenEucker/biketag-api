@@ -2,10 +2,11 @@ import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, TagData } from '../common/types'
 import { constructTagDataObject } from '../common/methods'
 import { tagDataReferenceFields } from '../common/data'
+import { getTagOptions } from '../common/options'
 
 export async function getTag(
   client: SanityClient,
-  options: any
+  options: getTagOptions
 ): Promise<BikeTagApiResponse<TagData>> {
   if (!options) {
     throw new Error('no options')
@@ -22,7 +23,18 @@ export async function getTag(
     }, '')
     .slice(0, -1)
 
-  const query = `*[_type == "tag" && slug.current == "${options.slug}"][0]{${fields}}`
+  const slugIsLatest = options.slug === 'latest'
+  const slugIsFirst = options.slug === 'first'
+  const slugQuery = slugIsLatest
+    ? `|order(tagnumber desc)[0]`
+    : slugIsFirst
+    ? `|order(tagnumber asc)[0]`
+    : ` && slug.current == "${options.slug}"`
+
+  const query =
+    slugIsLatest || slugIsFirst
+      ? `*[_type == "tag"]{${fields}}${slugQuery}`
+      : `*[_type == "tag" ${slugQuery}][0]{${fields}}`
 
   const params = {}
 

@@ -28,7 +28,10 @@
     "typecheck": "npx tsc --noEmit",
     "clean": "rm -rf lib dist _site",
     "prepare": "npx husky install",
-    "lint": "prettier --check . && npx eslint . && npm run typecheck && echo '🤖 linter and compilation successful 🤖!'",
+    "pretty": "prettier . --write ",
+    "pretty:check": "prettier . --check ",
+    "eslint": "npx eslint .",
+    "lint": "npm run pretty:check && npm run eslint && npm run typecheck && echo '🤖 !linter ✅ success! 🤖'",
     "lint:write": "npx prettier . --write && npx eslint . --fix",
     "commit": "npx cz",
     "convert": "npx typeconv -f ts -t oapi -o openapi 'src/**/*.ts'"

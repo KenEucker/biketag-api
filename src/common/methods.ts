@@ -81,7 +81,7 @@ export function isImgurClientId(arg: unknown): arg is ImgurClientId {
   return (arg as ImgurClientId).clientId !== undefined
 }
 
-export function constructTagDataObject(data: any, fields = []): any {
+export function constructTagDataObject(data: any, fields: string[] = []): any {
   const tagData = fields.length
     ? fields.reduce((o: any, f: any) => {
         o[f] = data[f]

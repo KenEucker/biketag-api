@@ -10,6 +10,7 @@ import {
   BikeTagCredentials,
 } from './common/types'
 import { tagDataFields } from './common/data'
+import { getTagOptions, getTagsOptions } from './common/options'
 import {
   constructTagNumberSlug,
   assignImgurCredentials,
@@ -94,8 +95,8 @@ export class BikeTagClient extends EventEmitter {
   }
 
   private getDefaultAPI(options: any): any {
-    const availableAPI = options.forceAPI
-      ? options.forceAPI
+    const availableAPI = options.source
+      ? options.source
       : this.getMostAvailableAPI()
     let client: any = null
     let api: any = null
@@ -110,12 +111,16 @@ export class BikeTagClient extends EventEmitter {
             ),
           }
         : options
-
     options.game = options.game ? options.game : this.credentials.game
-    options.slug = options.slug
-      ? options.slug
-      : constructTagNumberSlug(options.tagnumber, options.game)
     options.fields = options.fields ? options.fields : tagDataFields
+
+    if (!options.slug) {
+      if (options.tagnumber && typeof options.tagnumber !== 'undefined') {
+        options.slug = constructTagNumberSlug(options.tagnumber, options.game)
+      } else {
+        options.slug = 'latest'
+      }
+    }
 
     switch (availableAPI) {
       case 'sanity':
@@ -188,15 +193,13 @@ export class BikeTagClient extends EventEmitter {
   //   return getArchive(this, options)
   // }
 
-  getTag(opts: number | string | any): Promise<BikeTagApiResponse<TagData>> {
+  getTag(opts: getTagOptions): Promise<BikeTagApiResponse<TagData>> {
     const { client, options, api } = this.getDefaultAPI(opts)
 
     return api.getTag(client, options)
   }
 
-  getTags(
-    opts: number[] | string[] | any[]
-  ): Promise<BikeTagApiResponse<TagData>> {
+  getTags(opts: getTagsOptions): Promise<BikeTagApiResponse<TagData>> {
     const { client, options, api } = this.getDefaultAPI(opts)
 
     return api.getTags(client, options)

@@ -21,9 +21,10 @@
           clientSecret: '14dd920076de25884a1b900341022a84d78076bf',
         })
 
-        const tags = await biketagAPI.getTags({forceAPI: 'sanity'})
+        const tags = await biketagAPI.getTag({ source: 'sanity' })
+        const latestTag = await biketagAPI.getTag({ source: 'sanity' })
 
-        console.log(tags)
+        console.log(tags, latestTag)
 
         const config = biketagAPI.getConfiguration()
         document.getElementById('data').innerHTML = JSON.stringify(config)

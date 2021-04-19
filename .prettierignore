@@ -4,3 +4,4 @@ package-lock.json
 .github
 src/coverage/
 dist
+webpack.config.js
