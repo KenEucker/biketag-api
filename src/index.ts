@@ -1,1 +1,5 @@
-export { BikeTagClient, BikeTagConfiguration, BikeTagCredentials } from './client'
+export {
+  BikeTagClient,
+  BikeTagConfiguration,
+  BikeTagCredentials,
+} from './client'
