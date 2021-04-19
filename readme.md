@@ -1,4 +1,4 @@
-# BikeTag Clint Application Programming Interface
+# BikeTag Client Application Programming Interface
 
 The new BikeTag javascript client, written entirely in typescript. This API uses three different API servers to obtain BikeTag Game data.
 
