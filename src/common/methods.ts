@@ -7,6 +7,7 @@ import {
   ImgurCredentials,
   SanityCredentials,
   SanityClientId,
+  Credentials,
   BikeTagCredentials,
   Payload,
 } from './types'
@@ -117,7 +118,9 @@ export function isSanityCredentials(credentials: SanityCredentials): boolean {
   )
 }
 
-export function isBikeTagCredentials(credentials: BikeTagCredentials): boolean {
+export function isBikeTagCredentials(
+  credentials: BikeTagCredentials | Credentials
+): boolean {
   return !!(
     credentials.clientToken !== undefined &&
     (credentials as ClientKey).clientKey !== undefined
@@ -158,13 +161,11 @@ export function assignSanityCredentials(
 }
 
 export function assignBikeTagCredentials(
-  credentials: BikeTagCredentials
-): BikeTagCredentials {
-  const biketagCredentials = isBikeTagCredentials(
-    credentials as BikeTagCredentials
-  )
+  credentials: Credentials
+): Credentials {
+  const biketagCredentials = isBikeTagCredentials(credentials as Credentials)
     ? credentials
-    : ({ game: credentials.game } as BikeTagCredentials)
+    : ({ game: credentials.game } as Credentials)
 
   return biketagCredentials
 }

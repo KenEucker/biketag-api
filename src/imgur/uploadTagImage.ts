@@ -1,5 +1,5 @@
 // @ts-ignore
-import { ImgurClient } from './imgurClient'
+// import { ImgurClient } from './imgurClient'
 import { Payload, BikeTagApiResponse, TagData } from '../common/types'
 // import { Progress } from 'axios';
 
