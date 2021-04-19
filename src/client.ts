@@ -194,6 +194,14 @@ export class BikeTagClient extends EventEmitter {
     return api.getTag(client, options)
   }
 
+  getTags(
+    opts: number[] | string[] | any[]
+  ): Promise<BikeTagApiResponse<TagData>> {
+    const { client, options, api } = this.getDefaultAPI(opts)
+
+    return api.getTags(client, options)
+  }
+
   // updateImage(
   //   payload: UpdateImagePayload | UpdateImagePayload[]
   // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {

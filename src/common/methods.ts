@@ -90,7 +90,7 @@ export function constructTagDataObject(data: any, fields = []): any {
     : data
 
   tagDataReferenceFields.forEach((f) => {
-    if (typeof tagData[f] !== 'undefined') {
+    if (tagData[f] && typeof tagData[f] !== 'undefined') {
       tagData[f] = tagData[f].name
     }
   })
