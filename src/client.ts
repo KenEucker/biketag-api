@@ -7,7 +7,6 @@ import {
   TagData,
   BikeTagApiResponse,
   ImgurCredentials,
-  BikeTagCredentials,
 } from './common/types'
 import { tagDataFields } from './common/data'
 import { getTagOptions, getTagsOptions } from './common/options'
@@ -35,6 +34,12 @@ import sanityClient, {
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
 
+export { BikeTagCredentials } from './common/types'
+export type BikeTagConfiguration = {
+  biketag: Credentials
+  sanity: SanityConfig
+  imgur: ImgurCredentials
+}
 export class BikeTagClient extends EventEmitter {
   private fetcher: AxiosInstance
   private plainFetcher: AxiosInstance
@@ -44,7 +49,7 @@ export class BikeTagClient extends EventEmitter {
   private sanityClient?: SanityClient
   private sanityConfig?: SanityConfig | void
   private imgurConfig?: ImgurCredentials | void
-  private biketagConfig?: BikeTagCredentials | void
+  private biketagConfig?: Credentials | void
 
   constructor(readonly credentials: Credentials) {
     super()
@@ -107,7 +112,7 @@ export class BikeTagClient extends EventEmitter {
         ? {
             slug: constructTagNumberSlug(
               options,
-              (this.credentials as BikeTagCredentials).game
+              (this.credentials as Credentials).game
             ),
           }
         : options
@@ -160,12 +165,12 @@ export class BikeTagClient extends EventEmitter {
     return ''
   }
 
-  getConfiguration() {
+  getConfiguration(): BikeTagConfiguration {
     return {
+      biketag: this.biketagConfig,
       sanity: this.sanityConfig,
       imgur: this.imgurConfig,
-      biketag: this.biketagConfig,
-    }
+    } as BikeTagConfiguration
   }
 
   plainRequest(options: AxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
