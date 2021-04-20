@@ -1,6 +1,6 @@
 import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, TagData } from '../common/types'
-import { constructTagDataObject } from '../common/methods'
+import { constructTagDataObject } from './helpers'
 import { tagDataReferenceFields } from '../common/data'
 import { getTagsOptions } from '../common/options'
 

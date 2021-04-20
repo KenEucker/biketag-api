@@ -1,5 +1,5 @@
 import { Readable } from 'stream'
-
+import { ClientConfig as SanityConfig } from '@sanity/client'
 export interface ImgurAccessToken {
   accessToken: string
 }
@@ -30,6 +30,7 @@ export interface SanityCredentials extends SanityAccessToken, SanityClientId {
 
 export interface Game {
   game: string
+  hash?: string
 }
 export interface AccessToken extends Game {
   clientToken: string
@@ -64,7 +65,7 @@ interface CommonData {
   name: string
 }
 export interface TagData extends CommonData {
-  tagnumber: string
+  tagnumber: number
   mysteryImage: string
   mysteryImageUrl: string
   game: string
@@ -94,4 +95,16 @@ export interface Payload {
   album?: string
   stream?: Readable
   disable_audio?: '1' | '0'
+}
+
+export type BikeTagConfiguration = {
+  biketag: Credentials
+  sanity: SanityConfig
+  imgur: ImgurCredentials
+}
+
+export type BikeTagApiWrapper = {
+  client: any
+  api: any
+  options: any
 }

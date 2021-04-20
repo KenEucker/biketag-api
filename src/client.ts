@@ -12,9 +12,8 @@ import { tagDataFields } from './common/data'
 import { getTagOptions, getTagsOptions } from './common/options'
 import {
   constructTagNumberSlug,
-  assignImgurCredentials,
-  assignSanityCredentials,
-  assignBikeTagCredentials,
+  getTagnumberFromSlug,
+  assignBikeTagConfiguration,
   isImgurCredentials,
   isSanityCredentials,
   isBikeTagCredentials,
@@ -34,30 +33,28 @@ import sanityClient, {
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
 
-export { BikeTagCredentials } from './common/types'
-export type BikeTagConfiguration = {
-  biketag: Credentials
-  sanity: SanityConfig
-  imgur: ImgurCredentials
-}
+import { BikeTagCredentials, BikeTagConfiguration } from './common/types'
 export class BikeTagClient extends EventEmitter {
   private fetcher: AxiosInstance
   private plainFetcher: AxiosInstance
   private cachedFetcher: AxiosInstance
-  private mostAvailableApi: string
+
+  private mostAvailableApi: 'imgur' | 'sanity' | 'biketag' | undefined
   private imgurClient?: typeof ImgurClient
   private sanityClient?: SanityClient
-  private sanityConfig?: SanityConfig | void
-  private imgurConfig?: ImgurCredentials | void
-  private biketagConfig?: Credentials | void
+  private sanityConfig?: SanityConfig | undefined
+  private imgurConfig?: ImgurCredentials | undefined
+  private biketagConfig?: Credentials | undefined
 
-  constructor(readonly credentials: Credentials) {
+  constructor(readonly config: Credentials | BikeTagConfiguration) {
     super()
 
-    this.mostAvailableApi = ''
-    this.biketagConfig = assignBikeTagCredentials(credentials)
-    this.imgurConfig = assignImgurCredentials(credentials)
-    this.sanityConfig = assignSanityCredentials(credentials)
+    this.mostAvailableApi = undefined
+    config = assignBikeTagConfiguration(config as BikeTagConfiguration)
+
+    this.biketagConfig = (config as BikeTagConfiguration).biketag
+    this.imgurConfig = (config as BikeTagConfiguration).imgur
+    this.sanityConfig = (config as BikeTagConfiguration).sanity
 
     if (this.imgurConfig) {
       this.imgurClient = new ImgurClient(this.imgurConfig)
@@ -99,26 +96,29 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  private getDefaultAPI(options: any): any {
-    const availableAPI = options.source
-      ? options.source
-      : this.getMostAvailableAPI()
-    let client: any = null
-    let api: any = null
+  private getDefaultOptions(opts: any): any {
+    /// If the options passed in was a string, set it as the slug
+    const options =
+      typeof opts === 'string'
+        ? { slug: opts }
+        : typeof opts === 'number'
+        ? { tagnumber: opts }
+        : opts
 
-    options = typeof options === 'string' ? { slug: options } : options
-    options =
-      typeof options === 'number'
-        ? {
-            slug: constructTagNumberSlug(
-              options,
-              (this.credentials as Credentials).game
-            ),
-          }
-        : options
-    options.game = options.game ? options.game : this.credentials.game
+    /// Set the game in the options, defaulting to the configured game
+    options.game = options.game
+      ? options.game
+      : (this.biketagConfig as Credentials).game
+
+    /// Set the album hash, if present (Imgur specific)
+    options.hash = options.hash
+      ? options.hash
+      : (this.biketagConfig as Credentials).hash
+
+    /// Explicitely set the request fields to the specified TagDataFields
     options.fields = options.fields ? options.fields : tagDataFields
 
+    /// Explicitely set the slug from the tagnumber or to 'latest'
     if (!options.slug) {
       if (options.tagnumber && typeof options.tagnumber !== 'undefined') {
         options.slug = constructTagNumberSlug(options.tagnumber, options.game)
@@ -126,6 +126,28 @@ export class BikeTagClient extends EventEmitter {
         options.slug = 'latest'
       }
     }
+
+    /// Explicitely set the number if we happen to have the slug but not the tagnumber
+    if (options.tagnumber === undefined) {
+      if (options.slug !== 'latest') {
+        options.tagnumber = getTagnumberFromSlug(options.slug)
+        console.log({ options })
+      }
+    }
+
+    return options
+  }
+
+  private getDefaultAPI(options: any = {}, getDefaultOptions = true): any {
+    const availableAPI = options.source
+      ? options.source
+      : this.getMostAvailableAPI()
+    const outOptions = getDefaultOptions
+      ? this.getDefaultOptions(options)
+      : options
+
+    let client: any = null
+    let api: any = null
 
     switch (availableAPI) {
       case 'sanity':
@@ -145,12 +167,12 @@ export class BikeTagClient extends EventEmitter {
     return {
       client,
       api,
-      options,
+      options: outOptions,
     }
   }
 
   private getMostAvailableAPI(): string {
-    if (this.mostAvailableApi.length) {
+    if (this.mostAvailableApi) {
       return this.mostAvailableApi
     }
 
@@ -302,3 +324,5 @@ export class BikeTagClient extends EventEmitter {
     return this
   }
 }
+
+export type { BikeTagCredentials, BikeTagConfiguration }
