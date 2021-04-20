@@ -2,4 +2,5 @@ lib/
 src/coverage/
 webpack.config.js
 src/imgurClient/index.js
+_site/
 dist

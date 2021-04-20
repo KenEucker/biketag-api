@@ -6,15 +6,15 @@ import { BIKETAG_API_PREFIX, AUTHORIZE_ENDPOINT } from './common/endpoints'
 export async function getAuthorizationHeader(
   client: BikeTagClient
 ): Promise<string> {
-  if (isAccessToken(client.credentials)) {
-    return `Bearer ${client.credentials.accessToken}`
+  if (isAccessToken(client.config)) {
+    return `Bearer ${client.config.accessToken}`
   }
 
-  if (isClientKey(client.credentials) && !isAccessToken(client.credentials)) {
-    return `Client-ID ${(client.credentials as ClientKey).clientKey}`
+  if (isClientKey(client.config) && !isAccessToken(client.config)) {
+    return `Client-ID ${(client.config as ClientKey).clientKey}`
   }
 
-  const { clientId, username, password } = client.credentials
+  const { clientId, username, password } = client.config.biketag
 
   const options: Record<string, unknown> = {
     url: AUTHORIZE_ENDPOINT,
@@ -71,7 +71,7 @@ export async function getAuthorizationHeader(
   )
 
   const clientToken = token.access_token
-  ;((client.credentials as unknown) as AccessToken).clientToken = clientToken
+  ;((client.config as unknown) as AccessToken).clientToken = clientToken
 
   return `Bearer ${clientToken}`
 }

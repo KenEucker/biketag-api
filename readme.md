@@ -31,7 +31,7 @@ const biketagAPI = new BikeTagClient({
 
 ```
 // retrieves the "latest" BikeTag for the 'portland' game
-const biketagPortland1 = await biketagAPI.getTag()
+const biketagPortlandLatest = await biketagAPI.getTag()
 
 // retrieves the BikeTag #1 for the 'portland' game
 const biketagPortland1 = await biketagAPI.getTag(1)

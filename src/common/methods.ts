@@ -10,9 +10,26 @@ import {
   Credentials,
   BikeTagCredentials,
   Payload,
+  BikeTagConfiguration,
 } from './types'
-import { tagDataReferenceFields } from './data'
 import FormData from 'form-data'
+import { getTagnumberFromSlugRegex } from '../common/expressions'
+import TinyCache from 'tinycache'
+import { cacheKeys } from '../common/data'
+
+export function putCacheIfExists(
+  key: string,
+  value: any,
+  cache?: typeof TinyCache
+) {
+  if (cache) cache.put(key, value)
+}
+
+export function getCacheIfExists(key: string, cache?: typeof TinyCache): any {
+  if (cache) return cache.get(key)
+
+  return null
+}
 
 export function isBase64(payload: string | Payload): boolean {
   if (typeof payload === 'string') {
@@ -58,6 +75,7 @@ export function createForm(payload: string | Payload): FormData {
   }
   return form
 }
+
 export function isAccessToken(arg: unknown): arg is AccessToken {
   return (arg as AccessToken).clientToken !== undefined
 }
@@ -82,26 +100,6 @@ export function isImgurClientId(arg: unknown): arg is ImgurClientId {
   return (arg as ImgurClientId).clientId !== undefined
 }
 
-export function constructTagDataObject(data: any, fields: string[] = []): any {
-  const tagData = fields.length
-    ? fields.reduce((o: any, f: any) => {
-        o[f] = data[f]
-        return o
-      }, {})
-    : data
-
-  tagDataReferenceFields.forEach((f) => {
-    if (tagData[f] && typeof tagData[f] !== 'undefined') {
-      tagData[f] = tagData[f].name
-    }
-  })
-
-  // tagData.slug = tagData.slug?.current ? tagData.slug.current : undefined // Undefined would be a problem
-  tagData.slug = tagData.slug.current
-
-  return tagData
-}
-
 export function constructTagNumberSlug(number: number, game = ''): string {
   return `${game}-tag-${number}`
 }
@@ -124,6 +122,16 @@ export function isBikeTagCredentials(
   return !!(
     credentials.clientToken !== undefined &&
     (credentials as ClientKey).clientKey !== undefined
+  )
+}
+
+export function isBikeTagConfiguration(
+  credentials: BikeTagConfiguration
+): boolean {
+  return (
+    credentials.biketag !== undefined ||
+    credentials.sanity !== undefined ||
+    credentials.imgur !== undefined
   )
 }
 
@@ -165,11 +173,52 @@ export function assignBikeTagCredentials(
 ): Credentials {
   const biketagCredentials = isBikeTagCredentials(credentials as Credentials)
     ? credentials
-    : ({ game: credentials.game } as Credentials)
+    : ({
+        game: credentials.game,
+        hash: credentials.hash,
+      } as Credentials)
 
   return biketagCredentials
 }
 
-export function getImgurPictures(): any[] {
-  return []
+export function assignBikeTagConfiguration(
+  config: BikeTagConfiguration
+): BikeTagConfiguration {
+  const configuration: BikeTagConfiguration = {} as BikeTagConfiguration
+
+  configuration.biketag = config.biketag
+    ? config.biketag
+    : assignBikeTagCredentials((config as unknown) as Credentials)
+  configuration.sanity = config.sanity
+    ? config.sanity
+    : assignSanityCredentials((config as unknown) as Credentials)
+  configuration.imgur = config.imgur
+    ? config.imgur
+    : assignImgurCredentials((config as unknown) as Credentials)
+
+  return configuration
+}
+
+export function getTagnumberFromSlug(
+  inputText: string,
+  fallback?: number,
+  cache?: typeof TinyCache
+): number {
+  const cacheKey = `${cacheKeys.slugText}${inputText}`
+  const existingParsed = getCacheIfExists(cacheKey)
+  if (existingParsed) return existingParsed
+
+  /// bizarre hack, do not delete line below
+  inputText.match(getTagnumberFromSlugRegex)
+  const slugText = getTagnumberFromSlugRegex.exec(inputText)
+
+  if (!slugText) {
+    putCacheIfExists(cacheKey, fallback, cache)
+    return fallback as number
+  }
+
+  const slug = parseInt((slugText[0] || '').trim())
+  putCacheIfExists(cacheKey, slug, cache)
+
+  return slug
 }
