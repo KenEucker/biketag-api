@@ -14,6 +14,7 @@
   </a>
 </p>
 
+
 ## Installation
 
 ```shell
@@ -21,6 +22,7 @@ npm install biketag
 ```
 
 Or find a specific versions to pin on [our npm page](https://www.npmjs.com/package/biketag/v/latest?activeTab=versions).
+
 
 ## Usage
 
@@ -75,11 +77,13 @@ The acceptable fields for a BikeTagConfiguration object are outlined below:
 | `useCdn`        | [Sanity] `false` if you want to ensure fresh data                                                                                   |
 | `token`         | [Sanity] The sanity Access Token acquired via authorization (externally)                                                            |
 
+
 ### **⚠️ For brevity, the rest of the examples will leave out the import and/or instantiation step.**
+
 
 ### Get Tags
 
-You can upload one or more files by simply passing a path to a file or array of paths to multiple files.
+You can get tags one by one or all at once for a given game using the `getTag` and `getTags` methods:
 
 ```js
 // retrieves the latest BikeTag posted for the 'portland' game
@@ -90,7 +94,11 @@ const biketagPortland1 = await biketagAPI.getTag(1)
 
 // retrieves the all BikeTags for the 'portland' game
 const allPortlandTags = await biketagAPI.getTags()
+
+// retrieves the BikeTags for the first five tags for the 'portland' game
+const firstFivePortlandTags = await biketagAPI.getTags([1,2,3,4,5])
 ```
+
 
 ## Credits
 
@@ -105,6 +113,7 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
 [node-imgur]: https://github.com/kaimallea/node-imgur
 [sanity]: https://www.sanity.io/docs/api-versioning
 [imgur]: https://www.npmjs.com/package/imgur/v/next
+
 
 ## Vendors
 
