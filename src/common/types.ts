@@ -13,7 +13,7 @@ export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
 }
 
 export interface SanityAccessToken {
-  accessToken: string
+  token: string
 }
 
 export interface SanityClientId {
@@ -33,10 +33,11 @@ export interface Game {
   hash?: string
 }
 export interface AccessToken extends Game {
-  clientToken: string
+  accessToken: string
 }
 export interface ClientKey extends AccessToken {
   clientKey: string
+  clientToken: string
 }
 
 export type BikeTagCredentials = (ClientKey | AccessToken) & Game
