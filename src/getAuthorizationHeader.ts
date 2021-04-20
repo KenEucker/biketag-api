@@ -70,8 +70,8 @@ export async function getAuthorizationHeader(
       '"}'
   )
 
-  const clientToken = token.access_token
-  ;((client.config as unknown) as AccessToken).clientToken = clientToken
+  const accessToken = token.access_token
+  ;((client.config as unknown) as AccessToken).accessToken = accessToken
 
-  return `Bearer ${clientToken}`
+  return `Bearer ${accessToken}`
 }

@@ -6,3 +6,4 @@ src/coverage/
 dist
 _site/
 webpack.config.js
+*.md

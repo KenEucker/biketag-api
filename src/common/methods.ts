@@ -77,7 +77,7 @@ export function createForm(payload: string | Payload): FormData {
 }
 
 export function isAccessToken(arg: unknown): arg is AccessToken {
-  return (arg as AccessToken).clientToken !== undefined
+  return (arg as AccessToken).accessToken !== undefined
 }
 
 export function isClientKey(arg: unknown): arg is ClientKey {
@@ -85,7 +85,7 @@ export function isClientKey(arg: unknown): arg is ClientKey {
 }
 
 export function isSanityAccessToken(arg: unknown): arg is SanityAccessToken {
-  return (arg as SanityAccessToken).accessToken !== undefined
+  return (arg as SanityAccessToken).token !== undefined
 }
 
 export function isSanityClientId(arg: unknown): arg is SanityClientId {
@@ -111,16 +111,14 @@ export function isImgurCredentials(credentials: ImgurCredentials): boolean {
 }
 
 export function isSanityCredentials(credentials: SanityCredentials): boolean {
-  return !!(
-    credentials.projectId !== undefined && credentials.accessToken !== undefined
-  )
+  return !!(credentials.projectId !== undefined)
 }
 
 export function isBikeTagCredentials(
   credentials: BikeTagCredentials | Credentials
 ): boolean {
   return !!(
-    credentials.clientToken !== undefined &&
+    (credentials as ClientKey).clientToken !== undefined &&
     (credentials as ClientKey).clientKey !== undefined
   )
 }
@@ -158,7 +156,7 @@ export function assignSanityCredentials(
         projectId: credentials.projectId,
         useCdn: credentials.useCdn || true,
         dataset: credentials.dataset || 'development',
-        accessToken: credentials.accessToken || '',
+        token: credentials.token || '',
         password: credentials.password,
         username: credentials.username,
         apiVersion: credentials.apiVersion || '2021-03-25',

@@ -4,3 +4,4 @@ webpack.config.js
 src/imgurClient/index.js
 _site/
 dist
+*.md
