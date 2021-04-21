@@ -1,4 +1,11 @@
-# Hello, World!
+# Welcome to the BikeTag Api Developer Portal
+<p align="center">
+    <span>
+        <a href="/readme/">README</a>
+        <br>
+        Head on over to the readme to get information about how to start using the API in your own projects.
+    </span>
+</p>
 
 ## Check out these examples:
 

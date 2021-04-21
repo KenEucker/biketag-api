@@ -2,8 +2,6 @@
   "name": "biketag",
   "version": "1.2.1",
   "description": "The Javascript client API for BikeTag Games",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/keneucker/biketag-api.git"
@@ -12,6 +10,10 @@
   "license": "CC-BY-SA-4.0",
   "bugs": {
     "url": "https://github.com/keneucker/biketag-api/issues"
+  },
+  "funding": {
+    "type": "patreon",
+    "url": "https://www.patreon.com/biketag"
   },
   "homepage": "https://github.com/keneucker/biketag-api#readme",
   "scripts": {
@@ -22,8 +24,10 @@
     "test": "npx jest",
     "test:dev": "npx jest --silent=false",
     "test:ci": "npx jest --ci --coverage --runInBand",
-    "build": "npx tsc",
-    "compile": "npx webpack ",
+    "build:prod": "echo 'webpack handles the compilation process ✅'",
+    "compile": "npx webpack --mode development",
+    "compile:prod": "npx webpack --mode production && npm run expose",
+    "expose": "mv -v dist/* ./",
     "watch": "npx webpack --mode development --watch",
     "typecheck": "npx tsc --noEmit",
     "clean": "rm -rf lib dist _site",
@@ -51,6 +55,7 @@
     "@types/mock-fs": "^4.13.0",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
+    "clean-webpack-plugin": "*",
     "commitizen": "^4.2.3",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.24.0",
@@ -69,7 +74,8 @@
     "typeconv": "^1.4.1",
     "typescript": "^4.2.4",
     "webpack": "^5.33.2",
-    "webpack-cli": "^4.6.0"
+    "webpack-cli": "^4.6.0",
+    "webpack-node-externals": "^2.5.2"
   },
   "lint-staged": {
     "*.ts": [
@@ -87,5 +93,11 @@
     "extends": [
       "@commitlint/config-conventional"
     ]
-  }
+  },
+  "keywords": [
+    "typescript",
+    "sanity",
+    "imgur",
+    "biketag"
+  ]
 }

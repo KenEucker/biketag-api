@@ -52,7 +52,7 @@
         /***/ (module, __unused_webpack_exports, __webpack_require__) => {
           'use strict'
           /* provided dependency */ var process = __webpack_require__(
-            /*! process/browser */ './node_modules/process/browser.js'
+            /*! process/browser */ './node_modules/process/bundle.js'
           )
           /* provided dependency */ var console = __webpack_require__(
             /*! console-browserify */ './node_modules/console-browserify/index.js'
@@ -903,7 +903,7 @@
         /***/ (module, __unused_webpack_exports, __webpack_require__) => {
           'use strict'
           /* provided dependency */ var process = __webpack_require__(
-            /*! process/browser */ './node_modules/process/browser.js'
+            /*! process/browser */ './node_modules/process/bundle.js'
           )
           // Currently in sync with Node.js lib/internal/assert/assertion_error.js
           // https://github.com/nodejs/node/commit/0817840f775032169ddd70c85ac059f18ffcc81c
@@ -4020,7 +4020,7 @@
         /***/ (module, __unused_webpack_exports, __webpack_require__) => {
           'use strict'
           /* provided dependency */ var process = __webpack_require__(
-            /*! process/browser */ './node_modules/process/browser.js'
+            /*! process/browser */ './node_modules/process/bundle.js'
           )
 
           var utils = __webpack_require__(
@@ -5938,9 +5938,9 @@
           /***/
         },
 
-      /***/ './node_modules/form-data/lib/browser.js':
+      /***/ './node_modules/form-data/lib/bundle.js':
         /*!***********************************************!*\
-  !*** ./node_modules/form-data/lib/browser.js ***!
+  !*** ./node_modules/form-data/lib/bundle.js ***!
   \***********************************************/
         /***/ (module) => {
           /* eslint-env browser */
@@ -6591,9 +6591,9 @@
           /***/
         },
 
-      /***/ './node_modules/inherits/inherits_browser.js':
+      /***/ './node_modules/inherits/inherits_bundle.js':
         /*!***************************************************!*\
-  !*** ./node_modules/inherits/inherits_browser.js ***!
+  !*** ./node_modules/inherits/inherits_bundle.js ***!
   \***************************************************/
         /***/ (module) => {
           if (typeof Object.create === 'function') {
@@ -7262,9 +7262,9 @@
           /***/
         },
 
-      /***/ './node_modules/process/browser.js':
+      /***/ './node_modules/process/bundle.js':
         /*!*****************************************!*\
-  !*** ./node_modules/process/browser.js ***!
+  !*** ./node_modules/process/bundle.js ***!
   \*****************************************/
         /***/ (module) => {
           // shim for using process in browser
@@ -7862,7 +7862,7 @@
           )
           const form_data_1 = tslib_1.__importDefault(
             __webpack_require__(
-              /*! form-data */ './node_modules/form-data/lib/browser.js'
+              /*! form-data */ './node_modules/form-data/lib/bundle.js'
             )
           )
           function isBase64(payload) {
@@ -10364,9 +10364,9 @@ PERFORMANCE OF THIS SOFTWARE.
           /***/
         },
 
-      /***/ './node_modules/util/support/isBufferBrowser.js':
+      /***/ './node_modules/util/support/isBufferbundle.js':
         /*!******************************************************!*\
-  !*** ./node_modules/util/support/isBufferBrowser.js ***!
+  !*** ./node_modules/util/support/isBufferbundle.js ***!
   \******************************************************/
         /***/ (module) => {
           module.exports = function isBuffer(arg) {
@@ -10717,7 +10717,7 @@ PERFORMANCE OF THIS SOFTWARE.
   \***********************************/
         /***/ (__unused_webpack_module, exports, __webpack_require__) => {
           /* provided dependency */ var process = __webpack_require__(
-            /*! process/browser */ './node_modules/process/browser.js'
+            /*! process/browser */ './node_modules/process/bundle.js'
           )
           /* provided dependency */ var console = __webpack_require__(
             /*! console-browserify */ './node_modules/console-browserify/index.js'
@@ -11335,7 +11335,7 @@ PERFORMANCE OF THIS SOFTWARE.
           exports.isPrimitive = isPrimitive
 
           exports.isBuffer = __webpack_require__(
-            /*! ./support/isBuffer */ './node_modules/util/support/isBufferBrowser.js'
+            /*! ./support/isBuffer */ './node_modules/util/support/isBufferbundle.js'
           )
 
           function objectToString(o) {
@@ -11395,7 +11395,7 @@ PERFORMANCE OF THIS SOFTWARE.
            * @param {function} superCtor Constructor function to inherit prototype from.
            */
           exports.inherits = __webpack_require__(
-            /*! inherits */ './node_modules/inherits/inherits_browser.js'
+            /*! inherits */ './node_modules/inherits/inherits_bundle.js'
           )
 
           exports._extend = function (origin, add) {

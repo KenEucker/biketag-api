@@ -7,6 +7,10 @@
   <a href="https://github.com/keneucker/biketag-api/actions?query=workflow%3ATests+branch%3Anext">
     <img alt="Build states" src="https://github.com/keneucker/biketag-api/workflows/Tests/badge.svg">
   </a>
+  <br>
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/">
+    <img src='https://img.shields.io/github/license/KenEucker/biketag-api' alt='license'>
+  </a>
 </p>
 <p align="center">
   <a href="https://github.com/keneucker/biketag-api/discussions">
@@ -16,13 +20,45 @@
 
 
 ## Installation
+_This package is Typescript ready_
 
-```shell
+```bash
 npm install biketag
 ```
 
-Or find a specific versions to pin on [our npm page](https://www.npmjs.com/package/biketag/v/latest?activeTab=versions).
+## How to use it
 
+The library is a default export.
+
+### Browser
+
+To use it browser, you need to use the code from `bundle.js` file.
+
+```html
+<script src="path-to-local-library/bundle.js"></script>
+```
+
+If you have a toolchain available you can use an `import` statement.
+
+```ts
+import BikeTagClient from 'biketag/bundle';
+```
+
+```js
+const biketag = require('biketag/bundle');
+```
+
+_Because is a default export, here you can import it with what name you want_
+
+---
+
+### Node
+
+For `NodeJS` environment, just remove `browser`
+
+```ts
+import { BikeTagClient } from 'biketag';
+```
 
 ## Usage
 
