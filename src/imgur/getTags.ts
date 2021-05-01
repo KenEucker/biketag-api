@@ -49,7 +49,7 @@ export async function getTags(
       success = image.success && success
     }
     options.slugs.forEach(async (slug: string) =>
-      imagePromises.push(client.getImage(slug).then(addToArray))
+      imagePromises.push(client.getImage(slug).then(addToArray) as any)
     )
 
     return Promise.all(imagePromises).then((tags: TagData[]) => {
