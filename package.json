@@ -2,8 +2,6 @@
   "name": "biketag",
   "version": "1.2.1",
   "description": "The Javascript client API for BikeTag Games",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/keneucker/biketag-api.git"
@@ -13,63 +11,77 @@
   "bugs": {
     "url": "https://github.com/keneucker/biketag-api/issues"
   },
+  "funding": {
+    "type": "patreon",
+    "url": "https://www.patreon.com/biketag"
+  },
   "homepage": "https://github.com/keneucker/biketag-api#readme",
   "scripts": {
-    "dev": "npm-run-all --parallel watch serve",
-    "serve": "npx eleventy --serve",
-    "serve:prod": "npx eleventy --serve --port=80",
+    "dev": "npm run dev:browser",
+    "dev:node": "node examples/index.js",
+    "dev:browser": "npm-run-all --parallel watch serve",
+    "dev:both": "npm-run-all --parallel dev:node dev:browser",
+    "serve": "eleventy --serve",
+    "serve:prod": "eleventy --serve --port=80",
     "start": "npm run serve:prod",
-    "test": "npx jest",
-    "test:dev": "npx jest --silent=false",
-    "test:ci": "npx jest --ci --coverage --runInBand",
-    "build": "npx tsc",
-    "compile": "npx webpack ",
-    "watch": "npx webpack --mode development --watch",
-    "typecheck": "npx tsc --noEmit",
+    "test": "jest",
+    "test:dev": "jest --silent=false",
+    "test:ci": "jest --ci --coverage --runInBand",
+    "build": "tsc",
+    "build:prod": "echo 'webpack handles the compilation process ✅'",
+    "compile": "webpack --mode development",
+    "compile:prod": "webpack --mode production && npm run expose",
+    "expose": "mv -v dist/* ./",
+    "watch": "webpack --mode=development --watch --progress",
+    "typecheck": "tsc --noEmit",
     "clean": "rm -rf lib dist _site",
-    "prepare": "npx husky install",
-    "pretty": "prettier . --write ",
-    "pretty:check": "prettier . --check ",
-    "eslint": "npx eslint .",
-    "lint": "npm run pretty:check && npm run eslint && npm run typecheck && echo '🤖 !linter ✅ success! 🤖'",
-    "lint:write": "npx prettier . --write && npx eslint . --fix",
-    "commit": "npx cz",
-    "convert": "npx typeconv -f ts -t oapi -o openapi 'src/**/*.ts'"
+    "prepare": "husky install",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format:check": "prettier . --check ",
+    "lint": "npm run format:check && npm run lint:check && npm run typecheck && echo '🤖 !linter ✅ success! 🤖'",
+    "lint:check": "eslint .",
+    "lint:write": "prettier . --write && eslint . --fix",
+    "commit": "cz",
+    "convert": "typeconv -f ts -t oapi -o openapi 'src/**/*.ts'"
   },
   "dependencies": {
     "@sanity/client": "^2.8.0",
     "axios": "^0.21.1",
     "axios-cache-adapter": "^2.7.3",
     "form-data": "^4.0.0",
-    "tinycache": "^1.1.2"
+    "imgur": "^1.0.2",
+    "tinycache": "^1.1.2",
+    "util": "^0.12.3"
   },
   "devDependencies": {
     "@11ty/eleventy": "^0.12.1",
     "@commitlint/cli": "^12.1.1",
     "@commitlint/config-conventional": "^12.1.1",
-    "@types/jest": "^26.0.22",
+    "@types/jest": "^26.0.23",
     "@types/mock-fs": "^4.13.0",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
+    "clean-webpack-plugin": "^4.0.0-alpha.0",
     "commitizen": "^4.2.3",
     "cz-conventional-changelog": "^3.3.0",
-    "eslint": "^7.24.0",
-    "eslint-config-prettier": "^8.2.0",
+    "eslint": "^7.25.0",
+    "eslint-config-prettier": "^8.3.0",
     "husky": "^6.0.0",
     "jest": "^26.6.3",
     "lint-staged": "^10.5.4",
-    "mock-fs": "^4.13.0",
-    "msw": "^0.28.1",
+    "mock-fs": "^4.14.0",
+    "msw": "^0.28.2",
     "node-polyfill-webpack-plugin": "^1.1.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.2.1",
     "semantic-release": "^17.4.2",
     "ts-jest": "^26.5.5",
-    "ts-loader": "^8.1.0",
+    "ts-loader": "^9.1.1",
     "typeconv": "^1.4.1",
     "typescript": "^4.2.4",
     "webpack": "^5.33.2",
-    "webpack-cli": "^4.6.0"
+    "webpack-cli": "^4.6.0",
+    "webpack-node-externals": "^3.0.0"
   },
   "lint-staged": {
     "*.ts": [
@@ -87,5 +99,11 @@
     "extends": [
       "@commitlint/config-conventional"
     ]
-  }
+  },
+  "keywords": [
+    "typescript",
+    "sanity",
+    "imgur",
+    "biketag"
+  ]
 }
