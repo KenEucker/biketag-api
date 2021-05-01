@@ -40,7 +40,7 @@ export class BikeTagClient extends EventEmitter {
   private cachedFetcher: AxiosInstance
 
   private mostAvailableApi: 'imgur' | 'sanity' | 'biketag' | undefined
-  private imgurClient?: typeof ImgurClient
+  private imgurClient?: ImgurClient
   private sanityClient?: SanityClient
   private sanityConfig?: SanityConfig | undefined
   private imgurConfig?: ImgurCredentials | undefined
@@ -312,7 +312,7 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating a sanity client')
   }
 
-  images(options: any = {}): typeof ImgurClient {
+  images(options: any = {}): ImgurClient {
     if (isImgurCredentials(options)) {
       return new ImgurClient(options)
     }
