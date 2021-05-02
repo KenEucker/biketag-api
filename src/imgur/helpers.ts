@@ -9,7 +9,7 @@ import {
   constructTagNumberSlug,
 } from '../common/methods'
 
-export function getImagesByUploadDate(
+export function sortImgurImagesByUploadDate(
   images: any[] = [],
   newestFirst: boolean
 ): any[] {
@@ -207,7 +207,7 @@ export function getBikeTagNumberFromImage(image: any): number {
   return image.description ? getTagNumbersFromText(image.description)[0] : -1
 }
 
-export function getImagesByBikeTagNumber(images: any[] = []): any[] {
+export function sortImgurImagesByTagNumber(images: any[] = []): any[] {
   return images.sort((image1, image2) => {
     const tagNumber1 = getBikeTagNumberFromImage(image1)
     const tagNumber2 = getBikeTagNumberFromImage(image2)

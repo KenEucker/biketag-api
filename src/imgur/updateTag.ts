@@ -1,47 +1,119 @@
 // @ts-ignore
 import { ImgurClient } from './imgurClient'
-import { Payload, BikeTagApiResponse } from '../common/types'
+import { BikeTagApiResponse, TagData } from '../common/types'
+import {
+  getImgurFoundImageHashFromBikeTagData,
+  getImgurFoundDescriptionFromBikeTagData,
+  getImgurFoundTitleFromBikeTagData,
+  getImgurMysteryTitleFromBikeTagData,
+  getImgurMysteryDescriptionFromBikeTagData,
+  getImgurMysteryImageHashFromBikeTagData,
+} from '../common/methods'
 
-export interface UpdateTagPayload
-  extends Pick<Payload, 'title' | 'description'> {
+export interface ImgurUploadPayload {
   imageHash: string
+  imageTitle?: string
+  imageDescription?: string
+}
+export type UpdateTagPayload = Partial<TagData> & ImgurUploadPayload
+
+function isValidUpdatePayload(utp: UpdateTagPayload) {
+  return (
+    (typeof utp.imageHash === 'string' && typeof utp.imageTitle === 'string') ||
+    typeof utp.imageDescription === 'string'
+  )
 }
 
-// function isValidUpdatePayload(p: UpdateTagPayload) {
-//   return typeof p.title === 'string' || typeof p.description === 'string';
-// }
+export function getUpdateTagPayloadFromTagData(
+  tagData: TagData,
+  mystery = true
+): UpdateTagPayload {
+  return {
+    imageHash: mystery
+      ? getImgurMysteryImageHashFromBikeTagData(tagData)
+      : getImgurFoundImageHashFromBikeTagData(tagData),
+    imageTitle: mystery
+      ? getImgurMysteryImageHashFromBikeTagData(tagData)
+      : getImgurFoundImageHashFromBikeTagData(tagData),
+    imageDescription: mystery
+      ? getImgurMysteryImageHashFromBikeTagData(tagData)
+      : getImgurFoundImageHashFromBikeTagData(tagData),
+  }
+}
 
 export async function updateTag(
   client: ImgurClient,
   payload: UpdateTagPayload | UpdateTagPayload[]
-): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  // if (Array.isArray(payload)) {
-  //   const promises = payload.map((p: UpdateTagPayload) => {
-  //     if (!isValidUpdatePayload(p)) {
-  //       throw new Error('Update requires a title and/or description');
-  //     }
+): Promise<BikeTagApiResponse<string> | BikeTagApiResponse<string>[]> {
+  const success = false
+  const successMessage = 'all images have been updated successfully!'
 
-  //     const form = createForm(p);
-  //     return (client.request('url', {
-  //       method: 'POST',
-  //       body: form,
-  //       resolveBodyOnly: true,
-  //     }) as unknown) as Promise<BikeTagApiResponse<boolean>>;
-  //   });
+  const promises: Promise<BikeTagApiResponse<string>>[] = []
 
-  //   return await Promise.all(promises);
-  // }
+  const createUploadPromise = (utp): Promise<BikeTagApiResponse<string>> => {
+    const imgurMysteryImagePayload = getUpdateTagPayloadFromTagData(
+      utp as TagData
+    )
+    const imgurFoundImagePayload = getUpdateTagPayloadFromTagData(
+      utp as TagData,
+      false
+    )
 
-  // if (!isValidUpdatePayload(payload)) {
-  //   throw new Error('Update requires a title and/or description');
-  // }
+    return new Promise(async (resolve, reject) => {
+      let currentSuccess = false
 
-  // const form = createForm(payload);
-  // return ((await client.request('url', {
-  //   method: 'POST',
-  //   body: form,
-  //   resolveBodyOnly: true,
-  // })) as unknown) as BikeTagApiResponse<boolean>;
-  return ((await client.request({ url: payload, method: 'POST' }))
-    .data as unknown) as BikeTagApiResponse<boolean>
+      if (
+        isValidUpdatePayload(imgurMysteryImagePayload) &&
+        isValidUpdatePayload(imgurFoundImagePayload)
+      ) {
+        const mysteryImageUpdated = await client.updateImage({
+          imageHash: imgurMysteryImagePayload.imageHash,
+          title: imgurMysteryImagePayload.imageTitle,
+          description: imgurMysteryImagePayload.imageDescription,
+        })
+        const foundImageUpdated = await client.updateImage({
+          imageHash: imgurFoundImagePayload.imageHash,
+          title: imgurFoundImagePayload.imageTitle,
+          description: imgurFoundImagePayload.imageDescription,
+        })
+
+        currentSuccess =
+          success && mysteryImageUpdated.data && foundImageUpdated.data
+      } else {
+        reject('one update payload is invalid')
+      }
+
+      if (!currentSuccess) {
+        reject('one update of Imgur image failed')
+      }
+
+      resolve({
+        data: successMessage,
+        success: currentSuccess,
+        source: 'imgur',
+        status: 200,
+      })
+    })
+  }
+
+  if (Array.isArray(payload)) {
+    payload.map((p) => promises.push(createUploadPromise(p)))
+  } else if (isValidUpdatePayload(payload)) {
+    return createUploadPromise(payload)
+  } else {
+    throw new Error('Update requires a title and/or description')
+  }
+
+  return await Promise.all(promises)
+    .then((results) => {
+      return results
+    })
+    .catch((e) => {
+      return {
+        data: e.message,
+        success: false,
+        source: 'imgur',
+        status: 200,
+      }
+    })
 }

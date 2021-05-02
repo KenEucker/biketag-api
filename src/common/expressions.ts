@@ -23,3 +23,5 @@ export const getImageURLsFromTextRegex = new RegExp(
 export const getDiscussionUrlFromTextRegex = RegExp(/(?:hint:\s*?)([^)]*)/gi)
 
 export const getTagnumberFromSlugRegex = RegExp(/([^-]*)([^-]*)(\d)/g)
+
+export const getImgurImageHashFromUrl = RegExp(/imgur.com\/(.+)\./gi)
