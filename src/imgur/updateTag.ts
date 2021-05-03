@@ -8,7 +8,7 @@ import {
   getImgurMysteryTitleFromBikeTagData,
   getImgurMysteryDescriptionFromBikeTagData,
   getImgurMysteryImageHashFromBikeTagData,
-} from '../common/methods'
+} from '../common/getters'
 
 export interface ImgurUploadPayload {
   imageHash: string
@@ -25,19 +25,23 @@ function isValidUpdatePayload(utp: UpdateTagPayload) {
 }
 
 export function getUpdateTagPayloadFromTagData(
-  tagData: TagData,
+  tagData: UpdateTagPayload,
   mystery = true
 ): UpdateTagPayload {
+  if (isValidUpdatePayload(tagData)) {
+    return tagData
+  }
+
   return {
     imageHash: mystery
-      ? getImgurMysteryImageHashFromBikeTagData(tagData)
-      : getImgurFoundImageHashFromBikeTagData(tagData),
+      ? getImgurMysteryImageHashFromBikeTagData(tagData as TagData)
+      : getImgurFoundImageHashFromBikeTagData(tagData as TagData),
     imageTitle: mystery
-      ? getImgurMysteryImageHashFromBikeTagData(tagData)
-      : getImgurFoundImageHashFromBikeTagData(tagData),
+      ? getImgurMysteryTitleFromBikeTagData(tagData as TagData)
+      : getImgurFoundTitleFromBikeTagData(tagData as TagData),
     imageDescription: mystery
-      ? getImgurMysteryImageHashFromBikeTagData(tagData)
-      : getImgurFoundImageHashFromBikeTagData(tagData),
+      ? getImgurMysteryDescriptionFromBikeTagData(tagData as TagData)
+      : getImgurFoundDescriptionFromBikeTagData(tagData as TagData),
   }
 }
 
@@ -51,13 +55,8 @@ export async function updateTag(
   const promises: Promise<BikeTagApiResponse<string>>[] = []
 
   const createUploadPromise = (utp): Promise<BikeTagApiResponse<string>> => {
-    const imgurMysteryImagePayload = getUpdateTagPayloadFromTagData(
-      utp as TagData
-    )
-    const imgurFoundImagePayload = getUpdateTagPayloadFromTagData(
-      utp as TagData,
-      false
-    )
+    const imgurMysteryImagePayload = getUpdateTagPayloadFromTagData(utp)
+    const imgurFoundImagePayload = getUpdateTagPayloadFromTagData(utp, false)
 
     return new Promise(async (resolve, reject) => {
       let currentSuccess = false

@@ -1,5 +1,6 @@
 import * as expressions from '../common/expressions'
 import { TagData } from '../common/types'
+import { getCreditFromText, getImageHashFromText } from '../common/getters'
 import { cacheKeys } from '../common/data'
 
 import TinyCache from 'tinycache'
@@ -103,11 +104,16 @@ export function getDiscussionUrlFromText(
   fallback?: string,
   cache?: typeof TinyCache
 ) {
+  if (!inputText || !inputText.length) {
+    return fallback
+  }
+
   const cacheKey = `${cacheKeys.locationText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
   /// TODO: build out testers for all current games of BikeTag on Reddit
+  inputText.match(expressions.getDiscussionUrlFromTextRegex)
   const foundLocationText = expressions.getDiscussionUrlFromTextRegex.exec(
     inputText
   )
@@ -128,11 +134,15 @@ export function getFoundLocationFromText(
   fallback?: string,
   cache?: typeof TinyCache
 ): string {
+  if (!inputText || !inputText.length) {
+    return fallback
+  }
+
   const cacheKey = `${cacheKeys.locationText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
-  /// TODO: build out testers for all current games of BikeTag on Reddit
+  inputText.match(expressions.getFoundLocationFromTextRegex)
   const foundLocationText = expressions.getFoundLocationFromTextRegex.exec(
     inputText
   )
@@ -178,6 +188,10 @@ export function getGPSLocationFromText(
   fallback?: string | null,
   cache?: typeof TinyCache
 ): string | null {
+  if (!inputText || !inputText.length) {
+    return fallback
+  }
+
   const cacheKey = `${cacheKeys.gpsLocationText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
@@ -221,7 +235,7 @@ export function sortImgurImagesByTagNumber(images: any[] = []): any[] {
   })
 }
 
-export function getImageURLsFromText(
+export function getImgurLinksFromText(
   inputText: string,
   fallback?: string[] | null,
   cache?: typeof TinyCache
@@ -252,7 +266,7 @@ export function getImageURLsFromText(
   return tagImageURLs
 }
 
-export function getBikeTagFromImageSet(
+export function getBikeTagFromImgurImageSet(
   mysteryImage: any,
   foundImage?: any,
   opts?: any
@@ -260,12 +274,18 @@ export function getBikeTagFromImageSet(
   const game = opts?.game || ''
   const tagnumber = getTagNumbersFromText(mysteryImage.description)[0] as number
   const name = constructTagNumberSlug(tagnumber, game)
+
   const tagData: TagData = {
     tagnumber,
     name,
     slug: name,
     game,
-    discussionUrl: '',
+    discussionUrl: getDiscussionUrlFromText(mysteryImage.title),
+    foundLocation: getFoundLocationFromText(foundImage?.description),
+    player: getPlayerFromText(mysteryImage.description) as string,
+    hint: getHintFromText(mysteryImage.description) as string,
+    mysteryImageUrl: mysteryImage.link,
+    foundImageUrl: foundImage?.link,
     mysteryImage: '',
     foundImage: '',
     gps: {
@@ -273,12 +293,93 @@ export function getBikeTagFromImageSet(
       long: 0,
       alt: 0,
     },
-    foundLocation: getFoundLocationFromText(foundImage.description),
-    player: getPlayerFromText(mysteryImage.description) as string,
-    hint: getHintFromText(mysteryImage.description) as string,
-    mysteryImageUrl: mysteryImage.link,
-    foundImageUrl: foundImage.link,
   }
 
   return tagData
+}
+
+export const getBikeTagUsernameFromImgurImage = (
+  image: any,
+  cache?: typeof TinyCache
+): string => {
+  return getCreditFromText(image.description, undefined, cache)
+}
+
+export const getBikeTagDiscussionLinkFromImgurImage = (
+  image: any,
+  cache?: typeof TinyCache
+) => {
+  const tagTitle = image.title || ''
+  const tagDiscussionLinkIndex = tagTitle.indexOf('{')
+  let tagDiscussionLink = null
+  if (tagDiscussionLinkIndex !== -1) {
+    const tagDisscussionSplit = tagTitle ? tagTitle.split('{') : []
+    const tagDiscussionLinkLength = tagDisscussionSplit[1].indexOf('}')
+    tagDiscussionLink = tagDisscussionSplit[1]
+      .substr(0, tagDiscussionLinkLength)
+      .trim()
+  }
+
+  return tagDiscussionLink
+}
+
+export const getBikeTagNumberFromImgurImage = (
+  image: any,
+  cache?: typeof TinyCache
+): number => {
+  return image.description
+    ? getTagNumbersFromText(image.description, undefined, cache)[0]
+    : -1
+}
+
+export const getBikeTagNumberIndexFromImgurImages = (
+  images: any = [],
+  tagNumber = 1,
+  proof = false
+): number => {
+  const tagNumberIndex =
+    images.length + 1 - (tagNumber - (tagNumber % 2) + 1) * 2
+
+  const verifyTagNumber = function (index) {
+    if (!images[index] || !images[index].description) {
+      return false
+    }
+
+    let compare = `#${tagNumber} tag`
+    if (proof) {
+      compare = `#${tagNumber} proof`
+    }
+
+    return index > -1 && !!images[index]
+      ? images[index].description.indexOf(compare) !== -1
+      : false
+  }
+
+  if (verifyTagNumber(tagNumberIndex)) {
+    return tagNumberIndex
+  }
+  if (
+    tagNumberIndex < images.length + 1 &&
+    verifyTagNumber(tagNumberIndex + 1)
+  ) {
+    return tagNumberIndex + 1
+  }
+  if (tagNumberIndex > 0 && verifyTagNumber(tagNumberIndex - 1)) {
+    return tagNumberIndex - 1
+  }
+
+  for (let i = 0; i < images.length; ++i) {
+    if (verifyTagNumber(i)) {
+      return i
+    }
+  }
+
+  return -1
+}
+
+export const getImageHashFromImgurImage = (
+  image: any,
+  cache?: typeof TinyCache
+): string => {
+  return getImageHashFromText(image.link, cache)
 }

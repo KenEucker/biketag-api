@@ -20,8 +20,7 @@ export const getImageURLsFromTextRegex = new RegExp(
   /\b(https?:\/\/.*?\.[a-z]{2,4}\/[^\s)]*\b)/gi
 )
 
-export const getDiscussionUrlFromTextRegex = RegExp(/(?:hint:\s*?)([^)]*)/gi)
-
+export const getDiscussionUrlFromTextRegex = RegExp(/{(.*)}/gi)
+export const getGPSCoordinatesValueFromTextRegex = RegExp(/\((.*)\)/gi)
 export const getTagnumberFromSlugRegex = RegExp(/([^-]*)([^-]*)(\d)/g)
-
-export const getImgurImageHashFromUrl = RegExp(/imgur.com\/(.+)\./gi)
+export const getImgurImageHashFromUrlRegex = RegExp(/(?:imgur.com\/)(.*)(?:\.)/gi)

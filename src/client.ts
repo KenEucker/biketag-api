@@ -9,10 +9,13 @@ import {
   ImgurCredentials,
 } from './common/types'
 import { tagDataFields } from './common/data'
-import { getTagOptions, getTagsOptions } from './common/options'
+import {
+  getTagPayload,
+  getTagsPayload,
+  updateTagPayload,
+} from './common/payloads'
 import {
   constructTagNumberSlug,
-  getTagnumberFromSlug,
   assignBikeTagConfiguration,
   isImgurCredentials,
   isSanityCredentials,
@@ -20,6 +23,8 @@ import {
 } from './common/methods'
 import { setup } from 'axios-cache-adapter'
 
+import * as BikeTagExpressions from './common/expressions'
+import * as BikeTagGetters from './common/getters'
 import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
@@ -35,6 +40,9 @@ const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
 
 import { BikeTagCredentials, BikeTagConfiguration } from './common/types'
 export class BikeTagClient extends EventEmitter {
+  expressions: any = BikeTagExpressions
+  getters: any = BikeTagGetters
+
   private fetcher: AxiosInstance
   private plainFetcher: AxiosInstance
   private cachedFetcher: AxiosInstance
@@ -50,6 +58,7 @@ export class BikeTagClient extends EventEmitter {
     super()
 
     this.mostAvailableApi = undefined
+
     config = assignBikeTagConfiguration(config as BikeTagConfiguration)
 
     this.biketagConfig = (config as BikeTagConfiguration).biketag
@@ -130,7 +139,7 @@ export class BikeTagClient extends EventEmitter {
     /// Explicitely set the number if we happen to have the slug but not the tagnumber
     if (options.tagnumber === undefined) {
       if (options.slug !== 'latest') {
-        options.tagnumber = getTagnumberFromSlug(options.slug)
+        options.tagnumber = BikeTagGetters.getTagnumberFromSlug(options.slug)
         console.log({ options })
       }
     }
@@ -220,23 +229,25 @@ export class BikeTagClient extends EventEmitter {
   //   return getArchive(this, options)
   // }
 
-  getTag(opts: getTagOptions): Promise<BikeTagApiResponse<TagData>> {
-    const { client, options, api } = this.getDefaultAPI(opts)
+  getTag(payload: getTagPayload): Promise<BikeTagApiResponse<TagData>> {
+    const { client, options, api } = this.getDefaultAPI(payload)
 
     return api.getTag(client, options)
   }
 
-  getTags(opts: getTagsOptions): Promise<BikeTagApiResponse<TagData>> {
-    const { client, options, api } = this.getDefaultAPI(opts)
+  getTags(payload: getTagsPayload): Promise<BikeTagApiResponse<TagData>> {
+    const { client, options, api } = this.getDefaultAPI(payload)
 
     return api.getTags(client, options)
   }
 
-  // updateImage(
-  //   payload: UpdateImagePayload | UpdateImagePayload[]
-  // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  //   return updateImage(this, payload)
-  // }
+  updateTag(
+    payload: updateTagPayload | updateTagPayload[]
+  ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
+    const { client, options, api } = this.getDefaultAPI(payload)
+
+    return api.updateTag(client, options)
+  }
 
   // upload(
   //   payload: string | string[] | Payload | Payload[]

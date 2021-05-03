@@ -16,6 +16,7 @@ export const tagDataFields = [
 export const tagDataReferenceFields = ['game', 'player']
 
 export const cacheKeys = {
+  imageHashText: 'hash::',
   albumHash: `imgur::`,
   redditPosts: `reddit::`,
   bikeTagImage: `biketag::`,
@@ -23,6 +24,7 @@ export const cacheKeys = {
   hintText: `hint::`,
   creditText: `credit::`,
   locationText: `gps::`,
+  discussionText: `discussion::`,
   tagNumberText: `tag::`,
   imagesText: `images::`,
   gpsLocationText: `gps::`,

@@ -2,11 +2,11 @@ import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, TagData } from '../common/types'
 import { constructTagDataObject } from './helpers'
 import { tagDataReferenceFields } from '../common/data'
-import { getTagOptions } from '../common/options'
+import { getTagPayload } from '../common/payloads'
 
 export async function getTag(
   client: SanityClient,
-  options: getTagOptions
+  options: getTagPayload
 ): Promise<BikeTagApiResponse<TagData>> {
   if (!options) {
     throw new Error('no options')

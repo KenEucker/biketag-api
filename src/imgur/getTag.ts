@@ -1,7 +1,10 @@
 // @ts-ignore
 import { ImgurClient } from './imgurClient'
 import { BikeTagApiResponse, TagData } from '../common/types'
-import { getBikeTagNumberFromImage, getBikeTagFromImageSet } from './helpers'
+import {
+  getBikeTagNumberFromImage,
+  getBikeTagFromImgurImageSet,
+} from './helpers'
 
 export async function getTag(
   client: ImgurClient,
@@ -23,7 +26,7 @@ export async function getTag(
 
   const tagsData: TagData[] = []
   groupedImages.forEach((images) => {
-    tagsData.push(getBikeTagFromImageSet(images[0], images[1], options))
+    tagsData.push(getBikeTagFromImgurImageSet(images[0], images[1], options))
   })
 
   return {

@@ -28,18 +28,53 @@
         const tags = [tag1, tag2, tag3, tag4, tag5]
         console.log({ biketagAPI, tags })
 
-        let txt = '<table>'
-        tags.forEach((tag) => {
-          for (key in tag) {
-            txt += '<tr><td><strong>' + key + '</strong></td></tr>'
-            txt +=
-              '<tr><td>' +
-              (tag[key] ? tag[key].toString() : 'undefined') +
-              '</td></tr>'
+        const outputTagTable = (tags, id) => {
+          let txt = '<table>'
+
+          tags.forEach((tag) => {
+            for (key in tag) {
+              txt += '<tr><td><strong>' + key + '</strong></td></tr>'
+              txt +=
+                '<tr><td>' +
+                (tag[key] ? tag[key].toString() : 'undefined') +
+                '</td></tr>'
+            }
+          })
+          txt += '</table>'
+          document.getElementById(id).innerHTML = txt
+        }
+
+        const showImagesAndData = (tags, id) => {
+          const container = document.getElementById(id)
+
+          const appendTagImageAndData = (tag) => {
+            console.log({ tag })
+            const inner = document.createElement('div')
+
+            const img1 = document.createElement('img')
+            const img2 = document.createElement('img')
+
+            img1.src = tag.foundImageUrl
+            img1.width = '300'
+            img2.src = tag.mysteryImageUrl
+            img2.width = '300'
+
+            const dataDiv = document.createElement('div')
+            dataDiv.innerHTML = JSON.stringify(tag)
+
+            inner.appendChild(img1)
+            inner.appendChild(img2)
+            inner.appendChild(dataDiv)
+
+            return inner
           }
-        })
-        txt += '</table>'
-        document.getElementById('data').innerHTML = txt
+
+          tags.map((tag) =>
+            container.appendChild(appendTagImageAndData(tag.data))
+          )
+        }
+
+        showImagesAndData(tags, 'data')
       })()
     </script>
   </body>
