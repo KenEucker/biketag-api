@@ -13,25 +13,26 @@ import {
   BikeTagConfiguration,
 } from './types'
 import FormData from 'form-data'
-import { getTagnumberFromSlugRegex } from '../common/expressions'
 import TinyCache from 'tinycache'
-import { cacheKeys } from '../common/data'
 
-export function putCacheIfExists(
+export const putCacheIfExists = (
   key: string,
   value: any,
   cache?: typeof TinyCache
-) {
+) => {
   if (cache) cache.put(key, value)
 }
 
-export function getCacheIfExists(key: string, cache?: typeof TinyCache): any {
+export const getCacheIfExists = (
+  key: string,
+  cache?: typeof TinyCache
+): any => {
   if (cache) return cache.get(key)
 
   return null
 }
 
-export function isBase64(payload: string | Payload): boolean {
+export const isBase64 = (payload: string | Payload): boolean => {
   if (typeof payload === 'string') {
     return false
   }
@@ -39,7 +40,7 @@ export function isBase64(payload: string | Payload): boolean {
   return typeof payload.base64 !== 'undefined'
 }
 
-export function isImageUrl(payload: string | Payload): boolean {
+export const isImageUrl = (payload: string | Payload): boolean => {
   if (typeof payload === 'string') {
     return true
   }
@@ -47,7 +48,7 @@ export function isImageUrl(payload: string | Payload): boolean {
   return typeof payload.image !== 'undefined' && typeof payload === 'string'
 }
 
-export function isStream(payload: string | Payload): boolean {
+export const isStream = (payload: string | Payload): boolean => {
   if (typeof payload === 'string') {
     return false
   }
@@ -55,7 +56,7 @@ export function isStream(payload: string | Payload): boolean {
   return typeof payload.stream !== 'undefined'
 }
 
-export function createForm(payload: string | Payload): FormData {
+export const createForm = (payload: string | Payload): FormData => {
   const form = new FormData()
 
   if (typeof payload === 'string') {
@@ -76,56 +77,58 @@ export function createForm(payload: string | Payload): FormData {
   return form
 }
 
-export function isAccessToken(arg: unknown): arg is AccessToken {
+export const isAccessToken = (arg: unknown): arg is AccessToken => {
   return (arg as AccessToken).accessToken !== undefined
 }
 
-export function isClientKey(arg: unknown): arg is ClientKey {
+export const isClientKey = (arg: unknown): arg is ClientKey => {
   return (arg as ClientKey).clientKey !== undefined
 }
 
-export function isSanityAccessToken(arg: unknown): arg is SanityAccessToken {
+export const isSanityAccessToken = (arg: unknown): arg is SanityAccessToken => {
   return (arg as SanityAccessToken).token !== undefined
 }
 
-export function isSanityClientId(arg: unknown): arg is SanityClientId {
+export const isSanityClientId = (arg: unknown): arg is SanityClientId => {
   return (arg as SanityClientId).projectId !== undefined
 }
 
-export function isImgurAccessToken(arg: unknown): arg is ImgurAccessToken {
+export const isImgurAccessToken = (arg: unknown): arg is ImgurAccessToken => {
   return (arg as ImgurAccessToken).accessToken !== undefined
 }
 
-export function isImgurClientId(arg: unknown): arg is ImgurClientId {
+export const isImgurClientId = (arg: unknown): arg is ImgurClientId => {
   return (arg as ImgurClientId).clientId !== undefined
 }
 
-export function constructTagNumberSlug(number: number, game = ''): string {
+export const constructTagNumberSlug = (number: number, game = ''): string => {
   return `${game}-tag-${number}`
 }
 
-export function isImgurCredentials(credentials: ImgurCredentials): boolean {
+export const isImgurCredentials = (credentials: ImgurCredentials): boolean => {
   return !!(
     credentials.clientId !== undefined || credentials.clientSecret !== undefined
   )
 }
 
-export function isSanityCredentials(credentials: SanityCredentials): boolean {
+export const isSanityCredentials = (
+  credentials: SanityCredentials
+): boolean => {
   return !!(credentials.projectId !== undefined)
 }
 
-export function isBikeTagCredentials(
+export const isBikeTagCredentials = (
   credentials: BikeTagCredentials | Credentials
-): boolean {
+): boolean => {
   return !!(
     (credentials as ClientKey).clientToken !== undefined &&
     (credentials as ClientKey).clientKey !== undefined
   )
 }
 
-export function isBikeTagConfiguration(
+export const isBikeTagConfiguration = (
   credentials: BikeTagConfiguration
-): boolean {
+): boolean => {
   return (
     credentials.biketag !== undefined ||
     credentials.sanity !== undefined ||
@@ -133,22 +136,23 @@ export function isBikeTagConfiguration(
   )
 }
 
-export function assignImgurCredentials(
+export const assignImgurCredentials = (
   credentials: ImgurCredentials
-): ImgurCredentials {
+): ImgurCredentials => {
   const imgurCredentials = isImgurCredentials(credentials as ImgurCredentials)
     ? {
         clientId: credentials.clientId,
         clientSecret: credentials.clientSecret,
+        accessToken: credentials.accessToken,
       }
     : undefined
 
   return imgurCredentials as ImgurCredentials
 }
 
-export function assignSanityCredentials(
+export const assignSanityCredentials = (
   credentials: SanityCredentials
-): SanityCredentials {
+): SanityCredentials => {
   const sanityCredentials = isSanityCredentials(
     credentials as SanityCredentials
   )
@@ -166,9 +170,9 @@ export function assignSanityCredentials(
   return sanityCredentials as SanityCredentials
 }
 
-export function assignBikeTagCredentials(
+export const assignBikeTagCredentials = (
   credentials: Credentials
-): Credentials {
+): Credentials => {
   const biketagCredentials = isBikeTagCredentials(credentials as Credentials)
     ? credentials
     : ({
@@ -179,9 +183,9 @@ export function assignBikeTagCredentials(
   return biketagCredentials
 }
 
-export function assignBikeTagConfiguration(
+export const assignBikeTagConfiguration = (
   config: BikeTagConfiguration
-): BikeTagConfiguration {
+): BikeTagConfiguration => {
   const configuration: BikeTagConfiguration = {} as BikeTagConfiguration
 
   configuration.biketag = config.biketag
@@ -195,28 +199,4 @@ export function assignBikeTagConfiguration(
     : assignImgurCredentials((config as unknown) as Credentials)
 
   return configuration
-}
-
-export function getTagnumberFromSlug(
-  inputText: string,
-  fallback?: number,
-  cache?: typeof TinyCache
-): number {
-  const cacheKey = `${cacheKeys.slugText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
-  if (existingParsed) return existingParsed
-
-  /// bizarre hack, do not delete line below
-  inputText.match(getTagnumberFromSlugRegex)
-  const slugText = getTagnumberFromSlugRegex.exec(inputText)
-
-  if (!slugText) {
-    putCacheIfExists(cacheKey, fallback, cache)
-    return fallback as number
-  }
-
-  const slug = parseInt((slugText[0] || '').trim())
-  putCacheIfExists(cacheKey, slug, cache)
-
-  return slug
 }

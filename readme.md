@@ -35,17 +35,17 @@ The library is a default export.
 To use it browser, you need to use the code from `bundle.js` file.
 
 ```html
-<script src="path-to-local-library/bundle.js"></script>
+<script src="path-to-local-library/index.js"></script>
 ```
 
 If you have a toolchain available you can use an `import` statement.
 
 ```ts
-import BikeTagClient from 'biketag/bundle';
+import { BikeTagClient } from 'biketag';
 ```
 
 ```js
-const biketag = require('biketag/bundle');
+const biketag = require('biketag');
 ```
 
 _Because is a default export, here you can import it with what name you want_
@@ -94,6 +94,8 @@ client = new BikeTagClient({
 })
 ```
 
+### Configuration
+
 The acceptable fields for a BikeTagConfiguration object are outlined below:
 
 |     Key/Api     | Description                                                                                                                         |
@@ -134,6 +136,45 @@ const allPortlandTags = await biketagAPI.getTags()
 // retrieves the BikeTags for the first five tags for the 'portland' game
 const firstFivePortlandTags = await biketagAPI.getTags([1,2,3,4,5])
 ```
+
+
+### There are a series of getter methods, accessible by `biketagAPI.getters`. Their use is explained below: 
+
+|     method               | Description                                                                                                                                     |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `getTagnumberFromSlug`                        | parses a slug for a tag number based on existing BikeTag slugs. (uses `getTagnumberFromSlugRegex`)                         |
+| `getTagNumbersFromText`                       | parses text for tag numbers on existing BikeTag posts. (uses `getTagNumbersFromTextRegex`)                                 |
+| `getCreditFromText`                           | parses text for a player credit based on existing BikeTag posts. (uses `getCreditFromTextRegex`)                           |
+| `getFoundLocationFromText`                    | parses text for a found location based on existing BikeTag posts. (uses `getFoundLocationFromTextRegex`)                   |
+| `getHintFromText`                             | parses text for a hint based on existing BikeTag posts. (uses `getHintFromTextRegex`)                                      |
+| `getGPSLocationFromText`                      | parses text for GPS coordinates. (uses `getGPSLocationFromTextRegex`)                                                      |
+| `getImageURLsFromText`                        | parses text for URLs of known BikeTag image providers. (uses `getImageURLsFromTextRegex`)                                  |
+| `getDiscussionUrlFromText`                    | parses a url, or string, for a Reddit post link. (uses `getDiscussionUrlFromTextRegex`)                                    |
+| `getImageHashFromText`                        | parses a url, or string, for an Imgur url with an imageHash. (uses `getImgurImageHashFromUrlRegex`)                        |
+| `getImgurFoundImageHashFromBikeTagData`       | parses BikeTag Data for the found image Imgur hash.                                                                        |
+| `getImgurFoundDescriptionFromBikeTagData`     | constructs an Imgur image title from BikeTag data for the found image.                                                     |
+| `getImgurFoundTitleFromBikeTagData`           | constructs an Imgur image description from BikeTag data for the found image.                                               |
+| `getImgurMysteryImageHashFromBikeTagData`     | parses BikeTag Data for the mystery image Imgur hash.                                                                      |
+| `getImgurMysteryTitleFromBikeTagData`         | constructs an Imgur image title from BikeTag data for the mystery image.                                                   |
+| `getImgurMysteryDescriptionFromBikeTagData`   | constructs an Imgur image description from BikeTag data for the mystery image.                                             |
+
+
+
+### There are a series of regular expressions, accessible by `biketagAPI.expressions`. Their use is explained below: 
+
+|   expression                          | Description                                                                                                                         |
+| --------------------------------------| ----------------------------------------------------------------------------------------------------------------------------------- |
+| `getTagNumbersFromTextRegex`          | Searches a string for numbers associated with BikeTag posts.                                                                        |
+| `getCreditFromTextRegex`              | Searches a string for player credits associated with BikeTag posts.                                                                 |
+| `getFoundLocationFromTextRegex`       | Searches a string for "found at ()" and parses out the innards of that substring.                                                   |
+| `getHintFromTextRegex`                | Searches a string for "(hint: )" and parses out the innards of that substring.                                                      |
+| `getGPSLocationFromTextRegex`         | Searches a string for GPS coordinates in the format (lat,long,alt)                                                                  |
+| `getImageURLsFromTextRegex`           | Searches a string for an Imgur.com image url                                                                                        |
+| `getDiscussionUrlFromTextRegex`       | Searches a string for a URL within `{}` brackets                                                                                    |
+| `getGPSCoordinatesValueFromTextRegex` | Searches a string for GPS coordinates within `()` brackets                                                                          |
+| `getTagnumberFromSlugRegex`           | Parses out the number from a BikeTag slug.                                                                                          |
+| `getImgurImageHashFromUrlRegex`       | Parses out the Imgur image hash from an Imgur image url                                                                             |
+
 
 
 ## Credits

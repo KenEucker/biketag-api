@@ -2,47 +2,618 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta charset="utf-8" />
-    <title>BikeTag API test</title>
+    <title>BikeTag API test (imgur)</title>
+
     <script type="text/javascript" src="/dist/bundle.js"></script>
+    <script type="text/javascript" src="../static/main.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css"
+      integrity="sha512-EZLkOqwILORob+p0BXZc+Vm3RgJBOe1Iq/0fiI7r/wJgzOFZMlsqTa29UEl6v6U6gsV4uIpsNZoV32YZqrCRCQ=="
+      crossorigin="anonymous"
+    />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        max-width: 1170px;
+        margin: 3rem auto;
+        background-color: #101010;
+        color: #fff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      h1 {
+        margin-bottom: 3rem;
+      }
+
+      @media (min-width: 580px) {
+        .images {
+          grid-template-columns: 25% 25% 25% 25%;
+        }
+      }
+      img {
+        height: auto;
+        width: 100%;
+        max-width: 100%;
+        vertical-align: middle;
+      }
+      .template {
+        transition: all 0.8s cubic-bezier(0.455, 0.03, 0.515, 0.955);
+        opacity: 0;
+        position: relative;
+        background: #707070;
+      }
+
+      .template p {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        color: #fff;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 1px;
+        margin: 0;
+        width: 100%;
+        background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5));
+        padding: 25px 10px 10px 10px;
+      }
+
+      .template.animate {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      #gallery-pagination {
+        margin: 30px 0;
+      }
+
+      #btnNext,
+      #btnPrevious {
+        background: transparent;
+        color: #609ea5;
+        padding: 8px 28px;
+        border: 0;
+        font-size: 18px;
+        cursor: pointer;
+        outline: none;
+      }
+
+      #gallery-pagination #page {
+        margin-left: 15px;
+        margin-right: 15px;
+        color: #707070;
+        font-style: italic;
+        font-size: 13px;
+      }
+
+      .sr-only {
+        position: absolute !important;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        height: 1px;
+        width: 1px;
+        margin: -1px;
+        padding: 0;
+        border: 0;
+      }
+
+      #gallery-dots {
+        margin-bottom: 15px;
+      }
+
+      .gallery-dot {
+        background: #609ea5;
+        border: 0;
+        padding: 0;
+        width: 50px;
+        height: 8px;
+        margin: 5px;
+        opacity: 0.4;
+        outline: none;
+        cursor: pointer;
+      }
+
+      .gallery-dot.active {
+        opacity: 1;
+      }
+
+      #gallery-pagination {
+        display: grid;
+        grid-template-columns: 1fr 3fr 1fr;
+        align-items: start;
+      }
+
+      /* style for demo purposes   */
+      * {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .modal-content-wrapper .image-modal-content {
+        cursor: pointer;
+        transition: 300ms ease-out;
+      }
+      @media (max-width: 992px) {
+        .modal-content-wrapper .image-modal-content {
+          flex: 0 0 45%;
+        }
+      }
+      @media (max-width: 550px) {
+        .modal-content-wrapper .image-modal-content {
+          flex: 0 0 100%;
+        }
+      }
+      .modal-content-wrapper .image-modal-content:hover {
+        transform: scale(1.03);
+        transition: 300ms ease-in;
+      }
+
+      /* modal popup styles */
+      .image-modal-popup {
+        position: fixed;
+        overflow: auto;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        animation: 500ms fadeIn;
+        z-index: 1;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .image-modal-popup .wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 1200px;
+        margin: auto;
+        margin-top: 30px;
+        position: relative;
+        z-index: 10;
+      }
+
+      .image-modal-popup .description {
+        text-align: center;
+      }
+
+      .image-modal-popup img {
+        width: 80%;
+        max-height: calc(100vh - 150px);
+        margin-bottom: 10px;
+        cursor: pointer;
+      }
+      .image-modal-popup .close-button {
+        position: absolute;
+        top: 0;
+        right: 10px;
+        font-size: 4rem;
+        color: red;
+        cursor: pointer;
+      }
+      .image-modal-popup p {
+        margin: 5px auto;
+        font-size: 1.1rem;
+      }
+      .template span {
+        position: absolute;
+        left: 25%;
+        right: 25%;
+        top: 25%;
+      }
+
+      .image-modal-popup .editor {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 100;
+        flex-flow: wrap;
+      }
+      .image-modal-popup .editor > * {
+        z-index: 1000;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
-    <div id="data"></div>
+    <div class="container modal-content-wrapper">
+      <div class="container gallery image-modal-content">
+        <header class="row">
+          <h1>Imgur Album</h1>
+        </header>
+        <main id="image-gallery" class="images row"></main>
+        <footer id="gallery-pagination" class="row">
+          <button id="btnPrevious">
+            &larr; <span class="sr-only">Previous</span>
+          </button>
+          <div>
+            <div id="gallery-dots"></div>
+            <span id="page-indicator"></span>
+          </div>
+          <button id="btnNext"><span class="sr-only">Next </span>&rarr;</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- modal popup (displayed none by default) -->
+    <div class="image-modal-popup hidden">
+      <div class="wrapper">
+        <span class="close-button">&times;</span>
+        <img src="" alt="Image Modal" />
+        <div class="description">
+          <h1>This is placeholder content</h1>
+          <p>This content will be overwritten when the modal opens</p>
+          <a
+            href="#"
+            class="primary-link button button-secondary"
+            target="_blank"
+            rel="noopener noreferrer"
+            >View BikeTag</a
+          >
+
+          <a
+            href="#"
+            class="secondary-link button button-secondary"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Discussion</a
+          >
+          <button class="edit-button button-primary">Edit</button>
+        </div>
+        <div class="row editor hidden">
+          <label>Editing Tag #<span class="edit-tagnumber"></span></label>
+          <input type="text" class="title-input u-full-width column" />
+          <input type="text" class="description-input u-full-width column" />
+          <input type="text" hidden="true" class="slug-input hidden" />
+          <input type="text" hidden="true" class="hash-input hidden" />
+          <input type="text" hidden="true" class="index-input hidden" />
+          <button
+            type="submit"
+            class="submit-button button-primary u-full-width column"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
-      ;(async () => {
-        const biketagAPI = biketag({
-          // accessToken: '96cd9fd2e2df631a0eb5e9730b4ede091e59a8b2',
-          game: 'portland',
-          hash: 'Y9PKtpI',
-          clientId: '4fa12c6ce36984b',
-          clientSecret: '14dd920076de25884a1b900341022a84d78076bf',
-        })
+      /**
+       * Get the URL parameters
+       * source: https://css-tricks.com/snippets/javascript/get-url-variables/
+       * @param  {String} url The URL
+       * @return {Object}     The URL parameters
+       */
+      const getParams = (url) => {
+        var params = {}
+        var parser = document.createElement('a')
+        parser.href = url
+        var query = parser.search.substring(1)
+        var vars = query.split('&')
+        for (var i = 0; i < vars.length; i++) {
+          var pair = vars[i].split('=')
+          params[pair[0]] = decodeURIComponent(pair[1])
+        }
+        return params
+      }
 
-        console.log('BikeTag Config', biketagAPI.getConfiguration())
+      const renderImageGallery = (canEdit, biketagAPI) => {
+        const perPage = 8
+        let page = 1
+        let pages = Math.ceil(window.biketags.length / perPage)
 
-        // const tag5 = await biketagAPI.getTag({tagnumber: 3, fields: ["slug"]})
-        // const tag4 = await biketagAPI.getTag({tagnumber: 3})
-        const tag3 = await biketagAPI.getTag({ slug: 'portland-tag-3' })
-        const tag2 = await biketagAPI.getTag(2)
-        const tag1 = await biketagAPI.getTag('portland-tag-2')
-        const albumTags = await biketagAPI.getTags({
-          hash: 'Y9PKtpI',
-          tagnumbers: [100, 200],
-        })
-        const tags = [tag3, tag2, tag1]
-        console.log({ biketagAPI, tags, albumTags })
+        // dynamically selects all elements inside modal popup
+        const modalElement = (element) =>
+          document.querySelector(`.image-modal-popup ${element}`)
+        const body = document.querySelector('body')
 
-        let txt = '<table>'
-        tags.forEach((tag) => {
-          for (key in tag) {
-            txt += '<tr><td><strong>' + key + '</strong></td></tr>'
-            txt +=
-              '<tr><td>' +
-              (tag[key] ? tag[key].toString() : 'undefined') +
-              '</td></tr>'
+        const renderGalleryControls = () => {
+          const galleryDots = document.getElementById('gallery-dots')
+          const previous = document.getElementById('btnPrevious')
+          const next = document.getElementById('btnNext')
+
+          // Gallery dots
+          for (var i = 0; i < pages; i++) {
+            const dot = document.createElement('button')
+            const dotSpan = document.createElement('span')
+            const dotNumber = document.createTextNode(i + 1)
+            dot.classList.add('gallery-dot')
+            dot.setAttribute('data-index', i)
+            dotSpan.classList.add('sr-only')
+
+            dotSpan.appendChild(dotNumber)
+            dot.appendChild(dotSpan)
+
+            dot.addEventListener('click', function (e) {
+              var self = e.target
+              goToPage(self.getAttribute('data-index'))
+            })
+
+            galleryDots.appendChild(dot)
           }
+
+          // Previous Button
+          previous.addEventListener('click', function () {
+            if (page === 1) {
+              page = 1
+            } else {
+              page--
+              renderGalleryImages()
+            }
+          })
+
+          // Next Button
+          next.addEventListener('click', function () {
+            if (page < pages) {
+              page++
+              renderGalleryImages()
+            }
+          })
+        }
+
+        function goToPage(index) {
+          index = parseInt(index)
+          page = index + 1
+
+          renderGalleryImages()
+        }
+
+        const showHideEditor = () => {
+          modalElement('.description').classList.toggle('hidden')
+          modalElement('.editor').classList.toggle('hidden')
+        }
+
+        const hideModal = () => {
+          body.style.overflow = 'auto'
+          const modalPopup = document.querySelector('.image-modal-popup')
+
+          modalPopup.classList.add('hidden')
+          modalElement('.description').classList.remove('hidden')
+          modalElement('.editor').classList.add('hidden')
+        }
+
+        const attachClickEventsToPopup = () => {
+          const modalWrapper = modalElement('.wrapper')
+
+          // closes modal on clicking anywhere and adds overflow back
+          document.addEventListener('click', (e) => {
+            if (
+              !modalWrapper.contains(e.target) &&
+              !modalWrapper.classList.contains('hidden')
+            ) {
+              e.stopPropagation()
+              hideModal()
+            }
+          })
+          document.addEventListener('keyup', (e) => {
+            if (e.keyCode === 27) {
+              hideModal()
+            }
+          })
+          modalElement('.edit-button').addEventListener('click', (ev) => {
+            ev.stopPropagation()
+            showHideEditor()
+          })
+          modalElement('.submit-button').addEventListener('click', (ev) => {
+            ev.stopPropagation()
+
+            const title = modalElement('.title-input').value
+            const description = modalElement('.description-input').value
+            const slug = modalElement('.slug-input').value
+            const hash = modalElement('.hash-input').value
+            const index = parseInt(modalElement('.index-input').value)
+
+            if (window.biketags[index]) {
+              // && window.biketags[index].slug === slug) {
+              window.biketags[index].imageHash = hash
+              window.biketags[index].imageTitle = title
+              window.biketags[index].imageDescription = description
+            }
+
+            // console.log({set: window.biketags[index], title, description, index, slug, hash})
+
+            biketagAPI.updateTag(window.biketags[index])
+
+            setTimeout(() => {
+              hideModal()
+              renderGalleryImages()
+            }, 300)
+          })
+
+          modalElement('.close-button').addEventListener('click', (ev) => {
+            ev.stopPropagation()
+            hideModal()
+          })
+        }
+
+        const attachClickEventsToImages = () => {
+          // all images inside the image modal content class
+          const lightboxImages = document.querySelectorAll(
+            '.image-modal-content img'
+          )
+
+          const modalPopup = document.querySelector('.image-modal-popup')
+
+          // loops over each modal content img and adds click event functionality
+          lightboxImages.forEach((img, i) => {
+            const data = img.dataset
+            img.addEventListener('click', (e) => {
+              e.stopPropagation()
+
+              body.style.overflow = 'hidden'
+              modalPopup.classList.toggle('hidden')
+              modalElement('h1').innerHTML = data.description
+              modalElement('p').innerHTML = data.subtitle
+              modalElement('.edit-tagnumber').innerText = data.tagnumber
+              modalElement('.primary-link').href = data.url
+              modalElement('img').src = data.src
+
+              if (data.reddit) {
+                modalElement('.secondary-link').href = data.reddit
+              } else {
+                modalElement('.secondary-link').classList.toggle('hidden')
+              }
+
+              if (canEdit) {
+                modalElement('.title-input').value = data.title
+                modalElement('.description-input').value = data.description
+                modalElement('.slug-input').value = data.slug
+                modalElement('.hash-input').value = data.hash
+                modalElement('.index-input').value = i + (page - 1) * perPage
+              } else {
+                modalElement('.edit-button').classList.add('hidden')
+              }
+            })
+          })
+        }
+
+        const renderGalleryImages = () => {
+          const gallery = document.getElementById('image-gallery')
+          const pageIndicator = document.getElementById('page-indicator')
+
+          while (gallery.firstChild) gallery.removeChild(gallery.firstChild)
+
+          var offset = (page - 1) * perPage
+
+          // if (offset === 0) return
+
+          const dots = document.querySelectorAll('.gallery-dot')
+
+          for (var i = 0; i < dots.length; i++) {
+            dots[i].classList.remove('active')
+          }
+
+          dots[page - 1].classList.add('active')
+
+          for (var i = offset; i < offset + perPage; i++) {
+            if (window.biketags[i]) {
+              const biketag = window.biketags[i]
+              const imageTitle = biketag.imageTitle
+                ? biketag.imageTitle
+                : biketagAPI.getters.getImgurMysteryTitleFromBikeTagData(
+                    biketag
+                  )
+              const imageDescription = biketag.imageDescription
+                ? biketag.imageDescription
+                : biketagAPI.getters.getImgurMysteryDescriptionFromBikeTagData(
+                    biketag
+                  )
+              const imageHash = biketagAPI.getters.getImageHashFromText(
+                biketag.mysteryImageUrl
+              )
+              const imageUrlFull = biketag.mysteryImageUrl
+              const imageUrlMedium = imageUrlFull.replace(
+                imageHash,
+                `${imageHash}m`
+              )
+              const imageUrlSmall = imageUrlFull.replace(
+                imageHash,
+                `${imageHash}s`
+              )
+              const imageTagNumber = biketag.tagnumber
+              const redditLink = biketag.discussionLink
+              const bikeTagLink = `/${imageTagNumber}`
+              const bikeTagSlug = biketag.slug
+
+              const template = document.createElement('div')
+              const tagnumber = document.createElement('span')
+              const title = document.createElement('p')
+              const img = document.createElement('img')
+
+              template.classList.add('template')
+              template.classList.add('four')
+              template.classList.add('columns')
+
+              console.log({ biketag, imageHash })
+
+              img.setAttribute('src', imageUrlMedium)
+              img.setAttribute('data-src', imageUrlFull)
+              img.setAttribute('alt', imageDescription)
+              img.setAttribute('data-title', imageTitle)
+              img.setAttribute('data-description', imageDescription)
+              img.setAttribute('data-tagnumber', imageTagNumber)
+              img.setAttribute('data-subtitle', `Tag #${imageTagNumber}`)
+              img.setAttribute('data-url', bikeTagLink)
+              img.setAttribute('data-slug', bikeTagSlug)
+              img.setAttribute('data-hash', imageHash)
+
+              tagnumber.innerHTML = imageTagNumber
+              if (!!redditLink) img.setAttribute('data-reddit', redditLink)
+
+              template.appendChild(img)
+              template.appendChild(tagnumber)
+              gallery.appendChild(template)
+            }
+          }
+
+          // Animate images
+          var galleryItems = document.querySelectorAll('.template')
+          for (var i = 0; i < galleryItems.length; i++) {
+            var onAnimateItemIn = animateItemIn(i)
+            setTimeout(onAnimateItemIn, i * 100)
+          }
+
+          function animateItemIn(i) {
+            var item = galleryItems[i]
+            return function () {
+              item.classList.add('animate')
+            }
+          }
+
+          // Update page indicator
+          pageIndicator.textContent = 'Page ' + page + ' of ' + pages
+          attachClickEventsToImages()
+        }
+
+        renderGalleryControls()
+        renderGalleryImages()
+        attachClickEventsToPopup()
+      }
+
+      ;(async () => {
+        const urlParams = getParams(window.location.href)
+        const hash = urlParams.hash ? urlParams.hash : 'QjnikOm'
+
+        const biketagAPI = biketag({
+          accessToken: urlParams.accessToken ? urlParams.accessToken : null,
+          game: urlParams.game ? urlParams.game : 'test',
+          hash,
+          clientId: urlParams.clientId ? urlParams.clientId : '4fa12c6ce36984b',
+          clientSecret: urlParams.clientSecret
+            ? urlParams.clientSecret
+            : '14dd920076de25884a1b900341022a84d78076bf',
         })
-        txt += '</table>'
-        document.getElementById('data').innerHTML = txt
+
+        const albumTagsData = await biketagAPI.getTags({
+          hash,
+        })
+        const biketags = albumTagsData?.data || []
+        window.biketags = biketags
+
+        console.log('BikeTag Initialized', {
+          config: biketagAPI.getConfiguration(),
+          biketags,
+        })
+
+        renderImageGallery(true, biketagAPI)
       })()
     </script>
   </body>

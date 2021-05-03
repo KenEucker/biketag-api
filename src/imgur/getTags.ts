@@ -1,16 +1,31 @@
 // @ts-ignore
 import { ImgurClient } from './imgurClient'
 import { BikeTagApiResponse, TagData } from '../common/types'
-import { getBikeTagNumberFromImage, getBikeTagFromImageSet } from './helpers'
+import {
+  getBikeTagNumberFromImage,
+  getBikeTagFromImgurImageSet,
+} from './helpers'
 
 export async function getTags(
   client: ImgurClient,
   options: any
 ): Promise<BikeTagApiResponse<TagData[]>> {
-  /// TODO: Get the tag image hash for Reddit from the tagnumber provided
-  /// TODO: Get the images associated with the tagnumber
-  /// TODO: Implement data translation for Imgur image to TagData
-  /// TODO: Wrap the response in a BikeTagApiResponse
+  const tagsData: TagData[] = []
+  let images: any[] = []
+
+  const getGroupedImages = (ungroupedImages) => {
+    const groupedImages: any[] = []
+
+    ungroupedImages.forEach((image: any) => {
+      const tagnumber = getBikeTagNumberFromImage(image)
+      groupedImages[tagnumber] = groupedImages[tagnumber]
+        ? groupedImages[tagnumber]
+        : []
+      groupedImages[tagnumber].push(image)
+    })
+
+    return groupedImages
+  }
 
   if (options.tagnumbers?.length && options.hash) {
     const albumInfo = await (client.getAlbum(options.hash) as any)
@@ -18,55 +33,38 @@ export async function getTags(
       (image: any) =>
         options.tagnumbers.indexOf(getBikeTagNumberFromImage(image)) !== -1
     )
-    const groupedImages: any[] = []
-    imagesData.forEach((image: any) => {
-      const tagnumber = getBikeTagNumberFromImage(image)
-      groupedImages[tagnumber] = groupedImages[tagnumber]
-        ? groupedImages[tagnumber]
-        : []
-      groupedImages[tagnumber].push(image)
-    })
-    const tagsData: TagData[] = []
-    groupedImages.forEach((images) => {
-      const tagData = getBikeTagFromImageSet(images[0], images[1], options)
-      tagsData.push(tagData)
-    })
-
-    return {
-      data: tagsData,
-      success: true,
-      source: 'imgur',
-      status: 200,
-    } as BikeTagApiResponse<TagData[]>
-  }
-
-  if (options.slugs?.length) {
-    const tagsArray: TagData[] = []
+    images = getGroupedImages(imagesData)
+  } else if (options.slugs?.length) {
+    const imagesData: TagData[] = []
     const imagePromises: Promise<TagData>[] = []
     let success = true
     const addToArray = (image: any) => {
-      if (image?.data) tagsArray.push(image.data)
+      if (image?.data) imagesData.push(image.data)
       success = image.success && success
     }
     options.slugs.forEach(async (slug: string) =>
       imagePromises.push(client.getImage(slug).then(addToArray) as any)
     )
 
-    return Promise.all(imagePromises).then((tags: TagData[]) => {
-      return {
-        data: tags,
-        success,
-        source: 'imgur',
-        status: 200,
-      } as BikeTagApiResponse<TagData[]>
+    await Promise.all(imagePromises).then((allImages: any[]) => {
+      images = getGroupedImages(allImages)
     })
+  } else if (options.hash) {
+    const albumInfo = await client.getAlbum(options.hash)
+    const albumImages = albumInfo?.data?.images || []
+
+    images = getGroupedImages(albumImages)
   }
 
-  if (options.hash) {
-    return (await (client.getAlbum(options.hash) as any)) as BikeTagApiResponse<
-      TagData[]
-    >
-  }
+  images.forEach((images) => {
+    const tagData = getBikeTagFromImgurImageSet(images[0], images[1], options)
+    tagsData.push(tagData)
+  })
 
-  throw new Error('no method of retrieving tags provided')
+  return {
+    data: tagsData,
+    success: true,
+    source: 'imgur',
+    status: 200,
+  }
 }
