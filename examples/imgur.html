@@ -494,7 +494,7 @@
           var offset = (page - 1) * perPage
 
           // if (offset === 0) return
-          
+
           const dots = document.querySelectorAll('.gallery-dot')
 
           for (var i = 0; i < dots.length; i++) {
@@ -542,7 +542,7 @@
               template.classList.add('four')
               template.classList.add('columns')
 
-              console.log({biketag, imageHash})
+              console.log({ biketag, imageHash })
 
               img.setAttribute('src', imageUrlMedium)
               img.setAttribute('data-src', imageUrlFull)
@@ -596,9 +596,7 @@
           accessToken: urlParams.accessToken ? urlParams.accessToken : null,
           game: urlParams.game ? urlParams.game : 'test',
           hash,
-          clientId: urlParams.clientId
-            ? urlParams.clientId
-            : '4fa12c6ce36984b',
+          clientId: urlParams.clientId ? urlParams.clientId : '4fa12c6ce36984b',
           clientSecret: urlParams.clientSecret
             ? urlParams.clientSecret
             : '14dd920076de25884a1b900341022a84d78076bf',
