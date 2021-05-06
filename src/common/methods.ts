@@ -143,7 +143,7 @@ export const assignImgurCredentials = (
     ? {
         clientId: credentials.clientId,
         clientSecret: credentials.clientSecret,
-        accessToken: credentials.accessToken,
+        accessToken: credentials.accessToken || undefined,
       }
     : undefined
 
