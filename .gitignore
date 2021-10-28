@@ -3,3 +3,7 @@ lib
 _site
 dist
 *.DS_Store
+/biketag.js
+/biketag.js.LICENSE.txt
+/biketag.node.js
+/biketag.node.js.LICENSE.txt

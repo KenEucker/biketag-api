@@ -1,4 +1,4 @@
-// const BikeTagClient = require('../dist/index.js')
+// const BikeTagClient = require('../dist/biketag.node.js')
 
 // console.log({ BikeTagClient })
 // const opts = { game: 'portland' }

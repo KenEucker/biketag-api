@@ -2,6 +2,8 @@
   "name": "biketag",
   "version": "1.2.1",
   "description": "The Javascript client API for BikeTag Games",
+  "main": "./biketag.node.js",
+  "browser": "./biketag.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/keneucker/biketag-api.git"
