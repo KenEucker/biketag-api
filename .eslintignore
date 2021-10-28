@@ -3,5 +3,6 @@ src/coverage/
 webpack.config.js
 src/imgurClient/index.js
 _site/
+examples
 dist
 *.md
