@@ -1,5 +1,4 @@
-// @ts-ignore
-import { ImgurClient } from './imgurClient'
+import type { ImgurClient, ImgurApiResponse } from 'imgur'
 import { BikeTagApiResponse, TagData } from '../common/types'
 import {
   getImgurFoundImageHashFromBikeTagData,
@@ -69,12 +68,12 @@ export async function updateTag(
           imageHash: imgurMysteryImagePayload.imageHash,
           title: imgurMysteryImagePayload.imageTitle,
           description: imgurMysteryImagePayload.imageDescription,
-        })
+        }) as ImgurApiResponse<boolean>;
         const foundImageUpdated = await client.updateImage({
           imageHash: imgurFoundImagePayload.imageHash,
           title: imgurFoundImagePayload.imageTitle,
           description: imgurFoundImagePayload.imageDescription,
-        })
+        }) as ImgurApiResponse<boolean>;
 
         currentSuccess =
           success && mysteryImageUpdated.data && foundImageUpdated.data

@@ -29,8 +29,7 @@ import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 
-// @ts-ignore
-import ImgurClient from './imgurClient'
+import ImgurClient from 'imgur'
 import sanityClient, {
   SanityClient,
   ClientConfig as SanityConfig,

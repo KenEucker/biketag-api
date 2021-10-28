@@ -51,7 +51,7 @@
     "axios": "^0.21.1",
     "axios-cache-adapter": "^2.7.3",
     "form-data": "^4.0.0",
-    "imgur": "^1.0.2",
+    "imgur": "keneucker/node-imgur#release",
     "tinycache": "^1.1.2",
     "util": "^0.12.3"
   },

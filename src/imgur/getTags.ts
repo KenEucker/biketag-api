@@ -1,5 +1,4 @@
-// @ts-ignore
-import { ImgurClient } from './imgurClient'
+import type { ImgurClient } from 'imgur'
 import { BikeTagApiResponse, TagData } from '../common/types'
 import {
   getBikeTagNumberFromImage,
