@@ -590,7 +590,7 @@
         const urlParams = getParams(window.location.href)
         const hash = urlParams.hash ? urlParams.hash : 'QjnikOm'
 
-        const biketagAPI = biketag({
+        const biketagAPI = new biketag({
           accessToken: urlParams.accessToken ? urlParams.accessToken : null,
           game: urlParams.game ? urlParams.game : 'test',
           hash,
