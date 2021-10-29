@@ -11,7 +11,7 @@ const config: Config.InitialOptions = {
     }
   },
   modulePaths: [ "<rootDir>" ],
-  roots: [ '<rootDir>' ]
+  roots: [ '<rootDir>/test/tests' ]
 }
 
 export default config;
