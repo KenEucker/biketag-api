@@ -4,6 +4,8 @@ _site
 dist
 *.DS_Store
 /biketag.js
+/biketag.js.map
 /biketag.js.LICENSE.txt
 /biketag.node.js
+/biketag.node.js.map
 /biketag.node.js.LICENSE.txt
