@@ -27,12 +27,12 @@ jobs:
         run: npm ci
       - name: Run linters
         run: npm run lint
-      - name: Run tests
-        run: npm test
       - name: Build
         run: npm run build:prod
       - name: Compile
         run: npm run compile:prod
+      - name: Run tests
+        run: npm test
       - name: Release
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
