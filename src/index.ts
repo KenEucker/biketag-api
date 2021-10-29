@@ -1,6 +1,6 @@
 import { BikeTagClient } from './client'
 
-export type {
+export {
   BikeTagClient as BikeTagClient,
   BikeTagConfiguration as BikeTagConfiguration,
   BikeTagCredentials,
