@@ -1,6 +1,6 @@
 {
   "name": "biketag",
-  "version": "1.2.1",
+  "version": "1.4.3",
   "description": "The Javascript client API for BikeTag Games",
   "main": "./biketag.node.js",
   "browser": "./biketag.js",

@@ -16,3 +16,4 @@ webpack.config.js
 tsconfig.json
 jest.*.js
 *.code-workspace
+test/assets

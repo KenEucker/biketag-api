@@ -11,6 +11,10 @@
   <a href="https://creativecommons.org/licenses/by-sa/4.0/">
     <img src='https://img.shields.io/github/license/KenEucker/biketag-api' alt='license'>
   </a>
+  <br>
+  <a href="https://github.com/sponsors/KenEucker">
+    <img alt="Sponsors" src="https://img.shields.io/github/sponsors/keneucker">
+  </a>
 </p>
 <p align="center">
   <a href="https://github.com/keneucker/biketag-api/discussions">
@@ -55,11 +59,13 @@ npm install biketag
 yarn add biketag
 ```
 
-Add to project:
+Include in your projects:
 ```ts
 // Using import statement
 import { BikeTagClient } from 'biketag';
+```
 
+```js
 // Using require()
 const biketag = require('biketag');
 ```
@@ -68,25 +74,23 @@ _Because is a default export, here you can import it with what name you want_
 
 ---
 
-### Node
+## Node
 
-For `NodeJS` environment, just remove `browser`
-
-```ts
-import { BikeTagClient } from 'biketag';
-```
-
-## Usage
+### Usage
 
 ### Import and instantiate with credentials:
 
 ```ts
 // ESModule syntax
 import { BikeTagClient } from 'biketag'
+```
 
+```js
 // CommonJS syntax
 const { BikeTagClient } = require('biketag')
+```
 
+```ts
 let client
 
 // if you already have an access token acquired
