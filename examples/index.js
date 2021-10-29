@@ -1,4 +1,4 @@
-const BikeTagClient = require('../dist/biketag.node.js').default
+const { BikeTagClient } = require('../dist/biketag.node.js')
 
 const opts = {
   game: 'test',
