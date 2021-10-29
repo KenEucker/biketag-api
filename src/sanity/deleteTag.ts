@@ -6,5 +6,5 @@ export async function deleteTag(
   // slug?: string,
   // tagnumber?: number,
 ): Promise<BikeTagApiResponse<boolean>> {
-  return ({ client } as any) as BikeTagApiResponse<boolean>
+  return { client } as any as BikeTagApiResponse<boolean>
 }

@@ -38,8 +38,8 @@ export async function updateTagImage(
   // }
 
   const url = `${IMAGE_ENDPOINT}/${payload.slug}`
-  return ((await client.request({ url, method: 'DELETE' }))
-    .data as unknown) as BikeTagApiResponse<boolean>
+  return (await client.request({ url, method: 'DELETE' }))
+    .data as unknown as BikeTagApiResponse<boolean>
 
   // // const form = createForm(payload);
   // return ((await client.request(url, {

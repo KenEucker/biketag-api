@@ -6,3 +6,7 @@ _site/
 examples
 dist
 *.md
+biketag.js
+biketag.js.map
+biketag.node.js
+biketag.node.js.map

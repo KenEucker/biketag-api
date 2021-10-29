@@ -64,16 +64,16 @@ export async function updateTag(
         isValidUpdatePayload(imgurMysteryImagePayload) &&
         isValidUpdatePayload(imgurFoundImagePayload)
       ) {
-        const mysteryImageUpdated = await client.updateImage({
+        const mysteryImageUpdated = (await client.updateImage({
           imageHash: imgurMysteryImagePayload.imageHash,
           title: imgurMysteryImagePayload.imageTitle,
           description: imgurMysteryImagePayload.imageDescription,
-        }) as ImgurApiResponse<boolean>;
-        const foundImageUpdated = await client.updateImage({
+        })) as ImgurApiResponse<boolean>
+        const foundImageUpdated = (await client.updateImage({
           imageHash: imgurFoundImagePayload.imageHash,
           title: imgurFoundImagePayload.imageTitle,
           description: imgurFoundImagePayload.imageDescription,
-        }) as ImgurApiResponse<boolean>;
+        })) as ImgurApiResponse<boolean>
 
         currentSuccess =
           success && mysteryImageUpdated.data && foundImageUpdated.data

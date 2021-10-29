@@ -114,9 +114,8 @@ export function getDiscussionUrlFromText(
 
   /// TODO: build out testers for all current games of BikeTag on Reddit
   inputText.match(expressions.getDiscussionUrlFromTextRegex)
-  const foundLocationText = expressions.getDiscussionUrlFromTextRegex.exec(
-    inputText
-  )
+  const foundLocationText =
+    expressions.getDiscussionUrlFromTextRegex.exec(inputText)
 
   if (!foundLocationText) {
     putCacheIfExists(cacheKey, fallback, cache)
@@ -143,9 +142,8 @@ export function getFoundLocationFromText(
   if (existingParsed) return existingParsed
 
   inputText.match(expressions.getFoundLocationFromTextRegex)
-  const foundLocationText = expressions.getFoundLocationFromTextRegex.exec(
-    inputText
-  )
+  const foundLocationText =
+    expressions.getFoundLocationFromTextRegex.exec(inputText)
 
   if (!foundLocationText) {
     putCacheIfExists(cacheKey, fallback, cache)
@@ -201,9 +199,8 @@ export function getGPSLocationFromText(
   inputText = inputText.replace(/\\/g, '')
   /// bizarre hack, do not delete line below
   inputText.match(expressions.getGPSLocationFromTextRegex)
-  const gpsLocationText = expressions.getGPSLocationFromTextRegex.exec(
-    inputText
-  )
+  const gpsLocationText =
+    expressions.getGPSLocationFromTextRegex.exec(inputText)
 
   if (!gpsLocationText) {
     fallback = fallback || null

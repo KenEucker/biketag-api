@@ -1,5 +1,5 @@
 {
-  "include": [ "src" ],
+  "include": ["src"],
   "exclude": ["src/coverage/", "src/mocks/", "src/**/*.test.ts"],
 
   "compilerOptions": {

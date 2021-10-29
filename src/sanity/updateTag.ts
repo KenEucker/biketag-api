@@ -10,5 +10,5 @@ export async function updateTag(
   client: SanityClient
   // payload: UpdateTagPayload | UpdateTagPayload[]
 ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  return ({ client } as any) as BikeTagApiResponse<boolean>
+  return { client } as any as BikeTagApiResponse<boolean>
 }

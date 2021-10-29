@@ -190,13 +190,13 @@ export const assignBikeTagConfiguration = (
 
   configuration.biketag = config.biketag
     ? config.biketag
-    : assignBikeTagCredentials((config as unknown) as Credentials)
+    : assignBikeTagCredentials(config as unknown as Credentials)
   configuration.sanity = config.sanity
     ? config.sanity
-    : assignSanityCredentials((config as unknown) as Credentials)
+    : assignSanityCredentials(config as unknown as Credentials)
   configuration.imgur = config.imgur
     ? config.imgur
-    : assignImgurCredentials((config as unknown) as Credentials)
+    : assignImgurCredentials(config as unknown as Credentials)
 
   return configuration
 }

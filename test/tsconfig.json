@@ -1,8 +1,8 @@
 {
-  "include": [ "tests", "src" ],
+  "include": ["tests", "src"],
   "compilerOptions": {
     "noEmit": true,
-    "lib": [ "esnext" ],
+    "lib": ["esnext"],
     "target": "es2015",
     "module": "CommonJS",
     "moduleResolution": "node",

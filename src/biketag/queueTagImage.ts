@@ -20,7 +20,7 @@ export async function queueTagImage(
       //   client.emit('uploadProgress', { ...progress, id });
       // });
 
-      return (p as unknown) as Promise<BikeTagApiResponse<TagData>>
+      return p as unknown as Promise<BikeTagApiResponse<TagData>>
     })
     return await Promise.all(promises)
   }
@@ -36,5 +36,5 @@ export async function queueTagImage(
   //   client.emit('uploadProgress', { ...progress, id });
   // });
 
-  return (client as unknown) as BikeTagApiResponse<TagData>
+  return client as unknown as BikeTagApiResponse<TagData>
 }

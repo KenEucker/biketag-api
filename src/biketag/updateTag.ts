@@ -38,6 +38,6 @@ export async function updateTag(
   }
 
   const url = `${IMAGE_ENDPOINT}/${payload.slug}`
-  return ((await client.request({ url, method: 'DELETE' }))
-    .data as unknown) as BikeTagApiResponse<boolean>
+  return (await client.request({ url, method: 'DELETE' }))
+    .data as unknown as BikeTagApiResponse<boolean>
 }

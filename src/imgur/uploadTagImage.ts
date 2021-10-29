@@ -21,7 +21,7 @@ export async function uploadTagImage(
       //   client.emit('uploadProgress', { ...progress, id });
       // });
 
-      return (id as unknown) as Promise<BikeTagApiResponse<TagData>>
+      return id as unknown as Promise<BikeTagApiResponse<TagData>>
     })
     return await Promise.all(promises)
   }
@@ -38,5 +38,5 @@ export async function uploadTagImage(
   //   client.emit('uploadProgress', { ...progress, id });
   // });
 
-  return (id as unknown) as BikeTagApiResponse<TagData>
+  return id as unknown as BikeTagApiResponse<TagData>
 }
