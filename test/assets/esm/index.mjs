@@ -9,7 +9,7 @@ const defaultExportClient = new BikeTagClient({
 })
 
 const getTagAsync = async (client) => {
-  const status = (await client.getTag())?.status
+  const status = await client.getTag().status
 
   process.stdout.write(status.toString())
 }
