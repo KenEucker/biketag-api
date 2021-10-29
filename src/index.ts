@@ -1,9 +1,9 @@
-import { BikeTagClient, BikeTagConfiguration } from './client'
+import { BikeTagClient } from './client'
 
-export type {
+export {
   BikeTagClient as BikeTagClient,
   BikeTagConfiguration as BikeTagConfiguration,
   BikeTagCredentials,
 } from './client'
 
-export default (opts: BikeTagConfiguration) => new BikeTagClient(opts)
+export default BikeTagClient

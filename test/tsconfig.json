@@ -1,0 +1,15 @@
+{
+  "include": [ "tests", "src" ],
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": [ "esnext" ],
+    "target": "es2015",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true
+  }
+}

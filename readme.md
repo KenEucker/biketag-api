@@ -32,19 +32,35 @@ The library is a default export.
 
 ### Browser
 
-To use it browser, you need to use the code from `bundle.js` file.
+Using jsDelivr CDN:
 
 ```html
-<script src="path-to-local-library/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/biketag/biketag.js"></script>
 ```
 
-If you have a toolchain available you can use an `import` statement.
+Using unpkg CDN:
 
+```html
+<script src="https://unpkg.com/npm/biketag.js"></script>
+```
+
+### CommonJS
+
+Install:
+```sh
+# For NPM
+npm install biketag
+
+# For Yarn
+yarn add biketag
+```
+
+Add to project:
 ```ts
+// Using import statement
 import { BikeTagClient } from 'biketag';
-```
 
-```js
+// Using require()
 const biketag = require('biketag');
 ```
 

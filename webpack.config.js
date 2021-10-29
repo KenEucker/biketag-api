@@ -34,9 +34,8 @@ const nodeConfig = {
   externals: [nodeExternals()],
   output: {
     path: path.resolve(__dirname, './dist'),
-    filename: 'index.js',
-    libraryTarget: 'umd',
-    libraryExport: 'default',
+    filename: 'biketag.node.js',
+    libraryTarget: 'umd'
   },
 }
 
@@ -46,7 +45,7 @@ const browserConfig = {
   target: 'web',
   output: {
     path: path.resolve(__dirname, './dist'),
-    filename: 'bundle.js',
+    filename: 'biketag.js',
     libraryTarget: 'umd',
     globalObject: 'this',
     libraryExport: 'default',
