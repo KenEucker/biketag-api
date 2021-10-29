@@ -1,6 +1,6 @@
 .eleventy.js export-ignore
 .eslintrc.js export-ignore
 webpack.config.js export-ignore
-.husky/ export-ignore
-tests/assets/ export-ignore
-examples/ export-ignore
+.husky/**/* export-ignore
+tests/assets/**/* export-ignore
+examples/**/* export-ignore
