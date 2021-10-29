@@ -35,8 +35,7 @@ const nodeConfig = {
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: 'biketag.node.js',
-    libraryTarget: 'umd',
-    libraryExport: 'default',
+    libraryTarget: 'umd'
   },
 }
 
