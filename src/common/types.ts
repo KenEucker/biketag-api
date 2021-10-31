@@ -1,5 +1,5 @@
 import { Readable } from 'stream'
-import { ClientConfig as SanityConfig } from '@sanity/client'
+
 export interface ImgurAccessToken {
   accessToken: string
 }
@@ -10,6 +10,29 @@ export interface ImgurClientId {
 
 export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
   clientSecret: string
+}
+
+export interface RedditRefreshToken {
+  refreshToken: string
+}
+
+export interface RedditClientId {
+  clientId: string
+}
+export interface RedditClientSecret {
+  clientSecret: string
+}
+export interface RedditUserAgent {
+  userAgent: string
+}
+
+export interface RedditCredentials
+  extends RedditRefreshToken,
+    RedditClientId,
+    RedditUserAgent {
+  clientSecret: string
+  username: string
+  password: string
 }
 
 export interface SanityAccessToken {
@@ -44,6 +67,7 @@ export type BikeTagCredentials = (ClientKey | AccessToken) & Game
 
 export type Credentials = BikeTagCredentials &
   SanityCredentials &
+  RedditCredentials &
   ImgurCredentials
 
 export interface BikeTagApiResponse<
@@ -52,7 +76,7 @@ export interface BikeTagApiResponse<
   data: T
   status: number
   success: boolean
-  source: 'biketag' | 'imgur' | 'sanity'
+  source: 'biketag' | 'imgur' | 'sanity' | 'reddit'
 }
 
 export type geopoint = {
@@ -100,7 +124,8 @@ export interface Payload {
 
 export type BikeTagConfiguration = {
   biketag: Credentials
-  sanity: SanityConfig
+  sanity: SanityCredentials
+  reddit: RedditCredentials
   imgur: ImgurCredentials
 }
 

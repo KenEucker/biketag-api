@@ -7,6 +7,8 @@ import {
   TagData,
   BikeTagApiResponse,
   ImgurCredentials,
+  SanityCredentials,
+  RedditCredentials,
 } from './common/types'
 import { tagDataFields } from './common/data'
 import {
@@ -18,6 +20,7 @@ import {
   constructTagNumberSlug,
   assignBikeTagConfiguration,
   isImgurCredentials,
+  isRedditCredentials,
   isSanityCredentials,
   isBikeTagCredentials,
 } from './common/methods'
@@ -28,12 +31,11 @@ import * as BikeTagGetters from './common/getters'
 import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
+import * as redditApi from './reddit'
 
+import RedditClient from 'snoowrap'
 import ImgurClient from 'imgur'
-import sanityClient, {
-  SanityClient,
-  ClientConfig as SanityConfig,
-} from '@sanity/client'
+import sanityClient, { SanityClient } from '@sanity/client'
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
 
@@ -46,11 +48,18 @@ export class BikeTagClient extends EventEmitter {
   private plainFetcher: AxiosInstance
   private cachedFetcher: AxiosInstance
 
-  private mostAvailableApi: 'imgur' | 'sanity' | 'biketag' | undefined
+  private mostAvailableApi:
+    | 'imgur'
+    | 'sanity'
+    | 'reddit'
+    | 'biketag'
+    | undefined
   private imgurClient?: ImgurClient
   private sanityClient?: SanityClient
-  private sanityConfig?: SanityConfig | undefined
+  private redditClient?: RedditClient
+  private sanityConfig?: SanityCredentials | undefined
   private imgurConfig?: ImgurCredentials | undefined
+  private redditConfig?: RedditCredentials | undefined
   private biketagConfig?: Credentials | undefined
 
   constructor(readonly config: Credentials | BikeTagConfiguration) {
@@ -63,6 +72,7 @@ export class BikeTagClient extends EventEmitter {
     this.biketagConfig = (config as BikeTagConfiguration).biketag
     this.imgurConfig = (config as BikeTagConfiguration).imgur
     this.sanityConfig = (config as BikeTagConfiguration).sanity
+    this.redditConfig = (config as BikeTagConfiguration).reddit
 
     if (this.imgurConfig) {
       this.imgurClient = new ImgurClient(this.imgurConfig)
@@ -70,6 +80,10 @@ export class BikeTagClient extends EventEmitter {
 
     if (this.sanityConfig) {
       this.sanityClient = sanityClient(this.sanityConfig)
+    }
+
+    if (this.redditConfig) {
+      this.redditClient = new RedditClient(this.redditConfig)
     }
 
     /// Configure separate fetching strategies: plain, authed (default), cached (authed)
@@ -166,6 +180,10 @@ export class BikeTagClient extends EventEmitter {
         client = this.imgurClient
         api = imgurApi
         break
+      case 'reddit':
+        client = this.redditClient
+        api = redditApi
+        break
       default:
       case 'biketag':
         client = api = biketagApi
@@ -190,6 +208,8 @@ export class BikeTagClient extends EventEmitter {
       return (this.mostAvailableApi = 'imgur')
     } else if (this.sanityConfig) {
       return (this.mostAvailableApi = 'sanity')
+    } else if (this.redditConfig) {
+      return (this.mostAvailableApi = 'reddit')
     }
 
     return ''
@@ -200,6 +220,7 @@ export class BikeTagClient extends EventEmitter {
       biketag: this.biketagConfig,
       sanity: this.sanityConfig,
       imgur: this.imgurConfig,
+      reddit: this.redditConfig,
     } as BikeTagConfiguration
   }
 
@@ -325,6 +346,14 @@ export class BikeTagClient extends EventEmitter {
   images(options: any = {}): ImgurClient {
     if (isImgurCredentials(options)) {
       return new ImgurClient(options)
+    }
+
+    throw new Error('options are invalid for creating an imgur client')
+  }
+
+  reddit(options: any = {}): RedditClient {
+    if (isRedditCredentials(options)) {
+      return new RedditClient(options)
     }
 
     throw new Error('options are invalid for creating an imgur client')

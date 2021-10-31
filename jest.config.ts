@@ -7,11 +7,11 @@ const config: Config.InitialOptions = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   globals: {
     'ts-jest': {
-      tsConfig: '<rootDir>/test/tsconfig.json',
+      tsconfig: '<rootDir>/test/tsconfig.json',
     },
   },
   modulePaths: ['<rootDir>'],
-  roots: ['<rootDir>/test/tests'],
+  roots: ['<rootDir>/test/tests', '<rootDir>/src'],
 }
 
 export default config

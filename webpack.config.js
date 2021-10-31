@@ -1,6 +1,7 @@
 const path = require('path')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const nodeExternals = require('webpack-node-externals')
+const { ProvidePlugin } = require('webpack')
 
 const generalConfig = {
   watchOptions: {
@@ -24,6 +25,9 @@ const generalConfig = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    fallback: {
+      stream: require.resolve('stream-browserify'),
+    },
   },
 }
 
