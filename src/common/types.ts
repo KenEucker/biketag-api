@@ -85,6 +85,35 @@ export type geopoint = {
   alt: number
 }
 
+export type boundary = {
+  geo: geopoint
+}
+
+export type region = {
+  description: string
+  name: string
+  slug: string
+  zipcode: number
+}
+
+export type player = {
+  name: string
+  bicon: string
+}
+
+export type ambassador = {
+  address1: string
+  address2: string
+  city: string
+  country: string
+  email: string
+  name: string
+  phone: string
+  player: player
+  slug: string
+  zipcode: number
+}
+
 interface CommonData {
   slug: string
   name: string
@@ -108,6 +137,15 @@ export interface AlbumData extends CommonData {
   cover_height: number | null
   images: TagData[]
   images_count: number
+}
+
+export interface GameData {
+  name: string
+  ambassadors: ambassador[]
+  boundary: boundary
+  logo: string
+  region: region
+  slug: string
 }
 
 export interface Payload {

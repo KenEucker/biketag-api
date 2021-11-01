@@ -9,6 +9,7 @@
 .eslintignore
 examples
 src
+dist
 conduct.md
 contributing.md
 index.md

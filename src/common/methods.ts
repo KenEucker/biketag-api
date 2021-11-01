@@ -193,6 +193,7 @@ export const assignSanityCredentials = (
 
   return sanityCredentials as SanityCredentials
 }
+
 export const assignRedditCredentials = (
   credentials: RedditCredentials
 ): RedditCredentials => {

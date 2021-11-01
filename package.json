@@ -22,6 +22,7 @@
   "scripts": {
     "dev": "npm run dev:browser",
     "dev:node": "node examples/index.js",
+    "dev:test": "jest ./index.test.ts",
     "dev:browser": "npm-run-all --parallel watch serve",
     "dev:both": "npm-run-all --parallel dev:node dev:browser",
     "serve": "eleventy --serve",
@@ -34,7 +35,7 @@
     "build:prod": "echo 'webpack handles the compilation process ✅'",
     "compile": "webpack --mode development",
     "compile:prod": "webpack --mode production && npm run expose",
-    "expose": "mv -v dist/* ./",
+    "expose": "cp -v dist/* ./",
     "watch": "webpack --mode=development --watch --progress",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf lib dist _site biketag.js* biketag.node*",
@@ -44,6 +45,7 @@
     "lint": "npm run format:check && npm run lint:check && npm run typecheck && echo '🤖 !linter ✅ success! 🤖'",
     "lint:check": "eslint .",
     "lint:write": "prettier . --write && eslint . --fix",
+    "lint:staged": "npx --no-install lint-staged",
     "commit": "cz",
     "convert": "typeconv -f ts -t oapi -o openapi 'src/**/*.ts'"
   },

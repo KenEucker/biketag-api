@@ -1,7 +1,7 @@
 import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, TagData } from '../common/types'
-import { constructTagDataObject } from './helpers'
-import { tagDataReferenceFields } from '../common/data'
+import { constructTagDataObject, constructSanityFieldsQuery } from './helpers'
+import { tagDataFields } from '../common/data'
 import { getTagsPayload } from '../common/payloads'
 
 export async function getTags(
@@ -15,13 +15,6 @@ export async function getTags(
   let slugs = ''
   let tagnumbers = ''
 
-  const fields = options.fields
-    .reduce((o: any, f: any) => {
-      o += `${f}${tagDataReferenceFields.indexOf(f) != -1 ? '->{name}' : ''},`
-      return o
-    }, '')
-    .slice(0, -1)
-
   if (options.slugs?.length) {
     slugs = `&& slug.current in ${JSON.stringify(options.slugs)}`
   }
@@ -30,8 +23,10 @@ export async function getTags(
     tagnumbers = `&& tagnumber in ${JSON.stringify(options.tagnumbers)}`
   }
 
+  const fields = constructSanityFieldsQuery(
+    options.fields?.length ? options.fields : tagDataFields
+  )
   const query = `*[_type == "tag" && game._ref in *[_type=="game" && lower(name)=="${options.game.toLowerCase()}"]._id ${slugs} ${tagnumbers}]{${fields}}`
-
   const params = {}
 
   return client.fetch(query, params).then((tags) => {

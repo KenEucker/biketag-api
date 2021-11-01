@@ -14,8 +14,7 @@ export function constructTagDataObject(data: any, fields: string[] = []): any {
     }
   })
 
-  // tagData.slug = tagData.slug?.current ? tagData.slug.current : undefined // Undefined would be a problem
-  tagData.slug = tagData.slug.current
+  tagData.slug = tagData.slug?.current ?? 'latest'
 
   return tagData
 }

@@ -5,16 +5,17 @@ import { BIKETAG_API_PREFIX } from './common/endpoints'
 import {
   Credentials,
   TagData,
+  GameData,
   BikeTagApiResponse,
   ImgurCredentials,
   SanityCredentials,
   RedditCredentials,
 } from './common/types'
-import { tagDataFields } from './common/data'
 import {
   getTagPayload,
   getTagsPayload,
   updateTagPayload,
+  getGameDataPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -137,25 +138,25 @@ export class BikeTagClient extends EventEmitter {
       ? options.hash
       : (this.biketagConfig as Credentials).hash
 
-    /// Explicitely set the request fields to the specified TagDataFields
-    options.fields = options.fields ? options.fields : tagDataFields
+    /// If this is a request for TagData
+    // if (false) {
+    //   /// Explicitely set the slug from the tagnumber or to 'latest'
+    //   if (!options.slug) {
+    //     if (options.tagnumber && typeof options.tagnumber !== 'undefined') {
+    //       options.slug = constructTagNumberSlug(options.tagnumber, options.game)
+    //     } else {
+    //       options.slug = 'latest'
+    //     }
+    //   }
 
-    /// Explicitely set the slug from the tagnumber or to 'latest'
-    if (!options.slug) {
-      if (options.tagnumber && typeof options.tagnumber !== 'undefined') {
-        options.slug = constructTagNumberSlug(options.tagnumber, options.game)
-      } else {
-        options.slug = 'latest'
-      }
-    }
-
-    /// Explicitely set the number if we happen to have the slug but not the tagnumber
-    if (options.tagnumber === undefined) {
-      if (options.slug !== 'latest') {
-        options.tagnumber = BikeTagGetters.getTagnumberFromSlug(options.slug)
-        console.log({ options })
-      }
-    }
+    //   /// Explicitely set the number if we happen to have the slug but not the tagnumber
+    //   if (options.tagnumber === undefined) {
+    //     if (options.slug !== 'latest') {
+    //       options.tagnumber = BikeTagGetters.getTagnumberFromSlug(options.slug)
+    //       console.log({ options })
+    //     }
+    //   }
+    // }
 
     return options
   }
@@ -234,6 +235,18 @@ export class BikeTagClient extends EventEmitter {
 
   request(options: AxiosRequestConfig = {}): Promise<AxiosResponse<string>> {
     return this.fetcher(options)
+  }
+
+  getGameData(
+    payload: getGameDataPayload
+  ): Promise<BikeTagApiResponse<GameData>> {
+    const { client, options, api } = this.getDefaultAPI(payload)
+
+    if (api.getGameData) {
+      return api.getGameData(client, options)
+    } else {
+      throw new Error('client does not implement getGameData')
+    }
   }
 
   // deleteImage(imageHash: string): Promise<BikeTagApiResponse<boolean>> {
