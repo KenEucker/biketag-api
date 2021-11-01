@@ -33,10 +33,10 @@ const getGameDataAsync = async (client, out = false) => {
   return testGameData
 }
 
-if (false) {
-  getTagAsync(bikeTagImgurInstance, true)
-  getGameDataAsync(bikeTagSanityInstance, true)
-}
+// if (true) {
+//   getTagAsync(bikeTagImgurInstance, true)
+//   getGameDataAsync(bikeTagSanityInstance, true)
+// }
 
 module.exports = {
   imgurInstanceOpts,

@@ -119,13 +119,15 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  private getDefaultOptions(opts: any): any {
+  private getDefaultOptions(opts: any, optsType = 'default'): any {
     /// If the options passed in was a string, set it as the slug
     const options =
       typeof opts === 'string'
         ? { slug: opts }
         : typeof opts === 'number'
         ? { tagnumber: opts }
+        : Array.isArray(opts)
+        ? { tagnumbers: opts }
         : opts
 
     /// Set the game in the options, defaulting to the configured game
@@ -133,41 +135,53 @@ export class BikeTagClient extends EventEmitter {
       ? options.game
       : (this.biketagConfig as Credentials).game
 
-    /// Set the album hash, if present (Imgur specific)
-    options.hash = options.hash
-      ? options.hash
-      : (this.biketagConfig as Credentials).hash
+    switch (optsType) {
+      case 'game':
+        options.game = options.game ?? options.slug
+        options.slug = options.slug ?? options.game.toLowerCase()
+        break
 
-    /// If this is a request for TagData
-    // if (false) {
-    //   /// Explicitely set the slug from the tagnumber or to 'latest'
-    //   if (!options.slug) {
-    //     if (options.tagnumber && typeof options.tagnumber !== 'undefined') {
-    //       options.slug = constructTagNumberSlug(options.tagnumber, options.game)
-    //     } else {
-    //       options.slug = 'latest'
-    //     }
-    //   }
+      default:
+      case 'default':
+      case 'tag':
+        /// Set the album hash, if present (Imgur specific)
+        if (this.imgurConfig?.hash) {
+          options.hash = options.hash ?? this.imgurConfig.hash
+        }
 
-    //   /// Explicitely set the number if we happen to have the slug but not the tagnumber
-    //   if (options.tagnumber === undefined) {
-    //     if (options.slug !== 'latest') {
-    //       options.tagnumber = BikeTagGetters.getTagnumberFromSlug(options.slug)
-    //       console.log({ options })
-    //     }
-    //   }
-    // }
+        if (!options.slug) {
+          if (options.tagnumber && typeof options.tagnumber !== 'undefined') {
+            options.slug = constructTagNumberSlug(
+              options.tagnumber,
+              options.game
+            )
+          } else {
+            options.slug = 'latest'
+          }
+        }
+
+        /// Explicitely set the number if we happen to have the slug but not the tagnumber
+        if (!options.tagnumber) {
+          if (options.slug !== 'latest') {
+            options.tagnumber = BikeTagGetters.getTagnumberFromSlug(
+              options.slug
+            )
+          }
+        }
+        break
+    }
 
     return options
   }
 
-  private getDefaultAPI(options: any = {}, getDefaultOptions = true): any {
+  private getDefaultAPI(
+    opts: any = {},
+    getOptionsDefault: string | undefined = undefined
+  ): any {
+    const options = this.getDefaultOptions(opts, getOptionsDefault)
     const availableAPI = options.source
       ? options.source
       : this.getMostAvailableAPI()
-    const outOptions = getDefaultOptions
-      ? this.getDefaultOptions(options)
-      : options
 
     let client: any = null
     let api: any = null
@@ -194,7 +208,8 @@ export class BikeTagClient extends EventEmitter {
     return {
       client,
       api,
-      options: outOptions,
+      options,
+      source: availableAPI,
     }
   }
 
@@ -238,15 +253,26 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getGameData(
-    payload: getGameDataPayload
+    payload: getGameDataPayload | string
   ): Promise<BikeTagApiResponse<GameData>> {
-    const { client, options, api } = this.getDefaultAPI(payload)
-
-    if (api.getGameData) {
-      return api.getGameData(client, options)
-    } else {
-      throw new Error('client does not implement getGameData')
+    const onlyApplicableOpts = {
+      ...(typeof payload === 'string' ? { game: payload } : payload),
+      source: 'sanity',
     }
+    const { client, options, api, source } = this.getDefaultAPI(
+      onlyApplicableOpts,
+      'game'
+    )
+
+    return api.getGameData(client, options).catch((e) => {
+      return {
+        status: 500,
+        data: null,
+        error: e,
+        success: false,
+        source,
+      }
+    })
   }
 
   // deleteImage(imageHash: string): Promise<BikeTagApiResponse<boolean>> {
@@ -262,24 +288,52 @@ export class BikeTagClient extends EventEmitter {
   //   return getArchive(this, options)
   // }
 
-  getTag(payload: getTagPayload): Promise<BikeTagApiResponse<TagData>> {
-    const { client, options, api } = this.getDefaultAPI(payload)
+  getTag(
+    payload: getTagPayload | number
+  ): Promise<BikeTagApiResponse<TagData>> {
+    const { client, options, api, source } = this.getDefaultAPI(payload)
 
-    return api.getTag(client, options)
+    return api.getTag(client, options).catch((e) => {
+      return {
+        status: 500,
+        data: null,
+        error: e,
+        success: false,
+        source,
+      }
+    })
   }
 
-  getTags(payload: getTagsPayload): Promise<BikeTagApiResponse<TagData>> {
-    const { client, options, api } = this.getDefaultAPI(payload)
+  getTags(
+    payload: getTagsPayload | number[]
+  ): Promise<BikeTagApiResponse<TagData>> {
+    const { client, options, api, source } = this.getDefaultAPI(payload)
 
-    return api.getTags(client, options)
+    return api.getTags(client, options).catch((e) => {
+      return {
+        status: 500,
+        data: null,
+        error: e,
+        success: false,
+        source,
+      }
+    })
   }
 
   updateTag(
     payload: updateTagPayload | updateTagPayload[]
   ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-    const { client, options, api } = this.getDefaultAPI(payload)
+    const { client, options, api, source } = this.getDefaultAPI(payload)
 
-    return api.updateTag(client, options)
+    return api.updateTag(client, options).catch((e) => {
+      return Promise.resolve({
+        status: 500,
+        data: null,
+        error: e,
+        success: false,
+        source,
+      })
+    })
   }
 
   // upload(
