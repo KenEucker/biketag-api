@@ -12,20 +12,34 @@ export async function getTag(
     throw new Error('no options')
   }
 
-  if (!options.slug.length) {
-    throw new Error('no slug')
+  if (!options.slug?.length && !options.tagnumber) {
+    throw new Error('no slug or tagnumber')
+  }
+
+  let slug = ''
+  let tagnumber = ''
+
+  if (options.slug) {
+    slug = `&& slug.current in ${options.slug}`
+  }
+
+  if (options.tagnumber) {
+    tagnumber = `&& tagnumber in ${options.tagnumber}`
   }
 
   const fields = constructSanityFieldsQuery(
     options.fields?.length ? options.fields : tagDataFields
   )
+
   const slugIsLatest = options.slug === 'latest'
   const slugIsFirst = options.slug === 'first'
   const slugQuery = slugIsLatest
     ? `|order(tagnumber desc)[0]`
     : slugIsFirst
     ? `|order(tagnumber asc)[0]`
-    : ` && slug.current == "${options.slug}"`
+    : slug.length
+    ? slug
+    : tagnumber
 
   const query =
     slugIsLatest || slugIsFirst

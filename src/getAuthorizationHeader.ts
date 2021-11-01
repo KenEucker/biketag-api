@@ -1,19 +1,20 @@
 import { AccessToken, ClientKey } from './common/types'
-import { isClientKey, isAccessToken } from './common/methods'
+import { hasClientKey, hasAccessToken } from './common/methods'
 import { BikeTagClient } from './client'
 import { BIKETAG_API_PREFIX, AUTHORIZE_ENDPOINT } from './common/endpoints'
 
 export async function getAuthorizationHeader(
   client: BikeTagClient
 ): Promise<string> {
-  if (isAccessToken(client.config)) {
+  if (hasAccessToken(client.config)) {
     return `Bearer ${client.config.accessToken}`
   }
 
-  if (isClientKey(client.config) && !isAccessToken(client.config)) {
+  if (hasClientKey(client.config) && !hasAccessToken(client.config)) {
     return `Client-ID ${(client.config as ClientKey).clientKey}`
   }
 
+  // @ts-ignore
   const { clientId, username, password } = client.config.biketag
 
   const options: Record<string, unknown> = {

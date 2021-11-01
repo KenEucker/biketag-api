@@ -80,27 +80,29 @@ export const createForm = (payload: string | Payload): FormData => {
   return form
 }
 
-export const isAccessToken = (arg: unknown): arg is AccessToken => {
+export const hasAccessToken = (arg: unknown): arg is AccessToken => {
   return (arg as AccessToken).accessToken !== undefined
 }
 
-export const isClientKey = (arg: unknown): arg is ClientKey => {
+export const hasClientKey = (arg: unknown): arg is ClientKey => {
   return (arg as ClientKey).clientKey !== undefined
 }
 
-export const isSanityAccessToken = (arg: unknown): arg is SanityAccessToken => {
-  return (arg as SanityAccessToken).token !== undefined
+export const hasSanityAccessToken = (
+  arg: unknown
+): arg is SanityAccessToken => {
+  return (arg as SanityAccessToken).accessToken !== undefined
 }
 
-export const isSanityClientId = (arg: unknown): arg is SanityClientId => {
+export const hasSanityClientId = (arg: unknown): arg is SanityClientId => {
   return (arg as SanityClientId).projectId !== undefined
 }
 
-export const isImgurAccessToken = (arg: unknown): arg is ImgurAccessToken => {
+export const hasImgurAccessToken = (arg: unknown): arg is ImgurAccessToken => {
   return (arg as ImgurAccessToken).accessToken !== undefined
 }
 
-export const isImgurClientId = (arg: unknown): arg is ImgurClientId => {
+export const hasImgurClientId = (arg: unknown): arg is ImgurClientId => {
   return (arg as ImgurClientId).clientId !== undefined
 }
 
@@ -109,16 +111,20 @@ export const constructTagNumberSlug = (number: number, game = ''): string => {
 }
 
 export const isImgurCredentials = (credentials: ImgurCredentials): boolean => {
-  return !!(
-    credentials.clientId !== undefined || credentials.clientSecret !== undefined
+  return (
+    !!(
+      credentials.clientId !== undefined ||
+      credentials.clientSecret !== undefined
+    ) ||
+    (!!credentials.clientId && !!credentials.hash)
   )
 }
 
-export const isRedditClientId = (arg: unknown): arg is RedditClientId => {
+export const hasRedditClientId = (arg: unknown): arg is RedditClientId => {
   return (arg as RedditClientId).clientId !== undefined
 }
 
-export const isRedditRefreshToken = (
+export const hasRedditRefreshToken = (
   arg: unknown
 ): arg is RedditRefreshToken => {
   return (arg as RedditRefreshToken).refreshToken !== undefined
@@ -167,6 +173,7 @@ export const assignImgurCredentials = (
     ? {
         clientId: credentials.clientId,
         clientSecret: credentials.clientSecret,
+        hash: credentials.hash,
         accessToken: credentials.accessToken || undefined,
       }
     : undefined
@@ -184,7 +191,7 @@ export const assignSanityCredentials = (
         projectId: credentials.projectId,
         useCdn: credentials.useCdn || true,
         dataset: credentials.dataset || 'development',
-        token: credentials.token || '',
+        accessToken: credentials.accessToken || '',
         password: credentials.password,
         username: credentials.username,
         apiVersion: credentials.apiVersion || '2021-03-25',
@@ -215,15 +222,14 @@ export const assignRedditCredentials = (
 
 export const assignBikeTagCredentials = (
   credentials: Credentials
-): Credentials => {
+): BikeTagCredentials => {
   const biketagCredentials = isBikeTagCredentials(credentials as Credentials)
     ? credentials
     : ({
         game: credentials.game,
-        hash: credentials.hash,
-      } as Credentials)
+      } as BikeTagCredentials)
 
-  return biketagCredentials
+  return biketagCredentials as BikeTagCredentials
 }
 
 export const assignBikeTagConfiguration = (
@@ -233,16 +239,16 @@ export const assignBikeTagConfiguration = (
 
   configuration.biketag = config.biketag
     ? config.biketag
-    : assignBikeTagCredentials(config as unknown as Credentials)
+    : assignBikeTagCredentials(config as unknown as BikeTagCredentials)
   configuration.sanity = config.sanity
     ? config.sanity
-    : assignSanityCredentials(config as unknown as Credentials)
+    : assignSanityCredentials(config as unknown as SanityCredentials)
   configuration.imgur = config.imgur
     ? config.imgur
-    : assignImgurCredentials(config as unknown as Credentials)
+    : assignImgurCredentials(config as unknown as ImgurCredentials)
   configuration.reddit = config.reddit
     ? config.reddit
-    : assignRedditCredentials(config as unknown as Credentials)
+    : assignRedditCredentials(config as unknown as RedditCredentials)
 
   return configuration
 }

@@ -9,6 +9,7 @@ export interface ImgurClientId {
 }
 
 export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
+  hash?: string
   clientSecret: string
 }
 
@@ -36,7 +37,7 @@ export interface RedditCredentials
 }
 
 export interface SanityAccessToken {
-  token: string
+  accessToken: string
 }
 
 export interface SanityClientId {
@@ -53,22 +54,21 @@ export interface SanityCredentials extends SanityAccessToken, SanityClientId {
 
 export interface Game {
   game: string
-  hash?: string
 }
-export interface AccessToken extends Game {
+export interface AccessToken {
   accessToken: string
 }
-export interface ClientKey extends AccessToken {
+export interface ClientKey {
   clientKey: string
   clientToken: string
 }
 
 export type BikeTagCredentials = (ClientKey | AccessToken) & Game
 
-export type Credentials = BikeTagCredentials &
-  SanityCredentials &
-  RedditCredentials &
-  ImgurCredentials
+export type Credentials = Partial<BikeTagCredentials> &
+  Partial<SanityCredentials> &
+  Partial<RedditCredentials> &
+  Partial<ImgurCredentials>
 
 export interface BikeTagApiResponse<
   T = Record<string, unknown> | Record<string, unknown>[] | string | boolean
@@ -161,7 +161,7 @@ export interface Payload {
 }
 
 export type BikeTagConfiguration = {
-  biketag: Credentials
+  biketag: BikeTagCredentials
   sanity: SanityCredentials
   reddit: RedditCredentials
   imgur: ImgurCredentials

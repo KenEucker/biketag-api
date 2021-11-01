@@ -25,6 +25,8 @@ export const createGame = (gameData: any = {}): GameData => {
     name: gameData.name ?? '',
     ambassadors: gameData.ambassadors ?? [],
     boundary: gameData.boundary ?? {},
+    mainhash: gameData.mainhash ?? '',
+    queuehash: gameData.queuehash ?? '',
     logo: gameData.logo ?? '',
     region: gameData.region ?? '',
     slug: gameData.slug ?? '',

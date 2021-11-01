@@ -1,7 +1,6 @@
 import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, GameData } from '../common/types'
 import { constructGameDataObject, constructSanityFieldsQuery } from './helpers'
-import { gameDataFields } from '../common/data'
 import { getGameDataPayload } from '../common/payloads'
 
 export async function getGameData(

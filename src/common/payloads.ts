@@ -6,6 +6,7 @@ export type getTagsPayload = {
 }
 
 export type getTagPayload = {
+  tagnumber: number
   slug: string
   fields: string[]
 }
