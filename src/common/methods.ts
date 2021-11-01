@@ -5,6 +5,9 @@ import {
   ImgurAccessToken,
   ImgurClientId,
   ImgurCredentials,
+  RedditCredentials,
+  RedditClientId,
+  RedditRefreshToken,
   SanityCredentials,
   SanityClientId,
   Credentials,
@@ -111,6 +114,26 @@ export const isImgurCredentials = (credentials: ImgurCredentials): boolean => {
   )
 }
 
+export const isRedditClientId = (arg: unknown): arg is RedditClientId => {
+  return (arg as RedditClientId).clientId !== undefined
+}
+
+export const isRedditRefreshToken = (
+  arg: unknown
+): arg is RedditRefreshToken => {
+  return (arg as RedditRefreshToken).refreshToken !== undefined
+}
+
+export const isRedditCredentials = (
+  credentials: RedditCredentials
+): boolean => {
+  return !!(
+    (credentials.userAgent !== undefined &&
+      credentials.clientId !== undefined) ||
+    (credentials.username !== undefined && credentials.password !== undefined)
+  )
+}
+
 export const isSanityCredentials = (
   credentials: SanityCredentials
 ): boolean => {
@@ -132,6 +155,7 @@ export const isBikeTagConfiguration = (
   return (
     credentials.biketag !== undefined ||
     credentials.sanity !== undefined ||
+    credentials.reddit !== undefined ||
     credentials.imgur !== undefined
   )
 }
@@ -170,6 +194,25 @@ export const assignSanityCredentials = (
   return sanityCredentials as SanityCredentials
 }
 
+export const assignRedditCredentials = (
+  credentials: RedditCredentials
+): RedditCredentials => {
+  const RedditCredentials = isRedditCredentials(
+    credentials as RedditCredentials
+  )
+    ? {
+        clientId: credentials.clientId,
+        clientSecret: credentials.clientSecret,
+        password: credentials.password,
+        username: credentials.username,
+        refreshToken: credentials.refreshToken,
+        userAgent: credentials.userAgent || 'biketag API',
+      }
+    : undefined
+
+  return RedditCredentials as RedditCredentials
+}
+
 export const assignBikeTagCredentials = (
   credentials: Credentials
 ): Credentials => {
@@ -197,6 +240,9 @@ export const assignBikeTagConfiguration = (
   configuration.imgur = config.imgur
     ? config.imgur
     : assignImgurCredentials(config as unknown as Credentials)
+  configuration.reddit = config.reddit
+    ? config.reddit
+    : assignRedditCredentials(config as unknown as Credentials)
 
   return configuration
 }

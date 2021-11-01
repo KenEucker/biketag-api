@@ -1,6 +1,6 @@
 import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, TagData } from '../common/types'
-import { constructTagDataObject, constructSanityFieldsQuery } from './helpers'
+import { constructTagDataObject } from './helpers'
 import { tagDataFields } from '../common/data'
 import { getTagPayload } from '../common/payloads'
 
@@ -16,9 +16,6 @@ export async function getTag(
     throw new Error('no slug')
   }
 
-  const fields = constructSanityFieldsQuery(
-    options.fields?.length ? options.fields : tagDataFields
-  )
   const slugIsLatest = options.slug === 'latest'
   const slugIsFirst = options.slug === 'first'
   const slugQuery = slugIsLatest
@@ -27,16 +24,16 @@ export async function getTag(
     ? `|order(tagnumber asc)[0]`
     : ` && slug.current == "${options.slug}"`
 
-  const query =
-    slugIsLatest || slugIsFirst
-      ? `*[_type == "tag"]{${fields}}${slugQuery}`
-      : `*[_type == "tag" ${slugQuery}][0]{${fields}}`
+  const query = ''
 
   const params = {}
 
   return client.fetch(query, params).then((tag) => {
     // construct tagData object from tag
-    const tagData = constructTagDataObject(tag, fields)
+    const tagData = constructTagDataObject(
+      tag,
+      options.fields?.length ? options.fields : tagDataFields
+    )
 
     // wrap tag in BikeTagApiResponse
     const response = {

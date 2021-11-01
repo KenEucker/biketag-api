@@ -5,19 +5,23 @@ import { BIKETAG_API_PREFIX } from './common/endpoints'
 import {
   Credentials,
   TagData,
+  GameData,
   BikeTagApiResponse,
   ImgurCredentials,
+  SanityCredentials,
+  RedditCredentials,
 } from './common/types'
-import { tagDataFields } from './common/data'
 import {
   getTagPayload,
   getTagsPayload,
   updateTagPayload,
+  getGameDataPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
   assignBikeTagConfiguration,
   isImgurCredentials,
+  isRedditCredentials,
   isSanityCredentials,
   isBikeTagCredentials,
 } from './common/methods'
@@ -28,12 +32,11 @@ import * as BikeTagGetters from './common/getters'
 import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
+import * as redditApi from './reddit'
 
+import RedditClient from 'snoowrap'
 import ImgurClient from 'imgur'
-import sanityClient, {
-  SanityClient,
-  ClientConfig as SanityConfig,
-} from '@sanity/client'
+import sanityClient, { SanityClient } from '@sanity/client'
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
 
@@ -46,11 +49,18 @@ export class BikeTagClient extends EventEmitter {
   private plainFetcher: AxiosInstance
   private cachedFetcher: AxiosInstance
 
-  private mostAvailableApi: 'imgur' | 'sanity' | 'biketag' | undefined
+  private mostAvailableApi:
+    | 'imgur'
+    | 'sanity'
+    | 'reddit'
+    | 'biketag'
+    | undefined
   private imgurClient?: ImgurClient
   private sanityClient?: SanityClient
-  private sanityConfig?: SanityConfig | undefined
+  private redditClient?: RedditClient
+  private sanityConfig?: SanityCredentials | undefined
   private imgurConfig?: ImgurCredentials | undefined
+  private redditConfig?: RedditCredentials | undefined
   private biketagConfig?: Credentials | undefined
 
   constructor(readonly config: Credentials | BikeTagConfiguration) {
@@ -63,6 +73,7 @@ export class BikeTagClient extends EventEmitter {
     this.biketagConfig = (config as BikeTagConfiguration).biketag
     this.imgurConfig = (config as BikeTagConfiguration).imgur
     this.sanityConfig = (config as BikeTagConfiguration).sanity
+    this.redditConfig = (config as BikeTagConfiguration).reddit
 
     if (this.imgurConfig) {
       this.imgurClient = new ImgurClient(this.imgurConfig)
@@ -70,6 +81,10 @@ export class BikeTagClient extends EventEmitter {
 
     if (this.sanityConfig) {
       this.sanityClient = sanityClient(this.sanityConfig)
+    }
+
+    if (this.redditConfig) {
+      this.redditClient = new RedditClient(this.redditConfig)
     }
 
     /// Configure separate fetching strategies: plain, authed (default), cached (authed)
@@ -123,25 +138,25 @@ export class BikeTagClient extends EventEmitter {
       ? options.hash
       : (this.biketagConfig as Credentials).hash
 
-    /// Explicitely set the request fields to the specified TagDataFields
-    options.fields = options.fields ? options.fields : tagDataFields
+    /// If this is a request for TagData
+    // if (false) {
+    //   /// Explicitely set the slug from the tagnumber or to 'latest'
+    //   if (!options.slug) {
+    //     if (options.tagnumber && typeof options.tagnumber !== 'undefined') {
+    //       options.slug = constructTagNumberSlug(options.tagnumber, options.game)
+    //     } else {
+    //       options.slug = 'latest'
+    //     }
+    //   }
 
-    /// Explicitely set the slug from the tagnumber or to 'latest'
-    if (!options.slug) {
-      if (options.tagnumber && typeof options.tagnumber !== 'undefined') {
-        options.slug = constructTagNumberSlug(options.tagnumber, options.game)
-      } else {
-        options.slug = 'latest'
-      }
-    }
-
-    /// Explicitely set the number if we happen to have the slug but not the tagnumber
-    if (options.tagnumber === undefined) {
-      if (options.slug !== 'latest') {
-        options.tagnumber = BikeTagGetters.getTagnumberFromSlug(options.slug)
-        console.log({ options })
-      }
-    }
+    //   /// Explicitely set the number if we happen to have the slug but not the tagnumber
+    //   if (options.tagnumber === undefined) {
+    //     if (options.slug !== 'latest') {
+    //       options.tagnumber = BikeTagGetters.getTagnumberFromSlug(options.slug)
+    //       console.log({ options })
+    //     }
+    //   }
+    // }
 
     return options
   }
@@ -165,6 +180,10 @@ export class BikeTagClient extends EventEmitter {
       case 'imgur':
         client = this.imgurClient
         api = imgurApi
+        break
+      case 'reddit':
+        client = this.redditClient
+        api = redditApi
         break
       default:
       case 'biketag':
@@ -190,6 +209,8 @@ export class BikeTagClient extends EventEmitter {
       return (this.mostAvailableApi = 'imgur')
     } else if (this.sanityConfig) {
       return (this.mostAvailableApi = 'sanity')
+    } else if (this.redditConfig) {
+      return (this.mostAvailableApi = 'reddit')
     }
 
     return ''
@@ -200,6 +221,7 @@ export class BikeTagClient extends EventEmitter {
       biketag: this.biketagConfig,
       sanity: this.sanityConfig,
       imgur: this.imgurConfig,
+      reddit: this.redditConfig,
     } as BikeTagConfiguration
   }
 
@@ -213,6 +235,18 @@ export class BikeTagClient extends EventEmitter {
 
   request(options: AxiosRequestConfig = {}): Promise<AxiosResponse<string>> {
     return this.fetcher(options)
+  }
+
+  getGameData(
+    payload: getGameDataPayload
+  ): Promise<BikeTagApiResponse<GameData>> {
+    const { client, options, api } = this.getDefaultAPI(payload)
+
+    if (api.getGameData) {
+      return api.getGameData(client, options)
+    } else {
+      throw new Error('client does not implement getGameData')
+    }
   }
 
   // deleteImage(imageHash: string): Promise<BikeTagApiResponse<boolean>> {
@@ -325,6 +359,14 @@ export class BikeTagClient extends EventEmitter {
   images(options: any = {}): ImgurClient {
     if (isImgurCredentials(options)) {
       return new ImgurClient(options)
+    }
+
+    throw new Error('options are invalid for creating an imgur client')
+  }
+
+  reddit(options: any = {}): RedditClient {
+    if (isRedditCredentials(options)) {
+      return new RedditClient(options)
     }
 
     throw new Error('options are invalid for creating an imgur client')

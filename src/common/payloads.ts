@@ -14,3 +14,9 @@ export type updateTagPayload = {
   slug: string
   fields: string[]
 }
+
+export type getGameDataPayload = {
+  slug: string
+  name: string
+  fields: string[]
+}

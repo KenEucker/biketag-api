@@ -1,5 +1,5 @@
 import { Readable } from 'stream'
-import { ClientConfig as SanityConfig } from '@sanity/client'
+
 export interface ImgurAccessToken {
   accessToken: string
 }
@@ -10,6 +10,29 @@ export interface ImgurClientId {
 
 export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
   clientSecret: string
+}
+
+export interface RedditRefreshToken {
+  refreshToken: string
+}
+
+export interface RedditClientId {
+  clientId: string
+}
+export interface RedditClientSecret {
+  clientSecret: string
+}
+export interface RedditUserAgent {
+  userAgent: string
+}
+
+export interface RedditCredentials
+  extends RedditRefreshToken,
+    RedditClientId,
+    RedditUserAgent {
+  clientSecret: string
+  username: string
+  password: string
 }
 
 export interface SanityAccessToken {
@@ -44,6 +67,7 @@ export type BikeTagCredentials = (ClientKey | AccessToken) & Game
 
 export type Credentials = BikeTagCredentials &
   SanityCredentials &
+  RedditCredentials &
   ImgurCredentials
 
 export interface BikeTagApiResponse<
@@ -52,13 +76,42 @@ export interface BikeTagApiResponse<
   data: T
   status: number
   success: boolean
-  source: 'biketag' | 'imgur' | 'sanity'
+  source: 'biketag' | 'imgur' | 'sanity' | 'reddit'
 }
 
 export type geopoint = {
   lat: number
   long: number
   alt: number
+}
+
+export type boundary = {
+  geo: geopoint
+}
+
+export type region = {
+  description: string
+  name: string
+  slug: string
+  zipcode: number
+}
+
+export type player = {
+  name: string
+  bicon: string
+}
+
+export type ambassador = {
+  address1: string
+  address2: string
+  city: string
+  country: string
+  email: string
+  name: string
+  phone: string
+  player: player
+  slug: string
+  zipcode: number
 }
 
 interface CommonData {
@@ -86,6 +139,15 @@ export interface AlbumData extends CommonData {
   images_count: number
 }
 
+export interface GameData {
+  name: string
+  ambassadors: ambassador[]
+  boundary: boundary
+  logo: string
+  region: region
+  slug: string
+}
+
 export interface Payload {
   image?: string
   base64?: string
@@ -100,7 +162,8 @@ export interface Payload {
 
 export type BikeTagConfiguration = {
   biketag: Credentials
-  sanity: SanityConfig
+  sanity: SanityCredentials
+  reddit: RedditCredentials
   imgur: ImgurCredentials
 }
 

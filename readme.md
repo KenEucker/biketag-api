@@ -144,6 +144,9 @@ The acceptable fields for a BikeTagConfiguration object are outlined below:
 You can get tags one by one or all at once for a given game using the `getTag` and `getTags` methods:
 
 ```js
+// retrieves the BikeTag game data 'portland' game
+const biketagPortlandLatest = await biketagAPI.getGameData()
+
 // retrieves the latest BikeTag posted for the 'portland' game
 const biketagPortlandLatest = await biketagAPI.getTag()
 
