@@ -68,7 +68,7 @@ export class BikeTagClient extends EventEmitter {
     super()
 
     this.mostAvailableApi = undefined
-    
+
     this.setConfiguration(config)
 
     if (this.imgurConfig) {
@@ -227,7 +227,9 @@ export class BikeTagClient extends EventEmitter {
     return ''
   }
 
-  setConfiguration(config: Credentials | BikeTagConfiguration): BikeTagConfiguration {
+  setConfiguration(
+    config: Credentials | BikeTagConfiguration
+  ): BikeTagConfiguration {
     config = assignBikeTagConfiguration(config as BikeTagConfiguration)
 
     this.biketagConfig = (config as BikeTagConfiguration).biketag
