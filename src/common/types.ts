@@ -1,5 +1,7 @@
 import { Readable } from 'stream'
 
+export type RequireAtLeastOne<T> = { [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>; }[keyof T]
+
 export interface ImgurAccessToken {
   accessToken: string
 }
@@ -143,6 +145,8 @@ export interface GameData {
   name: string
   ambassadors: ambassador[]
   boundary: boundary
+  mainhash: string
+  queuehash: string
   logo: string
   region: region
   slug: string
