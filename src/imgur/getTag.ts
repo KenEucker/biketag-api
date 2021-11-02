@@ -9,6 +9,10 @@ export async function getTag(
   client: ImgurClient,
   options: any
 ): Promise<BikeTagApiResponse<TagData>> {
+  if (!options.hash) {
+    throw new Error('no Imgur album hash set')
+  }
+
   const albumInfo = await (client.getAlbum(options.hash) as any)
   const imagesData: TagData[] = albumInfo.data?.images?.filter(
     (image: any) => getBikeTagNumberFromImage(image) == options.tagnumber

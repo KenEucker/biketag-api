@@ -10,6 +10,7 @@ import {
   ImgurCredentials,
   SanityCredentials,
   RedditCredentials,
+  RequireAtLeastOne,
 } from './common/types'
 import {
   getTagPayload,
@@ -68,12 +69,7 @@ export class BikeTagClient extends EventEmitter {
 
     this.mostAvailableApi = undefined
 
-    config = assignBikeTagConfiguration(config as BikeTagConfiguration)
-
-    this.biketagConfig = (config as BikeTagConfiguration).biketag
-    this.imgurConfig = (config as BikeTagConfiguration).imgur
-    this.sanityConfig = (config as BikeTagConfiguration).sanity
-    this.redditConfig = (config as BikeTagConfiguration).reddit
+    this.setConfiguration(config)
 
     if (this.imgurConfig) {
       this.imgurClient = new ImgurClient(this.imgurConfig)
@@ -231,6 +227,19 @@ export class BikeTagClient extends EventEmitter {
     return ''
   }
 
+  setConfiguration(
+    config: Credentials | BikeTagConfiguration
+  ): BikeTagConfiguration {
+    config = assignBikeTagConfiguration(config as BikeTagConfiguration)
+
+    this.biketagConfig = (config as BikeTagConfiguration).biketag
+    this.imgurConfig = (config as BikeTagConfiguration).imgur
+    this.sanityConfig = (config as BikeTagConfiguration).sanity
+    this.redditConfig = (config as BikeTagConfiguration).reddit
+
+    return this.getConfiguration()
+  }
+
   getConfiguration(): BikeTagConfiguration {
     return {
       biketag: this.biketagConfig,
@@ -253,7 +262,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getGameData(
-    payload: getGameDataPayload | string
+    payload: RequireAtLeastOne<getGameDataPayload> | string
   ): Promise<BikeTagApiResponse<GameData>> {
     const onlyApplicableOpts = {
       ...(typeof payload === 'string' ? { game: payload } : payload),
@@ -289,7 +298,7 @@ export class BikeTagClient extends EventEmitter {
   // }
 
   getTag(
-    payload: getTagPayload | number
+    payload: RequireAtLeastOne<getTagPayload> | number
   ): Promise<BikeTagApiResponse<TagData>> {
     const { client, options, api, source } = this.getDefaultAPI(payload)
 
@@ -305,7 +314,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getTags(
-    payload: getTagsPayload | number[]
+    payload?: getTagsPayload | number[]
   ): Promise<BikeTagApiResponse<TagData>> {
     const { client, options, api, source } = this.getDefaultAPI(payload)
 
@@ -321,7 +330,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   updateTag(
-    payload: updateTagPayload | updateTagPayload[]
+    payload: RequireAtLeastOne<updateTagPayload> | updateTagPayload[]
   ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
     const { client, options, api, source } = this.getDefaultAPI(payload)
 
