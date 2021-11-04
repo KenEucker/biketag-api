@@ -6,6 +6,8 @@ export const createTag = (tagData: any = {}): TagData => {
     mysteryImage: tagData.mysteryImage ?? '',
     mysteryImageUrl: tagData.mysteryImageUrl ?? '',
     game: tagData.game ?? '',
+    slug: tagData.slug ?? '',
+    name: tagData.name ?? '',
     player: tagData.player ?? '',
     hint: tagData.hint ?? '',
     discussionUrl: tagData.discussionUrl ?? '',

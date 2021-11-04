@@ -1,3 +1,5 @@
+import { RequireAtLeastOne, TagData } from './types'
+
 export type getTagsPayload = {
   fields: string[]
   slugs: string[]
@@ -12,8 +14,9 @@ export type getTagPayload = {
 }
 
 export type updateTagPayload = {
-  slug: string
-  fields: string[]
+  _id?: string
+  tag: RequireAtLeastOne<TagData>
+  game: string
 }
 
 export type getGameDataPayload = {
