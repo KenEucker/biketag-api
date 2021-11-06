@@ -36,8 +36,6 @@ test('BikeTagClient imgur instance can retrieve tag data', async () => {
       hint: null,
       mysteryImageUrl: 'https://i.imgur.com/6cXbPlZ.jpg',
       foundImageUrl: 'https://i.imgur.com/UATbr0p.jpg',
-      mysteryImage: '',
-      foundImage: '',
       gps: { lat: 0, long: 0, alt: 0 },
     },
     source: "imgur",

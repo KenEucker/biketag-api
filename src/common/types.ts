@@ -27,28 +27,25 @@ export interface RedditClientId {
 export interface RedditClientSecret {
   clientSecret: string
 }
-export interface RedditUserAgent {
-  userAgent: string
-}
 
 export interface RedditCredentials
   extends RedditRefreshToken,
     RedditClientId,
-    RedditUserAgent {
-  clientSecret: string
+    RedditClientSecret {
+  userAgent: string
   username: string
   password: string
 }
 
 export interface SanityAccessToken {
-  accessToken: string
+  token: string
 }
 
-export interface SanityClientId {
+export interface SanityProjectId {
   projectId: string
 }
 
-export interface SanityCredentials extends SanityAccessToken, SanityClientId {
+export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
   dataset: string
   apiVersion: string
   useCdn: boolean
@@ -58,6 +55,7 @@ export interface SanityCredentials extends SanityAccessToken, SanityClientId {
 
 export interface Game {
   game: string
+  source?: string
 }
 export interface AccessToken {
   accessToken: string
@@ -124,7 +122,7 @@ interface CommonData {
 }
 export interface TagData extends CommonData {
   tagnumber: number
-  mysteryImage: string
+  mysteryImage?: string
   mysteryImageUrl: string
   game: string
   player: string
@@ -132,7 +130,7 @@ export interface TagData extends CommonData {
   discussionUrl: string
   foundLocation: string
   gps: geopoint
-  foundImage: string
+  foundImage?: string
   foundImageUrl: string
 }
 export interface AlbumData extends CommonData {
@@ -172,6 +170,13 @@ export type BikeTagConfiguration = {
   reddit: RedditCredentials
   imgur: ImgurCredentials
 }
+
+export type PartialBikeTagConfiguration = RequireAtLeastOne<{
+  biketag: Partial<BikeTagCredentials>
+  sanity: Partial<SanityCredentials>
+  reddit: Partial<RedditCredentials>
+  imgur: Partial<ImgurCredentials>
+}>
 
 export type BikeTagApiWrapper = {
   client: any

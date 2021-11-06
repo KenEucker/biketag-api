@@ -9,11 +9,12 @@ import {
   RedditClientId,
   RedditRefreshToken,
   SanityCredentials,
-  SanityClientId,
+  SanityProjectId,
   Credentials,
   BikeTagCredentials,
   Payload,
   BikeTagConfiguration,
+  Game,
 } from './types'
 import FormData from 'form-data'
 import TinyCache from 'tinycache'
@@ -91,11 +92,11 @@ export const hasClientKey = (arg: unknown): arg is ClientKey => {
 export const hasSanityAccessToken = (
   arg: unknown
 ): arg is SanityAccessToken => {
-  return (arg as SanityAccessToken).accessToken !== undefined
+  return (arg as SanityAccessToken).token !== undefined
 }
 
-export const hasSanityClientId = (arg: unknown): arg is SanityClientId => {
-  return (arg as SanityClientId).projectId !== undefined
+export const hasSanityProjectId = (arg: unknown): arg is SanityProjectId => {
+  return (arg as SanityProjectId).projectId !== undefined
 }
 
 export const hasImgurAccessToken = (arg: unknown): arg is ImgurAccessToken => {
@@ -112,12 +113,14 @@ export const constructTagNumberSlug = (number: number, game = ''): string => {
 
 export const isImgurCredentials = (credentials: ImgurCredentials): boolean => {
   return (
-    !!(
-      credentials.clientId !== undefined ||
-      credentials.clientSecret !== undefined
-    ) ||
-    (!!credentials.clientId && !!credentials.hash)
+    credentials?.clientId !== undefined ||
+    credentials?.clientSecret !== undefined ||
+    (credentials?.clientId !== undefined && credentials?.hash !== undefined)
   )
+}
+
+export const isImgurApiReady = (credentials: ImgurCredentials): boolean => {
+  return credentials?.clientId !== undefined
 }
 
 export const hasRedditClientId = (arg: unknown): arg is RedditClientId => {
@@ -133,23 +136,45 @@ export const hasRedditRefreshToken = (
 export const isRedditCredentials = (
   credentials: RedditCredentials
 ): boolean => {
-  return !!(
-    (credentials.userAgent !== undefined &&
-      credentials.clientId !== undefined) ||
-    (credentials.username !== undefined && credentials.password !== undefined)
+  return (
+    (credentials?.userAgent !== undefined &&
+      credentials?.clientId !== undefined) ||
+    (credentials?.username !== undefined && credentials.password !== undefined)
+  )
+}
+
+export const isRedditApiReady = (credentials: RedditCredentials): boolean => {
+  return (
+    credentials?.userAgent !== undefined && credentials?.clientId !== undefined
   )
 }
 
 export const isSanityCredentials = (
   credentials: SanityCredentials
 ): boolean => {
-  return !!(credentials.projectId !== undefined)
+  return credentials?.projectId !== undefined
+}
+
+export const isSanityApiReady = (credentials: SanityCredentials): boolean => {
+  return (
+    credentials.projectId !== undefined && credentials.dataset !== undefined
+  )
 }
 
 export const isBikeTagCredentials = (
   credentials: BikeTagCredentials | Credentials
 ): boolean => {
-  return !!(
+  return (
+    (credentials as Game)?.game !== undefined ||
+    ((credentials as ClientKey)?.clientToken !== undefined &&
+      (credentials as ClientKey)?.clientKey !== undefined)
+  )
+}
+
+export const isBikeTagApiReady = (
+  credentials: BikeTagCredentials | Credentials
+) => {
+  return (
     (credentials as ClientKey).clientToken !== undefined &&
     (credentials as ClientKey).clientKey !== undefined
   )
@@ -189,12 +214,13 @@ export const assignSanityCredentials = (
   )
     ? {
         projectId: credentials.projectId,
-        useCdn: credentials.useCdn || true,
-        dataset: credentials.dataset || 'development',
-        accessToken: credentials.accessToken || '',
+        useCdn:
+          credentials.token !== undefined ? false : credentials.useCdn ?? true,
+        dataset: credentials.dataset ?? 'development',
+        token: credentials.token ?? '',
         password: credentials.password,
         username: credentials.username,
-        apiVersion: credentials.apiVersion || '2021-03-25',
+        apiVersion: credentials.apiVersion ?? '2021-03-25',
       }
     : undefined
 
@@ -224,10 +250,10 @@ export const assignBikeTagCredentials = (
   credentials: Credentials
 ): BikeTagCredentials => {
   const biketagCredentials = isBikeTagCredentials(credentials as Credentials)
-    ? credentials
-    : ({
+    ? {
         game: credentials.game,
-      } as BikeTagCredentials)
+      }
+    : undefined
 
   return biketagCredentials as BikeTagCredentials
 }
@@ -237,18 +263,27 @@ export const assignBikeTagConfiguration = (
 ): BikeTagConfiguration => {
   const configuration: BikeTagConfiguration = {} as BikeTagConfiguration
 
+  /// Parse individual configurations from the entire config object
+  const parsedConfig = {
+    biketag: assignBikeTagCredentials(config as unknown as BikeTagCredentials),
+    sanity: assignSanityCredentials(config as unknown as SanityCredentials),
+    imgur: assignImgurCredentials(config as unknown as ImgurCredentials),
+    reddit: assignRedditCredentials(config as unknown as RedditCredentials),
+  }
+
+  /// Assign the individual configs with the parsed object plus overrides from individual configs in the passed in object
   configuration.biketag = config.biketag
-    ? config.biketag
-    : assignBikeTagCredentials(config as unknown as BikeTagCredentials)
+    ? { ...parsedConfig.biketag, ...config.biketag }
+    : parsedConfig.biketag
   configuration.sanity = config.sanity
-    ? config.sanity
-    : assignSanityCredentials(config as unknown as SanityCredentials)
+    ? { ...parsedConfig.sanity, ...config.sanity }
+    : parsedConfig.sanity
   configuration.imgur = config.imgur
-    ? config.imgur
-    : assignImgurCredentials(config as unknown as ImgurCredentials)
+    ? { ...parsedConfig.imgur, ...config.imgur }
+    : parsedConfig.imgur
   configuration.reddit = config.reddit
-    ? config.reddit
-    : assignRedditCredentials(config as unknown as RedditCredentials)
+    ? { ...parsedConfig.reddit, ...config.reddit }
+    : parsedConfig.reddit
 
   return configuration
 }

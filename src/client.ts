@@ -11,12 +11,16 @@ import {
   SanityCredentials,
   RedditCredentials,
   RequireAtLeastOne,
+  BikeTagCredentials,
+  BikeTagConfiguration,
+  PartialBikeTagConfiguration,
 } from './common/types'
 import {
   getTagPayload,
   getTagsPayload,
   updateTagPayload,
   getGameDataPayload,
+  uploadTagImagePayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -25,6 +29,10 @@ import {
   isRedditCredentials,
   isSanityCredentials,
   isBikeTagCredentials,
+  isBikeTagApiReady,
+  isSanityApiReady,
+  isImgurApiReady,
+  isRedditApiReady,
 } from './common/methods'
 import { setup } from 'axios-cache-adapter'
 
@@ -40,8 +48,6 @@ import ImgurClient from 'imgur'
 import sanityClient, { SanityClient } from '@sanity/client'
 
 const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
-
-import { BikeTagCredentials, BikeTagConfiguration } from './common/types'
 export class BikeTagClient extends EventEmitter {
   expressions: any = BikeTagExpressions
   getters: any = BikeTagGetters
@@ -115,15 +121,17 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  private getDefaultOptions(opts: any, optsType = 'default'): any {
+  private getDefaultOptions(opts: any, optsType = 'tag'): any {
     /// If the options passed in was a string, set it as the slug
     const options =
       typeof opts === 'string'
         ? { slug: opts }
-        : typeof opts === 'number'
+        : typeof opts === 'number' && optsType === 'tag'
         ? { tagnumber: opts }
-        : Array.isArray(opts)
+        : Array.isArray(opts) && optsType === 'tag'
         ? { tagnumbers: opts }
+        : Array.isArray(opts)
+        ? { payload: opts }
         : opts
 
     /// Set the game in the options, defaulting to the configured game
@@ -137,8 +145,6 @@ export class BikeTagClient extends EventEmitter {
         options.slug = options.slug ?? options.game.toLowerCase()
         break
 
-      default:
-      case 'default':
       case 'tag':
         /// Set the album hash, if present (Imgur specific)
         if (this.imgurConfig?.hash) {
@@ -172,9 +178,13 @@ export class BikeTagClient extends EventEmitter {
 
   private getDefaultAPI(
     opts: any = {},
+    overloads: any = {},
     getOptionsDefault: string | undefined = undefined
   ): any {
-    const options = this.getDefaultOptions(opts, getOptionsDefault)
+    const options = {
+      ...this.getDefaultOptions(opts, getOptionsDefault),
+      ...overloads,
+    }
     const availableAPI = options.source
       ? options.source
       : this.getMostAvailableAPI()
@@ -214,13 +224,29 @@ export class BikeTagClient extends EventEmitter {
       return this.mostAvailableApi
     }
 
-    if (this.biketagConfig && isBikeTagCredentials(this.biketagConfig)) {
+    if (
+      this.biketagConfig &&
+      isBikeTagCredentials(this.biketagConfig) &&
+      isBikeTagApiReady(this.biketagConfig)
+    ) {
       return (this.mostAvailableApi = 'biketag')
-    } else if (this.imgurConfig) {
+    } else if (
+      this.imgurConfig &&
+      isImgurCredentials(this.imgurConfig) &&
+      isImgurApiReady(this.imgurConfig)
+    ) {
       return (this.mostAvailableApi = 'imgur')
-    } else if (this.sanityConfig) {
+    } else if (
+      this.sanityConfig &&
+      isSanityCredentials(this.sanityConfig) &&
+      isSanityApiReady(this.sanityConfig)
+    ) {
       return (this.mostAvailableApi = 'sanity')
-    } else if (this.redditConfig) {
+    } else if (
+      this.redditConfig &&
+      isRedditCredentials(this.redditConfig) &&
+      isRedditApiReady(this.redditConfig)
+    ) {
       return (this.mostAvailableApi = 'reddit')
     }
 
@@ -228,14 +254,29 @@ export class BikeTagClient extends EventEmitter {
   }
 
   setConfiguration(
-    config: Credentials | BikeTagConfiguration
+    config: Credentials | BikeTagConfiguration | PartialBikeTagConfiguration,
+    overwrite = true
   ): BikeTagConfiguration {
-    config = assignBikeTagConfiguration(config as BikeTagConfiguration)
+    const parsedConfig = assignBikeTagConfiguration(
+      config as BikeTagConfiguration
+    )
 
-    this.biketagConfig = (config as BikeTagConfiguration).biketag
-    this.imgurConfig = (config as BikeTagConfiguration).imgur
-    this.sanityConfig = (config as BikeTagConfiguration).sanity
-    this.redditConfig = (config as BikeTagConfiguration).reddit
+    let biketagConfig = (parsedConfig as BikeTagConfiguration).biketag
+    let imgurConfig = (parsedConfig as BikeTagConfiguration).imgur
+    let sanityConfig = (parsedConfig as BikeTagConfiguration).sanity
+    let redditConfig = (parsedConfig as BikeTagConfiguration).reddit
+
+    if (!overwrite) {
+      biketagConfig = { ...this.biketagConfig, ...biketagConfig }
+      imgurConfig = { ...this.imgurConfig, ...imgurConfig }
+      sanityConfig = { ...this.sanityConfig, ...sanityConfig }
+      redditConfig = { ...this.redditConfig, ...redditConfig }
+    }
+
+    this.biketagConfig = biketagConfig
+    this.imgurConfig = imgurConfig
+    this.sanityConfig = sanityConfig
+    this.redditConfig = redditConfig
 
     return this.getConfiguration()
   }
@@ -270,6 +311,7 @@ export class BikeTagClient extends EventEmitter {
     }
     const { client, options, api, source } = this.getDefaultAPI(
       onlyApplicableOpts,
+      {},
       'game'
     )
 
@@ -298,9 +340,10 @@ export class BikeTagClient extends EventEmitter {
   // }
 
   getTag(
-    payload: RequireAtLeastOne<getTagPayload> | number
+    payload: RequireAtLeastOne<getTagPayload> | number,
+    opts?: Credentials
   ): Promise<BikeTagApiResponse<TagData>> {
-    const { client, options, api, source } = this.getDefaultAPI(payload)
+    const { client, options, api, source } = this.getDefaultAPI(payload, opts)
 
     return api.getTag(client, options).catch((e) => {
       return {
@@ -314,9 +357,10 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getTags(
-    payload?: getTagsPayload | number[]
-  ): Promise<BikeTagApiResponse<TagData>> {
-    const { client, options, api, source } = this.getDefaultAPI(payload)
+    payload?: getTagsPayload | number[],
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<TagData[]>> {
+    const { client, options, api, source } = this.getDefaultAPI(payload, opts)
 
     return api.getTags(client, options).catch((e) => {
       return {
@@ -330,9 +374,10 @@ export class BikeTagClient extends EventEmitter {
   }
 
   updateTag(
-    payload: RequireAtLeastOne<updateTagPayload> | updateTagPayload[]
+    payload: updateTagPayload | updateTagPayload[],
+    opts?: Credentials
   ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-    const { client, options, api, source } = this.getDefaultAPI(payload)
+    const { client, options, api, source } = this.getDefaultAPI(payload, opts)
 
     return api.updateTag(client, options).catch((e) => {
       return Promise.resolve({
@@ -345,11 +390,22 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  // upload(
-  //   payload: string | string[] | Payload | Payload[]
-  // ): Promise<BikeTagApiResponse<TagData> | BikeTagApiResponse<TagData>[]> {
-  //   return upload(this, payload)
-  // }
+  uploadTagImage(
+    payload: uploadTagImagePayload | uploadTagImagePayload[],
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<any | any[]>> {
+    const { client, options, api, source } = this.getDefaultAPI(payload, opts)
+
+    return api.uploadTagImage(client, options).catch((e) => {
+      return Promise.resolve({
+        status: 500,
+        data: null,
+        error: e,
+        success: false,
+        source,
+      })
+    })
+  }
 
   // getBikeTag(
   //   payload: UpdateImagePayload | UpdateImagePayload[]

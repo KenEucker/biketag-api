@@ -1,6 +1,9 @@
 import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, GameData } from '../common/types'
-import { constructGameDataObject, constructSanityFieldsQuery } from './helpers'
+import {
+  constructGameFromSanityObject,
+  constructSanityFieldsQuery,
+} from './helpers'
 import { getGameDataPayload } from '../common/payloads'
 
 export async function getGameData(
@@ -25,7 +28,7 @@ export async function getGameData(
 
   return client.fetch(query, params).then((game) => {
     // construct gameData object from game
-    const gameData = constructGameDataObject(game, options.fields)
+    const gameData = constructGameFromSanityObject(game, options.fields)
 
     // wrap tag in BikeTagApiResponse
     const response = {

@@ -283,8 +283,6 @@ export function getBikeTagFromImgurImageSet(
     hint: getHintFromText(mysteryImage.description) as string,
     mysteryImageUrl: mysteryImage.link,
     foundImageUrl: foundImage?.link,
-    mysteryImage: '',
-    foundImage: '',
     gps: {
       lat: 0,
       long: 0,

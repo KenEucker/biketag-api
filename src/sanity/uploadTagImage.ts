@@ -1,21 +1,45 @@
 import { SanityClient } from '@sanity/client'
-import { Payload, BikeTagApiResponse, TagData } from '../common/types'
+import { BikeTagApiResponse, TagData } from '../common/types'
+import { uploadTagImagePayload } from '../common/payloads'
+import { constructSanityObjectFromTag } from './helpers'
 
 export async function uploadTagImage(
   client: SanityClient,
-  payload: string | string[] | Payload | Payload[]
-): Promise<BikeTagApiResponse<TagData> | BikeTagApiResponse<TagData>[]> {
-  const req = null
+  payload: uploadTagImagePayload | uploadTagImagePayload[]
+): Promise<BikeTagApiResponse<any> | BikeTagApiResponse<any>[]> {
+  const uploadPayloads = Array.isArray(payload) ? payload : [payload]
+  const uploadResponses = []
 
-  if (Array.isArray(payload)) {
-    const promises = payload.map((p: string | Payload) => {
-      return p as unknown as Promise<BikeTagApiResponse<TagData>>
-    })
-    return await Promise.all(promises)
+  for (const uploadPayload of uploadPayloads) {
+    const uploadResponse = await client.assets.upload(
+      'image',
+      uploadPayload.stream
+    )
+    const updateTag = {
+      tagnumber: uploadPayload.tagnumber,
+      slug: uploadPayload.slug,
+    } as TagData
+    switch (uploadPayload.type) {
+      case 'found':
+        updateTag.foundImage = uploadResponse._id
+        break
+      case 'mystery':
+        updateTag.mysteryImage = uploadResponse._id
+        break
+      default:
+      case 'queued':
+        updateTag.foundImage = `${uploadResponse._id},`
+        break
+    }
+
+    const updatePayload = await constructSanityObjectFromTag(client, updateTag)
+    uploadResponses.push({ ...uploadResponse, updated: updatePayload })
   }
 
-  return (await {
-    client,
-    req,
-  }) as any as unknown as BikeTagApiResponse<TagData>
+  return {
+    success: true,
+    status: 1,
+    source: 'sanity',
+    data: uploadResponses,
+  }
 }
