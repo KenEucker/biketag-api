@@ -1,7 +1,7 @@
 import { RequireAtLeastOne, TagData } from './types'
 
 export type getTagsPayload = {
-  fields: string[]
+  fields?: string[]
   slugs: string[]
   tagnumbers: number[]
   game: string
@@ -10,7 +10,7 @@ export type getTagsPayload = {
 export type getTagPayload = {
   tagnumber: number
   slug: string
-  fields: string[]
+  fields?: string[]
 }
 
 export type updateTagPayload = {
@@ -18,8 +18,15 @@ export type updateTagPayload = {
   game: string
 }
 
+export type uploadTagImagePayload = {
+  tagnumber: number
+  type: 'found' | 'mystery' | 'queued'
+  slug?: string
+  stream: ReadableStream
+}
+
 export type getGameDataPayload = {
   slug: string
   name: string
-  fields: string[]
+  fields?: string[]
 }

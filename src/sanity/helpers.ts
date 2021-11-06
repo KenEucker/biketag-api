@@ -8,6 +8,7 @@ import {
   tagDataObjectFields,
   gameDataFields,
   gameDataArrayFields,
+  tagDataAssetFields,
 } from '../common/data'
 
 export function constructTagFromSanityObject(
@@ -66,7 +67,7 @@ export async function constructSanityObjectFromTag(
   for (const field of tagDataReferenceFields) {
     const fieldValue = tagData[field]
 
-    if (fieldValue !== 'undefined') {
+    if (fieldValue) {
       /// get the reference values from cache
       const refQuery = `*[_type == "${field}" && slug.current == "${fieldValue}"]{_id}`
       const referenceObject = await client.fetch(refQuery, {})
@@ -87,6 +88,20 @@ export async function constructSanityObjectFromTag(
       tagData[field] = {
         _type: 'reference',
         _ref: referenceId,
+      }
+    }
+  }
+
+  for (const field of tagDataAssetFields) {
+    const fieldValue = tagData[field]
+
+    if (fieldValue) {
+      tagData[field] = {
+        _type: 'image',
+        asset: {
+          _type: 'reference',
+          _ref: fieldValue,
+        },
       }
     }
   }

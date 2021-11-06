@@ -20,6 +20,7 @@ import {
   getTagsPayload,
   updateTagPayload,
   getGameDataPayload,
+  uploadTagImagePayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -389,11 +390,22 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  // upload(
-  //   payload: string | string[] | Payload | Payload[]
-  // ): Promise<BikeTagApiResponse<TagData> | BikeTagApiResponse<TagData>[]> {
-  //   return upload(this, payload)
-  // }
+  uploadTagImage(
+    payload: uploadTagImagePayload | uploadTagImagePayload[],
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<any | any[]>> {
+    const { client, options, api, source } = this.getDefaultAPI(payload, opts)
+
+    return api.uploadTagImage(client, options).catch((e) => {
+      return Promise.resolve({
+        status: 500,
+        data: null,
+        error: e,
+        success: false,
+        source,
+      })
+    })
+  }
 
   // getBikeTag(
   //   payload: UpdateImagePayload | UpdateImagePayload[]

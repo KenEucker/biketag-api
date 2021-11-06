@@ -24,6 +24,8 @@ export const tagDataFields = Object.keys(createTag())
 
 export const tagDataReferenceFields = ['game', 'player']
 
+export const tagDataAssetFields = ['foundImage', 'mysteryImage']
+
 export const tagDataObjectFields = {
   foundImage: 'asset->_ref',
   mysteryImage: 'asset->_ref',

@@ -19,7 +19,7 @@ function isValidUpdatePayload(utp: UpdateTagPayload) {
 export async function updateTag(
   client: SanityClient,
   payload: UpdateTagPayload | UpdateTagPayload[]
-): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
+): Promise<BikeTagApiResponse<any> | BikeTagApiResponse<any>[]> {
   const updatePayloads = Array.isArray(payload) ? payload : [payload]
   const successPayloads = []
 
@@ -31,12 +31,10 @@ export async function updateTag(
     successPayloads.push(await client.createOrReplace(updatePayload))
   }
 
-  return [
-    {
-      success: true,
-      status: 1,
-      source: 'sanity',
-      data: true,
-    },
-  ]
+  return {
+    success: true,
+    status: 1,
+    source: 'sanity',
+    data: successPayloads,
+  }
 }
