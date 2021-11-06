@@ -33,7 +33,7 @@ export async function uploadTagImage(
     }
 
     const updatePayload = await constructSanityObjectFromTag(client, updateTag)
-    uploadResponses.push({...uploadResponse, updated: updatePayload})
+    uploadResponses.push({ ...uploadResponse, updated: updatePayload })
   }
 
   return {
