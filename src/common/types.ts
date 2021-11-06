@@ -122,7 +122,7 @@ interface CommonData {
 }
 export interface TagData extends CommonData {
   tagnumber: number
-  mysteryImage: string
+  mysteryImage?: string
   mysteryImageUrl: string
   game: string
   player: string
@@ -130,7 +130,7 @@ export interface TagData extends CommonData {
   discussionUrl: string
   foundLocation: string
   gps: geopoint
-  foundImage: string
+  foundImage?: string
   foundImageUrl: string
 }
 export interface AlbumData extends CommonData {

@@ -112,9 +112,11 @@ export const constructTagNumberSlug = (number: number, game = ''): string => {
 }
 
 export const isImgurCredentials = (credentials: ImgurCredentials): boolean => {
-  return (credentials?.clientId !== undefined ||
-      credentials?.clientSecret !== undefined) ||
+  return (
+    credentials?.clientId !== undefined ||
+    credentials?.clientSecret !== undefined ||
     (credentials?.clientId !== undefined && credentials?.hash !== undefined)
+  )
 }
 
 export const isImgurApiReady = (credentials: ImgurCredentials): boolean => {
@@ -134,16 +136,17 @@ export const hasRedditRefreshToken = (
 export const isRedditCredentials = (
   credentials: RedditCredentials
 ): boolean => {
-  return (credentials?.userAgent !== undefined &&
+  return (
+    (credentials?.userAgent !== undefined &&
       credentials?.clientId !== undefined) ||
     (credentials?.username !== undefined && credentials.password !== undefined)
+  )
 }
 
-export const isRedditApiReady = (
-  credentials: RedditCredentials
-): boolean => {
-  return credentials?.userAgent !== undefined &&
-    credentials?.clientId !== undefined
+export const isRedditApiReady = (credentials: RedditCredentials): boolean => {
+  return (
+    credentials?.userAgent !== undefined && credentials?.clientId !== undefined
+  )
 }
 
 export const isSanityCredentials = (
@@ -152,11 +155,10 @@ export const isSanityCredentials = (
   return credentials?.projectId !== undefined
 }
 
-export const isSanityApiReady = (
-  credentials: SanityCredentials
-): boolean => {
-  return credentials.projectId !== undefined &&
-    credentials.dataset !== undefined
+export const isSanityApiReady = (credentials: SanityCredentials): boolean => {
+  return (
+    credentials.projectId !== undefined && credentials.dataset !== undefined
+  )
 }
 
 export const isBikeTagCredentials = (
@@ -212,7 +214,8 @@ export const assignSanityCredentials = (
   )
     ? {
         projectId: credentials.projectId,
-        useCdn: credentials.token !== undefined ? false : (credentials.useCdn ?? true),
+        useCdn:
+          credentials.token !== undefined ? false : credentials.useCdn ?? true,
         dataset: credentials.dataset ?? 'development',
         token: credentials.token ?? '',
         password: credentials.password,

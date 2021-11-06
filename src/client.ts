@@ -223,7 +223,8 @@ export class BikeTagClient extends EventEmitter {
       return this.mostAvailableApi
     }
 
-    if (this.biketagConfig &&
+    if (
+      this.biketagConfig &&
       isBikeTagCredentials(this.biketagConfig) &&
       isBikeTagApiReady(this.biketagConfig)
     ) {

@@ -3,7 +3,7 @@ import { TagData, GameData } from './types'
 export const createTag = (tagData: any = {}): TagData => {
   return {
     tagnumber: tagData.tagnumber ?? 'latest',
-    mysteryImage: tagData.mysteryImage ?? '',
+    mysteryImage: tagData.mysteryImage,
     mysteryImageUrl: tagData.mysteryImageUrl ?? '',
     game: tagData.game ?? '',
     slug: tagData.slug ?? '',
@@ -13,14 +13,21 @@ export const createTag = (tagData: any = {}): TagData => {
     discussionUrl: tagData.discussionUrl ?? '',
     foundLocation: tagData.foundLocation ?? '',
     gps: tagData.gps ?? '',
-    foundImage: tagData.foundImage ?? '',
+    foundImage: tagData.foundImage,
     foundImageUrl: tagData.foundImageUrl ?? '',
+    _id: tagData._id,
+    _type: tagData._type,
   } as TagData
 }
 
 export const tagDataFields = Object.keys(createTag())
 
 export const tagDataReferenceFields = ['game', 'player']
+
+export const tagDataObjectFields = {
+  foundImage: 'asset->_ref',
+  mysteryImage: 'asset->_ref',
+}
 
 export const createGame = (gameData: any = {}): GameData => {
   return {

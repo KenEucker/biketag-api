@@ -1,6 +1,9 @@
 import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, TagData } from '../common/types'
-import { constructTagDataObject, constructSanityFieldsQuery } from './helpers'
+import {
+  constructTagFromSanityObject,
+  constructSanityFieldsQuery,
+} from './helpers'
 import { tagDataFields } from '../common/data'
 import { getTagPayload } from '../common/payloads'
 
@@ -27,9 +30,8 @@ export async function getTag(
     tagnumber = `&& tagnumber in ${options.tagnumber}`
   }
 
-  const fields = constructSanityFieldsQuery(
-    options.fields?.length ? options.fields : tagDataFields
-  )
+  const fieldsFilter = options.fields?.length ? options.fields : tagDataFields
+  const fields = constructSanityFieldsQuery(fieldsFilter)
 
   const slugIsLatest = options.slug === 'latest'
   const slugIsFirst = options.slug === 'first'
@@ -50,7 +52,7 @@ export async function getTag(
 
   return client.fetch(query, params).then((tag) => {
     // construct tagData object from tag
-    const tagData = constructTagDataObject(tag, fields)
+    const tagData = constructTagFromSanityObject(tag, fieldsFilter)
 
     // wrap tag in BikeTagApiResponse
     const response = {

@@ -1,4 +1,5 @@
 import { SanityClient } from '@sanity/client'
+import { constructSanityObjectFromTag } from './helpers'
 import { BikeTagApiResponse, TagData } from '../common/types'
 export interface SanityUploadPayload {
   _id: string
@@ -20,22 +21,15 @@ export async function updateTag(
   payload: UpdateTagPayload | UpdateTagPayload[]
 ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
   const updatePayloads = Array.isArray(payload) ? payload : [payload]
+  const successPayloads = []
 
-  const successfulUpdatePromises = []
-
-  updatePayloads.forEach((updatePayload) => {
+  for (let updatePayload of updatePayloads) {
     if (!isValidUpdatePayload(updatePayload)) {
-      updatePayload._type = 'tag'
-      updatePayload._id =
-        updatePayload._id ?? `${updatePayload.game}-${updatePayload.slug}`
+      updatePayload = await constructSanityObjectFromTag(client, updatePayload)
     }
 
-    successfulUpdatePromises.push(client.createOrReplace(updatePayload))
-  })
-
-  await Promise.all(successfulUpdatePromises).then((success) => {
-    console.log({ successfulUpdatePromises, success })
-  })
+    successPayloads.push(await client.createOrReplace(updatePayload))
+  }
 
   return [
     {

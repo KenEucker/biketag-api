@@ -14,7 +14,6 @@ export type getTagPayload = {
 }
 
 export type updateTagPayload = {
-  _id?: string
   tag: RequireAtLeastOne<TagData>
   game: string
 }
