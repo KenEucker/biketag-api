@@ -1,5 +1,0 @@
-2021-10-31T16:31:45.285591+0000 WARN  84437:4648996352 core/boot.rs:20 core::boot - core_state_boot: METAWORK_VAULT_TOKEN not set
-2021-10-31T16:31:45.285734+0000 INFO  84437:4648996352 core/boot.rs:22 core::boot - core_state_boot: Using dummy key in development
-2021-10-31T16:31:45.285968+0000 INFO  84437:4648996352 core/boot.rs:53 core::boot - core_state_boot: Core state booted successfully.
-2021-10-31T16:31:45.285983+0000 INFO  84437:4648996352 node/sdk/api.rs:66 metawork_sdk::api - boot: Metawork for Node 20211025-145836.34a65d28 is now active (run_id: 6699818620038283264).
-2021-10-31T16:31:45.324834+0000 INFO  84437:4648996352 node/sdk/state.rs:99 metawork_sdk::state - halt: ∆ Exited safely.
