@@ -1,4 +1,4 @@
-import { TagData } from './types'
+import { geopoint, TagData } from './types'
 import {
   getTagnumberFromSlugRegex,
   getTagNumbersFromTextRegex,
@@ -178,9 +178,9 @@ export const getHintFromText = (
 
 export const getGPSLocationFromText = (
   inputText: string,
-  fallback: string,
+  fallback: geopoint,
   cache?: typeof TinyCache
-): string => {
+): geopoint => {
   if (!inputText.length) return fallback
 
   const cacheKey = `${cacheKeys.gpsLocationText}${inputText}`
@@ -199,9 +199,19 @@ export const getGPSLocationFromText = (
     return fallback
   }
 
-  const gpsLocation = gpsLocationText[0] || null
-  putCacheIfExists(cacheKey, gpsLocation, cache)
-  return gpsLocation
+  if (gpsLocationText.length) {
+    const gpsPair = gpsLocationText[0].split(',')
+    const gpsLocation = {
+      lat: parseFloat(gpsPair[0]),
+      long: parseFloat(gpsPair[1]),
+      alt: 0,
+    }
+    putCacheIfExists(cacheKey, gpsLocation, cache)
+    
+    return gpsLocation
+  }
+
+  return {} as geopoint
 }
 
 export const getImageURLsFromText = (
@@ -290,11 +300,17 @@ export const getImgurFoundImageHashFromBikeTagData = (
 ): string => {
   return getImageHashFromText(tag.foundImageUrl, cache)
 }
-export const getImgurFoundDescriptionFromBikeTagData = (tag: TagData): string =>
+export const getImgurFoundDescriptionFromBikeTagData = (
+  tag: TagData,
+  cache?: typeof TinyCache,
+): string =>
   `#${tag.tagnumber} proof${
     tag.foundLocation ? ` found at (${tag.foundLocation})` : ''
   } by ${tag.player}`
-export const getImgurFoundTitleFromBikeTagData = (tag: TagData): string =>
+export const getImgurFoundTitleFromBikeTagData = (
+  tag: TagData,
+  cache?: typeof TinyCache,
+): string =>
   `(${tag.gps ? tag.gps : ''})`
 
 export const getImgurMysteryImageHashFromBikeTagData = (
@@ -303,7 +319,10 @@ export const getImgurMysteryImageHashFromBikeTagData = (
 ): string => {
   return getImageHashFromText(tag.mysteryImageUrl, cache)
 }
-export const getImgurMysteryTitleFromBikeTagData = (tag: TagData): string =>
+export const getImgurMysteryTitleFromBikeTagData = (
+  tag: TagData,
+  cache?: typeof TinyCache,
+  ): string =>
   `${
     !tag.gps || (tag.gps.lat === 0 && tag.gps.long === 0)
       ? ''
@@ -311,6 +330,29 @@ export const getImgurMysteryTitleFromBikeTagData = (tag: TagData): string =>
   } ${tag.discussionUrl ? `{${tag.discussionUrl}}` : ''}`
 
 export const getImgurMysteryDescriptionFromBikeTagData = (
-  tag: TagData
+  tag: TagData,
+  cache?: typeof TinyCache,
 ): string =>
   `#${tag.tagnumber} tag (hint: ${tag.hint ? tag.hint : ''} ) by ${tag.player}`
+
+export const getBikeTagDescriptionFromData = (data) => {
+  return `#${data.currentTagNumber} tag ${
+    data.hint ? `(hint: ${data.hint})` : ''
+  } by ${data.credit}`
+}
+
+export const getBikeTagTitleFromData = (data) => {
+  return `${data.gps ? `(${data.gps})` : ''} {${
+    data.discussionLink ? data.discussionLink : ''
+  }}`
+}
+
+export const getBikeTagProofDescriptionFromData = (data) => {
+  return `#${data.proofTagNumber} proof${
+    data.foundAt ? ` found at (${data.foundAt})` : ''
+  } by ${data.credit}`
+}
+
+export const getBikeTagProofTitleFromData = (data) => {
+  return `(${data.gps ? data.gps : ''})`
+}

@@ -341,11 +341,18 @@ export class BikeTagClient extends EventEmitter {
 
   getTag(
     payload: RequireAtLeastOne<getTagPayload> | number,
-    opts?: Credentials
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<TagData>> {
     const { client, options, api, source } = this.getDefaultAPI(payload, opts)
+    let clientMethod = api.getTag
 
-    return api.getTag(client, options).catch((e) => {
+    switch (source) {
+      case 'reddit':
+        clientMethod = clientMethod.bind({images: this.images(this.imgurConfig) })
+        break
+    }
+
+    return clientMethod(client, options).catch((e) => {
       return {
         status: 500,
         data: null,
@@ -358,11 +365,18 @@ export class BikeTagClient extends EventEmitter {
 
   getTags(
     payload?: getTagsPayload | number[],
-    opts?: Credentials
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<TagData[]>> {
     const { client, options, api, source } = this.getDefaultAPI(payload, opts)
+    let clientMethod = api.getTags
 
-    return api.getTags(client, options).catch((e) => {
+    switch (source) {
+      case 'reddit':
+        clientMethod = clientMethod.bind({images: this.images(this.imgurConfig) })
+        break
+    }
+
+    return clientMethod(client, options).catch((e) => {
       return {
         status: 500,
         data: null,

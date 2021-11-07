@@ -35,6 +35,7 @@ export interface RedditCredentials
   userAgent: string
   username: string
   password: string
+  subreddit: string
 }
 
 export interface SanityAccessToken {
@@ -147,6 +148,7 @@ export interface GameData {
   boundary: boundary
   mainhash: string
   queuehash: string
+  subreddit: string
   logo: string
   region: region
   slug: string

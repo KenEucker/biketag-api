@@ -17,7 +17,7 @@ export const getGPSLocationFromTextRegex = new RegExp(
 )
 
 export const getImageURLsFromTextRegex = new RegExp(
-  /\b(https?:\/\/.*?\.[a-z]{2,4}\/[^\s)]*\b)/gi
+  /(?:])(?:\()(https?:\/\/.*?\.[a-z]{2,4}\/[^\s)]*)/gi
 )
 
 export const getDiscussionUrlFromTextRegex = RegExp(/{(.*)}/gi)

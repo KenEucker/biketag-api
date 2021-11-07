@@ -1,42 +1,41 @@
-import { SanityClient } from '@sanity/client'
+import RedditClient from 'snoowrap'
 import { BikeTagApiResponse, TagData } from '../common/types'
-import { constructTagDataObject } from './helpers'
 import { getTagsPayload } from '../common/payloads'
+import { getBikeTagInformationFromRedditData, getBikeTagsFromRedditPosts } from './helpers'
+import ImgurClient from 'imgur'
 
 export async function getTags(
-  client: SanityClient,
-  options: getTagsPayload
+  client: RedditClient,
+  options: getTagsPayload,
 ): Promise<BikeTagApiResponse<TagData[]>> {
   if (!options) {
     throw new Error('no options')
   }
 
-  let slugs = ''
-  let tagnumbers = ''
+  const query = `subreddit:${options.subreddit} title:Bike Tag`
 
-  if (options.slugs?.length) {
-    slugs = `&& slug.current in ${JSON.stringify(options.slugs)}`
-  }
+  options.sort = options.sort ?? 'new'
+  options.limit = options.limit ?? 10
+  options.time = options.time ?? 'year'
 
-  if (options.tagnumbers?.length) {
-    tagnumbers = `&& tagnumber in ${JSON.stringify(options.tagnumbers)}`
-  }
+  return client
+    .getSubreddit(options.subreddit)
+    .search({ query, ...options })
+    .then(async (redditPosts) => {
+      const redditBikeTagData = await getBikeTagsFromRedditPosts(redditPosts, this.images)
+      const bikeTags: TagData[] = []
 
-  const query = ''
-  const params = {}
+      for (const biketagPost of redditBikeTagData) {
+        bikeTags.push(await getBikeTagInformationFromRedditData(biketagPost))
+      }
 
-  return client.fetch(query, params).then((tags) => {
-    const tagsData = tags.map((tag: any) =>
-      constructTagDataObject(tag, options.fields)
-    )
+      const response = {
+        data: bikeTags,
+        status: 1,
+        success: true,
+        source: 'reddit',
+      }
 
-    const response = {
-      data: tagsData,
-      status: 1,
-      success: true,
-      source: 'sanity',
-    }
-
-    return response as BikeTagApiResponse<TagData[]>
-  })
+      return response as BikeTagApiResponse<TagData[]>
+    })
 }
