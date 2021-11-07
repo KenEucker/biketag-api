@@ -21,6 +21,7 @@ import {
   updateTagPayload,
   getGameDataPayload,
   uploadTagImagePayload,
+  deleteTagPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -326,13 +327,22 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  // deleteImage(imageHash: string): Promise<BikeTagApiResponse<boolean>> {
-  //   switch (this.getMostAvailableAPI()) {
-  //     case "imgur":
-  //       return imgur.deleteImage(this, imageHash)
-  //     break
-  //   }
-  // }
+  deleteTag(
+    payload: deleteTagPayload | number,
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<any>> {
+    const { client, options, api, source } = this.getDefaultAPI(payload, opts)
+
+    return api.deleteTag(client, options).catch((e) => {
+      return Promise.resolve({
+        status: 500,
+        data: null,
+        error: e,
+        success: false,
+        source,
+      })
+    })
+  }
 
   // /// TODO: this should be for getting an album
   // getArchive(options: ArchiveOptions): Promise<BikeTagApiResponse<ArchiveData>> {
@@ -341,11 +351,20 @@ export class BikeTagClient extends EventEmitter {
 
   getTag(
     payload: RequireAtLeastOne<getTagPayload> | number,
-    opts?: Credentials
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<TagData>> {
     const { client, options, api, source } = this.getDefaultAPI(payload, opts)
+    let clientMethod = api.getTag
 
-    return api.getTag(client, options).catch((e) => {
+    switch (source) {
+      case 'reddit':
+        clientMethod = clientMethod.bind({
+          images: this.images(this.imgurConfig),
+        })
+        break
+    }
+
+    return clientMethod(client, options).catch((e) => {
       return {
         status: 500,
         data: null,
@@ -358,11 +377,20 @@ export class BikeTagClient extends EventEmitter {
 
   getTags(
     payload?: getTagsPayload | number[],
-    opts?: Credentials
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<TagData[]>> {
     const { client, options, api, source } = this.getDefaultAPI(payload, opts)
+    let clientMethod = api.getTags
 
-    return api.getTags(client, options).catch((e) => {
+    switch (source) {
+      case 'reddit':
+        clientMethod = clientMethod.bind({
+          images: this.images(this.imgurConfig),
+        })
+        break
+    }
+
+    return clientMethod(client, options).catch((e) => {
       return {
         status: 500,
         data: null,

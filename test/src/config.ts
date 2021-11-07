@@ -1,8 +1,10 @@
 import * as path from 'path'
 
 export const apiCredentials = {
-  clientId: '4fa12c6ce36984b',
-  clientSecret: '14dd920076de25884a1b900341022a84d78076bf',
+  imgur: {
+    clientId: '4fa12c6ce36984b',
+    clientSecret: '14dd920076de25884a1b900341022a84d78076bf',
+  },
 }
 
 export const assetsPath = path.resolve(__dirname, '../assets')

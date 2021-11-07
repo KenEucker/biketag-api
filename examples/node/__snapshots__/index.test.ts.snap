@@ -1,0 +1,264 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BikeTagClient imgur instance can retrieve all tags data 1`] = `
+Object {
+  "data": Array [
+    Object {
+      "discussionUrl": undefined,
+      "foundImageUrl": "https://i.imgur.com/UATbr0p.jpg",
+      "foundLocation": "nowhere?",
+      "game": "test",
+      "gps": Object {
+        "alt": 0,
+        "lat": 0,
+        "long": 0,
+      },
+      "hint": null,
+      "mysteryImageUrl": "https://i.imgur.com/6cXbPlZ.jpg",
+      "name": "test-tag-1",
+      "player": "hooooo",
+      "slug": "test-tag-1",
+      "tagnumber": 1,
+    },
+    Object {
+      "discussionUrl": undefined,
+      "foundImageUrl": "https://i.imgur.com/FnR2O1R.jpg",
+      "foundLocation": "somewhere?",
+      "game": "test",
+      "gps": Object {
+        "alt": 0,
+        "lat": 0,
+        "long": 0,
+      },
+      "hint": "somelocation",
+      "mysteryImageUrl": "https://i.imgur.com/9b7mpwB.jpg",
+      "name": "test-tag-2",
+      "player": "yooooo",
+      "slug": "test-tag-2",
+      "tagnumber": 2,
+    },
+    Object {
+      "discussionUrl": undefined,
+      "foundImageUrl": undefined,
+      "foundLocation": undefined,
+      "game": "test",
+      "gps": Object {
+        "alt": 0,
+        "lat": 0,
+        "long": 0,
+      },
+      "hint": "hinttime",
+      "mysteryImageUrl": "https://i.imgur.com/hHIJ1AW.jpg",
+      "name": "test-tag-3",
+      "player": "noooo",
+      "slug": "test-tag-3",
+      "tagnumber": 3,
+    },
+  ],
+  "source": "imgur",
+  "status": 200,
+  "success": true,
+}
+`;
+
+exports[`BikeTagClient imgur instance can retrieve latest tag data 1`] = `
+Object {
+  "data": Object {
+    "discussionUrl": undefined,
+    "foundImageUrl": "https://i.imgur.com/UATbr0p.jpg",
+    "foundLocation": "nowhere?",
+    "game": "test",
+    "gps": Object {
+      "alt": 0,
+      "lat": 0,
+      "long": 0,
+    },
+    "hint": null,
+    "mysteryImageUrl": "https://i.imgur.com/6cXbPlZ.jpg",
+    "name": "test-tag-1",
+    "player": "hooooo",
+    "slug": "test-tag-1",
+    "tagnumber": 1,
+  },
+  "source": "imgur",
+  "status": 200,
+  "success": true,
+}
+`;
+
+exports[`BikeTagClient imgur instance can retrieve tag 1 data 1`] = `
+Object {
+  "data": Object {
+    "discussionUrl": undefined,
+    "foundImageUrl": "https://i.imgur.com/UATbr0p.jpg",
+    "foundLocation": "nowhere?",
+    "game": "test",
+    "gps": Object {
+      "alt": 0,
+      "lat": 0,
+      "long": 0,
+    },
+    "hint": null,
+    "mysteryImageUrl": "https://i.imgur.com/6cXbPlZ.jpg",
+    "name": "test-tag-1",
+    "player": "hooooo",
+    "slug": "test-tag-1",
+    "tagnumber": 1,
+  },
+  "source": "imgur",
+  "status": 200,
+  "success": true,
+}
+`;
+
+exports[`BikeTagClient imgur instance can retrieve tag data 1`] = `
+Object {
+  "data": Object {
+    "discussionUrl": undefined,
+    "foundImageUrl": "https://i.imgur.com/UATbr0p.jpg",
+    "foundLocation": "nowhere?",
+    "game": "test",
+    "gps": Object {
+      "alt": 0,
+      "lat": 0,
+      "long": 0,
+    },
+    "hint": null,
+    "mysteryImageUrl": "https://i.imgur.com/6cXbPlZ.jpg",
+    "name": "test-tag-1",
+    "player": "hooooo",
+    "slug": "test-tag-1",
+    "tagnumber": 1,
+  },
+  "source": "imgur",
+  "status": 200,
+  "success": true,
+}
+`;
+
+exports[`BikeTagClient sanity instance can retrieve all tags data 1`] = `
+Object {
+  "data": Array [
+    Object {
+      "_id": "09f07e62-9b60-49d4-abfb-f73d4e9c6314",
+      "_type": "tag",
+      "discussionUrl": "",
+      "foundImage": null,
+      "foundImageUrl": "https://i.imgur.com/UATbr0p.jpg",
+      "foundLocation": "nowhere?",
+      "game": "Test",
+      "gps": "",
+      "hint": "",
+      "mysteryImage": null,
+      "mysteryImageUrl": "https://i.imgur.com/6cXbPlZ.jpg",
+      "name": "test-tag-1",
+      "player": "hooooo",
+      "slug": "test-tag-1",
+      "tagnumber": 1,
+    },
+  ],
+  "source": "sanity",
+  "status": 1,
+  "success": true,
+}
+`;
+
+exports[`BikeTagClient sanity instance can retrieve game data 1`] = `
+Object {
+  "data": Object {
+    "ambassadors": Array [
+      "Ken",
+    ],
+    "boundary": Object {
+      "_type": "geopoint",
+      "lat": 40.6516223,
+      "lng": -119.3567677,
+    },
+    "logo": "",
+    "mainhash": "QjnikOm",
+    "name": "Test",
+    "queuehash": "",
+    "region": "Gerlach",
+    "slug": "test",
+    "subreddit": "",
+  },
+  "source": "sanity",
+  "status": 1,
+  "success": true,
+}
+`;
+
+exports[`BikeTagClient sanity instance can retrieve latest tag data 1`] = `
+Object {
+  "data": Object {
+    "_id": "09f07e62-9b60-49d4-abfb-f73d4e9c6314",
+    "_type": "tag",
+    "discussionUrl": "",
+    "foundImage": null,
+    "foundImageUrl": "https://i.imgur.com/UATbr0p.jpg",
+    "foundLocation": "nowhere?",
+    "game": "Test",
+    "gps": "",
+    "hint": "",
+    "mysteryImage": null,
+    "mysteryImageUrl": "https://i.imgur.com/6cXbPlZ.jpg",
+    "name": "test-tag-1",
+    "player": "hooooo",
+    "slug": "test-tag-1",
+    "tagnumber": 1,
+  },
+  "source": "sanity",
+  "status": 1,
+  "success": true,
+}
+`;
+
+exports[`BikeTagClient sanity instance can retrieve tag 1 data 1`] = `
+Object {
+  "data": Object {
+    "_id": "09f07e62-9b60-49d4-abfb-f73d4e9c6314",
+    "_type": "tag",
+    "discussionUrl": "",
+    "foundImage": null,
+    "foundImageUrl": "https://i.imgur.com/UATbr0p.jpg",
+    "foundLocation": "nowhere?",
+    "game": "Test",
+    "gps": "",
+    "hint": "",
+    "mysteryImage": null,
+    "mysteryImageUrl": "https://i.imgur.com/6cXbPlZ.jpg",
+    "name": "test-tag-1",
+    "player": "hooooo",
+    "slug": "test-tag-1",
+    "tagnumber": 1,
+  },
+  "source": "sanity",
+  "status": 1,
+  "success": true,
+}
+`;
+
+exports[`BikeTagClient sanity instance can retrieve tag data 1`] = `
+Object {
+  "data": Object {
+    "_id": "09f07e62-9b60-49d4-abfb-f73d4e9c6314",
+    "_type": "tag",
+    "discussionUrl": "",
+    "foundImage": null,
+    "foundImageUrl": "https://i.imgur.com/UATbr0p.jpg",
+    "foundLocation": "nowhere?",
+    "game": "Test",
+    "gps": "",
+    "hint": "",
+    "mysteryImage": null,
+    "mysteryImageUrl": "https://i.imgur.com/6cXbPlZ.jpg",
+    "name": "test-tag-1",
+    "player": "hooooo",
+    "slug": "test-tag-1",
+    "tagnumber": 1,
+  },
+  "source": "sanity",
+  "status": 1,
+  "success": true,
+}
+`;

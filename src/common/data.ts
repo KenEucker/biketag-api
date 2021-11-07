@@ -38,6 +38,7 @@ export const createGame = (gameData: any = {}): GameData => {
     boundary: gameData.boundary ?? {},
     mainhash: gameData.mainhash ?? '',
     queuehash: gameData.queuehash ?? '',
+    subreddit: gameData.subreddit ?? '',
     logo: gameData.logo ?? '',
     region: gameData.region ?? '',
     slug: gameData.slug ?? '',

@@ -23,11 +23,11 @@ export async function getTag(
   let tagnumber = ''
 
   if (options.slug) {
-    slug = `&& slug.current in ${options.slug}`
+    slug = `&& slug.current == "${options.slug}"`
   }
 
   if (options.tagnumber) {
-    tagnumber = `&& tagnumber in ${options.tagnumber}`
+    tagnumber = `&& tagnumber == ${options.tagnumber}`
   }
 
   const fieldsFilter = options.fields?.length ? options.fields : tagDataFields

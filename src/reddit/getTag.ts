@@ -1,7 +1,5 @@
 import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, TagData } from '../common/types'
-import { constructTagDataObject } from './helpers'
-import { tagDataFields } from '../common/data'
 import { getTagPayload } from '../common/payloads'
 
 export async function getTag(
@@ -30,14 +28,10 @@ export async function getTag(
 
   return client.fetch(query, params).then((tag) => {
     // construct tagData object from tag
-    const tagData = constructTagDataObject(
-      tag,
-      options.fields?.length ? options.fields : tagDataFields
-    )
 
     // wrap tag in BikeTagApiResponse
     const response = {
-      data: tagData,
+      data: null,
       status: 1,
       success: true,
       source: 'sanity',

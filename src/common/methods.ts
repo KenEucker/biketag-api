@@ -137,8 +137,7 @@ export const isRedditCredentials = (
   credentials: RedditCredentials
 ): boolean => {
   return (
-    (credentials?.userAgent !== undefined &&
-      credentials?.clientId !== undefined) ||
+    credentials?.clientId !== undefined ||
     (credentials?.username !== undefined && credentials.password !== undefined)
   )
 }
@@ -273,16 +272,16 @@ export const assignBikeTagConfiguration = (
 
   /// Assign the individual configs with the parsed object plus overrides from individual configs in the passed in object
   configuration.biketag = config.biketag
-    ? { ...parsedConfig.biketag, ...config.biketag }
+    ? { ...parsedConfig.biketag, ...assignBikeTagCredentials(config.biketag) }
     : parsedConfig.biketag
   configuration.sanity = config.sanity
-    ? { ...parsedConfig.sanity, ...config.sanity }
+    ? { ...parsedConfig.sanity, ...assignSanityCredentials(config.sanity) }
     : parsedConfig.sanity
   configuration.imgur = config.imgur
-    ? { ...parsedConfig.imgur, ...config.imgur }
+    ? { ...parsedConfig.imgur, ...assignImgurCredentials(config.imgur) }
     : parsedConfig.imgur
   configuration.reddit = config.reddit
-    ? { ...parsedConfig.reddit, ...config.reddit }
+    ? { ...parsedConfig.reddit, ...assignRedditCredentials(config.reddit) }
     : parsedConfig.reddit
 
   return configuration
