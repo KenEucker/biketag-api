@@ -1,6 +1,6 @@
 {
   "name": "biketag",
-  "version": "1.4.3",
+  "version": "1.6.1",
   "description": "The Javascript client API for BikeTag Games",
   "main": "./biketag.node.js",
   "browser": "./biketag.js",
@@ -21,7 +21,7 @@
   "homepage": "https://github.com/keneucker/biketag-api#readme",
   "scripts": {
     "dev": "npm run dev:browser",
-    "dev:node": "node examples/index.js",
+    "dev:node": "node examples/node/index.js",
     "dev:test": "jest ./index.test.ts",
     "dev:browser": "npm-run-all --parallel watch serve",
     "dev:both": "npm-run-all --parallel dev:node dev:browser",

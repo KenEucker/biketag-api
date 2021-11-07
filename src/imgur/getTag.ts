@@ -14,9 +14,21 @@ export async function getTag(
   }
 
   const albumInfo = await (client.getAlbum(options.hash) as any)
-  const imagesData: TagData[] = albumInfo.data?.images?.filter(
-    (image: any) => getBikeTagNumberFromImage(image) == options.tagnumber
-  )
+  let imagesData: TagData[] = []
+
+  if (options.tagnumber) {
+    imagesData = albumInfo.data?.images?.filter(
+      (image: any) => getBikeTagNumberFromImage(image) == options.tagnumber
+    )
+  } else if (
+    !options.tagnumber &&
+    options.slug === 'latest' &&
+    albumInfo.data?.images?.length > 1
+  ) {
+    /// TODO: need to sort images by latest
+    /// const sortedImages = albumInfo.data.images
+    imagesData = [albumInfo.data.images[0], albumInfo.data.images[1]]
+  }
 
   const groupedImages: any[] = []
   imagesData.forEach((image: any) => {

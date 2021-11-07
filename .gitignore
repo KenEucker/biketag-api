@@ -4,3 +4,4 @@ _site
 dist
 *.DS_Store
 biketag.*
+logs

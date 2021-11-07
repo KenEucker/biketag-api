@@ -1,5 +1,5 @@
 // @ts-ignore
-const { BikeTagClient } = require('../dist/biketag.node.js')
+const { BikeTagClient } = require('../../dist/biketag.node.js')
 
 const imgurInstanceOpts = {
   game: 'test',
@@ -30,6 +30,27 @@ const getTagAsync = async (client, out = false) => {
   return tag1
 }
 
+const getTag1Async = async (client, out = false) => {
+  const tag1 = await client.getTag(1)
+  if (out) console.log(tag1.success ? 'successfully retrieved tag data' : 'error', tag1.success ? tag1.data : tag1.status)
+
+  return tag1
+}
+
+const getTagsAsync = async (client, out = false) => {
+  const tag1 = await client.getTags()
+  if (out) console.log(tag1.success ? 'successfully retrieved tag data' : 'error', tag1.success ? tag1.data : tag1.status)
+
+  return tag1
+}
+
+const getLatestTagAsync = async (client, out = false) => {
+  const tag1 = await client.getTag()
+  if (out) console.log(tag1.success ? 'successfully retrieved tag data' : 'error', tag1.success ? tag1.data : tag1.status)
+
+  return tag1
+}
+
 const getGameDataAsync = async (client, out = false) => {
   const testGameData = await client.getGameData('test')
   if (out) console.log(testGameData.success ? 'success fully retrieved game data' : 'error', testGameData.success ? testGameData.data : testGameData.status)
@@ -37,15 +58,20 @@ const getGameDataAsync = async (client, out = false) => {
   return testGameData
 }
 
-// if (true) {
-//   getTagAsync(bikeTagImgurInstance, true)
-//   getGameDataAsync(bikeTagSanityInstance, true)
-// }
+if (require.main === module) {
+  getTagAsync(bikeTagImgurInstance, true)
+  getLatestTagAsync(bikeTagImgurInstance, true)
+  getTagsAsync(bikeTagSanityInstance, true)
+  getGameDataAsync(bikeTagSanityInstance, true)
+}
 
 module.exports = {
   imgurInstanceOpts,
   sanityInstanceOpts,
   BikeTagClient,
   getGameDataAsync,
+  getLatestTagAsync,
+  getTagsAsync,
+  getTag1Async,
   getTagAsync,
 }

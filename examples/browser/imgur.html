@@ -590,13 +590,15 @@
         const hash = urlParams.hash ? urlParams.hash : 'QjnikOm'
 
         const biketagAPI = new biketag({
-          accessToken: urlParams.accessToken ? urlParams.accessToken : null,
           game: urlParams.game ? urlParams.game : 'test',
-          hash,
-          clientId: urlParams.clientId ? urlParams.clientId : '4fa12c6ce36984b',
-          clientSecret: urlParams.clientSecret
-            ? urlParams.clientSecret
-            : '14dd920076de25884a1b900341022a84d78076bf',
+          imgur: {
+            accessToken: urlParams.accessToken ? urlParams.accessToken : null,
+            hash,
+            clientId: urlParams.clientId ? urlParams.clientId : '4fa12c6ce36984b',
+            clientSecret: urlParams.clientSecret
+              ? urlParams.clientSecret
+              : '14dd920076de25884a1b900341022a84d78076bf',
+          }
         })
 
         const albumTagsData = await biketagAPI.getTags({
