@@ -11,6 +11,12 @@ export type getTagsPayload = {
   game: string
 }
 
+export type deleteTagPayload = {
+  slugs?: string[]
+  tagnumbers: number[]
+  game: string
+}
+
 export type getTagPayload = {
   tagnumber: number
   time?: 'all'
