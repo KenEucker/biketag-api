@@ -207,7 +207,7 @@ export const getGPSLocationFromText = (
       alt: 0,
     }
     putCacheIfExists(cacheKey, gpsLocation, cache)
-    
+
     return gpsLocation
   }
 
@@ -302,16 +302,15 @@ export const getImgurFoundImageHashFromBikeTagData = (
 }
 export const getImgurFoundDescriptionFromBikeTagData = (
   tag: TagData,
-  cache?: typeof TinyCache,
+  cache?: typeof TinyCache
 ): string =>
   `#${tag.tagnumber} proof${
     tag.foundLocation ? ` found at (${tag.foundLocation})` : ''
   } by ${tag.player}`
 export const getImgurFoundTitleFromBikeTagData = (
   tag: TagData,
-  cache?: typeof TinyCache,
-): string =>
-  `(${tag.gps ? tag.gps : ''})`
+  cache?: typeof TinyCache
+): string => `(${tag.gps ? tag.gps : ''})`
 
 export const getImgurMysteryImageHashFromBikeTagData = (
   tag: TagData,
@@ -321,8 +320,8 @@ export const getImgurMysteryImageHashFromBikeTagData = (
 }
 export const getImgurMysteryTitleFromBikeTagData = (
   tag: TagData,
-  cache?: typeof TinyCache,
-  ): string =>
+  cache?: typeof TinyCache
+): string =>
   `${
     !tag.gps || (tag.gps.lat === 0 && tag.gps.long === 0)
       ? ''
@@ -331,7 +330,7 @@ export const getImgurMysteryTitleFromBikeTagData = (
 
 export const getImgurMysteryDescriptionFromBikeTagData = (
   tag: TagData,
-  cache?: typeof TinyCache,
+  cache?: typeof TinyCache
 ): string =>
   `#${tag.tagnumber} tag (hint: ${tag.hint ? tag.hint : ''} ) by ${tag.player}`
 

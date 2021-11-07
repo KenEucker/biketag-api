@@ -358,7 +358,9 @@ export class BikeTagClient extends EventEmitter {
 
     switch (source) {
       case 'reddit':
-        clientMethod = clientMethod.bind({images: this.images(this.imgurConfig) })
+        clientMethod = clientMethod.bind({
+          images: this.images(this.imgurConfig),
+        })
         break
     }
 
@@ -382,7 +384,9 @@ export class BikeTagClient extends EventEmitter {
 
     switch (source) {
       case 'reddit':
-        clientMethod = clientMethod.bind({images: this.images(this.imgurConfig) })
+        clientMethod = clientMethod.bind({
+          images: this.images(this.imgurConfig),
+        })
         break
     }
 

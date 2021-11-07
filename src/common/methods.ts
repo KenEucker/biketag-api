@@ -137,7 +137,7 @@ export const isRedditCredentials = (
   credentials: RedditCredentials
 ): boolean => {
   return (
-    (credentials?.clientId !== undefined) ||
+    credentials?.clientId !== undefined ||
     (credentials?.username !== undefined && credentials.password !== undefined)
   )
 }

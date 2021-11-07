@@ -1,12 +1,15 @@
 import RedditClient from 'snoowrap'
 import { BikeTagApiResponse, TagData } from '../common/types'
 import { getTagsPayload } from '../common/payloads'
-import { getBikeTagInformationFromRedditData, getBikeTagsFromRedditPosts } from './helpers'
+import {
+  getBikeTagInformationFromRedditData,
+  getBikeTagsFromRedditPosts,
+} from './helpers'
 import ImgurClient from 'imgur'
 
 export async function getTags(
   client: RedditClient,
-  options: getTagsPayload,
+  options: getTagsPayload
 ): Promise<BikeTagApiResponse<TagData[]>> {
   if (!options) {
     throw new Error('no options')
@@ -16,13 +19,16 @@ export async function getTags(
 
   options.sort = options.sort ?? 'new'
   options.limit = options.limit ?? 10
-  options.time = options.time ?? 'year'
+  options.time = options.time ?? 'all'
 
   return client
     .getSubreddit(options.subreddit)
     .search({ query, ...options })
     .then(async (redditPosts) => {
-      const redditBikeTagData = await getBikeTagsFromRedditPosts(redditPosts, this.images)
+      const redditBikeTagData = await getBikeTagsFromRedditPosts(
+        redditPosts,
+        this.images
+      )
       const bikeTags: TagData[] = []
 
       for (const biketagPost of redditBikeTagData) {

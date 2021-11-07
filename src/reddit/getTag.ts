@@ -28,7 +28,7 @@ export async function getTag(
 
   return client.fetch(query, params).then((tag) => {
     // construct tagData object from tag
-   
+
     // wrap tag in BikeTagApiResponse
     const response = {
       data: null,

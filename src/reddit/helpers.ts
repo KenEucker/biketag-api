@@ -13,12 +13,13 @@ import { GalleryOptions } from 'imgur/lib/gallery'
 
 export async function getBikeTagsFromRedditPosts(
   posts,
-  imageClient: ImgurClient,
+  imageClient: ImgurClient
 ) {
   let selftext = '',
     postBody,
     isSelfPost = true
   const postTexts = []
+  const unreadableRedditPosts = []
 
   for (const p of posts) {
     const imgurBaseUrl = '://imgur.com'
@@ -63,7 +64,7 @@ export async function getBikeTagsFromRedditPosts(
         const galleryInfoResponse = await imageClient.getAlbum(galleryID)
 
         if (galleryInfoResponse) {
-          for(const image of galleryInfoResponse.data.images) {
+          for (const image of galleryInfoResponse.data.images) {
             const imageText = `${image.title} ${image.description}`
             const newImageNumbers = getTagNumbersFromText(imageText)
 
@@ -84,11 +85,6 @@ export async function getBikeTagsFromRedditPosts(
             gps = gps || getGPSLocationFromText(postBody, undefined)
             credit = credit || image.account_url
           }
-        } else {
-          console.log('ERROR: getBikeTagsFromRedditPosts', {
-            imageUrl,
-            galleryInfoResponse,
-          })
         }
       } else {
         directImageLinks.push(imageUrl)
@@ -97,7 +93,7 @@ export async function getBikeTagsFromRedditPosts(
 
     if (!(directImageLinksNumbers as number[]).length) {
       /// No tag numbers found?
-      console.log({ unreadableRedditPost: p })
+      unreadableRedditPosts.push(p)
     } else {
       if (!foundAt) {
         foundAt = postBody
@@ -111,7 +107,9 @@ export async function getBikeTagsFromRedditPosts(
           removeStringFromFoundAt(`#${s}`)
         )
 
-        if (credit) {removeStringFromFoundAt(`(@|#|u/)?${credit}`)}
+        if (credit) {
+          removeStringFromFoundAt(`(@|#|u/)?${credit}`)
+        }
         if (gps) {
           removeStringFromFoundAt(
             new RegExp(
@@ -119,9 +117,9 @@ export async function getBikeTagsFromRedditPosts(
               'gi'
             )
           )
-            }
+        }
         if (hint) {
-            removeStringFromFoundAt(
+          removeStringFromFoundAt(
             new RegExp(/(\()?(hint:?)?\s*(${hint})(\s?\))?/gi)
           )
         }
@@ -167,7 +165,7 @@ export async function getBikeTagsFromRedditPosts(
 }
 
 export async function getBikeTagInformationFromRedditData(
-  redditPostData,
+  redditPostData
 ): Promise<TagData> {
   if (!redditPostData.tagNumbers) {
     /// TODO: handle a link that is an image gallery and has only one tag number attached
