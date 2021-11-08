@@ -15,6 +15,7 @@ export interface ImgurClientId {
 export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
   hash?: string
   clientSecret: string
+  apiVersion: '2021-06-07' | string
 }
 
 export interface RedditRefreshToken {
@@ -66,7 +67,7 @@ export interface ClientKey {
   clientToken: string
 }
 
-export type BikeTagCredentials = (ClientKey | AccessToken) & Game
+export type BikeTagCredentials = ClientKey & AccessToken & Game
 
 export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
@@ -80,6 +81,13 @@ export interface BikeTagApiResponse<
   status: number
   success: boolean
   source: 'biketag' | 'imgur' | 'sanity' | 'reddit'
+}
+
+export type ImgurImage = {
+  description: string
+  title: string
+  link: string
+  datetime: number
 }
 
 export type geopoint = {

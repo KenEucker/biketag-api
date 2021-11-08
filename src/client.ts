@@ -344,11 +344,6 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  // /// TODO: this should be for getting an album
-  // getArchive(options: ArchiveOptions): Promise<BikeTagApiResponse<ArchiveData>> {
-  //   return getArchive(this, options)
-  // }
-
   getTag(
     payload: RequireAtLeastOne<getTagPayload> | number,
     opts?: RequireAtLeastOne<Credentials>
@@ -434,66 +429,6 @@ export class BikeTagClient extends EventEmitter {
       })
     })
   }
-
-  // getBikeTag(
-  //   payload: UpdateImagePayload | UpdateImagePayload[]
-  // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  //   switch (this.getMostAvailableAPI()) {
-  //     case "imgur":
-  //       return getBikeTag(this, payload)
-  //       break
-  //     case "sanity":
-  //       return
-  //   }
-  // }
-
-  // getBikeTagMysteryImage(
-  //   payload: UpdateImagePayload | UpdateImagePayload[]
-  // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  //   return getBikeTagMysteryImage(this, payload)
-  // }
-
-  // getBikeTagFoundImage(
-  //   payload: UpdateImagePayload | UpdateImagePayload[]
-  // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  //   return getBikeTagFoundImage(this, payload)
-  // }
-
-  // queueBikeTagFoundImage(
-  //   payload: UpdateImagePayload | UpdateImagePayload[]
-  // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  //   return queueBikeTagFoundImage(this, payload)
-  // }
-
-  // queueBikeTagMysteryImage(
-  //   payload: UpdateImagePayload | UpdateImagePayload[]
-  // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  //   return queueBikeTagMysteryImage(this, payload)
-  // }
-
-  // getQueuedImages(
-  //   payload: UpdateImagePayload | UpdateImagePayload[]
-  // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  //   return getQueuedImages(this, payload)
-  // }
-
-  // getQueue(
-  //   payload: UpdateImagePayload | UpdateImagePayload[]
-  // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  //   return getQueue(this, payload)
-  // }
-
-  // completeBikeTagRound(
-  //   payload: UpdateImagePayload | UpdateImagePayload[]
-  // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  //   return completeBikeTagRound(this, payload)
-  // }
-
-  // getBikeTagRound(
-  //   payload: UpdateImagePayload | UpdateImagePayload[]
-  // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  //   return getBikeTagRound(this, payload)
-  // }
 
   content(options: any = {}): SanityClient {
     if (isSanityCredentials(options)) {
