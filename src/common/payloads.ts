@@ -12,8 +12,15 @@ export type getTagsPayload = {
 }
 
 export type deleteTagPayload = {
+  slug?: string
+  tagnumber?: string
+  game?: string
+}
+
+export type deleteTagsPayload = {
   slugs?: string[]
   tagnumbers: number[]
+  tags?: Partial<TagData>[]
   game: string
 }
 

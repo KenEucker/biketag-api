@@ -1,8 +1,9 @@
 import type { ImgurClient } from 'imgur'
-import { BikeTagApiResponse, TagData } from '../common/types'
+import { BikeTagApiResponse, ImgurImage, TagData } from '../common/types'
 import {
   getBikeTagNumberFromImage,
   getBikeTagFromImgurImageSet,
+  sortImgurImagesByTagNumber,
 } from './helpers'
 
 export async function getTag(
@@ -14,7 +15,7 @@ export async function getTag(
   }
 
   const albumInfo = await (client.getAlbum(options.hash) as any)
-  let imagesData: TagData[] = []
+  let imagesData: ImgurImage[] = []
 
   if (options.tagnumber) {
     imagesData = albumInfo.data?.images?.filter(
@@ -25,9 +26,16 @@ export async function getTag(
     options.slug === 'latest' &&
     albumInfo.data?.images?.length > 1
   ) {
-    /// TODO: need to sort images by latest
-    /// const sortedImages = albumInfo.data.images
-    imagesData = [albumInfo.data.images[0], albumInfo.data.images[1]]
+    const sortedImages = sortImgurImagesByTagNumber(albumInfo.data.images)
+    imagesData.push(sortedImages[0])
+
+    if (sortedImages[1]) {
+      const firstImageNumber = getBikeTagNumberFromImage(sortedImages[0])
+      const secondImageNumber = getBikeTagNumberFromImage(sortedImages[1])
+      if (firstImageNumber === secondImageNumber) {
+        imagesData.push(sortedImages[1])
+      }
+    }
   }
 
   const groupedImages: any[] = []

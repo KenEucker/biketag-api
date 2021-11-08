@@ -23,6 +23,7 @@ import {
   getGameDataPayload,
   uploadTagImagePayload,
   deleteTagPayload,
+  deleteTagsPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -341,8 +342,39 @@ export class BikeTagClient extends EventEmitter {
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<any>> {
     const { client, options, api, source } = this.getDefaultAPI(payload, opts)
+    let clientMethod = api.deleteTag
 
-    return api.deleteTag(client, options).catch((e) => {
+    switch (source) {
+      case 'imgur':
+        clientMethod = clientMethod.bind({ getTag: api.getTag })
+        break
+    }
+
+    return clientMethod(client, options).catch((e) => {
+      return Promise.resolve({
+        status: 500,
+        data: null,
+        error: e,
+        success: false,
+        source,
+      })
+    })
+  }
+
+  deleteTags(
+    payload: deleteTagsPayload | number[],
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<any>> {
+    const { client, options, api, source } = this.getDefaultAPI(payload, opts)
+    let clientMethod = api.deleteTags
+
+    switch (source) {
+      case 'imgur':
+        clientMethod = clientMethod.bind({ getTags: api.getTags })
+        break
+    }
+
+    return clientMethod(client, options).catch((e) => {
       return Promise.resolve({
         status: 500,
         data: null,
@@ -455,7 +487,7 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating an imgur client')
   }
 
-  reddit(options: any = {}): RedditClient {
+  discussions(options: any = {}): RedditClient {
     if (isRedditCredentials(options)) {
       return new RedditClient(options)
     }
