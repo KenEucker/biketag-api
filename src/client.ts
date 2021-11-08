@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
+import merge from 'deepmerge'
 import { EventEmitter } from 'events'
 // import { getAuthorizationHeader } from './getAuthorizationHeader'
 import { BIKETAG_API_PREFIX } from './common/endpoints'
@@ -268,10 +269,18 @@ export class BikeTagClient extends EventEmitter {
     let redditConfig = (parsedConfig as BikeTagConfiguration).reddit
 
     if (!overwrite) {
-      biketagConfig = { ...this.biketagConfig, ...biketagConfig }
-      imgurConfig = { ...this.imgurConfig, ...imgurConfig }
-      sanityConfig = { ...this.sanityConfig, ...sanityConfig }
-      redditConfig = { ...this.redditConfig, ...redditConfig }
+      biketagConfig = this.biketagConfig
+        ? merge(this.biketagConfig, biketagConfig ?? {})
+        : biketagConfig
+      imgurConfig = this.imgurConfig
+        ? merge(this.imgurConfig, imgurConfig ?? {})
+        : imgurConfig
+      sanityConfig = this.sanityConfig
+        ? merge(this.sanityConfig, sanityConfig ?? {})
+        : sanityConfig
+      redditConfig = this.redditConfig
+        ? merge(this.redditConfig, redditConfig ?? {})
+        : redditConfig
     }
 
     this.biketagConfig = biketagConfig

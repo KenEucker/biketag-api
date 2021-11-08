@@ -15,7 +15,6 @@ export interface ImgurClientId {
 export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
   hash?: string
   clientSecret: string
-  apiVersion: '2021-06-07' | string
 }
 
 export interface RedditRefreshToken {
@@ -49,7 +48,7 @@ export interface SanityProjectId {
 
 export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
   dataset: string
-  apiVersion: string
+  apiVersion: '2021-06-07' | string
   useCdn: boolean
   username: string
   password: string

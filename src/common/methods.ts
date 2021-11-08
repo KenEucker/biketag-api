@@ -198,7 +198,6 @@ export const createImgurCredentials = (
     clientSecret: credentials.clientSecret,
     hash: credentials.hash,
     accessToken: credentials.accessToken,
-    apiVersion: credentials.apiVersion ?? '2021-06-07',
   }
 }
 
