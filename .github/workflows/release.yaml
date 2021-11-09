@@ -32,7 +32,7 @@ jobs:
       - name: Compile
         run: npm run compile:prod
       - name: Run tests
-        run: npm test:ci
+        run: npm run test:ci
       - name: Release
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
