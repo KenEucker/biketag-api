@@ -1,34 +1,37 @@
 import ImgurClient from 'imgur'
-import { deleteTagPayload } from '../common/payloads'
+import { deleteTagsPayload } from '../common/payloads'
 import { BikeTagApiResponse, ImgurImage } from '../common/types'
 import { getImageHashFromImgurImage } from './helpers'
 
 export async function deleteTag(
   client: ImgurClient,
-  payload: deleteTagPayload
+  payload: deleteTagsPayload
 ): Promise<BikeTagApiResponse<any>> {
   const responses = []
-  const hashes = []
+  const deleteHashes = []
+  let tags = payload.tags
 
-  if (payload.tagnumber || payload.slug) {
-    const tag = await this.getTag(payload.tagnumber ?? payload.slug)
+  if (!tags.length && (payload.tagnumbers || payload.slugs)) {
+    tags = await this.getTags(payload.tagnumbers ?? payload.slugs)
+  }
+  for (const tag of tags) {
     if (tag.foundImageUrl) {
-      hashes.push(
+      deleteHashes.push(
         getImageHashFromImgurImage({ link: tag.foundImageUrl } as ImgurImage)
       )
     }
     if (tag.mysteryImageUrl) {
-      hashes.push(
+      deleteHashes.push(
         getImageHashFromImgurImage({ link: tag.mysteryImageUrl } as ImgurImage)
       )
     }
   }
 
-  if (!hashes.length) {
+  if (!deleteHashes.length) {
     throw new Error('Imgur delete hashes not set')
   }
 
-  for (const hash of hashes) {
+  for (const hash of deleteHashes) {
     responses.push(await client.deleteImage(hash))
   }
 

@@ -12,8 +12,15 @@ export type getTagsPayload = {
 }
 
 export type deleteTagPayload = {
+  slug?: string
+  tagnumber?: string
+  game?: string
+}
+
+export type deleteTagsPayload = {
   slugs?: string[]
   tagnumbers: number[]
+  tags?: Partial<TagData>[]
   game: string
 }
 
@@ -21,7 +28,8 @@ export type getTagPayload = {
   tagnumber: number
   time?: 'all'
   sort?: 'new'
-  limit?: 1
+  limit?: number
+  subreddit?: string
   slug: string
   fields?: string[]
 }

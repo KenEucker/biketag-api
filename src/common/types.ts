@@ -48,7 +48,7 @@ export interface SanityProjectId {
 
 export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
   dataset: string
-  apiVersion: string
+  apiVersion: '2021-06-07' | string
   useCdn: boolean
   username: string
   password: string
@@ -66,7 +66,7 @@ export interface ClientKey {
   clientToken: string
 }
 
-export type BikeTagCredentials = (ClientKey | AccessToken) & Game
+export type BikeTagCredentials = ClientKey & AccessToken & Game
 
 export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
@@ -82,6 +82,13 @@ export interface BikeTagApiResponse<
   source: 'biketag' | 'imgur' | 'sanity' | 'reddit'
 }
 
+export type ImgurImage = {
+  description: string
+  title: string
+  link: string
+  datetime: number
+}
+
 export type geopoint = {
   lat: number
   long: number
@@ -92,19 +99,21 @@ export type boundary = {
   geo: geopoint
 }
 
-export type region = {
+export type Region = {
   description: string
   name: string
   slug: string
   zipcode: number
 }
 
-export type player = {
+export type Player = {
   name: string
   bicon: string
+  games: string[]
+  tags: string[]
 }
 
-export type ambassador = {
+export type Ambassador = {
   address1: string
   address2: string
   city: string
@@ -112,7 +121,7 @@ export type ambassador = {
   email: string
   name: string
   phone: string
-  player: player
+  player: Player
   slug: string
   zipcode: number
 }
@@ -144,13 +153,13 @@ export interface AlbumData extends CommonData {
 
 export interface GameData {
   name: string
-  ambassadors: ambassador[]
+  ambassadors: Ambassador[]
   boundary: boundary
   mainhash: string
   queuehash: string
   subreddit: string
   logo: string
-  region: region
+  region: Region
   slug: string
 }
 

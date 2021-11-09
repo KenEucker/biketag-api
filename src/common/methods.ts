@@ -23,7 +23,7 @@ export const putCacheIfExists = (
   key: string,
   value: any,
   cache?: typeof TinyCache
-) => {
+): void => {
   if (cache) cache.put(key, value)
 }
 
@@ -172,7 +172,7 @@ export const isBikeTagCredentials = (
 
 export const isBikeTagApiReady = (
   credentials: BikeTagCredentials | Credentials
-) => {
+): boolean => {
   return (
     (credentials as ClientKey).clientToken !== undefined &&
     (credentials as ClientKey).clientKey !== undefined
@@ -190,19 +190,44 @@ export const isBikeTagConfiguration = (
   )
 }
 
+export const createImgurCredentials = (
+  credentials: Partial<ImgurCredentials>,
+  defaults: Partial<ImgurCredentials> = {}
+): ImgurCredentials => {
+  return {
+    clientId: credentials.clientId ?? defaults.clientId,
+    clientSecret: credentials.clientSecret ?? defaults.clientSecret,
+    hash: credentials.hash ?? defaults.hash,
+    accessToken: credentials.accessToken ?? defaults.accessToken,
+  }
+}
+
 export const assignImgurCredentials = (
   credentials: ImgurCredentials
 ): ImgurCredentials => {
   const imgurCredentials = isImgurCredentials(credentials as ImgurCredentials)
-    ? {
-        clientId: credentials.clientId,
-        clientSecret: credentials.clientSecret,
-        hash: credentials.hash,
-        accessToken: credentials.accessToken || undefined,
-      }
+    ? createImgurCredentials(credentials)
     : undefined
 
   return imgurCredentials as ImgurCredentials
+}
+
+export const createSanityCredentials = (
+  credentials: Partial<SanityCredentials>,
+  defaults: Partial<SanityCredentials> = {}
+): SanityCredentials => {
+  return {
+    useCdn:
+      credentials.token !== undefined
+        ? false
+        : credentials.useCdn ?? defaults.useCdn ?? true,
+    projectId: credentials.projectId ?? defaults.projectId,
+    dataset: credentials.dataset ?? defaults.dataset ?? 'development',
+    token: credentials.token ?? defaults.token ?? '',
+    password: credentials.password ?? defaults.password,
+    username: credentials.username ?? defaults.username,
+    apiVersion: credentials.apiVersion ?? defaults.apiVersion ?? '2021-06-07',
+  }
 }
 
 export const assignSanityCredentials = (
@@ -211,19 +236,25 @@ export const assignSanityCredentials = (
   const sanityCredentials = isSanityCredentials(
     credentials as SanityCredentials
   )
-    ? {
-        projectId: credentials.projectId,
-        useCdn:
-          credentials.token !== undefined ? false : credentials.useCdn ?? true,
-        dataset: credentials.dataset ?? 'development',
-        token: credentials.token ?? '',
-        password: credentials.password,
-        username: credentials.username,
-        apiVersion: credentials.apiVersion ?? '2021-03-25',
-      }
+    ? createSanityCredentials(credentials)
     : undefined
 
   return sanityCredentials as SanityCredentials
+}
+
+export const createRedditCredentials = (
+  credentials: Partial<RedditCredentials>,
+  defaults: Partial<RedditCredentials> = {}
+): RedditCredentials => {
+  return {
+    subreddit: credentials.subreddit ?? defaults.subreddit,
+    clientId: credentials.clientId ?? defaults.clientId,
+    clientSecret: credentials.clientSecret ?? defaults.clientSecret,
+    password: credentials.password ?? defaults.password,
+    username: credentials.username ?? defaults.username,
+    refreshToken: credentials.refreshToken ?? defaults.refreshToken,
+    userAgent: credentials.userAgent ?? defaults.userAgent ?? 'biketag API',
+  }
 }
 
 export const assignRedditCredentials = (
@@ -232,26 +263,30 @@ export const assignRedditCredentials = (
   const RedditCredentials = isRedditCredentials(
     credentials as RedditCredentials
   )
-    ? {
-        clientId: credentials.clientId,
-        clientSecret: credentials.clientSecret,
-        password: credentials.password,
-        username: credentials.username,
-        refreshToken: credentials.refreshToken,
-        userAgent: credentials.userAgent || 'biketag API',
-      }
+    ? createRedditCredentials(credentials)
     : undefined
 
   return RedditCredentials as RedditCredentials
+}
+
+export const createBikeTagCredentials = (
+  credentials: Partial<BikeTagCredentials>,
+  defaults: Partial<BikeTagCredentials> = {}
+): BikeTagCredentials => {
+  return {
+    game: credentials.game ?? defaults.game,
+    source: credentials.source ?? defaults.source,
+    clientKey: credentials.clientKey ?? defaults.clientKey,
+    clientToken: credentials.clientToken ?? defaults.clientToken,
+    accessToken: credentials.accessToken ?? defaults.accessToken,
+  }
 }
 
 export const assignBikeTagCredentials = (
   credentials: Credentials
 ): BikeTagCredentials => {
   const biketagCredentials = isBikeTagCredentials(credentials as Credentials)
-    ? {
-        game: credentials.game,
-      }
+    ? createBikeTagCredentials(credentials)
     : undefined
 
   return biketagCredentials as BikeTagCredentials
@@ -272,16 +307,16 @@ export const assignBikeTagConfiguration = (
 
   /// Assign the individual configs with the parsed object plus overrides from individual configs in the passed in object
   configuration.biketag = config.biketag
-    ? { ...parsedConfig.biketag, ...assignBikeTagCredentials(config.biketag) }
+    ? { ...parsedConfig.biketag, ...createBikeTagCredentials(config.biketag) }
     : parsedConfig.biketag
   configuration.sanity = config.sanity
-    ? { ...parsedConfig.sanity, ...assignSanityCredentials(config.sanity) }
+    ? { ...parsedConfig.sanity, ...createSanityCredentials(config.sanity) }
     : parsedConfig.sanity
   configuration.imgur = config.imgur
-    ? { ...parsedConfig.imgur, ...assignImgurCredentials(config.imgur) }
+    ? { ...parsedConfig.imgur, ...createImgurCredentials(config.imgur) }
     : parsedConfig.imgur
   configuration.reddit = config.reddit
-    ? { ...parsedConfig.reddit, ...assignRedditCredentials(config.reddit) }
+    ? { ...parsedConfig.reddit, ...createRedditCredentials(config.reddit) }
     : parsedConfig.reddit
 
   return configuration

@@ -5,7 +5,6 @@ import {
   getBikeTagInformationFromRedditData,
   getBikeTagsFromRedditPosts,
 } from './helpers'
-import ImgurClient from 'imgur'
 
 export async function getTags(
   client: RedditClient,

@@ -6,12 +6,9 @@ export async function deleteTag(
   client: SanityClient,
   payload: deleteTagPayload
 ): Promise<BikeTagApiResponse<any>> {
-  if (!payload.slugs?.length) {
-    if (payload.tagnumbers?.length) {
-      payload.slugs = payload.tagnumbers.reduce((o, v) => {
-        o.push(`${payload.game}-tag-${v}`)
-        return o
-      }, [])
+  if (!payload.slug?.length) {
+    if (payload.tagnumber) {
+      payload.slug = `${payload.game}-tag-${payload.tagnumber}`
     } else {
       return {
         data: null,
@@ -21,7 +18,7 @@ export async function deleteTag(
       }
     }
   }
-  const query = `*[_type == "tag" && _id in [${payload.slugs.join(',')}]]`
+  const query = `*[_type == "tag" && _id == ${payload.slug}]`
 
   return client.delete({ query }).then((result) => {
     return {

@@ -1,5 +1,5 @@
 import * as expressions from '../common/expressions'
-import { TagData } from '../common/types'
+import { ImgurImage, TagData } from '../common/types'
 import { getCreditFromText, getImageHashFromText } from '../common/getters'
 import { cacheKeys } from '../common/data'
 
@@ -11,9 +11,9 @@ import {
 } from '../common/methods'
 
 export function sortImgurImagesByUploadDate(
-  images: any[] = [],
+  images: ImgurImage[] = [],
   newestFirst: boolean
-): any[] {
+): ImgurImage[] {
   if (!newestFirst) {
     return images.sort(
       (image1, image2) =>
@@ -81,7 +81,8 @@ export function getPlayerFromText(
     typeof c === 'string' &&
     (c.indexOf('tag ') === -1 || c.indexOf('tag') !== 0) &&
     (c.indexOf('proof ') === -1 || c.indexOf('proof') !== 0) &&
-    c.indexOf('(hint:') === -1 &&
+    c.indexOf('to:') === -1 &&
+    c.indexOf('hint:') === -1 &&
     (c.indexOf('by') === -1 || c.indexOf('by') !== 0)
       ? c
       : undefined
@@ -103,7 +104,7 @@ export function getDiscussionUrlFromText(
   inputText: string,
   fallback?: string,
   cache?: typeof TinyCache
-) {
+): string {
   if (!inputText || !inputText.length) {
     return fallback
   }
@@ -214,11 +215,13 @@ export function getGPSLocationFromText(
   return gpsLocation
 }
 
-export function getBikeTagNumberFromImage(image: any): number {
+export function getBikeTagNumberFromImage(image: ImgurImage): number {
   return image.description ? getTagNumbersFromText(image.description)[0] : -1
 }
 
-export function sortImgurImagesByTagNumber(images: any[] = []): any[] {
+export function sortImgurImagesByTagNumber(
+  images: ImgurImage[] = []
+): ImgurImage[] {
   return images.sort((image1, image2) => {
     const tagNumber1 = getBikeTagNumberFromImage(image1)
     const tagNumber2 = getBikeTagNumberFromImage(image2)
@@ -264,8 +267,8 @@ export function getImgurLinksFromText(
 }
 
 export function getBikeTagFromImgurImageSet(
-  mysteryImage: any,
-  foundImage?: any,
+  mysteryImage: ImgurImage,
+  foundImage?: ImgurImage,
   opts?: any
 ): TagData {
   const game = opts?.game || ''
@@ -294,16 +297,16 @@ export function getBikeTagFromImgurImageSet(
 }
 
 export const getBikeTagUsernameFromImgurImage = (
-  image: any,
+  image: ImgurImage,
   cache?: typeof TinyCache
 ): string => {
   return getCreditFromText(image.description, undefined, cache)
 }
 
 export const getBikeTagDiscussionLinkFromImgurImage = (
-  image: any,
+  image: ImgurImage,
   cache?: typeof TinyCache
-) => {
+): string | null => {
   const tagTitle = image.title || ''
   const tagDiscussionLinkIndex = tagTitle.indexOf('{')
   let tagDiscussionLink = null
@@ -319,7 +322,7 @@ export const getBikeTagDiscussionLinkFromImgurImage = (
 }
 
 export const getBikeTagNumberFromImgurImage = (
-  image: any,
+  image: ImgurImage,
   cache?: typeof TinyCache
 ): number => {
   return image.description
@@ -328,14 +331,14 @@ export const getBikeTagNumberFromImgurImage = (
 }
 
 export const getBikeTagNumberIndexFromImgurImages = (
-  images: any = [],
+  images: ImgurImage[] = [],
   tagNumber = 1,
   proof = false
 ): number => {
   const tagNumberIndex =
     images.length + 1 - (tagNumber - (tagNumber % 2) + 1) * 2
 
-  const verifyTagNumber = function (index) {
+  const verifyTagNumber = function (index): boolean {
     if (!images[index] || !images[index].description) {
       return false
     }
@@ -373,7 +376,7 @@ export const getBikeTagNumberIndexFromImgurImages = (
 }
 
 export const getImageHashFromImgurImage = (
-  image: any,
+  image: ImgurImage,
   cache?: typeof TinyCache
 ): string => {
   return getImageHashFromText(image.link, cache)

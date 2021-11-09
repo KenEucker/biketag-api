@@ -3,7 +3,7 @@ export const getTagNumbersFromTextRegex = new RegExp(
 )
 
 export const getCreditFromTextRegex = new RegExp(
-  /((?:\[.*)?(?:proof\s*(?:found\s*at\s*)?(?:\(.*\))?\s*by\s*)(.*)(?:\])?)|((?:\[.*)?(?:tag\s*(?:\((?:hint:)?.*\))?\s*by\s*)(.*)(?:\])?)|((?:credit goes to:\s*)(.*)(?:\s*for))/gi
+  /((?:proof\s*(?:found\s*at\s*)?(?:\(.*\))?\s*by\s*)(.*?(?=])))|((?:tag\s*(?:\((?:hint:)?.*\))?\s*by\s*)(.+?(?=]|\r|\n|$))?)|((?:tag\s*(?:\((?:hint:)?.*\))?\s*by\s*)(.+?(?=]|\r|\n))?)|((?:credit goes to:\s*)(.*)(?:\sfor finding))/gi
 )
 
 export const getFoundLocationFromTextRegex = new RegExp(
@@ -17,7 +17,7 @@ export const getGPSLocationFromTextRegex = new RegExp(
 )
 
 export const getImageURLsFromTextRegex = new RegExp(
-  /(?:])(?:\()(https?:\/\/.*?\.[a-z]{2,4}\/[^\s)]*)/gi
+  /https?:\/\/.*?\.[a-z]{2,4}\/.+?(?=\))/gi
 )
 
 export const getDiscussionUrlFromTextRegex = RegExp(/{(.*)}/gi)
