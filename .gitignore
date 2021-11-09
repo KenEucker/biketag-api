@@ -6,3 +6,4 @@ dist
 biketag.*
 logs
 .env
+coverage
