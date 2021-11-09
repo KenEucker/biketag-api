@@ -10,7 +10,7 @@ const imgurInstanceOpts = {
     clientSecret: process.env.IMGUR_CLIENT_SECRET,
   }
 }
-const bikeTagImgurInstance = imgurInstanceOpts.imgur?.hash ? new BikeTagClient(imgurInstanceOpts) : null
+const bikeTagImgurInstance = imgurInstanceOpts.imgur && imgurInstanceOpts.imgur.hash ? new BikeTagClient(imgurInstanceOpts) : null
 
 const sanityInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
@@ -21,7 +21,7 @@ const sanityInstanceOpts = {
     useCdn: !!process.env.SANITY_PROJECT_ID ? false : true,
   }
 }
-const bikeTagSanityInstance = sanityInstanceOpts.sanity?.projectId ? new BikeTagClient(sanityInstanceOpts) : null
+const bikeTagSanityInstance = sanityInstanceOpts.sanity && sanityInstanceOpts.sanity.projectId ? new BikeTagClient(sanityInstanceOpts) : null
 
 const redditInstanceOpts = {
   ...imgurInstanceOpts,
@@ -33,7 +33,7 @@ const redditInstanceOpts = {
     password: process.env.REDDIT_PASSWORD,
   }
 }
-const bikeTagRedditInstance = redditInstanceOpts.reddit?.clientId ? new BikeTagClient(redditInstanceOpts) : null
+const bikeTagRedditInstance = redditInstanceOpts.reddit && redditInstanceOpts.reddit.clientId ? new BikeTagClient(redditInstanceOpts) : null
 
 const getTagAsync = async (client, out = false, opts = {}) => {
   const tag1 = await client.getTag(`test-tag-1`, opts)
