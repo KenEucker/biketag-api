@@ -81,7 +81,7 @@ export class BikeTagClient extends EventEmitter {
 
     this.mostAvailableApi = undefined
 
-    this.setConfiguration(config)
+    this.setConfiguration(config ?? {})
 
     if (this.imgurConfig) {
       this.imgurClient = new ImgurClient(this.imgurConfig)
@@ -142,22 +142,22 @@ export class BikeTagClient extends EventEmitter {
         ? { tagnumbers: opts }
         : Array.isArray(opts)
         ? { payload: opts }
-        : opts
+        : opts ?? {}
 
     options.source = source
-
-    /// Set the game in the options, defaulting to the configured game
-    options.game = options.game
-      ? options.game
-      : (this.biketagConfig as Credentials).game
 
     switch (optsType) {
       case 'game':
         options.game = options.game ?? options.slug
-        options.slug = options.slug ?? options.game.toLowerCase()
+        options.slug = options.slug ?? options.game?.toLowerCase() ?? undefined
         break
 
       case 'tag':
+        /// Set the game in the options, defaulting to the configured game
+        options.game = options.game
+          ? options.game
+          : (this.biketagConfig as Credentials).game
+
         /// Set the album hash, if present (Imgur specific)
         if (this.imgurConfig?.hash) {
           options.hash = options.hash ?? this.imgurConfig.hash
@@ -329,15 +329,13 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getGameData(
-    payload: RequireAtLeastOne<getGameDataPayload> | string
+    payload: RequireAtLeastOne<getGameDataPayload> | string | undefined
   ): Promise<BikeTagApiResponse<GameData>> {
-    const onlyApplicableOpts = {
-      ...(typeof payload === 'string' ? { game: payload } : payload),
-      source: 'sanity',
-    }
+    const onlyApplicableOpts =
+      typeof payload === 'string' ? { game: payload } : payload
     const { client, options, api } = this.getDefaultAPI(
       onlyApplicableOpts,
-      {},
+      { source: 'sanity' },
       'game'
     )
 
