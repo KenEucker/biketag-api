@@ -7,3 +7,4 @@ biketag.*
 logs
 .env
 coverage
+examples/node/__snapshots__
