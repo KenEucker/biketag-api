@@ -3,7 +3,7 @@ const { BikeTagClient } = require('../../biketag.node.js')
 require('dotenv').config()
 
 const imgurInstanceOpts = {
-  game: process.env.BIKETAG_GAME ?? 'test',
+  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME :'test',
   imgur: {
     hash: process.env.IMGUR_HASH,
     clientId: process.env.IMGUR_CLIENT_ID,
@@ -13,7 +13,7 @@ const imgurInstanceOpts = {
 const bikeTagImgurInstance = imgurInstanceOpts.imgur?.hash ? new BikeTagClient(imgurInstanceOpts) : null
 
 const sanityInstanceOpts = {
-  game: process.env.BIKETAG_GAME ?? 'test',
+  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
   sanity: {
     projectId: process.env.SANITY_PROJECT_ID,
     accessToken: process.env.SANITY_ACCESS_TOKEN,
@@ -26,7 +26,7 @@ const bikeTagSanityInstance = sanityInstanceOpts.sanity?.projectId ? new BikeTag
 const redditInstanceOpts = {
   ...imgurInstanceOpts,
   reddit: {
-    subreddit: process.env.REDDIT_SUBREDDIT ?? 'cyclepdx',
+    subreddit: process.env.REDDIT_SUBREDDIT ? process.env.REDDIT_SUBREDDIT : 'cyclepdx',
     clientId: process.env.REDDIT_CLIENT_ID,
     clientSecret: process.env.REDDIT_CLIENT_SECRET,
     username: process.env.REDDIT_USERNAME,
