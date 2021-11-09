@@ -30,7 +30,7 @@
     "start": "npm run serve:prod",
     "test": "jest",
     "test:dev": "jest --silent=false",
-    "test:ci": "jest --ci --coverage --runInBand",
+    "test:ci": "jest --ci --coverage --maxWorkers=2",
     "build": "tsc",
     "build:prod": "echo 'webpack handles the compilation process ✅'",
     "compile": "webpack --mode development",
