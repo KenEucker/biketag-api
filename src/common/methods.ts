@@ -23,7 +23,7 @@ export const putCacheIfExists = (
   key: string,
   value: any,
   cache?: typeof TinyCache
-) => {
+): void => {
   if (cache) cache.put(key, value)
 }
 
@@ -172,7 +172,7 @@ export const isBikeTagCredentials = (
 
 export const isBikeTagApiReady = (
   credentials: BikeTagCredentials | Credentials
-) => {
+): boolean => {
   return (
     (credentials as ClientKey).clientToken !== undefined &&
     (credentials as ClientKey).clientKey !== undefined
@@ -191,13 +191,14 @@ export const isBikeTagConfiguration = (
 }
 
 export const createImgurCredentials = (
-  credentials: Partial<ImgurCredentials>
+  credentials: Partial<ImgurCredentials>,
+  defaults: Partial<ImgurCredentials> = {}
 ): ImgurCredentials => {
   return {
-    clientId: credentials.clientId,
-    clientSecret: credentials.clientSecret,
-    hash: credentials.hash,
-    accessToken: credentials.accessToken,
+    clientId: credentials.clientId ?? defaults.clientId,
+    clientSecret: credentials.clientSecret ?? defaults.clientSecret,
+    hash: credentials.hash ?? defaults.hash,
+    accessToken: credentials.accessToken ?? defaults.accessToken,
   }
 }
 
@@ -212,17 +213,20 @@ export const assignImgurCredentials = (
 }
 
 export const createSanityCredentials = (
-  credentials: Partial<SanityCredentials>
+  credentials: Partial<SanityCredentials>,
+  defaults: Partial<SanityCredentials> = {}
 ): SanityCredentials => {
   return {
-    projectId: credentials.projectId,
     useCdn:
-      credentials.token !== undefined ? false : credentials.useCdn ?? true,
-    dataset: credentials.dataset ?? 'development',
-    token: credentials.token ?? '',
-    password: credentials.password,
-    username: credentials.username,
-    apiVersion: credentials.apiVersion ?? '2021-06-07',
+      credentials.token !== undefined
+        ? false
+        : credentials.useCdn ?? defaults.useCdn ?? true,
+    projectId: credentials.projectId ?? defaults.projectId,
+    dataset: credentials.dataset ?? defaults.dataset ?? 'development',
+    token: credentials.token ?? defaults.token ?? '',
+    password: credentials.password ?? defaults.password,
+    username: credentials.username ?? defaults.username,
+    apiVersion: credentials.apiVersion ?? defaults.apiVersion ?? '2021-06-07',
   }
 }
 
@@ -239,16 +243,17 @@ export const assignSanityCredentials = (
 }
 
 export const createRedditCredentials = (
-  credentials: Partial<RedditCredentials>
+  credentials: Partial<RedditCredentials>,
+  defaults: Partial<RedditCredentials> = {}
 ): RedditCredentials => {
   return {
-    subreddit: credentials.subreddit,
-    clientId: credentials.clientId,
-    clientSecret: credentials.clientSecret,
-    password: credentials.password,
-    username: credentials.username,
-    refreshToken: credentials.refreshToken,
-    userAgent: credentials.userAgent || 'biketag API',
+    subreddit: credentials.subreddit ?? defaults.subreddit,
+    clientId: credentials.clientId ?? defaults.clientId,
+    clientSecret: credentials.clientSecret ?? defaults.clientSecret,
+    password: credentials.password ?? defaults.password,
+    username: credentials.username ?? defaults.username,
+    refreshToken: credentials.refreshToken ?? defaults.refreshToken,
+    userAgent: credentials.userAgent ?? defaults.userAgent ?? 'biketag API',
   }
 }
 
@@ -265,14 +270,15 @@ export const assignRedditCredentials = (
 }
 
 export const createBikeTagCredentials = (
-  credentials: Partial<BikeTagCredentials>
+  credentials: Partial<BikeTagCredentials>,
+  defaults: Partial<BikeTagCredentials> = {}
 ): BikeTagCredentials => {
   return {
-    game: credentials.game,
-    source: credentials.source,
-    clientKey: credentials.clientKey,
-    clientToken: credentials.clientToken,
-    accessToken: credentials.accessToken,
+    game: credentials.game ?? defaults.game,
+    source: credentials.source ?? defaults.source,
+    clientKey: credentials.clientKey ?? defaults.clientKey,
+    clientToken: credentials.clientToken ?? defaults.clientToken,
+    accessToken: credentials.accessToken ?? defaults.accessToken,
   }
 }
 

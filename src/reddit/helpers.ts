@@ -1,5 +1,6 @@
-import { tagDataReferenceFields, createTag } from '../common/data'
+import { createTag } from '../common/data'
 import { TagData } from '../common/types'
+import { Submission } from 'snoowrap/dist/snoowrap.d'
 import {
   getCreditFromText,
   getFoundLocationFromText,
@@ -9,12 +10,11 @@ import {
   getTagNumbersFromText,
 } from '../common/getters'
 import ImgurClient from 'imgur'
-import { GalleryOptions } from 'imgur/lib/gallery'
 
 export async function getBikeTagsFromRedditPosts(
-  posts,
+  posts: Submission[],
   imageClient: ImgurClient
-) {
+): Promise<any[]> {
   let selftext = '',
     postBody,
     isSelfPost = true
@@ -31,8 +31,10 @@ export async function getBikeTagsFromRedditPosts(
     } else if (p.media && p.media.oembed) {
       /// Might be a single tag?
       postBody = `${p.media.oembed.title} ${p.media.oembed.description}`
-      selftext = p.media.oembed.url
+      selftext = p.media.oembed.provider_url
       isSelfPost = false
+    } else {
+      return
     }
 
     const tagImageURLs = getImageURLsFromText(selftext, [])
@@ -45,6 +47,7 @@ export async function getBikeTagsFromRedditPosts(
 
     const directImageLinks = []
     let directImageLinksNumbers = tagNumbers
+
     for (let u = 0; u < tagImageURLs.length; u++) {
       const imageUrl = tagImageURLs[u]
       const galleryIndex = imageUrl.indexOf(galleryBaseUrl)
@@ -78,12 +81,12 @@ export async function getBikeTagsFromRedditPosts(
             directImageLinks.push(image.link)
 
             /// TODO: might need a conversion to utc here
-            timestamp = image.datetime || timestamp
-            hint = hint || getHintFromText(imageText, '')
-            foundAt = foundAt || getFoundLocationFromText(postBody, '')
-            credit = credit || getCreditFromText(postBody, '')
-            gps = gps || getGPSLocationFromText(postBody, undefined)
-            credit = credit || image.account_url
+            timestamp = image.datetime ?? timestamp
+            hint = hint ?? getHintFromText(imageText, '')
+            foundAt = foundAt ?? getFoundLocationFromText(postBody, '')
+            credit = credit ?? getCreditFromText(postBody, '')
+            gps = gps ?? getGPSLocationFromText(postBody, undefined)
+            credit = credit ?? image.account_url
           }
         }
       } else {
@@ -165,7 +168,7 @@ export async function getBikeTagsFromRedditPosts(
 }
 
 export async function getBikeTagInformationFromRedditData(
-  redditPostData
+  redditPostData: any
 ): Promise<TagData> {
   if (!redditPostData.tagNumbers) {
     /// TODO: handle a link that is an image gallery and has only one tag number attached

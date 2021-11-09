@@ -81,7 +81,8 @@ export function getPlayerFromText(
     typeof c === 'string' &&
     (c.indexOf('tag ') === -1 || c.indexOf('tag') !== 0) &&
     (c.indexOf('proof ') === -1 || c.indexOf('proof') !== 0) &&
-    c.indexOf('(hint:') === -1 &&
+    c.indexOf('to:') === -1 &&
+    c.indexOf('hint:') === -1 &&
     (c.indexOf('by') === -1 || c.indexOf('by') !== 0)
       ? c
       : undefined
@@ -103,7 +104,7 @@ export function getDiscussionUrlFromText(
   inputText: string,
   fallback?: string,
   cache?: typeof TinyCache
-) {
+): string {
   if (!inputText || !inputText.length) {
     return fallback
   }
@@ -305,7 +306,7 @@ export const getBikeTagUsernameFromImgurImage = (
 export const getBikeTagDiscussionLinkFromImgurImage = (
   image: ImgurImage,
   cache?: typeof TinyCache
-) => {
+): string | null => {
   const tagTitle = image.title || ''
   const tagDiscussionLinkIndex = tagTitle.indexOf('{')
   let tagDiscussionLink = null
@@ -337,7 +338,7 @@ export const getBikeTagNumberIndexFromImgurImages = (
   const tagNumberIndex =
     images.length + 1 - (tagNumber - (tagNumber % 2) + 1) * 2
 
-  const verifyTagNumber = function (index) {
+  const verifyTagNumber = function (index): boolean {
     if (!images[index] || !images[index].description) {
       return false
     }

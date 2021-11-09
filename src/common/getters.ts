@@ -87,19 +87,20 @@ export const getCreditFromText = (
   const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
+  /// HACK
   inputText.match(getCreditFromTextRegex)
   const creditText = getCreditFromTextRegex.exec(inputText)
   if (!creditText) return fallback || null
 
   /// Weed out the results and get the one remaining match
-  const tagCredits = creditText.filter((c) =>
-    typeof c === 'string' &&
-    (c.indexOf('tag ') === -1 || c.indexOf('tag') !== 0) &&
-    (c.indexOf('proof ') === -1 || c.indexOf('proof') !== 0) &&
-    c.indexOf('(hint:') === -1 &&
-    (c.indexOf('by') === -1 || c.indexOf('by') !== 0)
-      ? c
-      : undefined
+  const tagCredits = creditText.filter(
+    (c) =>
+      typeof c === 'string' &&
+      (c.indexOf('tag ') === -1 || c.indexOf('tag') !== 0) &&
+      (c.indexOf('proof ') === -1 || c.indexOf('proof') !== 0) &&
+      c.indexOf('to:') === -1 &&
+      c.indexOf('hint:') === -1 &&
+      (c.indexOf('by') === -1 || c.indexOf('by') !== 0)
   )
 
   if (!tagCredits.length && fallback) {
@@ -334,24 +335,24 @@ export const getImgurMysteryDescriptionFromBikeTagData = (
 ): string =>
   `#${tag.tagnumber} tag (hint: ${tag.hint ? tag.hint : ''} ) by ${tag.player}`
 
-export const getBikeTagDescriptionFromData = (data) => {
+export const getBikeTagDescriptionFromData = (data: any): string => {
   return `#${data.currentTagNumber} tag ${
     data.hint ? `(hint: ${data.hint})` : ''
   } by ${data.credit}`
 }
 
-export const getBikeTagTitleFromData = (data) => {
+export const getBikeTagTitleFromData = (data: any): string => {
   return `${data.gps ? `(${data.gps})` : ''} {${
     data.discussionLink ? data.discussionLink : ''
   }}`
 }
 
-export const getBikeTagProofDescriptionFromData = (data) => {
+export const getBikeTagProofDescriptionFromData = (data: any): string => {
   return `#${data.proofTagNumber} proof${
     data.foundAt ? ` found at (${data.foundAt})` : ''
   } by ${data.credit}`
 }
 
-export const getBikeTagProofTitleFromData = (data) => {
+export const getBikeTagProofTitleFromData = (data: any): string => {
   return `(${data.gps ? data.gps : ''})`
 }

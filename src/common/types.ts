@@ -99,19 +99,21 @@ export type boundary = {
   geo: geopoint
 }
 
-export type region = {
+export type Region = {
   description: string
   name: string
   slug: string
   zipcode: number
 }
 
-export type player = {
+export type Player = {
   name: string
   bicon: string
+  games: string[]
+  tags: string[]
 }
 
-export type ambassador = {
+export type Ambassador = {
   address1: string
   address2: string
   city: string
@@ -119,7 +121,7 @@ export type ambassador = {
   email: string
   name: string
   phone: string
-  player: player
+  player: Player
   slug: string
   zipcode: number
 }
@@ -151,13 +153,13 @@ export interface AlbumData extends CommonData {
 
 export interface GameData {
   name: string
-  ambassadors: ambassador[]
+  ambassadors: Ambassador[]
   boundary: boundary
   mainhash: string
   queuehash: string
   subreddit: string
   logo: string
-  region: region
+  region: Region
   slug: string
 }
 

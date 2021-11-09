@@ -28,7 +28,8 @@ export type getTagPayload = {
   tagnumber: number
   time?: 'all'
   sort?: 'new'
-  limit?: 1
+  limit?: number
+  subreddit?: string
   slug: string
   fields?: string[]
 }

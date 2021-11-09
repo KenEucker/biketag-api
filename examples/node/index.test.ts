@@ -1,89 +1,86 @@
 // @ts-ignore
-import { getGameDataAsync, getTagAsync, BikeTagClient, sanityInstanceOpts, imgurInstanceOpts, getLatestTagAsync, getTagsAsync, getTag1Async } from './index'
+import { getGameDataAsync, getTagAsync, getLatestTagAsync, getTagsAsync, getTag1Async, bikeTagSanityInstance, bikeTagImgurInstance, bikeTagRedditInstance } from './index'
 
-test('BikeTagClient sanity instance can retrieve game data', async () => {
-  const client = new BikeTagClient(sanityInstanceOpts)
-  const testGameData = await getGameDataAsync(client)
+if (bikeTagSanityInstance) {
+  test('BikeTagClient sanity instance can retrieve game data', async () => {
+    const testGameData = await getGameDataAsync(bikeTagSanityInstance)
 
-  expect(testGameData).toMatchSnapshot()
-})
+    expect(testGameData).toMatchSnapshot()
+  })
 
-test('BikeTagClient imgur instance can retrieve tag data', async () => {
-  const client = new BikeTagClient(imgurInstanceOpts)
-  const testTagData = await getTagAsync(client)
+  test('BikeTagClient sanity instance can retrieve tag data', async () => {
+    const testTagData = await getTagAsync(bikeTagSanityInstance)
 
-  expect(testTagData).toMatchSnapshot()
-})
+    expect(testTagData).toMatchSnapshot()
+  })
 
-test('BikeTagClient sanity instance can retrieve tag data', async () => {
-  const client = new BikeTagClient(sanityInstanceOpts)
-  const testTagData = await getTagAsync(client)
+  test('BikeTagClient sanity instance can retrieve tag 1 data', async () => {
+    const testTagData = await getTag1Async(bikeTagSanityInstance)
 
-  expect(testTagData).toMatchSnapshot()
-})
+    expect(testTagData).toMatchSnapshot()
+  })
 
-test('BikeTagClient imgur instance can retrieve tag 1 data', async () => {
-  const client = new BikeTagClient(imgurInstanceOpts)
-  const testTagData = await getTag1Async(client)
+  test('BikeTagClient sanity instance can retrieve latest tag data', async () => {
+    const testTagData = await getLatestTagAsync(bikeTagSanityInstance)
 
-  expect(testTagData).toMatchSnapshot()
-})
+    expect(testTagData).toMatchSnapshot()
+  })
 
-test('BikeTagClient sanity instance can retrieve tag 1 data', async () => {
-  const client = new BikeTagClient(sanityInstanceOpts)
-  const testTagData = await getTag1Async(client)
+  test('BikeTagClient sanity instance can retrieve all tags data', async () => {
+    const testTagsData = await getTagsAsync(bikeTagSanityInstance)
 
-  expect(testTagData).toMatchSnapshot()
-})
+    expect(testTagsData).toMatchSnapshot()
+  })
+}
 
-// test('BikeTagClient reddit instance can retrieve latest tag data', async () => {
-//   const client = new BikeTagClient(redditInstanceOpts)
-//   const testTagData = await getTagAsync(client)
+if (bikeTagImgurInstance) {
+  test('BikeTagClient imgur instance can retrieve tag data', async () => {
+    const testTagData = await getTagAsync(bikeTagImgurInstance)
 
-//   expect(testTagData).toMatchObject({
-//     data: {
-//       tagnumber: 1,
-//       name: 'test-tag-1',
-//       slug: 'test-tag-1',
-//       game: 'test',
-//       discussionUrl: undefined,
-//       foundLocation: 'nowhere?',
-//       player: 'hooooo',
-//       hint: null,
-//       mysteryImageUrl: 'https://i.imgur.com/6cXbPlZ.jpg',
-//       foundImageUrl: 'https://i.imgur.com/UATbr0p.jpg',
-//       gps: { lat: 0, long: 0, alt: 0 },
-//     },
-//     source: "imgur",
-//     status: 200,
-//     success: true,
-//   })
-// })
+    expect(testTagData).toMatchSnapshot()
+  })
 
-test('BikeTagClient imgur instance can retrieve latest tag data', async () => {
-  const client = new BikeTagClient(imgurInstanceOpts)
-  const testTagData = await getLatestTagAsync(client)
+  test('BikeTagClient imgur instance can retrieve tag 1 data', async () => {
+    const testTagData = await getTag1Async(bikeTagImgurInstance)
 
-  expect(testTagData).toMatchSnapshot()
-})
+    expect(testTagData).toMatchSnapshot()
+  })
 
-test('BikeTagClient sanity instance can retrieve latest tag data', async () => {
-  const client = new BikeTagClient(sanityInstanceOpts)
-  const testTagData = await getLatestTagAsync(client)
+  test('BikeTagClient imgur instance can retrieve latest tag data', async () => {
+    const testTagData = await getLatestTagAsync(bikeTagImgurInstance)
 
-  expect(testTagData).toMatchSnapshot()
-})
+    expect(testTagData).toMatchSnapshot()
+  })
 
-test('BikeTagClient imgur instance can retrieve all tags data', async () => {
-  const client = new BikeTagClient(imgurInstanceOpts)
-  const testTagsData = await getTagsAsync(client)
+  test('BikeTagClient imgur instance can retrieve all tags data', async () => {
+    const testTagsData = await getTagsAsync(bikeTagImgurInstance)
 
-  expect(testTagsData).toMatchSnapshot()
-})
+    expect(testTagsData).toMatchSnapshot()
+  })
+}
 
-test('BikeTagClient sanity instance can retrieve all tags data', async () => {
-  const client = new BikeTagClient(sanityInstanceOpts)
-  const testTagsData = await getTagsAsync(client)
+if (bikeTagRedditInstance) {
+  test('BikeTagClient reddit instance can retrieve tag data', async () => {
+    const testTagData = await getTagAsync(bikeTagRedditInstance, false, { source: 'reddit' })
 
-  expect(testTagsData).toMatchSnapshot()
-})
+    expect(testTagData).toMatchSnapshot()
+  })
+
+  test('BikeTagClient reddit instance can retrieve tag 1 data', async () => {
+    const testTagData = await getTag1Async(bikeTagRedditInstance, false, { source: 'reddit' })
+
+    expect(testTagData).toMatchSnapshot()
+  })
+
+  test('BikeTagClient reddit instance can retrieve latest tag data', async () => {
+    const testTagData = await getLatestTagAsync(bikeTagRedditInstance, false, { source: 'reddit' })
+
+    expect(testTagData).toMatchSnapshot()
+  })
+
+  test('BikeTagClient reddit instance can retrieve all tags data', async () => {
+    const testTagsData = await getTagsAsync(bikeTagRedditInstance, false, { source: 'reddit' })
+
+    expect(testTagsData).toMatchSnapshot()
+  })
+}
