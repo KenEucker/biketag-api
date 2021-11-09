@@ -1,6 +1,10 @@
 // @ts-ignore
 import { getGameDataAsync, getTagAsync, getLatestTagAsync, getTagsAsync, getTag1Async, bikeTagSanityInstance, bikeTagImgurInstance, bikeTagRedditInstance } from './index'
 
+test('BikeTagClient integration tests run when they can', async () => {
+  expect(true).toBeTruthy()
+})
+
 if (bikeTagSanityInstance) {
   test('BikeTagClient sanity instance can retrieve game data', async () => {
     const testGameData = await getGameDataAsync(bikeTagSanityInstance)
