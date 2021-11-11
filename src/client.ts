@@ -14,6 +14,8 @@ import {
   BikeTagCredentials,
   BikeTagConfiguration,
   PartialBikeTagConfiguration,
+  AvailableApis,
+  TwitterCredentials,
 } from './common/types'
 import {
   getTagPayload,
@@ -23,6 +25,7 @@ import {
   uploadTagImagePayload,
   deleteTagPayload,
   deleteTagsPayload,
+  importTagPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -39,6 +42,9 @@ import {
   createImgurCredentials,
   createSanityCredentials,
   createRedditCredentials,
+  createTwitterCredentials,
+  isTwitterCredentials,
+  isTwitterApiReady,
 } from './common/methods'
 import { setup } from 'axios-cache-adapter'
 import _ from 'lodash'
@@ -48,12 +54,17 @@ import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 import * as redditApi from './reddit'
+import * as twitterApi from './twitter'
+type TwitterClient = {
+  any?: any
+}
 
 import RedditClient from 'snoowrap'
 import ImgurClient from 'imgur'
 import sanityClient, { SanityClient } from '@sanity/client'
 
-const USERAGENT = 'biketag-api (https://github.com/keneucker/biketag-api)'
+export const USERAGENT =
+  'biketag-api (https://github.com/keneucker/biketag-api)'
 export class BikeTagClient extends EventEmitter {
   expressions: any = BikeTagExpressions
   getters: any = BikeTagGetters
@@ -62,19 +73,16 @@ export class BikeTagClient extends EventEmitter {
   private plainFetcher: AxiosInstance
   private cachedFetcher: AxiosInstance
 
-  private mostAvailableApi:
-    | 'imgur'
-    | 'sanity'
-    | 'reddit'
-    | 'biketag'
-    | undefined
+  private mostAvailableApi: AvailableApis
   private imgurClient?: ImgurClient
   private sanityClient?: SanityClient
   private redditClient?: RedditClient
+  private twitterClient?: any
   private sanityConfig?: SanityCredentials
   private imgurConfig?: ImgurCredentials
   private redditConfig?: RedditCredentials
   private biketagConfig?: BikeTagCredentials
+  private twitterConfig?: TwitterCredentials
 
   constructor(readonly config: Credentials | BikeTagConfiguration) {
     super()
@@ -119,7 +127,7 @@ export class BikeTagClient extends EventEmitter {
   private getDefaultOptions(
     opts: any,
     optsType = 'tag',
-    source = 'biketag'
+    source?: AvailableApis
   ): any {
     /// If the options passed in was a string, set it as the slug
     const options =
@@ -133,7 +141,13 @@ export class BikeTagClient extends EventEmitter {
         ? { payload: opts }
         : opts ?? {}
 
-    options.source = source
+    if (typeof source === 'string') {
+      options.source = AvailableApis[source]
+    } else if (typeof source === 'undefined') {
+      options.source = this.getMostAvailableAPI()
+    } else {
+      options.source = source
+    }
 
     switch (optsType) {
       case 'game':
@@ -175,7 +189,7 @@ export class BikeTagClient extends EventEmitter {
     }
 
     switch (options.source) {
-      case 'reddit':
+      case AvailableApis.reddit:
         options.subreddit = options.subreddit ?? this.redditConfig.subreddit
         break
     }
@@ -188,12 +202,10 @@ export class BikeTagClient extends EventEmitter {
     overloads: any = {},
     getOptionsDefault: string | undefined = undefined
   ) {
+    const initialSource = overloads.source ?? this.getMostAvailableAPI()
+    delete overloads.source
     const options = {
-      ...this.getDefaultOptions(
-        opts,
-        getOptionsDefault,
-        overloads.source ?? this.getMostAvailableAPI()
-      ),
+      ...this.getDefaultOptions(opts, getOptionsDefault, initialSource),
       ...overloads,
     }
 
@@ -201,20 +213,24 @@ export class BikeTagClient extends EventEmitter {
     let api: any = null
 
     switch (options.source) {
-      case 'sanity':
+      case AvailableApis.sanity:
         client = this.sanityClient
         api = sanityApi
         break
-      case 'imgur':
+      case AvailableApis.imgur:
         client = this.imgurClient
         api = imgurApi
         break
-      case 'reddit':
+      case AvailableApis.reddit:
         client = this.redditClient
         api = redditApi
         break
+      case AvailableApis.twitter:
+        client = this.twitterClient
+        api = twitterApi
+        break
       default:
-      case 'biketag':
+      case AvailableApis.biketag:
         client = api = biketagApi
         break
     }
@@ -226,7 +242,7 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  private getMostAvailableAPI(): string {
+  private getMostAvailableAPI(): AvailableApis {
     if (this.mostAvailableApi) {
       return this.mostAvailableApi
     }
@@ -236,33 +252,44 @@ export class BikeTagClient extends EventEmitter {
       isBikeTagCredentials(this.biketagConfig) &&
       isBikeTagApiReady(this.biketagConfig)
     ) {
-      return (this.mostAvailableApi = 'biketag')
+      return (this.mostAvailableApi = AvailableApis.biketag)
     } else if (
       this.imgurConfig &&
       isImgurCredentials(this.imgurConfig) &&
       isImgurApiReady(this.imgurConfig)
     ) {
-      return (this.mostAvailableApi = 'imgur')
+      return (this.mostAvailableApi = AvailableApis.imgur)
     } else if (
       this.sanityConfig &&
       isSanityCredentials(this.sanityConfig) &&
       isSanityApiReady(this.sanityConfig)
     ) {
-      return (this.mostAvailableApi = 'sanity')
+      return (this.mostAvailableApi = AvailableApis.sanity)
     } else if (
       this.redditConfig &&
       isRedditCredentials(this.redditConfig) &&
       isRedditApiReady(this.redditConfig)
     ) {
-      return (this.mostAvailableApi = 'reddit')
+      return (this.mostAvailableApi = AvailableApis.reddit)
+    } else if (
+      this.twitterConfig &&
+      isTwitterCredentials(this.twitterConfig) &&
+      isTwitterApiReady(this.twitterConfig)
+    ) {
+      return (this.mostAvailableApi = AvailableApis.twitter)
     }
 
-    return ''
+    return undefined
   }
 
   private getPassthroughApiMethod(
     method: any,
-    client: RedditClient | ImgurClient | BikeTagClient | SanityClient
+    client:
+      | RedditClient
+      | ImgurClient
+      | BikeTagClient
+      | SanityClient
+      | TwitterClient
   ): any {
     return (opts) => {
       return method(client, this.getDefaultOptions(opts))
@@ -278,8 +305,11 @@ export class BikeTagClient extends EventEmitter {
     if (config.sanity) {
       this.sanityClient = sanityClient(config.sanity)
     }
-    if (this.redditConfig) {
+    if (config.reddit) {
       this.redditClient = new RedditClient(config.reddit)
+    }
+    if (config.twitter) {
+      // this.twitterClient = new TwitterClient(config.twitter)
     }
 
     return config
@@ -294,25 +324,60 @@ export class BikeTagClient extends EventEmitter {
       config as BikeTagConfiguration
     )
 
-    let biketagConfig = (parsedConfig as BikeTagConfiguration).biketag
-    let imgurConfig = (parsedConfig as BikeTagConfiguration).imgur
-    let sanityConfig = (parsedConfig as BikeTagConfiguration).sanity
-    let redditConfig = (parsedConfig as BikeTagConfiguration).reddit
+    const initClientConfig = (
+      type: AvailableApis,
+      parsedConfig: BikeTagConfiguration,
+      overwrite = true
+    ) => {
+      const configName = `${AvailableApis[type]}Config`
+      const config = parsedConfig[AvailableApis[type]]
+      let createCredentialsMethod: any = createBikeTagCredentials
 
-    if (!overwrite) {
-      biketagConfig = this.biketagConfig
-        ? createBikeTagCredentials(this.biketagConfig, biketagConfig)
-        : biketagConfig
-      imgurConfig = this.imgurConfig
-        ? createImgurCredentials(this.imgurConfig, imgurConfig)
-        : imgurConfig
-      sanityConfig = this.sanityConfig
-        ? createSanityCredentials(this.sanityConfig, sanityConfig)
-        : sanityConfig
-      redditConfig = this.redditConfig
-        ? createRedditCredentials(this.redditConfig, redditConfig)
-        : redditConfig
+      switch (type) {
+        case AvailableApis.imgur:
+          createCredentialsMethod = createImgurCredentials
+          break
+        case AvailableApis.reddit:
+          createCredentialsMethod = createRedditCredentials
+          break
+        case AvailableApis.sanity:
+          createCredentialsMethod = createSanityCredentials
+          break
+        case AvailableApis.twitter:
+          createCredentialsMethod = createTwitterCredentials
+          break
+      }
+
+      return !overwrite && this[configName] && config
+        ? createCredentialsMethod(config, this[configName])
+        : config ?? this[configName]
     }
+
+    const biketagConfig = initClientConfig(
+      AvailableApis.biketag,
+      parsedConfig,
+      overwrite
+    )
+    const imgurConfig = initClientConfig(
+      AvailableApis.imgur,
+      parsedConfig,
+      overwrite
+    )
+    const sanityConfig = initClientConfig(
+      AvailableApis.sanity,
+      parsedConfig,
+      overwrite
+    )
+    const redditConfig = initClientConfig(
+      AvailableApis.reddit,
+      parsedConfig,
+      overwrite
+    )
+    const twitterConfig = initClientConfig(
+      AvailableApis.twitter,
+      parsedConfig,
+      overwrite
+    )
 
     if (reInitialize) {
       const initializeConfig: BikeTagConfiguration = {
@@ -320,6 +385,7 @@ export class BikeTagClient extends EventEmitter {
         imgur: undefined,
         reddit: undefined,
         sanity: undefined,
+        twitter: undefined,
       }
 
       if (!_.isEqual(this.imgurConfig, imgurConfig)) {
@@ -331,6 +397,9 @@ export class BikeTagClient extends EventEmitter {
       if (!_.isEqual(this.sanityConfig, sanityConfig)) {
         initializeConfig.sanity = sanityConfig
       }
+      if (!_.isEqual(this.twitterConfig, twitterConfig)) {
+        initializeConfig.twitter = twitterConfig
+      }
 
       this.initializeClients(initializeConfig)
     }
@@ -339,6 +408,7 @@ export class BikeTagClient extends EventEmitter {
     this.imgurConfig = imgurConfig
     this.sanityConfig = sanityConfig
     this.redditConfig = redditConfig
+    this.twitterConfig = twitterConfig
 
     return this.getConfiguration()
   }
@@ -349,6 +419,7 @@ export class BikeTagClient extends EventEmitter {
       sanity: config?.sanity ?? this.sanityConfig,
       imgur: config?.imgur ?? this.imgurConfig,
       reddit: config?.reddit ?? this.redditConfig,
+      twitter: config?.twitter ?? this.twitterConfig,
     } as BikeTagConfiguration
   }
 
@@ -371,7 +442,7 @@ export class BikeTagClient extends EventEmitter {
       typeof payload === 'string' ? { game: payload } : payload
     const { client, options, api } = this.getDefaultAPI(
       onlyApplicableOpts,
-      { source: 'sanity' },
+      { source: AvailableApis.sanity },
       'game'
     )
 
@@ -386,6 +457,14 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
+  importTag(
+    payload:
+      | RequireAtLeastOne<importTagPayload>
+      | RequireAtLeastOne<importTagPayload>[]
+  ): Promise<BikeTagApiResponse<TagData[]>> {
+    return payload as unknown as Promise<BikeTagApiResponse<TagData[]>>
+  }
+
   deleteTag(
     payload: deleteTagPayload | number,
     opts?: RequireAtLeastOne<Credentials>
@@ -394,7 +473,7 @@ export class BikeTagClient extends EventEmitter {
     let clientMethod = api.deleteTag
 
     switch (options.source) {
-      case 'imgur':
+      case AvailableApis.imgur:
         clientMethod = {
           getTag: this.getPassthroughApiMethod(api.getTag, client),
         }
@@ -420,7 +499,7 @@ export class BikeTagClient extends EventEmitter {
     let clientMethod = api.deleteTags
 
     switch (options.source) {
-      case 'imgur':
+      case AvailableApis.imgur:
         clientMethod = clientMethod.bind({
           getTags: this.getPassthroughApiMethod(api.getTags, client),
         })
@@ -446,7 +525,7 @@ export class BikeTagClient extends EventEmitter {
     let clientMethod = api.getTag
 
     switch (options.source) {
-      case 'reddit':
+      case AvailableApis.reddit:
         clientMethod = clientMethod.bind({
           images: this.images({ ...this.imgurConfig, ...opts }),
         })
@@ -472,7 +551,7 @@ export class BikeTagClient extends EventEmitter {
     let clientMethod = api.getTags
 
     switch (options.source) {
-      case 'reddit':
+      case AvailableApis.reddit:
         clientMethod = clientMethod.bind({
           images: this.images({ ...this.imgurConfig, ...opts }),
         })
@@ -498,7 +577,7 @@ export class BikeTagClient extends EventEmitter {
     let clientMethod = api.updateTag
 
     switch (options.source) {
-      case 'imgur':
+      case AvailableApis.imgur:
         clientMethod = clientMethod.bind({
           getTag: this.getPassthroughApiMethod(api.getTag, client),
           uploadTagImage: this.getPassthroughApiMethod(
@@ -561,7 +640,24 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating an imgur client')
   }
 
+  // mentions(options: any = {}): TwitterClient {
+  //   if (isTwitterCredentials(options)) {
+  //     return new TwitterClient(options)
+  //   }
+
+  //   throw new Error('options are invalid for creating an twitter client')
+  // }
+
+  // shares(options: any = {}): InstagramClient {
+  //   if (isInstagramCredentials(options)) {
+  //     return new InstagramClient(options)
+  //   }
+
+  //   throw new Error('options are invalid for creating an instagram client')
+  // }
+
   data(): BikeTagClient {
+    /// TODO: return gun.js
     return this
   }
 }

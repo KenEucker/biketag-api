@@ -1,5 +1,5 @@
 import { SanityClient } from '@sanity/client'
-import { BikeTagApiResponse, GameData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, GameData } from '../common/types'
 import {
   constructGameFromSanityObject,
   constructSanityFieldsQuery,
@@ -40,7 +40,7 @@ export async function getGameData(
       data: isArray ? gameData : gameData[0],
       status: 1,
       success: true,
-      source: 'sanity',
+      source: AvailableApis.sanity,
     }
 
     // return BikeTagApiResponse

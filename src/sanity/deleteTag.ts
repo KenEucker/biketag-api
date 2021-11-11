@@ -1,6 +1,6 @@
 import { SanityClient } from '@sanity/client'
 import { deleteTagPayload } from '../common/payloads'
-import { BikeTagApiResponse } from '../common/types'
+import { AvailableApis, BikeTagApiResponse } from '../common/types'
 
 export async function deleteTag(
   client: SanityClient,
@@ -14,7 +14,7 @@ export async function deleteTag(
         data: null,
         success: false,
         status: 0,
-        source: 'sanity',
+        source: AvailableApis.sanity,
       }
     }
   }
@@ -25,7 +25,7 @@ export async function deleteTag(
       data: result,
       success: true,
       status: 1,
-      source: 'sanity',
+      source: AvailableApis.sanity,
     }
   })
 }
