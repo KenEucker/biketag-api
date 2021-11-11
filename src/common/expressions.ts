@@ -1,5 +1,5 @@
 export const getTagNumbersFromTextRegex = new RegExp(
-  /((?:(?:bike\s*)?(?:\s*tag)?)#(\d+)(?:(?:\s*tag)?|(?:\s*proof)?))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*.*\]))/gi
+  /((?:(?:bike\s*)?(?:\s*tag)?)#(\d+)(?:(?:\s*tag)?|(?:\s*proof)?))|((?:bike\s*)?(?:tag\s*)#?\s*(\d+))|((?:(?:found\s*#?)|(?:here'?i?s?\s*))\[?(\d+)\]?)/gi
 )
 
 export const getCreditFromTextRegex = new RegExp(
@@ -17,7 +17,11 @@ export const getGPSLocationFromTextRegex = new RegExp(
 )
 
 export const getImageURLsFromTextRegex = new RegExp(
-  /https?:\/\/.*?\.[a-z]{2,4}\/.+?(?=\))/gi
+  /https?:\/\/.*?\.[a-z]{2,4}\/.+?(?=\)|\s)/gi
+)
+
+export const getAlbumIdFromTextRegex = new RegExp(
+  /((?:imgur.com\/)(?:(a|album|gallery)\/)(\w+))/gi
 )
 
 export const getDiscussionUrlFromTextRegex = RegExp(/{(.*)}/gi)

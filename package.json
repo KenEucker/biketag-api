@@ -1,6 +1,6 @@
 {
   "name": "biketag",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "The Javascript client API for BikeTag Games",
   "main": "./biketag.node.js",
   "browser": "./biketag.js",
@@ -35,6 +35,7 @@
     "build:prod": "echo 'webpack handles the compilation process ✅'",
     "compile": "webpack --mode development",
     "compile:prod": "webpack --mode production && npm run expose",
+    "analyse": "webpack --mode production --json | npx webpack-bundle-size-analyzer",
     "expose": "cp -v dist/* ./",
     "watch": "webpack --mode=development --watch --progress",
     "typecheck": "tsc --noEmit",

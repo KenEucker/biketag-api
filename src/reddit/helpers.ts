@@ -7,6 +7,7 @@ import {
   getGPSLocationFromText,
   getHintFromText,
   getImageURLsFromText,
+  getImgurAlbumIdFromText,
   getTagNumbersFromText,
 } from '../common/getters'
 import ImgurClient from 'imgur'
@@ -17,151 +18,207 @@ export async function getBikeTagsFromRedditPosts(
 ): Promise<any[]> {
   let selftext = '',
     postBody,
-    isSelfPost = true
+    isSelfPost = true,
+    isImagePost = false
   const postTexts = []
   const unreadableRedditPosts = []
 
   for (const p of posts) {
-    const imgurBaseUrl = '://imgur.com'
-    const galleryBaseUrl = `${imgurBaseUrl}/gallery/`
-    const albumBaseUrl = `${imgurBaseUrl}/a/`
+    try {
+      const imgurBaseUrl = 'imgur.com'
+      // const imageBaseUrl = `i.${imgurBaseUrl}/`
+      const galleryBaseUrl = `${imgurBaseUrl}/gallery/`
+      const albumBaseUrl = `${imgurBaseUrl}/a/`
+      const imageUrlIsRedditGallery = (p as any).is_gallery
 
-    if (p.selftext && p.selftext.length) {
-      postBody = selftext = p.selftext
-    } else if (p.media && p.media.oembed) {
-      /// Might be a single tag?
-      postBody = `${p.media.oembed.title} ${p.media.oembed.description}`
-      selftext = p.media.oembed.provider_url
-      isSelfPost = false
-    } else {
-      return
-    }
+      if (p.selftext && p.selftext.length) {
+        postBody = selftext = p.selftext
+      } else if (p.media && p.media.oembed) {
+        /// Might be a single tag?
+        postBody = `${p.media.oembed.title} ${p.media.oembed.description}`
+        selftext = p.media.oembed.provider_url
+        isSelfPost = false
+      } else if ((p.preview?.images || imageUrlIsRedditGallery) && p.url) {
+        let expandedPostReplies
+        await p.expandReplies({ depth: 1 }).then((r) => {
+          expandedPostReplies = r
+        })
+        const comments = expandedPostReplies.comments?.length
+          ? expandedPostReplies.comments.filter(
+              (c) => c.author.name === p.author.name
+            )
+          : []
+        selftext = postBody = comments.length
+          ? comments.reduce((o, v) => {
+              return `${o} ${v.body}`
+            }, p.url)
+          : p.url
+        isImagePost = true
+        // console.log({comments: expandedPostReplies.comments.reduce((o, c) => o + c.body, ''), body: comments.reduce((o, c) => o + c.body, '') })
+      } else {
+        selftext = null
+      }
 
-    const tagImageURLs = getImageURLsFromText(selftext, [])
-    const tagNumbers = getTagNumbersFromText(postBody)
-    let hint = getHintFromText(postBody, '')
-    let foundAt = getFoundLocationFromText(postBody, '')
-    let gps = getGPSLocationFromText(postBody, undefined)
-    let credit = getCreditFromText(postBody, `u/${p.author.name}`)
-    let timestamp = p.created_utc
+      // console.log({selftext, title: p.title})
+      if (selftext) {
+        const tagImageURLs = getImageURLsFromText(selftext, [])
+        const tagNumbers = getTagNumbersFromText(postBody)
+        let hint = getHintFromText(postBody, '')
+        let foundAt = getFoundLocationFromText(postBody, '')
+        let gps = getGPSLocationFromText(postBody, undefined)
+        let credit = getCreditFromText(postBody, `u/${p.author.name}`)
+        let timestamp = p.created_utc
 
-    const directImageLinks = []
-    let directImageLinksNumbers = tagNumbers
+        const directImageLinks = []
+        let directImageLinksNumbers = tagNumbers
 
-    for (let u = 0; u < tagImageURLs.length; u++) {
-      const imageUrl = tagImageURLs[u]
-      const galleryIndex = imageUrl.indexOf(galleryBaseUrl)
-      const albumIndex = imageUrl.indexOf(albumBaseUrl)
-      const imageUrlIsGallery = galleryIndex !== -1
-      const imageUrlIsAlbum = albumIndex !== -1
-      const imageIsMultipleIndex = imageUrlIsGallery ? galleryIndex : albumIndex
-      const imageIsMultipleLength = imageUrlIsGallery
-        ? galleryBaseUrl.length
-        : albumBaseUrl.length
+        for (let u = 0; u < tagImageURLs.length; u++) {
+          try {
+            const imageUrl = tagImageURLs[u]
+            const galleryIndex = imageUrl.indexOf(galleryBaseUrl)
+            const albumIndex = imageUrl.indexOf(albumBaseUrl)
+            const imageUrlIsGallery = galleryIndex !== -1
+            const imageUrlIsAlbum = albumIndex !== -1
+            const imageIsMultipleIndex = imageUrlIsGallery
+              ? galleryIndex
+              : albumIndex
+            const imageIsMultipleLength = imageUrlIsGallery
+              ? galleryBaseUrl.length
+              : albumBaseUrl.length
 
-      /// If the one image is a gallery, we need to go get it's images and parse those
-      if (imageUrlIsGallery || imageUrlIsAlbum) {
-        const galleryID = imageUrl.substring(
-          imageIsMultipleIndex + imageIsMultipleLength
-        )
-        const galleryInfoResponse = await imageClient.getAlbum(galleryID)
+            // console.log({imageIsMultipleIndex, imageUrlIsAlbum, imageUrlIsGallery, imageUrl})
+            /// If the one image is a gallery, we need to go get it's images and parse those
+            if (imageUrlIsGallery || imageUrlIsAlbum) {
+              const galleryID = getImgurAlbumIdFromText(
+                imageUrl,
+                imageUrl.substring(imageIsMultipleIndex + imageIsMultipleLength)
+              )
+              const galleryInfoResponse = await imageClient.getAlbum(galleryID)
 
-        if (galleryInfoResponse) {
-          for (const image of galleryInfoResponse.data.images) {
-            const imageText = `${image.title} ${image.description}`
-            const newImageNumbers = getTagNumbersFromText(imageText)
+              if (galleryInfoResponse) {
+                for (const image of galleryInfoResponse.data.images) {
+                  const imageText = `${image.title} ${image.description}`
+                  const newImageNumbers = getTagNumbersFromText(imageText, [])
 
-            if ((newImageNumbers as number[]).length) {
-              ;(directImageLinksNumbers as number[]).splice(u, 1)
-              directImageLinksNumbers = (
-                directImageLinksNumbers as number[]
-              ).concat(newImageNumbers)
+                  if ((newImageNumbers as number[]).length) {
+                    ;(directImageLinksNumbers as number[]).splice(u, 1)
+                    directImageLinksNumbers = (
+                      directImageLinksNumbers as number[]
+                    ).concat(newImageNumbers)
+                  }
+
+                  directImageLinks.push(image.link)
+
+                  // console.log({
+                  //   directImageLinks,
+                  //   timestamp,
+                  //   hint,
+                  //   foundAt,
+                  //   credit,
+                  //   gps,
+                  // })
+
+                  /// TODO: might need a conversion to utc here
+                  timestamp = image.datetime ?? timestamp
+                  hint = hint ?? getHintFromText(imageText, '')
+                  foundAt = foundAt ?? getFoundLocationFromText(postBody, '')
+                  credit = credit ?? getCreditFromText(postBody, '')
+                  gps = gps ?? getGPSLocationFromText(postBody, undefined)
+                  credit = credit ?? image.account_url
+                }
+              }
+            } else if (imageUrlIsRedditGallery) {
+              for (const image of (p as any).gallery_data.items) {
+                directImageLinks.push(
+                  `https://preview.redd.it/${image.media_id}.jpg`
+                )
+              }
+            } else {
+              directImageLinks.push(imageUrl)
             }
-
-            directImageLinks.push(image.link)
-
-            /// TODO: might need a conversion to utc here
-            timestamp = image.datetime ?? timestamp
-            hint = hint ?? getHintFromText(imageText, '')
-            foundAt = foundAt ?? getFoundLocationFromText(postBody, '')
-            credit = credit ?? getCreditFromText(postBody, '')
-            gps = gps ?? getGPSLocationFromText(postBody, undefined)
-            credit = credit ?? image.account_url
+          } catch (e) {
+            // console.log(p.title, { selftext, tagImageURLs, tagNumbers })
+            console.error('get image url', e)
           }
         }
-      } else {
-        directImageLinks.push(imageUrl)
-      }
-    }
 
-    if (!(directImageLinksNumbers as number[]).length) {
-      /// No tag numbers found?
-      unreadableRedditPosts.push(p)
-    } else {
-      if (!foundAt) {
-        foundAt = postBody
-        const removeStringFromFoundAt = (s) => {
-          foundAt = foundAt.replace(s, '')
-        }
-        const foundAtRemnantRegex = /\s*at\s*/gi
+        if (!(directImageLinksNumbers as number[]).length) {
+          /// No tag numbers found?
+          unreadableRedditPosts.push(p)
+        } else {
+          if (!foundAt) {
+            foundAt = postBody
+            const removeStringFromFoundAt = (s) => {
+              foundAt = foundAt.replace(s, '')
+            }
+            const foundAtRemnantRegex = /\s*at\s*/gi
 
-        ;(tagImageURLs as string[]).forEach(removeStringFromFoundAt)
-        ;(tagNumbers as number[]).forEach((s) =>
-          removeStringFromFoundAt(`#${s}`)
-        )
-
-        if (credit) {
-          removeStringFromFoundAt(`(@|#|u/)?${credit}`)
-        }
-        if (gps) {
-          removeStringFromFoundAt(
-            new RegExp(
-              `(@|#)?${gps.lat}.?${gps.long}|(@|#)?${gps.lat},${gps.long}`,
-              'gi'
+            ;(tagImageURLs as string[]).forEach(removeStringFromFoundAt)
+            ;(tagNumbers as number[]).forEach((s) =>
+              removeStringFromFoundAt(`#${s}`)
             )
-          )
+
+            if (credit) {
+              removeStringFromFoundAt(`(@|#|u/)?${credit}`)
+            }
+            if (gps) {
+              removeStringFromFoundAt(
+                new RegExp(
+                  `(@|#)?${gps.lat}.?${gps.long}|(@|#)?${gps.lat},${gps.long}`,
+                  'gi'
+                )
+              )
+            }
+            if (hint) {
+              removeStringFromFoundAt(
+                new RegExp(/(\()?(hint:?)?\s*(${hint})(\s?\))?/gi)
+              )
+            }
+
+            removeStringFromFoundAt(/\[(?:bike)?\s*tag\s*\d*\]\(\s*\)/gi)
+            removeStringFromFoundAt(/\[\s*\]\(http.*\)/gi)
+            removeStringFromFoundAt(/\[(?!(?:bike)?\s*tag\s*).*\]\(.*\)/gi)
+            removeStringFromFoundAt(/\[(?:bike)?\s*tag\s*\d*\s*-/gi)
+            removeStringFromFoundAt(/\]\(\s*\)/gi)
+            removeStringFromFoundAt(/\r?\n?/gi)
+            removeStringFromFoundAt(/\\/gi)
+            removeStringFromFoundAt(/\(\s*\)/gi)
+            removeStringFromFoundAt(/&#.*;/gi)
+
+            if (foundAt.endsWith('at') || foundAt.endsWith('at '))
+              removeStringFromFoundAt(foundAtRemnantRegex)
+            if (foundAt.startsWith('-') || foundAt.startsWith(' -'))
+              removeStringFromFoundAt(/^\s*-/i)
+            if (foundAt.startsWith(',') || foundAt.startsWith(' ,'))
+              removeStringFromFoundAt(/^\s*,/i)
+
+            foundAt = foundAt.trim()
+          }
+
+          postTexts.push({
+            id: p.id,
+            isSelfPost,
+            isImagePost,
+            selftext,
+            postBody,
+            timestamp,
+            tagNumbers: directImageLinksNumbers,
+            tagImageURLs: directImageLinks,
+            credit,
+            gps,
+            foundAt,
+            hint,
+            author_flair: p.author_flair_text,
+          })
         }
-        if (hint) {
-          removeStringFromFoundAt(
-            new RegExp(/(\()?(hint:?)?\s*(${hint})(\s?\))?/gi)
-          )
-        }
-
-        removeStringFromFoundAt(/\[(?:bike)?\s*tag\s*\d*\]\(\s*\)/gi)
-        removeStringFromFoundAt(/\[\s*\]\(http.*\)/gi)
-        removeStringFromFoundAt(/\[(?!(?:bike)?\s*tag\s*).*\]\(.*\)/gi)
-        removeStringFromFoundAt(/\[(?:bike)?\s*tag\s*\d*\s*-/gi)
-        removeStringFromFoundAt(/\]\(\s*\)/gi)
-        removeStringFromFoundAt(/\r?\n?/gi)
-        removeStringFromFoundAt(/\\/gi)
-        removeStringFromFoundAt(/\(\s*\)/gi)
-        removeStringFromFoundAt(/&#.*;/gi)
-
-        if (foundAt.endsWith('at') || foundAt.endsWith('at '))
-          removeStringFromFoundAt(foundAtRemnantRegex)
-        if (foundAt.startsWith('-') || foundAt.startsWith(' -'))
-          removeStringFromFoundAt(/^\s*-/i)
-        if (foundAt.startsWith(',') || foundAt.startsWith(' ,'))
-          removeStringFromFoundAt(/^\s*,/i)
-
-        foundAt = foundAt.trim()
       }
-
-      postTexts.push({
-        id: p.id,
-        isSelfPost,
-        selftext,
-        postBody,
-        timestamp,
-        tagNumbers: directImageLinksNumbers,
-        tagImageURLs: directImageLinks,
-        credit,
-        gps,
-        foundAt,
-        hint,
-        author_flair: p.author_flair_text,
-      })
+    } catch (e) {
+      console.error('assign', e)
     }
+  }
+
+  if (unreadableRedditPosts.length) {
+    console.log({ unreadableRedditPosts })
   }
 
   return postTexts

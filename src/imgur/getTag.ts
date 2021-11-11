@@ -54,7 +54,7 @@ export async function getTag(
 
   return {
     data: tagsData[0],
-    success: true,
+    success: !!tagsData.length,
     source: 'imgur',
     status: 200,
   } as BikeTagApiResponse<TagData>

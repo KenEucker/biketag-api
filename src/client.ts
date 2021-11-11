@@ -41,7 +41,7 @@ import {
   createRedditCredentials,
 } from './common/methods'
 import { setup } from 'axios-cache-adapter'
-
+import _ from 'lodash'
 import * as BikeTagExpressions from './common/expressions'
 import * as BikeTagGetters from './common/getters'
 import * as sanityApi from './sanity'
@@ -81,19 +81,8 @@ export class BikeTagClient extends EventEmitter {
 
     this.mostAvailableApi = undefined
 
-    this.setConfiguration(config ?? {})
-
-    if (this.imgurConfig) {
-      this.imgurClient = new ImgurClient(this.imgurConfig)
-    }
-
-    if (this.sanityConfig) {
-      this.sanityClient = sanityClient(this.sanityConfig)
-    }
-
-    if (this.redditConfig) {
-      this.redditClient = new RedditClient(this.redditConfig)
-    }
+    const initConfig = this.setConfiguration(config ?? {})
+    this.initializeClients(initConfig)
 
     /// Configure separate fetching strategies: plain, authed (default), cached (authed)
     this.plainFetcher = axios.create({
@@ -271,9 +260,35 @@ export class BikeTagClient extends EventEmitter {
     return ''
   }
 
+  private getPassthroughApiMethod(
+    method: any,
+    client: RedditClient | ImgurClient | BikeTagClient | SanityClient
+  ): any {
+    return (opts) => {
+      return method(client, this.getDefaultOptions(opts))
+    }
+  }
+
+  initializeClients(config?: BikeTagConfiguration): BikeTagConfiguration {
+    config = config ?? this.getConfiguration()
+
+    if (config.imgur) {
+      this.imgurClient = new ImgurClient(config.imgur)
+    }
+    if (config.sanity) {
+      this.sanityClient = sanityClient(config.sanity)
+    }
+    if (this.redditConfig) {
+      this.redditClient = new RedditClient(config.reddit)
+    }
+
+    return config
+  }
+
   setConfiguration(
     config: Credentials | BikeTagConfiguration | PartialBikeTagConfiguration,
-    overwrite = true
+    overwrite = true,
+    reInitialize = false
   ): BikeTagConfiguration {
     const parsedConfig = assignBikeTagConfiguration(
       config as BikeTagConfiguration
@@ -299,6 +314,27 @@ export class BikeTagClient extends EventEmitter {
         : redditConfig
     }
 
+    if (reInitialize) {
+      const initializeConfig: BikeTagConfiguration = {
+        biketag: undefined,
+        imgur: undefined,
+        reddit: undefined,
+        sanity: undefined,
+      }
+
+      if (!_.isEqual(this.imgurConfig, imgurConfig)) {
+        initializeConfig.imgur = imgurConfig
+      }
+      if (!_.isEqual(this.redditConfig, redditConfig)) {
+        initializeConfig.reddit = redditConfig
+      }
+      if (!_.isEqual(this.sanityConfig, sanityConfig)) {
+        initializeConfig.sanity = sanityConfig
+      }
+
+      this.initializeClients(initializeConfig)
+    }
+
     this.biketagConfig = biketagConfig
     this.imgurConfig = imgurConfig
     this.sanityConfig = sanityConfig
@@ -307,12 +343,12 @@ export class BikeTagClient extends EventEmitter {
     return this.getConfiguration()
   }
 
-  getConfiguration(): BikeTagConfiguration {
+  getConfiguration(config?: BikeTagConfiguration): BikeTagConfiguration {
     return {
-      biketag: this.biketagConfig,
-      sanity: this.sanityConfig,
-      imgur: this.imgurConfig,
-      reddit: this.redditConfig,
+      biketag: config?.biketag ?? this.biketagConfig,
+      sanity: config?.sanity ?? this.sanityConfig,
+      imgur: config?.imgur ?? this.imgurConfig,
+      reddit: config?.reddit ?? this.redditConfig,
     } as BikeTagConfiguration
   }
 
@@ -359,7 +395,9 @@ export class BikeTagClient extends EventEmitter {
 
     switch (options.source) {
       case 'imgur':
-        clientMethod = clientMethod.bind({ getTag: api.getTag })
+        clientMethod = {
+          getTag: this.getPassthroughApiMethod(api.getTag, client),
+        }
         break
     }
 
@@ -383,7 +421,9 @@ export class BikeTagClient extends EventEmitter {
 
     switch (options.source) {
       case 'imgur':
-        clientMethod = clientMethod.bind({ getTags: api.getTags })
+        clientMethod = clientMethod.bind({
+          getTags: this.getPassthroughApiMethod(api.getTags, client),
+        })
         break
     }
 
@@ -408,7 +448,7 @@ export class BikeTagClient extends EventEmitter {
     switch (options.source) {
       case 'reddit':
         clientMethod = clientMethod.bind({
-          images: this.images(this.imgurConfig),
+          images: this.images({ ...this.imgurConfig, ...opts }),
         })
         break
     }
@@ -434,7 +474,7 @@ export class BikeTagClient extends EventEmitter {
     switch (options.source) {
       case 'reddit':
         clientMethod = clientMethod.bind({
-          images: this.images(this.imgurConfig),
+          images: this.images({ ...this.imgurConfig, ...opts }),
         })
         break
     }
@@ -455,8 +495,21 @@ export class BikeTagClient extends EventEmitter {
     opts?: Credentials
   ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
     const { client, options, api } = this.getDefaultAPI(payload, opts)
+    let clientMethod = api.updateTag
 
-    return api.updateTag(client, options).catch((e) => {
+    switch (options.source) {
+      case 'imgur':
+        clientMethod = clientMethod.bind({
+          getTag: this.getPassthroughApiMethod(api.getTag, client),
+          uploadTagImage: this.getPassthroughApiMethod(
+            api.uploadTagImage,
+            client
+          ),
+        })
+        break
+    }
+
+    return clientMethod(client, options).catch((e) => {
       return Promise.resolve({
         status: 500,
         data: null,
