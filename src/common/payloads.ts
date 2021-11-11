@@ -1,4 +1,4 @@
-import { RequireAtLeastOne, TagData } from './types'
+import { Game, RequireAtLeastOne, TagData } from './types'
 
 export type getTagsPayload = {
   fields?: string[]
@@ -51,3 +51,13 @@ export type getGameDataPayload = {
   name: string
   fields?: string[]
 }
+
+export type importTagPayload = Pick<
+  TagData,
+  | 'discussionUrl'
+  | 'mysteryImageUrl'
+  | 'foundImageUrl'
+  | 'mentionUrl'
+  | 'shareUrl'
+> &
+  Game

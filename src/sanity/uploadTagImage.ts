@@ -1,5 +1,5 @@
 import { SanityClient } from '@sanity/client'
-import { BikeTagApiResponse, TagData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
 import { uploadTagImagePayload } from '../common/payloads'
 import { constructSanityObjectFromTag } from './helpers'
 
@@ -39,7 +39,7 @@ export async function uploadTagImage(
   return {
     success: true,
     status: 1,
-    source: 'sanity',
+    source: AvailableApis.sanity,
     data: uploadResponses,
   }
 }

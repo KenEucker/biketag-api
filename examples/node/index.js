@@ -37,30 +37,30 @@ const bikeTagRedditInstance = redditInstanceOpts.reddit && redditInstanceOpts.re
 
 const getTagAsync = async (client, out = false, opts = {}) => {
   const tag1 = await client.getTag(`test-tag-1`, opts)
-  if (out) console.log(tag1.success ? 'successfully retrieved tag data' : 'error', tag1.success ? tag1.data : tag1.status)
+  if (out) console.log(tag1.success ? 'successfully retrieved tag 1 data by slug' : 'error', tag1.success ? tag1.data : tag1.status)
 
   return tag1
 }
 
 const getTag1Async = async (client, out = false, opts = {}) => {
   const tag1 = await client.getTag(1, opts)
-  if (out) console.log(tag1.success ? 'successfully retrieved tag data' : 'error', tag1.success ? tag1.data : tag1.status)
+  if (out) console.log(tag1.success ? 'successfully retrieved tag 1 data by number' : 'error', tag1.success ? tag1.data : tag1.status)
 
   return tag1
 }
 
 const getTagsAsync = async (client, out = false, opts = {}) => {
-  const tag1 = await client.getTags(undefined, opts)
-  if (out) console.log(tag1.success ? 'successfully retrieved tag data' : 'error', tag1.success ? tag1.data : tag1.status)
+  const tags = await client.getTags(undefined, opts)
+  if (out) console.log(tags.success ? 'successfully retrieved tags data' : 'error', tags.success ? tags.data : tags.status)
 
-  return tag1
+  return tags
 }
 
 const getLatestTagAsync = async (client, out = false, opts = {}) => {
-  const tag1 = await client.getTag(undefined, opts)
-  if (out) console.log(tag1.success ? 'successfully retrieved tag data' : 'error', tag1.success ? tag1.data : tag1.status)
+  const latest = await client.getTag(undefined, opts)
+  if (out) console.log(latest.success ? 'successfully retrieved latest tag data' : 'error', latest.success ? latest.data : latest.status)
 
-  return tag1
+  return latest
 }
 
 const getGameDataAsync = async (client, out = false, opts = {}) => {

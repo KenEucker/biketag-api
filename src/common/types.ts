@@ -5,6 +5,14 @@ export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>
 }[keyof T]
 
+export enum AvailableApis {
+  biketag,
+  imgur,
+  sanity,
+  reddit,
+  twitter,
+}
+
 export interface ImgurAccessToken {
   accessToken: string
 }
@@ -15,6 +23,20 @@ export interface ImgurClientId {
 
 export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
   hash?: string
+  clientSecret: string
+}
+export interface TwitterAccessToken {
+  accessToken: string
+}
+
+export interface TwitterClientId {
+  clientId: string
+}
+
+export interface TwitterCredentials
+  extends TwitterAccessToken,
+    TwitterClientId {
+  account?: string
   clientSecret: string
 }
 
@@ -57,7 +79,7 @@ export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
 
 export interface Game {
   game: string
-  source?: string
+  source?: AvailableApis
 }
 export interface AccessToken {
   accessToken: string
@@ -72,7 +94,8 @@ export type BikeTagCredentials = ClientKey & AccessToken & Game
 export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
   Partial<RedditCredentials> &
-  Partial<ImgurCredentials>
+  Partial<ImgurCredentials> &
+  Partial<TwitterCredentials>
 
 export interface BikeTagApiResponse<
   T = Record<string, unknown> | Record<string, unknown>[] | string | boolean
@@ -80,7 +103,7 @@ export interface BikeTagApiResponse<
   data: T
   status: number
   success: boolean
-  source: 'biketag' | 'imgur' | 'sanity' | 'reddit'
+  source: AvailableApis
 }
 
 export type ImgurImage = Pick<
@@ -136,7 +159,9 @@ export interface TagData extends CommonData {
   game: string
   player: string
   hint: string
-  discussionUrl: string
+  discussionUrl?: string
+  mentionUrl?: string
+  shareUrl?: string
   foundLocation: string
   gps: geopoint
   foundImage?: string
@@ -179,6 +204,7 @@ export type BikeTagConfiguration = {
   sanity: SanityCredentials
   reddit: RedditCredentials
   imgur: ImgurCredentials
+  twitter: TwitterCredentials
 }
 
 export type PartialBikeTagConfiguration = RequireAtLeastOne<{
@@ -186,6 +212,7 @@ export type PartialBikeTagConfiguration = RequireAtLeastOne<{
   sanity: Partial<SanityCredentials>
   reddit: Partial<RedditCredentials>
   imgur: Partial<ImgurCredentials>
+  twitter: Partial<TwitterCredentials>
 }>
 
 export type BikeTagApiWrapper = {

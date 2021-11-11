@@ -1,5 +1,5 @@
 import RedditClient from 'snoowrap'
-import { BikeTagApiResponse, TagData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
 import { getTagsPayload } from '../common/payloads'
 import {
   getBikeTagInformationFromRedditData,
@@ -38,7 +38,7 @@ export async function getTags(
         data: bikeTags,
         status: 1,
         success: true,
-        source: 'reddit',
+        source: AvailableApis.reddit,
       }
 
       return response as BikeTagApiResponse<TagData[]>

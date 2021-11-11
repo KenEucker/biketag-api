@@ -1,6 +1,6 @@
 import { SanityClient } from '@sanity/client'
 import { constructSanityObjectFromTag } from './helpers'
-import { BikeTagApiResponse, TagData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
 export interface SanityUploadPayload {
   _id: string
   _type: string
@@ -34,7 +34,7 @@ export async function updateTag(
   return {
     success: true,
     status: 1,
-    source: 'sanity',
+    source: AvailableApis.sanity,
     data: successPayloads,
   }
 }

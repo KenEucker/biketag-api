@@ -15,9 +15,11 @@ import {
   Payload,
   BikeTagConfiguration,
   Game,
+  TwitterCredentials,
 } from './types'
 import FormData from 'form-data'
 import TinyCache from 'tinycache'
+import { USERAGENT } from '../client'
 
 export const putCacheIfExists = (
   key: string,
@@ -186,8 +188,62 @@ export const isBikeTagConfiguration = (
     credentials.biketag !== undefined ||
     credentials.sanity !== undefined ||
     credentials.reddit !== undefined ||
-    credentials.imgur !== undefined
+    credentials.imgur !== undefined ||
+    credentials.twitter !== undefined
   )
+}
+
+export const isTwitterCredentials = (
+  credentials: TwitterCredentials | Credentials
+): boolean => {
+  return (
+    credentials?.clientId !== undefined ||
+    credentials?.clientSecret !== undefined ||
+    (credentials?.clientId !== undefined && credentials?.account !== undefined)
+  )
+}
+
+export const isTwitterApiReady = (
+  credentials: TwitterCredentials | Credentials
+): boolean => {
+  return (
+    (credentials as ClientKey).clientToken !== undefined &&
+    (credentials as ClientKey).clientKey !== undefined
+  )
+}
+
+export const isTwitterConfiguration = (
+  credentials: TwitterCredentials
+): boolean => {
+  return (
+    credentials?.clientId !== undefined ||
+    credentials?.clientSecret !== undefined ||
+    (credentials?.clientId !== undefined && credentials?.account !== undefined)
+  )
+}
+
+export const createTwitterCredentials = (
+  credentials: Partial<TwitterCredentials>,
+  defaults: Partial<TwitterCredentials> = {}
+): TwitterCredentials => {
+  return {
+    clientId: credentials.clientId ?? defaults.clientId,
+    clientSecret: credentials.clientSecret ?? defaults.clientSecret,
+    account: credentials.account ?? defaults.account,
+    accessToken: credentials.accessToken ?? defaults.accessToken,
+  }
+}
+
+export const assignTwitterCredentials = (
+  credentials: TwitterCredentials
+): TwitterCredentials => {
+  const twitterCredentials = isImgurCredentials(
+    credentials as TwitterCredentials
+  )
+    ? createTwitterCredentials(credentials)
+    : undefined
+
+  return twitterCredentials as TwitterCredentials
 }
 
 export const createImgurCredentials = (
@@ -195,10 +251,16 @@ export const createImgurCredentials = (
   defaults: Partial<ImgurCredentials> = {}
 ): ImgurCredentials => {
   return {
-    clientId: credentials.clientId ?? defaults.clientId,
-    clientSecret: credentials.clientSecret ?? defaults.clientSecret,
     hash: credentials.hash ?? defaults.hash,
-    accessToken: credentials.accessToken ?? defaults.accessToken,
+    clientId: credentials.clientId?.length
+      ? credentials.clientId
+      : defaults.clientId,
+    clientSecret: credentials.clientSecret?.length
+      ? credentials.clientSecret
+      : defaults.clientSecret,
+    accessToken: credentials.accessToken?.length
+      ? credentials.accessToken
+      : defaults.accessToken,
   }
 }
 
@@ -217,16 +279,21 @@ export const createSanityCredentials = (
   defaults: Partial<SanityCredentials> = {}
 ): SanityCredentials => {
   return {
-    useCdn:
-      credentials.token !== undefined
-        ? false
-        : credentials.useCdn ?? defaults.useCdn ?? true,
+    useCdn: credentials.token?.length
+      ? false
+      : credentials.useCdn ?? defaults.useCdn ?? true,
     projectId: credentials.projectId ?? defaults.projectId,
     dataset: credentials.dataset ?? defaults.dataset ?? 'development',
-    token: credentials.token ?? defaults.token ?? '',
-    password: credentials.password ?? defaults.password,
-    username: credentials.username ?? defaults.username,
-    apiVersion: credentials.apiVersion ?? defaults.apiVersion ?? '2021-06-07',
+    token: credentials.token?.length ? credentials.token : defaults.token ?? '',
+    password: credentials.password?.length
+      ? credentials.password
+      : defaults.password,
+    username: credentials.username?.length
+      ? credentials.username
+      : defaults.username,
+    apiVersion: credentials.apiVersion?.length
+      ? credentials.apiVersion
+      : defaults.apiVersion ?? '2021-06-07',
   }
 }
 
@@ -249,11 +316,21 @@ export const createRedditCredentials = (
   return {
     subreddit: credentials.subreddit ?? defaults.subreddit,
     clientId: credentials.clientId ?? defaults.clientId,
-    clientSecret: credentials.clientSecret ?? defaults.clientSecret,
-    password: credentials.password ?? defaults.password,
-    username: credentials.username ?? defaults.username,
-    refreshToken: credentials.refreshToken ?? defaults.refreshToken,
-    userAgent: credentials.userAgent ?? defaults.userAgent ?? 'biketag API',
+    clientSecret: credentials.clientSecret?.length
+      ? credentials.clientSecret
+      : defaults.clientSecret,
+    password: credentials.password?.length
+      ? credentials.password
+      : defaults.password,
+    username: credentials.username?.length
+      ? credentials.username
+      : defaults.username,
+    refreshToken: credentials.refreshToken?.length
+      ? credentials.refreshToken
+      : defaults.refreshToken,
+    userAgent: credentials.userAgent?.length
+      ? credentials.userAgent
+      : defaults.userAgent ?? USERAGENT,
   }
 }
 
@@ -276,9 +353,15 @@ export const createBikeTagCredentials = (
   return {
     game: credentials.game ?? defaults.game,
     source: credentials.source ?? defaults.source,
-    clientKey: credentials.clientKey ?? defaults.clientKey,
-    clientToken: credentials.clientToken ?? defaults.clientToken,
-    accessToken: credentials.accessToken ?? defaults.accessToken,
+    clientKey: credentials.clientKey?.length
+      ? credentials.clientKey
+      : defaults.clientKey,
+    clientToken: credentials.clientToken?.length
+      ? credentials.clientToken
+      : defaults.clientToken,
+    accessToken: credentials.accessToken?.length
+      ? credentials.accessToken
+      : defaults.accessToken,
   }
 }
 
