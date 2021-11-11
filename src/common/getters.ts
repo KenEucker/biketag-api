@@ -9,6 +9,7 @@ import {
   getCreditFromTextRegex,
   getDiscussionUrlFromTextRegex,
   getGPSLocationFromTextRegex,
+  getAlbumIdFromTextRegex,
 } from '../common/expressions'
 import { getCacheIfExists, putCacheIfExists } from '../common/methods'
 import { cacheKeys } from '../common/data'
@@ -215,6 +216,43 @@ export const getGPSLocationFromText = (
   return {} as geopoint
 }
 
+export const getImgurAlbumIdFromText = (
+  inputText: string,
+  fallback: string,
+  cache?: typeof TinyCache
+): string => {
+  if (!inputText.length) return fallback
+
+  const cacheKey = `${cacheKeys.imageUrlText}${inputText}`
+  const existingParsed = getCacheIfExists(cacheKey, cache)
+  if (existingParsed) return existingParsed
+
+  inputText.match(getAlbumIdFromTextRegex)
+  const albumbIdMatches = getAlbumIdFromTextRegex.exec(inputText)
+  const albumbIds = albumbIdMatches.reduce((ids, id) => {
+    if (
+      id.indexOf('gallery') === -1 &&
+      id.indexOf('?') === -1 &&
+      id.indexOf('a/') === -1 &&
+      id.length > 1
+    ) {
+      ids.push(id)
+    }
+
+    return ids
+  }, [])
+
+  if (!albumbIds.length && fallback) {
+    putCacheIfExists(cacheKey, fallback, cache)
+    return fallback
+  }
+
+  const albumbId = albumbIds[0]
+  putCacheIfExists(cacheKey, albumbId, cache)
+
+  return albumbId
+}
+
 export const getImageURLsFromText = (
   inputText: string,
   fallback: string | string[],
@@ -229,9 +267,23 @@ export const getImageURLsFromText = (
   /// TODO: make this image validator more intelligent
   const validImageURLs = ['imgur']
 
-  const selfTextURLs = inputText.match(getImageURLsFromTextRegex) || []
+  const selfTextURLs = inputText.match(getImageURLsFromTextRegex)
   const tagImageURLs = selfTextURLs.reduce((urls, url) => {
     if (!url || !new RegExp(validImageURLs.join('|')).test(url)) return urls
+
+    const ext = /[^.]+$/.test(url) ? '.' + /[^.]+$/.exec(url) : ''
+    if (
+      ['.jpg', '.jpeg', '.png', '.bmp'].indexOf(ext) === -1 &&
+      ext.indexOf('.com/') === 0 &&
+      url.indexOf('//imgur.com/') !== -1 &&
+      url.indexOf('3/album') === -1 &&
+      url.indexOf('/a/') === -1 &&
+      url.indexOf('.com/gallery') === -1 &&
+      url.length > 2
+    ) {
+      /// TODO: detect the image extension and set it here instead of defaulting to jpg
+      url = `${url.replace('//imgur.com', '//i.imgur.com')}.jpg`
+    }
 
     urls.push(url)
 
@@ -301,6 +353,7 @@ export const getImgurFoundImageHashFromBikeTagData = (
 ): string => {
   return getImageHashFromText(tag.foundImageUrl, cache)
 }
+
 export const getImgurFoundDescriptionFromBikeTagData = (
   tag: TagData,
   cache?: typeof TinyCache
@@ -311,7 +364,12 @@ export const getImgurFoundDescriptionFromBikeTagData = (
 export const getImgurFoundTitleFromBikeTagData = (
   tag: TagData,
   cache?: typeof TinyCache
-): string => `(${tag.gps ? tag.gps : ''})`
+): string =>
+  `${
+    !tag.gps || (tag.gps.lat === 0 && tag.gps.long === 0)
+      ? ''
+      : `(${tag.gps.lat ?? 0}, ${tag.gps.long ?? 0}, ${tag.gps.alt ?? 0})`
+  }`
 
 export const getImgurMysteryImageHashFromBikeTagData = (
   tag: TagData,
@@ -326,7 +384,7 @@ export const getImgurMysteryTitleFromBikeTagData = (
   `${
     !tag.gps || (tag.gps.lat === 0 && tag.gps.long === 0)
       ? ''
-      : `(${tag.gps.lat}, ${tag.gps.long}, ${tag.gps.alt})`
+      : `(${tag.gps.lat ?? 0}, ${tag.gps.long ?? 0}, ${tag.gps.alt ?? 0})`
   } ${tag.discussionUrl ? `{${tag.discussionUrl}}` : ''}`
 
 export const getImgurMysteryDescriptionFromBikeTagData = (

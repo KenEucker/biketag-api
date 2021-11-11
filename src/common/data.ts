@@ -62,6 +62,7 @@ export const cacheKeys = {
   discussionText: `discussion::`,
   tagNumberText: `tag::`,
   imagesText: `images::`,
+  imageUrlText: `images::`,
   gpsLocationText: `gps::`,
   slugText: `slug::`,
 }

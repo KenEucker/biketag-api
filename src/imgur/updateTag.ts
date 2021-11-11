@@ -7,19 +7,21 @@ import {
   getImgurMysteryTitleFromBikeTagData,
   getImgurMysteryDescriptionFromBikeTagData,
   getImgurMysteryImageHashFromBikeTagData,
+  getImageHashFromText,
 } from '../common/getters'
+import { createTag } from '../common/data'
 
 export interface ImgurUploadPayload {
   imageHash: string
-  imageTitle?: string
-  imageDescription?: string
+  title: string
+  description: string
 }
 export type UpdateTagPayload = Partial<TagData> & ImgurUploadPayload
 
 function isValidUpdatePayload(utp: UpdateTagPayload) {
   return (
-    (typeof utp.imageHash === 'string' && typeof utp.imageTitle === 'string') ||
-    typeof utp.imageDescription === 'string'
+    typeof utp.imageHash === 'string' &&
+    (typeof utp.title === 'string' || typeof utp.description === 'string')
   )
 }
 
@@ -27,18 +29,14 @@ export function getUpdateTagPayloadFromTagData(
   tagData: UpdateTagPayload,
   mystery = true
 ): UpdateTagPayload {
-  if (isValidUpdatePayload(tagData)) {
-    return tagData
-  }
-
   return {
     imageHash: mystery
       ? getImgurMysteryImageHashFromBikeTagData(tagData as TagData)
       : getImgurFoundImageHashFromBikeTagData(tagData as TagData),
-    imageTitle: mystery
+    title: mystery
       ? getImgurMysteryTitleFromBikeTagData(tagData as TagData)
       : getImgurFoundTitleFromBikeTagData(tagData as TagData),
-    imageDescription: mystery
+    description: mystery
       ? getImgurMysteryDescriptionFromBikeTagData(tagData as TagData)
       : getImgurFoundDescriptionFromBikeTagData(tagData as TagData),
   }
@@ -47,62 +45,86 @@ export function getUpdateTagPayloadFromTagData(
 export async function updateTag(
   client: ImgurClient,
   payload: UpdateTagPayload | UpdateTagPayload[]
-): Promise<BikeTagApiResponse<string> | BikeTagApiResponse<string>[]> {
-  const success = false
-  const successMessage = 'all images have been updated successfully!'
+): Promise<BikeTagApiResponse<TagData> | BikeTagApiResponse<TagData>[]> {
+  const promises: Promise<BikeTagApiResponse<TagData>>[] = []
+  const payloads = Array.isArray(payload) ? payload : [payload]
 
-  const promises: Promise<BikeTagApiResponse<string>>[] = []
-
-  const createUploadPromise = (utp): Promise<BikeTagApiResponse<string>> => {
+  const createUpdatePromise = (utp): Promise<BikeTagApiResponse<TagData>> => {
     const imgurMysteryImagePayload = getUpdateTagPayloadFromTagData(utp)
     const imgurFoundImagePayload = getUpdateTagPayloadFromTagData(utp, false)
 
-    return new Promise(async (resolve, reject) => {
-      let currentSuccess = false
+    return new Promise(async (resolve) => {
+      let success = true
 
       if (
         isValidUpdatePayload(imgurMysteryImagePayload) &&
         isValidUpdatePayload(imgurFoundImagePayload)
       ) {
-        const mysteryImageUpdated = (await client.updateImage({
-          imageHash: imgurMysteryImagePayload.imageHash,
-          title: imgurMysteryImagePayload.imageTitle,
-          description: imgurMysteryImagePayload.imageDescription,
-        })) as ImgurApiResponse<boolean>
-        const foundImageUpdated = (await client.updateImage({
-          imageHash: imgurFoundImagePayload.imageHash,
-          title: imgurFoundImagePayload.imageTitle,
-          description: imgurFoundImagePayload.imageDescription,
-        })) as ImgurApiResponse<boolean>
+        const tagExistsForBikeTagAlbum = await this.getTag(utp.tagnumber)
+        if (
+          tagExistsForBikeTagAlbum.success &&
+          tagExistsForBikeTagAlbum.data?.mysteryImageUrl?.length
+        ) {
+          const mysteryImageUpdated = (await client.updateImage({
+            ...imgurMysteryImagePayload,
+            imageHash: getImageHashFromText(
+              tagExistsForBikeTagAlbum.data.mysteryImageUrl
+            ),
+          })) as ImgurApiResponse<boolean>
 
-        currentSuccess =
-          success && mysteryImageUpdated.data && foundImageUpdated.data
+          success = mysteryImageUpdated.data
+        } else {
+          const mysteryImageUploaded = await this.uploadTagImage({
+            ...imgurMysteryImagePayload,
+            mysteryImage: utp.mysteryImageUrl,
+            mysteryImageUrl: undefined,
+          })
+          if (mysteryImageUploaded?.length && mysteryImageUploaded[0].success) {
+            utp.mysteryImageUrl = mysteryImageUploaded[0].data.mysteryImageUrl
+          } else {
+            success = false
+          }
+        }
+
+        if (
+          tagExistsForBikeTagAlbum.success &&
+          tagExistsForBikeTagAlbum.data?.foundImageUrl?.length
+        ) {
+          const foundImageUpdated = (await client.updateImage({
+            ...imgurFoundImagePayload,
+            imageHash: getImageHashFromText(
+              tagExistsForBikeTagAlbum.data.foundImageUrl
+            ),
+          })) as ImgurApiResponse<boolean>
+          success = success && foundImageUpdated.data
+        } else {
+          const foundImageUploaded = await this.uploadTagImage({
+            ...imgurFoundImagePayload,
+            foundImage: utp.foundImageUrl,
+            foundImageUrl: undefined,
+          })
+          if (foundImageUploaded?.length && foundImageUploaded[0].success) {
+            utp.foundImageUrl = foundImageUploaded[0].data.foundImageUrl
+          } else {
+            success = false
+          }
+        }
       } else {
-        reject('one update payload is invalid')
-      }
-
-      if (!currentSuccess) {
-        reject('one update of Imgur image failed')
+        throw new Error('one update payload is invalid')
       }
 
       resolve({
-        data: successMessage,
-        success: currentSuccess,
+        data: createTag(utp),
+        success,
         source: 'imgur',
         status: 200,
       })
     })
   }
 
-  if (Array.isArray(payload)) {
-    payload.map((p) => promises.push(createUploadPromise(p)))
-  } else if (isValidUpdatePayload(payload)) {
-    return createUploadPromise(payload)
-  } else {
-    throw new Error('Update requires a title and/or description')
-  }
+  payloads.map((p) => promises.push(createUpdatePromise(p)))
 
-  return await Promise.all(promises)
+  return Promise.all(promises)
     .then((results) => {
       return results
     })

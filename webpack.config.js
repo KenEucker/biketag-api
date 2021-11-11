@@ -1,9 +1,9 @@
 const path = require('path')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const nodeExternals = require('webpack-node-externals')
-const { ProvidePlugin } = require('webpack')
 
 const generalConfig = {
+  devtool: 'cheap-module-source-map',
   watchOptions: {
     aggregateTimeout: 600,
     ignored: /node_modules/,
@@ -32,7 +32,6 @@ const generalConfig = {
 }
 
 const nodeConfig = {
-  devtool: 'inline-source-map',
   entry: './src/index.ts',
   target: 'node',
   externals: [nodeExternals()],
@@ -44,7 +43,6 @@ const nodeConfig = {
 }
 
 const browserConfig = {
-  devtool: 'inline-source-map',
   entry: './src/index.ts',
   target: 'web',
   output: {
@@ -59,15 +57,16 @@ const browserConfig = {
 }
 
 module.exports = (env, argv) => {
+  Object.assign(nodeConfig, generalConfig)
+  Object.assign(browserConfig, generalConfig)
+
   if (argv.mode === 'development') {
-    generalConfig.devtool = 'cheap-module-source-map'
   } else if (argv.mode === 'production') {
+    nodeConfig.devtool = false
+    browserConfig.devtool = false
   } else {
     throw new Error('Specify env')
   }
-
-  Object.assign(nodeConfig, generalConfig)
-  Object.assign(browserConfig, generalConfig)
 
   return [nodeConfig, browserConfig]
 }

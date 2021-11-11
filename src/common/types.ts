@@ -1,4 +1,5 @@
 import { Readable } from 'stream'
+import { ImageData } from 'imgur/lib/common/types'
 
 export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>
@@ -82,12 +83,10 @@ export interface BikeTagApiResponse<
   source: 'biketag' | 'imgur' | 'sanity' | 'reddit'
 }
 
-export type ImgurImage = {
-  description: string
-  title: string
-  link: string
-  datetime: number
-}
+export type ImgurImage = Pick<
+  ImageData,
+  'id' | 'description' | 'title' | 'link' | 'datetime'
+>
 
 export type geopoint = {
   lat: number

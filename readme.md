@@ -74,7 +74,16 @@ client = new biketag({
   clientToken: process.env.BIKETAG_CLIENT_TOKEN,
 })
 
-// or your reddit client ID and clientSecret
+// if you have Imgur credentials: clientId and clientSecret
+client = new biketag({
+  game: 'portland',
+  imgur: {
+    clientId: process.env.IMGUR_CLIENT_ID,
+    clientSecret: process.env.IMGUR_CLIENT_SECRET,
+  }
+})
+
+// or Reddit credentials: clientId and clientSecret
 client = new biketag({
   game: 'portland',
   reddit: {
@@ -84,7 +93,7 @@ client = new biketag({
   }
 })
 
-// or your sanity client ID and clientSecret
+// or Sanity credentials: projectId and accessToken
 client = new biketag({
   game: 'portland',
   sanity: {
