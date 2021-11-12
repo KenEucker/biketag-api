@@ -34,7 +34,7 @@ export async function updateTag(
   return {
     success: true,
     status: 1,
-    source: AvailableApis.sanity,
+    source: AvailableApis[AvailableApis.sanity],
     data: successPayloads,
   }
 }

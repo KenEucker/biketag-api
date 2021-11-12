@@ -63,7 +63,7 @@ export async function getTags(
   return {
     data: tagsData,
     success: true,
-    source: AvailableApis.imgur,
+    source: AvailableApis[AvailableApis.imgur],
     status: 200,
   }
 }

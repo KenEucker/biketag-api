@@ -40,7 +40,7 @@ export async function getGameData(
       data: isArray ? gameData : gameData[0],
       status: 1,
       success: true,
-      source: AvailableApis.sanity,
+      source: AvailableApis[AvailableApis.sanity],
     }
 
     // return BikeTagApiResponse

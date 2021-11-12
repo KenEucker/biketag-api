@@ -79,7 +79,7 @@ export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
 
 export interface Game {
   game: string
-  source?: AvailableApis
+  source?: AvailableApis | string
 }
 export interface AccessToken {
   accessToken: string
@@ -103,7 +103,7 @@ export interface BikeTagApiResponse<
   data: T
   status: number
   success: boolean
-  source: AvailableApis
+  source: AvailableApis | string
 }
 
 export type ImgurImage = Pick<

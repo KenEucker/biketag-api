@@ -39,7 +39,7 @@ export async function uploadTagImage(
   return {
     success: true,
     status: 1,
-    source: AvailableApis.sanity,
+    source: AvailableApis[AvailableApis.sanity],
     data: uploadResponses,
   }
 }

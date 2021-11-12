@@ -239,8 +239,28 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
 
 ## Vendors
 
-Structured content powered by Sanity.io
+Images powered by imgur.com
 
-[![Sanity.io][sanity-image]](https://sanity.io)
+[![imgur.com][imgur-image]](https://apidocs.imgur.com/)
 
-[sanity-image]: https://raw.githubusercontent.com/keneucker/biketag-app/production/public/img/sanity-logo.png
+Structured Content powered by sanity.io
+
+[![sanity.io][sanity-image]](https://www.sanity.io/docs/http-api)
+
+Discussions powered by reddit.com
+
+[![reddit.com][reddit-image]](https://www.reddit.com/dev/api/)
+
+Mentions powered by twitter.com
+
+[![twitter.com][twitter-image]](https://developer.twitter.com/en/docs)
+
+Data powered by gun.eco
+
+[![gun.eco][gun-image]](https://gun.eco/docs/API)
+
+[imgur-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/imgur-logo.png
+[sanity-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/sanity-logo.png
+[reddit-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/reddit-logo.png
+[gun-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/gun-logo.png
+[twitter-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/twitter-logo.png

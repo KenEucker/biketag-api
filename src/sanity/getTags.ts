@@ -40,7 +40,7 @@ export async function getTags(
       data: tagsData,
       status: 1,
       success: true,
-      source: AvailableApis.sanity,
+      source: AvailableApis[AvailableApis.sanity],
     }
 
     return response as BikeTagApiResponse<TagData[]>

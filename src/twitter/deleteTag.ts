@@ -35,7 +35,7 @@ export async function deleteTag(
   return {
     data: responses,
     success: true,
-    source: AvailableApis.imgur,
+    source: AvailableApis[AvailableApis.imgur],
     status: 200,
   } as BikeTagApiResponse<any>
 }

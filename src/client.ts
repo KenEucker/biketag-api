@@ -127,7 +127,7 @@ export class BikeTagClient extends EventEmitter {
   private getDefaultOptions(
     opts: any,
     optsType = 'tag',
-    source?: AvailableApis
+    source?: AvailableApis | string
   ): any {
     /// If the options passed in was a string, set it as the slug
     const options =
@@ -452,7 +452,7 @@ export class BikeTagClient extends EventEmitter {
         data: null,
         error: e,
         success: false,
-        source: options.source,
+        source: AvailableApis[options.source],
       }
     })
   }
@@ -486,7 +486,7 @@ export class BikeTagClient extends EventEmitter {
         data: null,
         error: e,
         success: false,
-        source: options.source,
+        source: AvailableApis[options.source],
       })
     })
   }
@@ -512,7 +512,7 @@ export class BikeTagClient extends EventEmitter {
         data: null,
         error: e,
         success: false,
-        source: options.source,
+        source: AvailableApis[options.source],
       })
     })
   }
@@ -538,7 +538,7 @@ export class BikeTagClient extends EventEmitter {
         data: null,
         error: e,
         success: false,
-        source: options.source,
+        source: AvailableApis[options.source],
       }
     })
   }
@@ -564,7 +564,7 @@ export class BikeTagClient extends EventEmitter {
         data: null,
         error: e,
         success: false,
-        source: options.source,
+        source: AvailableApis[options.source],
       }
     })
   }
@@ -594,7 +594,7 @@ export class BikeTagClient extends EventEmitter {
         data: null,
         error: e,
         success: false,
-        source: options.source,
+        source: AvailableApis[options.source],
       })
     })
   }
@@ -611,7 +611,7 @@ export class BikeTagClient extends EventEmitter {
         data: null,
         error: e,
         success: false,
-        source: options.source,
+        source: AvailableApis[options.source],
       })
     })
   }

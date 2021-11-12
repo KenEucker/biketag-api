@@ -59,7 +59,7 @@ export async function getTag(
       data: tagData,
       status: 1,
       success: true,
-      source: AvailableApis.sanity,
+      source: AvailableApis[AvailableApis.sanity],
     }
 
     // return BikeTagApiResponse
