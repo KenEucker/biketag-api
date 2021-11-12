@@ -1,0 +1,11 @@
+export declare const getTagNumbersFromTextRegex: RegExp;
+export declare const getCreditFromTextRegex: RegExp;
+export declare const getFoundLocationFromTextRegex: RegExp;
+export declare const getHintFromTextRegex: RegExp;
+export declare const getGPSLocationFromTextRegex: RegExp;
+export declare const getImageURLsFromTextRegex: RegExp;
+export declare const getAlbumIdFromTextRegex: RegExp;
+export declare const getDiscussionUrlFromTextRegex: RegExp;
+export declare const getGPSCoordinatesValueFromTextRegex: RegExp;
+export declare const getTagnumberFromSlugRegex: RegExp;
+export declare const getImgurImageHashFromUrlRegex: RegExp;

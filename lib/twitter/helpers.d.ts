@@ -1,0 +1,18 @@
+import { ImgurImage, TagData } from '../common/types';
+import TinyCache from 'tinycache';
+export declare function sortImgurImagesByUploadDate(images: ImgurImage[], newestFirst: boolean): ImgurImage[];
+export declare function getTagNumbersFromText(inputText: string, fallback?: number[] | null, cache?: typeof TinyCache): number[];
+export declare function getPlayerFromText(inputText: string, fallback?: string, cache?: typeof TinyCache): string | null;
+export declare function getDiscussionUrlFromText(inputText: string, fallback?: string, cache?: typeof TinyCache): string;
+export declare function getFoundLocationFromText(inputText: string, fallback?: string, cache?: typeof TinyCache): string;
+export declare function getHintFromText(inputText: string, fallback?: string | null, cache?: typeof TinyCache): string | null;
+export declare function getGPSLocationFromText(inputText: string, fallback?: string | null, cache?: typeof TinyCache): string | null;
+export declare function getBikeTagNumberFromImage(image: ImgurImage): number;
+export declare function sortImgurImagesByTagNumber(images?: ImgurImage[]): ImgurImage[];
+export declare function getImgurLinksFromText(inputText: string, fallback?: string[] | null, cache?: typeof TinyCache): string[];
+export declare function getBikeTagFromImgurImageSet(mysteryImage: ImgurImage, foundImage?: ImgurImage, opts?: any): TagData;
+export declare const getBikeTagUsernameFromImgurImage: (image: ImgurImage, cache?: typeof TinyCache) => string;
+export declare const getBikeTagDiscussionLinkFromImgurImage: (image: ImgurImage, cache?: typeof TinyCache) => string | null;
+export declare const getBikeTagNumberFromImgurImage: (image: ImgurImage, cache?: typeof TinyCache) => number;
+export declare const getBikeTagNumberIndexFromImgurImages: (images?: ImgurImage[], tagNumber?: number, proof?: boolean) => number;
+export declare const getImageHashFromImgurImage: (image: ImgurImage, cache?: typeof TinyCache) => string;

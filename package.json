@@ -1,9 +1,10 @@
 {
   "name": "biketag",
-  "version": "0.0.1-alpha-3",
+  "version": "1.8.2",
   "description": "The Javascript client API for BikeTag Games",
-  "main": "dist/bundle.js",
-  "types": "lib/index.d.ts",
+  "main": "./biketag.node.js",
+  "browser": "./biketag.js",
+  "types": "./lib/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/keneucker/biketag-api.git"
@@ -13,15 +14,15 @@
   "bugs": {
     "url": "https://github.com/keneucker/biketag-api/issues"
   },
-  "homepage": "https://github.com/keneucker/biketag-api#readme",
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
+  "funding": {
+    "type": "patreon",
+    "url": "https://www.patreon.com/biketag"
   },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
-  }
+  "homepage": "https://github.com/keneucker/biketag-api#readme",
+  "keywords": [
+    "typescript",
+    "sanity",
+    "imgur",
+    "biketag"
+  ]
 }
