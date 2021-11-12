@@ -35,53 +35,60 @@ const redditInstanceOpts = {
 }
 const bikeTagRedditInstance = redditInstanceOpts.reddit && redditInstanceOpts.reddit.clientId ? new BikeTagClient(redditInstanceOpts) : null
 
+const pretty = m => `\x1b[44m${m}\x1b[0m`
+const log = (message, response, toLog = false) => {
+  if (toLog) {
+    console.log(pretty(response.success ? message : 'error', response.success ? response.data : response.status), {data: response.data, error: response.error})
+  }
+}
+
 const getTagAsync = async (client, out = false, opts = {}) => {
   const tag1 = await client.getTag(`test-tag-1`, opts)
-  if (out) console.log(tag1.success ? 'successfully retrieved tag 1 data by slug' : 'error', tag1.success ? tag1.data : tag1.status)
+  log('successfully retrieved tag 1 data by slug', tag1, out)
 
   return tag1
 }
 
 const getTag1Async = async (client, out = false, opts = {}) => {
   const tag1 = await client.getTag(1, opts)
-  if (out) console.log(tag1.success ? 'successfully retrieved tag 1 data by number' : 'error', tag1.success ? tag1.data : tag1.status)
+  log('successfully retrieved tag 1 data by number', tag1, out)
 
   return tag1
 }
 
 const getTagsAsync = async (client, out = false, opts = {}) => {
   const tags = await client.getTags(undefined, opts)
-  if (out) console.log(tags.success ? 'successfully retrieved tags data' : 'error', tags.success ? tags.data : tags.status)
+  log('successfully retrieved tags data', tags, out)
 
   return tags
 }
 
 const getLatestTagAsync = async (client, out = false, opts = {}) => {
   const latest = await client.getTag(undefined, opts)
-  if (out) console.log(latest.success ? 'successfully retrieved latest tag data' : 'error', latest.success ? latest.data : latest.status)
+  log('successfully retrieved latest tag data', latest, out)
 
   return latest
 }
 
 const getGameDataAsync = async (client, out = false, opts = {}) => {
   const testGameData = await client.getGameData('test', opts)
-  if (out) console.log(testGameData.success ? 'success fully retrieved game data' : 'error', testGameData.success ? testGameData.data : testGameData.status)
+  log('success fully retrieved game data', testGameData, out)
 
   return testGameData
 }
 
 const runTests = async () => {
   if (bikeTagImgurInstance) {
-    console.log("Tag #1 from Imgur")
+    console.log(pretty("Tag #1 from Imgur"))
     await getTagAsync(bikeTagImgurInstance, true)
-    console.log("Latest Tag from Imgur")
+    console.log(pretty("Latest Tag from Imgur"))
     await getLatestTagAsync(bikeTagSanityInstance, true)
   }
 
   if (bikeTagSanityInstance) {
-    console.log("Tag #1 from Sanity")
+    console.log(pretty("Tag #1 from Sanity"))
     await getTag1Async(bikeTagSanityInstance, true)
-    console.log("All Tags from Sanity")
+    console.log(pretty("All Tags from Sanity"))
     await getTagsAsync(bikeTagSanityInstance, true)
 
     console.log("Game from Sanity")
@@ -89,14 +96,15 @@ const runTests = async () => {
   }
 
   if (bikeTagRedditInstance) {
-    console.log("Latest Tag from Reddit")
+    console.log(pretty("Latest Tag from Reddit"))
     await getLatestTagAsync(bikeTagRedditInstance, true, {source: 'reddit'})
-    console.log("All Tags from Reddit")
+    console.log(pretty("All Tags from Reddit"))
     await getTagsAsync(bikeTagRedditInstance, true, {source: 'reddit', time: 'all'})
   }
 }
 
 if (require.main === module) {
+  getGameDataAsync(bikeTagSanityInstance, true)
   runTests()
 }
 

@@ -10,6 +10,7 @@ import {
   getDiscussionUrlFromTextRegex,
   getGPSLocationFromTextRegex,
   getAlbumIdFromTextRegex,
+  getSanityImageUrlHashFromTextRegex,
 } from '../common/expressions'
 import { getCacheIfExists, putCacheIfExists } from '../common/methods'
 import { cacheKeys } from '../common/data'
@@ -268,35 +269,40 @@ export const getImageURLsFromText = (
   const validImageURLs = ['imgur']
 
   const selfTextURLs = inputText.match(getImageURLsFromTextRegex)
-  const tagImageURLs = selfTextURLs.reduce((urls, url) => {
-    if (!url || !new RegExp(validImageURLs.join('|')).test(url)) return urls
+  if (selfTextURLs) {
+    const tagImageURLs = selfTextURLs.reduce((urls, url) => {
+      if (!url || !new RegExp(validImageURLs.join('|')).test(url)) return urls
 
-    const ext = /[^.]+$/.test(url) ? '.' + /[^.]+$/.exec(url) : ''
-    if (
-      ['.jpg', '.jpeg', '.png', '.bmp'].indexOf(ext) === -1 &&
-      ext.indexOf('.com/') === 0 &&
-      url.indexOf('//imgur.com/') !== -1 &&
-      url.indexOf('3/album') === -1 &&
-      url.indexOf('/a/') === -1 &&
-      url.indexOf('.com/gallery') === -1 &&
-      url.length > 2
-    ) {
-      /// TODO: detect the image extension and set it here instead of defaulting to jpg
-      url = `${url.replace('//imgur.com', '//i.imgur.com')}.jpg`
+      const ext = /[^.]+$/.test(url) ? '.' + /[^.]+$/.exec(url) : ''
+      if (
+        ['.jpg', '.jpeg', '.png', '.bmp'].indexOf(ext) === -1 &&
+        ext.indexOf('.com/') === 0 &&
+        url.indexOf('//imgur.com/') !== -1 &&
+        url.indexOf('3/album') === -1 &&
+        url.indexOf('/a/') === -1 &&
+        url.indexOf('.com/gallery') === -1 &&
+        url.length > 2
+      ) {
+        /// TODO: detect the image extension and set it here instead of defaulting to jpg
+        url = `${url.replace('//imgur.com', '//i.imgur.com')}.jpg`
+      }
+
+      urls.push(url)
+
+      return urls
+    }, [])
+
+    if (!tagImageURLs.length && fallback) {
+      putCacheIfExists(cacheKey, fallback, cache)
+      return fallback
     }
 
-    urls.push(url)
-
-    return urls
-  }, [])
-
-  if (!tagImageURLs.length && fallback) {
-    putCacheIfExists(cacheKey, fallback, cache)
-    return fallback
+    putCacheIfExists(cacheKey, tagImageURLs, cache)
+    return tagImageURLs
   }
 
-  putCacheIfExists(cacheKey, tagImageURLs, cache)
-  return tagImageURLs
+  putCacheIfExists(cacheKey, fallback, cache)
+  return fallback
 }
 
 export const getDiscussionUrlFromText = (
@@ -342,6 +348,29 @@ export const getImageHashFromText = (
   }
 
   const imageHash = (imageHashMatches[1] || '').trim()
+  putCacheIfExists(cacheKey, imageHash, cache)
+
+  return imageHash
+}
+
+export const getSanityImageUrlHashFromText = (
+  inputText: string,
+  cache?: typeof TinyCache
+): string => {
+  if (!inputText.length) return ''
+
+  const cacheKey = `${cacheKeys.sanityUrlText}${inputText}`
+  const existingParsed = getCacheIfExists(cacheKey, cache)
+  if (existingParsed) return existingParsed
+
+  const imageUrlMatches = getSanityImageUrlHashFromTextRegex.exec(inputText)
+
+  if (!imageUrlMatches || !imageUrlMatches.length) {
+    putCacheIfExists(cacheKey, null, cache)
+    return null
+  }
+
+  const imageHash = (imageUrlMatches[1] || '').trim()
   putCacheIfExists(cacheKey, imageHash, cache)
 
   return imageHash

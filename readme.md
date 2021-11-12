@@ -22,11 +22,14 @@
   </a>
 </p>
 
+<div align="center">
 
 ## Installation
-_This package is Typescript ready_
+_This package is Isomorphic and Typescript ready_
 
 `npm install biketag`
+
+</div>
 
 ## How to include it in your projects
 
@@ -126,6 +129,7 @@ client = new BikeTagClient({
   }
 })
 ```
+<div align="center">
 
 ### Configuration
 
@@ -156,6 +160,7 @@ The acceptable fields for a BikeTagConfiguration object are outlined below:
 | `clientSecret`  | [Reddit] The reddit Client Secret to use when authenticating using the ImgurClient                                                  |
 | `refreshToken`  | [Reddit] The reddit Refresh Token acquired via authorization (externally)                                                           |
 
+</div>
 
 ### **⚠️ For brevity, the rest of the examples will leave out the import and/or instantiation step.**
 
@@ -183,6 +188,7 @@ const firstFivePortlandTags = await biketagAPI.getTags([1,2,3,4,5], { source: 'r
 
 
 ### There are a series of getter methods, accessible by `biketagAPI.getters`. Their use is explained below: 
+<div align="center">
 
 |     method               | Description                                                                                                                                     |
 | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -202,9 +208,10 @@ const firstFivePortlandTags = await biketagAPI.getTags([1,2,3,4,5], { source: 'r
 | `getImgurMysteryTitleFromBikeTagData`         | constructs an Imgur image title from BikeTag data for the mystery image.                                                   |
 | `getImgurMysteryDescriptionFromBikeTagData`   | constructs an Imgur image description from BikeTag data for the mystery image.                                             |
 
-
+</div>
 
 ### There are a series of regular expressions, accessible by `biketagAPI.expressions`. Their use is explained below: 
+<div align="center">
 
 |   expression                          | Description                                                                                                                         |
 | --------------------------------------| ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -219,10 +226,13 @@ const firstFivePortlandTags = await biketagAPI.getTags([1,2,3,4,5], { source: 'r
 | `getTagnumberFromSlugRegex`           | Parses out the number from a BikeTag slug.                                                                                          |
 | `getImgurImageHashFromUrlRegex`       | Parses out the Imgur image hash from an Imgur image url                                                                             |
 
+</div>
 
+<div align="center">
 
 ## Credits
 
+</div>
 This project is heavily influenced by the [node-imgur][node-imgur] package, the Imgur API and it's documentation, and Sanity.IO's javascript client.
 
 Using the typescript library configured and developed on the node-imgur v2 project: https://github.com/kaimallea/node-imgur, this package comes bundled with testing using jest and automated releases using github actions. Many thanks to Kaimallea for collaborating with me on the imgur API because I learned so much along the way!
@@ -237,30 +247,33 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
 [reddit]: https://www.npmjs.com/package/snoowrap
 
 
-## Vendors
+<div align="center">
 
-Images powered by imgur.com
+  ## Vendors
 
-[![imgur.com][imgur-image]](https://apidocs.imgur.com/)
+  Images powered by imgur.com
 
-Structured Content powered by sanity.io
+  [![imgur.com][imgur-image]](https://apidocs.imgur.com/)
 
-[![sanity.io][sanity-image]](https://www.sanity.io/docs/http-api)
+  Structured Content powered by sanity.io
 
-Discussions powered by reddit.com
+  [![sanity.io][sanity-image]](https://www.sanity.io/docs/http-api)
 
-[![reddit.com][reddit-image]](https://www.reddit.com/dev/api/)
+  Discussions powered by reddit.com
 
-Mentions powered by twitter.com
+  [![reddit.com][reddit-image]](https://www.reddit.com/dev/api/)
 
-[![twitter.com][twitter-image]](https://developer.twitter.com/en/docs)
+  Mentions powered by twitter.com
 
-Data powered by gun.eco
+  [![twitter.com][twitter-image]](https://developer.twitter.com/en/docs)
 
-[![gun.eco][gun-image]](https://gun.eco/docs/API)
+  Data powered by gun.eco
 
-[imgur-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/imgur-logo.png
-[sanity-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/sanity-logo.png
-[reddit-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/reddit-logo.png
-[gun-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/gun-logo.png
-[twitter-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/twitter-logo.png
+  [![gun.eco][gun-image]](https://gun.eco/docs/API)
+
+  [imgur-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/imgur-logo.png
+  [sanity-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/sanity-logo.png
+  [reddit-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/reddit-logo.png
+  [gun-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/gun-logo.png
+  [twitter-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/twitter-logo.png
+</div>

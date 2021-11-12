@@ -30,6 +30,7 @@ export async function getBikeTagsFromRedditPosts(
       const galleryBaseUrl = `${imgurBaseUrl}/gallery/`
       const albumBaseUrl = `${imgurBaseUrl}/a/`
       const imageUrlIsRedditGallery = (p as any).is_gallery
+      const directImageLinks = []
 
       if (p.selftext && p.selftext.length) {
         postBody = selftext = p.selftext
@@ -54,22 +55,24 @@ export async function getBikeTagsFromRedditPosts(
             }, p.url)
           : p.url
         isImagePost = true
+
+        for (const image of (p as any).gallery_data.items) {
+          directImageLinks.push(`https://i.redd.it/${image.media_id}.jpg`)
+        }
         // console.log({comments: expandedPostReplies.comments.reduce((o, c) => o + c.body, ''), body: comments.reduce((o, c) => o + c.body, '') })
       } else {
         selftext = null
       }
 
-      // console.log({selftext, title: p.title})
       if (selftext) {
-        const tagImageURLs = getImageURLsFromText(selftext, [])
-        const tagNumbers = getTagNumbersFromText(postBody)
+        const tagImageURLs = getImageURLsFromText(selftext, directImageLinks)
+        const tagNumbers = getTagNumbersFromText(postBody) as number[]
         let hint = getHintFromText(postBody, '')
         let foundAt = getFoundLocationFromText(postBody, '')
         let gps = getGPSLocationFromText(postBody, undefined)
         let credit = getCreditFromText(postBody, `u/${p.author.name}`)
         let timestamp = p.created_utc
 
-        const directImageLinks = []
         let directImageLinksNumbers = tagNumbers
 
         for (let u = 0; u < tagImageURLs.length; u++) {
@@ -128,10 +131,11 @@ export async function getBikeTagsFromRedditPosts(
                 }
               }
             } else if (imageUrlIsRedditGallery) {
-              for (const image of (p as any).gallery_data.items) {
-                directImageLinks.push(
-                  `https://preview.redd.it/${image.media_id}.jpg`
-                )
+              ///
+              if (directImageLinksNumbers.length === 1) {
+                const titleTagNumbers = getTagNumbersFromText(p.title, [])
+                directImageLinksNumbers =
+                  directImageLinksNumbers.concat(titleTagNumbers)
               }
             } else {
               directImageLinks.push(imageUrl)

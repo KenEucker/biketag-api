@@ -9,6 +9,7 @@ import {
   gameDataFields,
   gameDataArrayFields,
   tagDataAssetFields,
+  gameDataObjectFields,
 } from '../common/data'
 
 export function constructTagFromSanityObject(
@@ -130,6 +131,17 @@ export function constructGameFromSanityObject(
   gameDataReferenceFields.forEach((f) => {
     if (gameData[f] && typeof gameData[f] !== 'undefined') {
       gameData[f] = gameData[f].name
+    }
+  })
+
+  Object.keys(gameDataObjectFields).forEach((f) => {
+    if (gameData[f] && typeof gameData[f] !== 'undefined') {
+      const objectTree = gameDataObjectFields[f].split('->')
+      let targetObj: any = gameData[f]
+      objectTree.forEach((o) => {
+        targetObj = targetObj[o] ?? undefined
+      })
+      gameData[f] = targetObj
     }
   })
 

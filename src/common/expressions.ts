@@ -7,7 +7,7 @@ export const getCreditFromTextRegex = new RegExp(
 )
 
 export const getFoundLocationFromTextRegex = new RegExp(
-  /(?:found at \()(.+?)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/gi
+  /(?:is\s*(at|the)?\s*\(?)(.+?)(?:\)|]|$)|(?:found\s*(at)?\s*\(?)(.+?)(?:\)|])|(?:found\s*at\s*\()(.+?)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/gim
 )
 
 export const getHintFromTextRegex = new RegExp(/(?:hint:\s*?)([^)]*)/gi)
@@ -29,4 +29,7 @@ export const getGPSCoordinatesValueFromTextRegex = RegExp(/\((.*)\)/gi)
 export const getTagnumberFromSlugRegex = RegExp(/([^-]*)([^-]*)(\d)/g)
 export const getImgurImageHashFromUrlRegex = RegExp(
   /(?:imgur.com\/)(.*)(?:\.)/gi
+)
+export const getSanityImageUrlHashFromTextRegex = RegExp(
+  /^(?:image-)(.*?(?=-(-png|-jpg|-jpeg|-gif)))/i
 )
