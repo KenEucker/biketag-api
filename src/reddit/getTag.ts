@@ -18,7 +18,9 @@ export async function getTag(
     throw new Error('no subreddit set')
   }
 
-  const query = `subreddit:${options.subreddit} title:Bike Tag`
+  const query = `subreddit:${options.subreddit} title:Bike Tag ${
+    options.tagnumber ?? ''
+  }`
 
   options.sort = options.sort ?? 'new'
   options.limit = 1

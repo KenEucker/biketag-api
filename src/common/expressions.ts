@@ -31,3 +31,6 @@ export const getTagnumberFromSlugRegex = RegExp(/([^-]*)([^-]*)(\d)/g)
 export const getImgurImageHashFromUrlRegex = RegExp(
   /(?:imgur.com\/)(.*)(?:\.)/gi
 )
+export const getSanityImageUrlHashFromTextRegex = RegExp(
+  /^(?:image-)(.*?(?=-(-png|-jpg|-jpeg|-gif)))/i
+)

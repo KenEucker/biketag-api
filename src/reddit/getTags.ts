@@ -15,15 +15,23 @@ export async function getTags(
   }
 
   const query = `subreddit:${options.subreddit} title:Bike Tag`
+  const maxPerRequest = 500
 
   options.sort = options.sort ?? 'new'
-  options.limit = options.limit ?? 10
+  options.limit = options.limit ?? maxPerRequest
   options.time = options.time ?? 'all'
 
   return client
     .getSubreddit(options.subreddit)
     .search({ query, ...options })
     .then(async (redditPosts) => {
+      let fetcher = redditPosts
+      while (!fetcher.isFinished) {
+        fetcher = await fetcher.fetchMore({ amount: maxPerRequest })
+        console.log({ fetcher })
+        redditPosts.concat(fetcher)
+      }
+
       const redditBikeTagData = await getBikeTagsFromRedditPosts(
         redditPosts,
         this.images

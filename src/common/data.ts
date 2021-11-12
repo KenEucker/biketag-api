@@ -1,3 +1,4 @@
+import { getSanityImageUrlHashFromText } from './getters'
 import { TagData, GameData } from './types'
 
 export const createTag = (tagData: any = {}): TagData => {
@@ -39,7 +40,7 @@ export const createGame = (gameData: any = {}): GameData => {
     mainhash: gameData.mainhash ?? '',
     queuehash: gameData.queuehash ?? '',
     subreddit: gameData.subreddit ?? '',
-    logo: gameData.logo ?? '',
+    logo: getSanityImageUrlHashFromText(gameData.logo),
     region: gameData.region ?? '',
     slug: gameData.slug ?? '',
   } as GameData
@@ -50,7 +51,13 @@ export const gameDataArrayFields = ['ambassadors', 'tags']
 
 export const gameDataFields = Object.keys(createGame())
 
+export const gameDataAssetFields = ['logo']
+export const gameDataObjectFields = {
+  logo: 'asset->_ref',
+}
+
 export const cacheKeys = {
+  sanityUrlText: 'sanity::',
   imageHashText: 'hash::',
   albumHash: `imgur::`,
   redditPosts: `reddit::`,
