@@ -253,29 +253,13 @@ export class BikeTagClient extends EventEmitter {
       isBikeTagApiReady(this.biketagConfig)
     ) {
       return (this.mostAvailableApi = AvailableApis.biketag)
-    } else if (
-      this.imgurConfig &&
-      isImgurCredentials(this.imgurConfig) &&
-      isImgurApiReady(this.imgurConfig)
-    ) {
+    } else if (this.imgurConfig && this.imgurClient) {
       return (this.mostAvailableApi = AvailableApis.imgur)
-    } else if (
-      this.sanityConfig &&
-      isSanityCredentials(this.sanityConfig) &&
-      isSanityApiReady(this.sanityConfig)
-    ) {
+    } else if (this.sanityConfig && this.sanityClient) {
       return (this.mostAvailableApi = AvailableApis.sanity)
-    } else if (
-      this.redditConfig &&
-      isRedditCredentials(this.redditConfig) &&
-      isRedditApiReady(this.redditConfig)
-    ) {
+    } else if (this.redditConfig && this.redditClient) {
       return (this.mostAvailableApi = AvailableApis.reddit)
-    } else if (
-      this.twitterConfig &&
-      isTwitterCredentials(this.twitterConfig) &&
-      isTwitterApiReady(this.twitterConfig)
-    ) {
+    } else if (this.twitterConfig && this.twitterClient) {
       return (this.mostAvailableApi = AvailableApis.twitter)
     }
 
@@ -299,16 +283,32 @@ export class BikeTagClient extends EventEmitter {
   initializeClients(config?: BikeTagConfiguration): BikeTagConfiguration {
     config = config ?? this.getConfiguration()
 
-    if (config.imgur) {
+    if (
+      config.imgur &&
+      isImgurCredentials(this.imgurConfig) &&
+      isImgurApiReady(this.imgurConfig)
+    ) {
       this.imgurClient = new ImgurClient(config.imgur)
     }
-    if (config.sanity) {
+    if (
+      config.sanity &&
+      isSanityCredentials(this.sanityConfig) &&
+      isSanityApiReady(this.sanityConfig)
+    ) {
       this.sanityClient = sanityClient(config.sanity)
     }
-    if (config.reddit) {
+    if (
+      config.reddit &&
+      isRedditCredentials(this.redditConfig) &&
+      isRedditApiReady(this.redditConfig)
+    ) {
       this.redditClient = new RedditClient(config.reddit)
     }
-    if (config.twitter) {
+    if (
+      config.twitter &&
+      isTwitterCredentials(this.twitterConfig) &&
+      isTwitterApiReady(this.twitterConfig)
+    ) {
       // this.twitterClient = new TwitterClient(config.twitter)
     }
 

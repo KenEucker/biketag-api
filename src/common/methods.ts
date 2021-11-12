@@ -146,7 +146,12 @@ export const isRedditCredentials = (
 
 export const isRedditApiReady = (credentials: RedditCredentials): boolean => {
   return (
-    credentials?.userAgent !== undefined && credentials?.clientId !== undefined
+    credentials?.userAgent !== undefined &&
+    credentials?.clientId !== undefined &&
+    ((credentials?.clientSecret !== undefined &&
+      credentials?.refreshToken !== undefined) ||
+      (credentials?.username !== undefined &&
+        credentials?.password !== undefined))
   )
 }
 
@@ -158,7 +163,10 @@ export const isSanityCredentials = (
 
 export const isSanityApiReady = (credentials: SanityCredentials): boolean => {
   return (
-    credentials.projectId !== undefined && credentials.dataset !== undefined
+    credentials.projectId !== undefined &&
+    credentials.dataset !== undefined &&
+    credentials.token !== undefined &&
+    credentials.apiVersion !== undefined
   )
 }
 
