@@ -38,7 +38,7 @@ export async function getTags(
         data: bikeTags,
         status: 1,
         success: true,
-        source: AvailableApis.reddit,
+        source: AvailableApis[AvailableApis.reddit],
       }
 
       return response as BikeTagApiResponse<TagData[]>

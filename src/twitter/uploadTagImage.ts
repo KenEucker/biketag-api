@@ -94,7 +94,7 @@ export async function uploadTagImage(
       resolve({
         data: createTag(utp),
         success,
-        source: AvailableApis.imgur,
+        source: AvailableApis[AvailableApis.imgur],
         status: 200,
       })
     })
@@ -110,7 +110,7 @@ export async function uploadTagImage(
       return {
         data: e.message,
         success: false,
-        source: AvailableApis.imgur,
+        source: AvailableApis[AvailableApis.imgur],
         status: 200,
       }
     })

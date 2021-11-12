@@ -14,7 +14,7 @@ export async function deleteTag(
         data: null,
         success: false,
         status: 0,
-        source: AvailableApis.sanity,
+        source: AvailableApis[AvailableApis.sanity],
       }
     }
   }
@@ -25,7 +25,7 @@ export async function deleteTag(
       data: result,
       success: true,
       status: 1,
-      source: AvailableApis.sanity,
+      source: AvailableApis[AvailableApis.sanity],
     }
   })
 }
