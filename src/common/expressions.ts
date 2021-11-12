@@ -8,7 +8,6 @@ export const getCreditFromTextRegex = new RegExp(
 
 export const getFoundLocationFromTextRegex = new RegExp(
   /(?:is\s*(at|the)?\s*\(?)(.+?)(?:\)|]|$)|(?:found\s*(at)?\s*\(?)(.+?)(?:\)|])|(?:found\s*at\s*\()(.+?)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/gim
-  // /(?:found at \(?)(.+?)(?:\)|])|(?:found at \()(.+?)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/gi
 )
 
 export const getHintFromTextRegex = new RegExp(/(?:hint:\s*?)([^)]*)/gi)

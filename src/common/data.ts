@@ -40,7 +40,7 @@ export const createGame = (gameData: any = {}): GameData => {
     mainhash: gameData.mainhash ?? '',
     queuehash: gameData.queuehash ?? '',
     subreddit: gameData.subreddit ?? '',
-    logo: getSanityImageUrlHashFromText(gameData.logo),
+    logo: gameData.logo,
     region: gameData.region ?? '',
     slug: gameData.slug ?? '',
   } as GameData
