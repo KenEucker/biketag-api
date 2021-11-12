@@ -82,9 +82,10 @@ if (bikeTagRedditInstance) {
     expect(testTagData).toMatchSnapshot()
   })
 
-  test('BikeTagClient reddit instance can retrieve all tags data', async () => {
-    const testTagsData = await getTagsAsync(bikeTagRedditInstance, false, { source: 'reddit' })
+  /// Test takes too long
+  // test('BikeTagClient reddit instance can retrieve all tags data', async () => {
+  //   const testTagsData = await getTagsAsync(bikeTagRedditInstance, false, { source: 'reddit', limit: 100 })
 
-    expect(testTagsData).toMatchSnapshot()
-  })
+  //   expect(testTagsData).toMatchSnapshot()
+  // })
 }
