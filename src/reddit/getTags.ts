@@ -39,7 +39,9 @@ export async function getTags(
       const bikeTags: TagData[] = []
 
       for (const biketagPost of redditBikeTagData) {
-        bikeTags.push(await getBikeTagInformationFromRedditData(biketagPost))
+        bikeTags.push(
+          await getBikeTagInformationFromRedditData(biketagPost, options.game)
+        )
       }
 
       const response = {

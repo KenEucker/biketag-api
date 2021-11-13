@@ -36,7 +36,10 @@ export async function getTag(
       )
 
       const response = {
-        data: await getBikeTagInformationFromRedditData(redditBikeTagData[0]),
+        data: await getBikeTagInformationFromRedditData(
+          redditBikeTagData[0],
+          options.game
+        ),
         status: 1,
         success: true,
         source: AvailableApis[AvailableApis.reddit],

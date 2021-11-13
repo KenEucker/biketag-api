@@ -104,7 +104,7 @@ const runTests = async () => {
 }
 
 if (require.main === module) {
-  getGameDataAsync(bikeTagSanityInstance, true)
+  if (bikeTagSanityInstance) getGameDataAsync(bikeTagSanityInstance, true)
   runTests()
 }
 

@@ -1,4 +1,3 @@
-import { getSanityImageUrlHashFromText } from './getters'
 import { TagData, GameData } from './types'
 
 export const createTag = (tagData: any = {}): TagData => {

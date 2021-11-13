@@ -33,7 +33,7 @@
 
         console.log({tags, latestTag})
 
-        const config = biketagAPI.getConfiguration()
+        const config = biketagAPI.config()
         document.getElementById('data').innerHTML = JSON.stringify(config)
         console.log('BikeTag Config', config)
       })()

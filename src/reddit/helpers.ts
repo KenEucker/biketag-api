@@ -229,7 +229,8 @@ export async function getBikeTagsFromRedditPosts(
 }
 
 export async function getBikeTagInformationFromRedditData(
-  redditPostData: any
+  redditPostData: any,
+  game?: string
 ): Promise<TagData> {
   if (!redditPostData.tagNumbers) {
     /// TODO: handle a link that is an image gallery and has only one tag number attached
@@ -254,6 +255,7 @@ export async function getBikeTagInformationFromRedditData(
     foundLocation: redditPostData.foundAt,
     player: redditPostData.credit,
     hint: redditPostData.hint,
+    game: redditPostData.game ?? game,
     gps,
     discussionUrl: `https://redd.it/${redditPostData.id}`,
     tagnumber: mysteryTagNumber,
