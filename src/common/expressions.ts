@@ -1,9 +1,9 @@
 export const getTagNumbersFromTextRegex = new RegExp(
-  /((?:(?:bike\s*)?(?:\s*tag)?)#(\d+)(?:(?:\s*tag)?|(?:\s*proof)?))|((?:bike\s*)?(?:tag\s*)#?\s*(\d+))|((?:(?:found\s*#?)|(?:here'?i?s?\s*))\[?(\d+)\]?)/gi
+  /((?:(?:bike\s*)?(?:\s*tag)?)(#|num|number)(\d+)(?:(?:\s*tag)?|(?:\s*proof)?))|((?:bike\s*)?(?:tag\s*)(#|num|number)?\s*(\d+))|((?:(?:found\s*#?)|(?:here'?i?s?\s*))\[?(\d+)\]?)/gi
 )
 
 export const getCreditFromTextRegex = new RegExp(
-  /((?:proof\s*(?:found\s*at\s*)?(?:\(.*\))?\s*by\s*)(.*?(?=])))|((?:tag\s*(?:\((?:hint:)?.*\))?\s*by\s*)(.+?(?=]|\r|\n|$))?)|((?:tag\s*(?:\((?:hint:)?.*\))?\s*by\s*)(.+?(?=]|\r|\n))?)|((?:credit goes to:\s*)(.*)(?:\sfor finding))/gi
+  /((?:proof\s*(?:found\s*at\s*)?(?:\(.*\))?\s*by\s*)(.*?(?=])))|((?:tag\s*(?:\((?:hint:)?.*\))?\s*by\s*)(.+?(?=]|\r|\n|$))?)|((?:tag\s*(?:\((?:hint:)?.*\))?\s*by\s*)(.+?(?=]|\r|\n))?)|((?:credit goes to:\s*)(.*)(?:\sfor finding))|(?:tag\s*)(?:number\s*)?(\d*)?(?:\s*by\s*)(.+?(?=$|\n))/gi
 )
 
 export const getFoundLocationFromTextRegex = new RegExp(
@@ -17,14 +17,14 @@ export const getGPSLocationFromTextRegex = new RegExp(
 )
 
 export const getImageURLsFromTextRegex = new RegExp(
-  /https?:\/\/.*?\.[a-z]{2,4}\/.+?(?=\)|\s)/gi
+  /https?:\/\/.*?\.[a-z]{2,4}\/.+?(?=\)|\s|$)/gi
 )
 
 export const getAlbumIdFromTextRegex = new RegExp(
   /((?:imgur.com\/)(?:(a|album|gallery)\/)(\w+))/gi
 )
 
-export const getDiscussionUrlFromTextRegex = RegExp(/{(.*)}/gi)
+export const getDiscussionUrlFromTextRegex = RegExp(/{(.*)}/i)
 export const getGPSCoordinatesValueFromTextRegex = RegExp(/\((.*)\)/gi)
 export const getTagnumberFromSlugRegex = RegExp(/([^-]*)([^-]*)(\d)/g)
 export const getImgurImageHashFromUrlRegex = RegExp(
@@ -32,4 +32,8 @@ export const getImgurImageHashFromUrlRegex = RegExp(
 )
 export const getSanityImageUrlHashFromTextRegex = RegExp(
   /^(?:image-)(.*?(?=-(-png|-jpg|-jpeg|-gif)))/i
+)
+
+export const getCreditFromTwitterTextRegex = RegExp(
+  /(?:tag\s*)(?:number\s*)?(\d*)?(?:\s*by\s*)(.+?(?=$|\n))/i
 )

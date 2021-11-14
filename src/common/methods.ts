@@ -205,9 +205,11 @@ export const isTwitterCredentials = (
   credentials: TwitterCredentials | Credentials
 ): boolean => {
   return (
-    credentials?.clientId !== undefined ||
-    credentials?.clientSecret !== undefined ||
-    (credentials?.clientId !== undefined && credentials?.account !== undefined)
+    credentials?.bearer_token !== undefined ||
+    (credentials?.consumer_key !== undefined &&
+      credentials?.consumer_secret !== undefined) ||
+    (credentials?.access_token_key !== undefined &&
+      credentials?.access_token_secret !== undefined)
   )
 }
 
@@ -215,8 +217,11 @@ export const isTwitterApiReady = (
   credentials: TwitterCredentials | Credentials
 ): boolean => {
   return (
-    (credentials as ClientKey).clientToken !== undefined &&
-    (credentials as ClientKey).clientKey !== undefined
+    credentials?.bearer_token !== undefined ||
+    (credentials.consumer_secret !== undefined &&
+      credentials.consumer_key !== undefined) ||
+    (credentials?.access_token_key !== undefined &&
+      credentials?.access_token_secret !== undefined)
   )
 }
 
@@ -224,9 +229,12 @@ export const isTwitterConfiguration = (
   credentials: TwitterCredentials
 ): boolean => {
   return (
-    credentials?.clientId !== undefined ||
-    credentials?.clientSecret !== undefined ||
-    (credentials?.clientId !== undefined && credentials?.account !== undefined)
+    credentials?.bearer_token !== undefined ||
+    credentials?.consumer_key !== undefined ||
+    credentials?.access_token_key !== undefined ||
+    (credentials?.account !== undefined &&
+      credentials?.consumer_key !== undefined &&
+      credentials.consumer_secret !== undefined)
   )
 }
 
@@ -235,17 +243,20 @@ export const createTwitterCredentials = (
   defaults: Partial<TwitterCredentials> = {}
 ): TwitterCredentials => {
   return {
-    clientId: credentials.clientId ?? defaults.clientId,
-    clientSecret: credentials.clientSecret ?? defaults.clientSecret,
     account: credentials.account ?? defaults.account,
-    accessToken: credentials.accessToken ?? defaults.accessToken,
+    bearer_token: credentials.bearer_token ?? defaults.bearer_token,
+    consumer_key: credentials.consumer_key ?? defaults.consumer_key,
+    consumer_secret: credentials.consumer_secret ?? defaults.consumer_secret,
+    access_token_key: credentials.access_token_key ?? defaults.access_token_key,
+    access_token_secret:
+      credentials.access_token_secret ?? defaults.access_token_secret,
   }
 }
 
 export const assignTwitterCredentials = (
   credentials: TwitterCredentials
 ): TwitterCredentials => {
-  const twitterCredentials = isImgurCredentials(
+  const twitterCredentials = isTwitterCredentials(
     credentials as TwitterCredentials
   )
     ? createTwitterCredentials(credentials)
@@ -394,6 +405,7 @@ export const assignBikeTagConfiguration = (
     sanity: assignSanityCredentials(config as unknown as SanityCredentials),
     imgur: assignImgurCredentials(config as unknown as ImgurCredentials),
     reddit: assignRedditCredentials(config as unknown as RedditCredentials),
+    twitter: assignTwitterCredentials(config as unknown as TwitterCredentials),
   }
 
   /// Assign the individual configs with the parsed object plus overrides from individual configs in the passed in object
@@ -409,6 +421,9 @@ export const assignBikeTagConfiguration = (
   configuration.reddit = config.reddit
     ? { ...parsedConfig.reddit, ...createRedditCredentials(config.reddit) }
     : parsedConfig.reddit
+  configuration.twitter = config.twitter
+    ? { ...parsedConfig.twitter, ...createTwitterCredentials(config.twitter) }
+    : parsedConfig.twitter
 
   return configuration
 }

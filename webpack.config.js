@@ -27,6 +27,7 @@ const generalConfig = {
     extensions: ['.tsx', '.ts', '.js'],
     fallback: {
       stream: require.resolve('stream-browserify'),
+      crypto: require.resolve("crypto-browserify"),
     },
   },
 }

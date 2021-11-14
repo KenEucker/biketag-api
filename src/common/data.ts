@@ -66,6 +66,7 @@ export const cacheKeys = {
   creditText: `credit::`,
   locationText: `gps::`,
   discussionText: `discussion::`,
+  mentionText: `mention::`,
   tagNumberText: `tag::`,
   imagesText: `images::`,
   imageUrlText: `images::`,

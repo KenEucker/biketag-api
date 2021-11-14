@@ -1,5 +1,14 @@
-// @ts-ignore
-import { getGameDataAsync, getTagAsync, getLatestTagAsync, getTagsAsync, getTag1Async, bikeTagSanityInstance, bikeTagImgurInstance, bikeTagRedditInstance } from './index'
+import {
+  getGameDataAsync,
+  getTagAsync,
+  getLatestTagAsync,
+  getTagsAsync,
+  getTag1Async,
+  bikeTagSanityInstance,
+  bikeTagImgurInstance,
+  bikeTagRedditInstance,
+  bikeTagTwitterInstance,
+} from './index'
 
 test('BikeTagClient integration tests run when they can', async () => {
   expect(true).toBeTruthy()
@@ -88,4 +97,30 @@ if (bikeTagRedditInstance) {
 
   //   expect(testTagsData).toMatchSnapshot()
   // })
+}
+
+if (bikeTagTwitterInstance) {
+  test('BikeTagClient twitter instance can retrieve tag data', async () => {
+    const testTagData = await getTagAsync(bikeTagTwitterInstance)
+
+    expect(testTagData).toMatchSnapshot()
+  })
+
+  test('BikeTagClient twitter instance can retrieve tag 1 data', async () => {
+    const testTagData = await getTag1Async(bikeTagTwitterInstance)
+
+    expect(testTagData).toMatchSnapshot()
+  })
+
+  test('BikeTagClient twitter instance can retrieve latest tag data', async () => {
+    const testTagData = await getLatestTagAsync(bikeTagTwitterInstance)
+
+    expect(testTagData).toMatchSnapshot()
+  })
+
+  test('BikeTagClient twitter instance can retrieve all tags data', async () => {
+    const testTagsData = await getTagsAsync(bikeTagTwitterInstance)
+
+    expect(testTagsData).toMatchSnapshot()
+  })
 }

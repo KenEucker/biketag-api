@@ -26,18 +26,20 @@ export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
   clientSecret: string
 }
 export interface TwitterAccessToken {
-  accessToken: string
+  access_token_key?: string
+  access_token_secret?: string
+  bearer_token?: string
 }
 
-export interface TwitterClientId {
-  clientId: string
+export interface TwitterClientKey {
+  consumer_key: string
+  consumer_secret: string
 }
 
 export interface TwitterCredentials
   extends TwitterAccessToken,
-    TwitterClientId {
+    TwitterClientKey {
   account?: string
-  clientSecret: string
 }
 
 export interface RedditRefreshToken {

@@ -5,11 +5,15 @@ import {
   ImgurImage,
   TagData,
 } from '../common/types'
-import {
-  getBikeTagNumberFromImage,
-  getBikeTagFromImgurImageSet,
-  sortImgurImagesByTagNumber,
-} from './helpers'
+const getBikeTagNumberFromImage = (a: any): any => {
+  return { a }
+}
+const getBikeTagFromImgurImageSet = (a: any, b: any, c: any): any => {
+  return { a, b, c }
+}
+const sortImgurImagesByTagNumber = (a: any): any => {
+  return { a }
+}
 
 export async function getTag(
   client: ImgurClient,

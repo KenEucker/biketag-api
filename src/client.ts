@@ -55,13 +55,11 @@ import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 import * as redditApi from './reddit'
 import * as twitterApi from './twitter'
-type TwitterClient = {
-  any?: any
-}
 
 import RedditClient from 'snoowrap'
 import ImgurClient from 'imgur'
 import sanityClient, { SanityClient } from '@sanity/client'
+import TwitterClient from 'twitter-v2'
 
 export const USERAGENT =
   'biketag-api (https://github.com/keneucker/biketag-api)'
@@ -157,14 +155,7 @@ export class BikeTagClient extends EventEmitter {
 
       case 'tag':
         /// Set the game in the options, defaulting to the configured game
-        options.game = options.game
-          ? options.game
-          : (this.biketagConfig as Credentials).game
-
-        /// Set the album hash, if present (Imgur specific)
-        if (this.imgurConfig?.hash) {
-          options.hash = options.hash ?? this.imgurConfig.hash
-        }
+        options.game = options.game ? options.game : this.biketagConfig.game
 
         if (!options.slug) {
           if (options.tagnumber && typeof options.tagnumber !== 'undefined') {
@@ -189,8 +180,14 @@ export class BikeTagClient extends EventEmitter {
     }
 
     switch (options.source) {
+      case AvailableApis.imgur:
+        options.hash = options.hash ?? this.imgurConfig.hash
+        break
       case AvailableApis.reddit:
         options.subreddit = options.subreddit ?? this.redditConfig.subreddit
+        break
+      case AvailableApis.twitter:
+        options.account = options.account ?? this.twitterConfig.account
         break
     }
 
@@ -285,31 +282,31 @@ export class BikeTagClient extends EventEmitter {
 
     if (
       config.imgur &&
-      isImgurCredentials(this.imgurConfig) &&
-      isImgurApiReady(this.imgurConfig)
+      isImgurCredentials(config.imgur) &&
+      isImgurApiReady(config.imgur)
     ) {
       this.imgurClient = new ImgurClient(config.imgur)
     }
     if (
       config.sanity &&
-      isSanityCredentials(this.sanityConfig) &&
-      isSanityApiReady(this.sanityConfig)
+      isSanityCredentials(config.sanity) &&
+      isSanityApiReady(config.sanity)
     ) {
       this.sanityClient = sanityClient(config.sanity)
     }
     if (
       config.reddit &&
-      isRedditCredentials(this.redditConfig) &&
-      isRedditApiReady(this.redditConfig)
+      isRedditCredentials(config.reddit) &&
+      isRedditApiReady(config.reddit)
     ) {
       this.redditClient = new RedditClient(config.reddit)
     }
     if (
       config.twitter &&
-      isTwitterCredentials(this.twitterConfig) &&
-      isTwitterApiReady(this.twitterConfig)
+      isTwitterCredentials(config.twitter) &&
+      isTwitterApiReady(config.twitter)
     ) {
-      // this.twitterClient = new TwitterClient(config.twitter)
+      this.twitterClient = new TwitterClient(config.twitter)
     }
 
     return config
@@ -646,14 +643,14 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating an imgur client')
   }
 
-  // mentions(opts: any): TwitterClient {
-  // const options = opts ?? this.twitterConfig
-  //   if (isTwitterCredentials(options)) {
-  //     return new TwitterClient(options)
-  //   }
+  mentions(opts: any): TwitterClient {
+    const options = opts ?? this.twitterConfig
+    if (isTwitterCredentials(options)) {
+      return new TwitterClient(options)
+    }
 
-  //   throw new Error('options are invalid for creating an twitter client')
-  // }
+    throw new Error('options are invalid for creating an twitter client')
+  }
 
   // shares(options: any = {}): InstagramClient {
   //   if (isInstagramCredentials(options)) {

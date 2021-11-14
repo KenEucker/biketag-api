@@ -5,6 +5,6 @@ dist
 *.DS_Store
 biketag.*
 logs
-.env
+.env*
 coverage
 examples/node/__snapshots__
