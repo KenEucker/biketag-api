@@ -89,7 +89,7 @@ export class BikeTagClient extends EventEmitter {
 
     this.mostAvailableApi = undefined
 
-    const initConfig = this.config(configuration, true, true)
+    const initConfig = this.config(configuration ?? {}, true, true)
     this.initializeClients(initConfig)
 
     /// Configure separate fetching strategies: plain, authed (default), cached (authed)

@@ -1,4 +1,4 @@
-import { AccessToken, ClientKey } from './common/types'
+import { AccessToken } from './common/types'
 import { hasClientKey, hasAccessToken } from './common/methods'
 import { BikeTagClient } from './client'
 import { BIKETAG_API_PREFIX, AUTHORIZE_ENDPOINT } from './common/endpoints'
@@ -6,23 +6,25 @@ import { BIKETAG_API_PREFIX, AUTHORIZE_ENDPOINT } from './common/endpoints'
 export async function getAuthorizationHeader(
   client: BikeTagClient
 ): Promise<string> {
-  if (hasAccessToken(client.config)) {
-    return `Bearer ${client.config.accessToken}`
+  const config = client.config()
+
+  if (hasAccessToken(config.biketag) && config.biketag.clientKey) {
+    return `Bearer ${config.biketag.accessToken}`
   }
 
-  if (hasClientKey(client.config) && !hasAccessToken(client.config)) {
-    return `Client-ID ${(client.config as ClientKey).clientKey}`
+  if (hasClientKey(config.biketag) && !hasAccessToken(config)) {
+    return `Client-ID ${config.biketag.clientKey}`
   }
 
   // @ts-ignore
-  const { clientId, username, password } = client.config.biketag
+  const { clientKey, clientToken } = client.config.biketag
 
   const options: Record<string, unknown> = {
     url: AUTHORIZE_ENDPOINT,
     baseURL: BIKETAG_API_PREFIX,
     params: {
-      client_id: clientId,
-      response_type: 'token',
+      clientKey,
+      type: 'token',
     },
   }
 
@@ -46,8 +48,8 @@ export async function getAuthorizationHeader(
 
   options.method = 'POST'
   options.data = {
-    username,
-    password,
+    clientKey,
+    clientToken,
     allow: authorizeToken,
   }
 
