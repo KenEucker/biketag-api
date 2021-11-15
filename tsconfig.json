@@ -1,6 +1,6 @@
 {
   "include": ["src"],
-  "exclude": ["src/coverage/", "src/mocks/", "src/**/*.test.ts"],
+  "exclude": ["src/coverage/", "test/"],
 
   "compilerOptions": {
     "moduleResolution": "node",

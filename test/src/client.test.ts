@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { apiCredentials, assetsPath, rootPath } from '../src/config'
+import { apiCredentials, assetsPath, rootPath } from './config'
 import { execSync } from 'child_process'
 import * as path from 'path'
 

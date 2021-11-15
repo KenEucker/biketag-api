@@ -1,4 +1,4 @@
-import { Handler } from './'
+import { Handler } from '.'
 
 const AuthenticationRequiredResponse = {
   data: {

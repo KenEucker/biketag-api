@@ -1,5 +1,5 @@
 {
-  "include": ["tests", "src"],
+  "include": ["src"],
   "compilerOptions": {
     "noEmit": true,
     "lib": ["esnext"],

@@ -1,9 +1,9 @@
-import { Handler } from './'
+import { Handler } from '.'
 
 const AuthenticationRequiredResponse = {
   data: {
     error: 'Authentication required',
-    request: '/3/album',
+    request: '/album',
     method: 'POST',
   },
   success: false,

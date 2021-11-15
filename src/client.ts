@@ -47,7 +47,7 @@ import {
   isTwitterApiReady,
 } from './common/methods'
 import { setup } from 'axios-cache-adapter'
-import _ from 'lodash'
+import { isEqual } from 'lodash'
 import * as BikeTagExpressions from './common/expressions'
 import * as BikeTagGetters from './common/getters'
 import * as sanityApi from './sanity'
@@ -386,16 +386,16 @@ export class BikeTagClient extends EventEmitter {
           twitter: undefined,
         }
 
-        if (!_.isEqual(this.imgurConfig, imgurConfig)) {
+        if (!isEqual(this.imgurConfig, imgurConfig)) {
           initializeConfig.imgur = imgurConfig
         }
-        if (!_.isEqual(this.redditConfig, redditConfig)) {
+        if (!isEqual(this.redditConfig, redditConfig)) {
           initializeConfig.reddit = redditConfig
         }
-        if (!_.isEqual(this.sanityConfig, sanityConfig)) {
+        if (!isEqual(this.sanityConfig, sanityConfig)) {
           initializeConfig.sanity = sanityConfig
         }
-        if (!_.isEqual(this.twitterConfig, twitterConfig)) {
+        if (!isEqual(this.twitterConfig, twitterConfig)) {
           initializeConfig.twitter = twitterConfig
         }
 

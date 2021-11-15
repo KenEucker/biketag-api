@@ -23,7 +23,15 @@
 </p>
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/biketag-api-logo.jpg" style="max-width:25vw;border-radius:25%;background-color:white;padding:1em;">
+<style>
+  .logo { 
+    max-width:25vw;
+    border-radius:25%;
+    background-color:white;
+    padding:1em;
+  }
+</style>
+<img alt="biketag-api logo" src="https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/biketag-api-logo.jpg" class="logo">
 </div>
 
 <div align="center">
