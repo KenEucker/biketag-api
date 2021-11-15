@@ -21,7 +21,7 @@ import {
   getTagPayload,
   getTagsPayload,
   updateTagPayload,
-  getGameDataPayload,
+  getGamePayload,
   uploadTagImagePayload,
   deleteTagPayload,
   deleteTagsPayload,
@@ -434,8 +434,8 @@ export class BikeTagClient extends EventEmitter {
     return this.fetcher(options)
   }
 
-  getGameData(
-    payload: RequireAtLeastOne<getGameDataPayload> | string | undefined
+  getGame(
+    payload: RequireAtLeastOne<getGamePayload> | string | undefined
   ): Promise<BikeTagApiResponse<GameData>> {
     const onlyApplicableOpts =
       typeof payload === 'string' ? { game: payload } : payload
@@ -445,7 +445,7 @@ export class BikeTagClient extends EventEmitter {
       'game'
     )
 
-    return api.getGameData(client, options).catch((e) => {
+    return api.getGame(client, options).catch((e) => {
       return {
         status: 500,
         data: null,

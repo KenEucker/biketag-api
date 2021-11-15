@@ -4,11 +4,11 @@ import {
   constructGameFromSanityObject,
   constructSanityFieldsQuery,
 } from './helpers'
-import { getGameDataPayload } from '../common/payloads'
+import { getGamePayload } from '../common/payloads'
 
-export async function getGameData(
+export async function getGame(
   client: SanityClient,
-  options: getGameDataPayload
+  options: getGamePayload
 ): Promise<BikeTagApiResponse<GameData | GameData[]>> {
   if (!options) {
     throw new Error('no options')

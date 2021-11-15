@@ -23,15 +23,7 @@
 </p>
 
 <div align="center">
-<style>
-  .logo { 
-    max-width:25vw;
-    border-radius:25%;
-    background-color:white;
-    padding:1em;
-  }
-</style>
-<img alt="biketag-api logo" src="https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/biketag-api-logo.jpg" class="logo">
+<img alt="biketag-api logo" src="https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/biketag-api-logo.jpg" height="auto" width="200" style="border-radius:25%;">
 </div>
 
 <div align="center">
@@ -192,7 +184,7 @@ You can get tags one by one or all at once for a given game using the `getTag` a
 
 ```ts
 // retrieves the BikeTag game data 'portland' game
-const biketagPortlandLatest = await biketagAPI.getGameData()
+const biketagPortlandLatest = await biketagAPI.getGame()
 
 // retrieves the latest BikeTag posted for the 'portland' game from the most available API
 const biketagPortlandLatest = await biketagAPI.getTag()

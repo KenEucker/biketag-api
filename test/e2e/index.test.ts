@@ -1,5 +1,5 @@
 import {
-  getGameDataAsync,
+  getGameAsync,
   getTagAsync,
   getLatestTagAsync,
   getTagsAsync,
@@ -16,7 +16,7 @@ test('BikeTagClient integration tests run when they can', async () => {
 
 if (bikeTagSanityInstance) {
   test('BikeTagClient sanity instance can retrieve game data', async () => {
-    const testGameData = await getGameDataAsync(bikeTagSanityInstance)
+    const testGameData = await getGameAsync(bikeTagSanityInstance)
 
     expect(testGameData).toMatchSnapshot()
   })

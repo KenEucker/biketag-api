@@ -49,7 +49,7 @@ export type uploadTagImagePayload = {
   stream: ReadableStream
 }
 
-export type getGameDataPayload = {
+export type getGamePayload = {
   slug: string
   name: string
   fields?: string[]
