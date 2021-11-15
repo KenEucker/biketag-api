@@ -31,6 +31,7 @@ export type getTagPayload = {
   sort?: 'new'
   limit?: number
   subreddit?: string
+  account?: string
   game: string
   slug: string
   fields?: string[]

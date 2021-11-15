@@ -28,7 +28,6 @@ export async function getTags(
       let fetcher = redditPosts
       while (!fetcher.isFinished) {
         fetcher = await fetcher.fetchMore({ amount: maxPerRequest })
-        console.log({ fetcher })
         redditPosts.concat(fetcher)
       }
 

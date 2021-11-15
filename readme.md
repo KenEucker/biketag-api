@@ -128,6 +128,15 @@ client = new BikeTagClient({
     clientSecret: process.env.IMGUR_CLIENT_SECRET,
   }
 })
+
+// or your twitter bearer_token
+client = new BikeTagClient({
+  game: 'portland',
+  twitter: {
+    bearer_token: process.env.TWITTER_BEARER_TOKEN,
+    account: "portlandbiketag",
+  }
+})
 ```
 <div align="center">
 

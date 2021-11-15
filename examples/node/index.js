@@ -109,8 +109,8 @@ const runTests = async () => {
 
   if (bikeTagTwitterInstance) {
     console.log(pretty("Twitter BikeTag Client Instantiated"), twitterInstanceOpts)
-    // console.log(pretty("Latest Tag from Twitter"))
-    // await getLatestTagAsync(bikeTagTwitterInstance)
+    console.log(pretty("Latest Tag from Twitter"))
+    await getLatestTagAsync(bikeTagTwitterInstance)
     console.log(pretty("All Tags from Twitter"))
     await getTagsAsync(bikeTagTwitterInstance, true)
   }

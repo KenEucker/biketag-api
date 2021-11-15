@@ -8,16 +8,31 @@ export async function getTags(
   options: getTagsPayload
 ): Promise<BikeTagApiResponse<TagData[]>> {
   const tagsData: TagData[] = []
+  // let fetching = true
+  const tenYearsAgo = new Date()
+  // const nowYearsAgo = new Date()
+  tenYearsAgo.setFullYear(tenYearsAgo.getFullYear() - 10)
+  // while (fetching) {
   const data: any = await client.get(
-    `users/${options.account}/tweets?expansions=attachments.media_keys&media.fields=preview_image_url,url`
+    `tweets/search/recent?expansions=attachments.media_keys&media.fields=preview_image_url,url`,
+    {
+      query: `from: ${options.account}`,
+      // start_time: nowYearsAgo.toISOString(),
+      // end_time: tenYearsAgo.toISOString(),
+      max_results: '100',
+    }
   )
 
   if (data) {
+    console.log('count:', data.data.length, data)
     for (const datum of data.data) {
       tagsData.push(
         getBikeTagFromTwitterPost(datum, options.game, data.includes?.media)
       )
     }
+    // } else {
+    //   fetching = false
+    // }
   }
 
   return {
