@@ -23,6 +23,10 @@
 </p>
 
 <div align="center">
+<img src="https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/biketag-api-logo.jpg" style="max-width:25vw;border-radius:25%;background-color:white;padding:1em;">
+</div>
+
+<div align="center">
 
 ## Installation
 _This package is Isomorphic and Typescript ready_
@@ -280,6 +284,7 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
 
   [![gun.eco][gun-image]](https://gun.eco/docs/API)
 
+  [biketag-logo]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/biketag-api-logo.jpg
   [imgur-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/imgur-logo.png
   [sanity-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/sanity-logo.png
   [reddit-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/reddit-logo.png
