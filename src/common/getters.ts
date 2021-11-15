@@ -102,6 +102,7 @@ export const getCreditFromText = (
       (c.indexOf('proof ') === -1 || c.indexOf('proof') !== 0) &&
       c.indexOf('to:') === -1 &&
       c.indexOf('hint:') === -1 &&
+      Number.isInteger(Number.parseInt(c)) === false &&
       (c.indexOf('by') === -1 || c.indexOf('by') !== 0)
   )
 
@@ -254,6 +255,54 @@ export const getImgurAlbumIdFromText = (
   return albumbId
 }
 
+export const getMentionURLsFromText = (
+  inputText: string,
+  fallback: string | string[],
+  cache?: typeof TinyCache
+): string | string[] => {
+  if (!inputText.length) return fallback
+
+  const cacheKey = `${cacheKeys.mentionText}${inputText}`
+  const existingParsed = getCacheIfExists(cacheKey, cache)
+  if (existingParsed) return existingParsed
+
+  /// TODO: put these URLS into a different constant elsewhere
+  const validImageURLs = ['t.co']
+
+  const selfTextURLs = inputText.match(getImageURLsFromTextRegex)
+  if (selfTextURLs) {
+    const tagImageURLs = selfTextURLs.reduce((urls, url) => {
+      if (!url || !new RegExp(validImageURLs.join('|')).test(url)) return urls
+
+      const ext = /[^.]+$/.test(url) ? '.' + /[^.]+$/.exec(url) : ''
+      if (
+        // ['.jpg', '.jpeg', '.png', '.bmp'].indexOf(ext) === -1 &&
+        ext.indexOf('.co') === 0 &&
+        url.indexOf('//t.co/') !== -1 &&
+        url.length > 2
+      ) {
+        /// TODO: detect the image extension and set it here instead of defaulting to jpg
+        // url = `${url.replace('//imgur.com', '//i.imgur.com')}.jpg`
+      }
+
+      urls.push(url)
+
+      return urls
+    }, [])
+
+    if (!tagImageURLs.length && fallback) {
+      putCacheIfExists(cacheKey, fallback, cache)
+      return fallback
+    }
+
+    putCacheIfExists(cacheKey, tagImageURLs, cache)
+    return tagImageURLs
+  }
+
+  putCacheIfExists(cacheKey, fallback, cache)
+  return fallback
+}
+
 export const getImageURLsFromText = (
   inputText: string,
   fallback: string | string[],
@@ -266,7 +315,7 @@ export const getImageURLsFromText = (
   if (existingParsed) return existingParsed
 
   /// TODO: make this image validator more intelligent
-  const validImageURLs = ['imgur']
+  const validImageURLs = ['imgur', 't.co']
 
   const selfTextURLs = inputText.match(getImageURLsFromTextRegex)
   if (selfTextURLs) {
@@ -315,10 +364,9 @@ export const getDiscussionUrlFromText = (
   const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
-  inputText.match(getDiscussionUrlFromTextRegex)
   const tagDiscussionLinkMatches = getDiscussionUrlFromTextRegex.exec(inputText)
 
-  if (!tagDiscussionLinkMatches.length) {
+  if (!tagDiscussionLinkMatches?.length) {
     putCacheIfExists(cacheKey, null, cache)
     return null
   }

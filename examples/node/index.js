@@ -12,6 +12,16 @@ const imgurInstanceOpts = {
 }
 const bikeTagImgurInstance = imgurInstanceOpts.imgur && imgurInstanceOpts.imgur.hash ? new BikeTagClient(imgurInstanceOpts) : null
 
+const twitterInstanceOpts = {
+  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME :'test',
+  twitter: {
+    account: process.env.TWITTER_ACCOUNT,
+    bearer_token: process.env.TWITTER_BEARER_TOKEN,
+  }
+}
+const bikeTagTwitterInstance = twitterInstanceOpts.twitter && twitterInstanceOpts.twitter.account ? new BikeTagClient(twitterInstanceOpts) : null
+
+
 const sanityInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
   sanity: {
@@ -79,6 +89,7 @@ const getGameDataAsync = async (client, out = false, opts = {}) => {
 
 const runTests = async () => {
   if (bikeTagImgurInstance) {
+    console.log(pretty("Imgur BikeTag Client Instantiated"), imgurInstanceOpts)
     console.log(pretty("Tag #1 from Imgur"))
     await getTagAsync(bikeTagImgurInstance, true)
     console.log(pretty("Latest Tag from Imgur"))
@@ -86,6 +97,7 @@ const runTests = async () => {
   }
 
   if (bikeTagSanityInstance) {
+    console.log(pretty("Sanity BikeTag Client Instantiated"), sanityInstanceOpts)
     console.log(pretty("Tag #1 from Sanity"))
     await getTag1Async(bikeTagSanityInstance, true)
     console.log(pretty("All Tags from Sanity"))
@@ -95,7 +107,16 @@ const runTests = async () => {
     await getGameDataAsync(bikeTagSanityInstance, true)
   }
 
+  if (bikeTagTwitterInstance) {
+    console.log(pretty("Twitter BikeTag Client Instantiated"), twitterInstanceOpts)
+    console.log(pretty("Latest Tag from Twitter"))
+    await getLatestTagAsync(bikeTagTwitterInstance)
+    console.log(pretty("All Tags from Twitter"))
+    await getTagsAsync(bikeTagTwitterInstance, true)
+  }
+
   if (bikeTagRedditInstance) {
+    console.log(pretty("Reddit BikeTag Client Instantiated"), redditInstanceOpts)
     console.log(pretty("Latest Tag from Reddit"))
     await getLatestTagAsync(bikeTagRedditInstance, true, {source: 'reddit'})
     console.log(pretty("All Tags from Reddit"))
@@ -104,7 +125,7 @@ const runTests = async () => {
 }
 
 if (require.main === module) {
-  getGameDataAsync(bikeTagSanityInstance, true)
+  if (bikeTagSanityInstance) getGameDataAsync(bikeTagSanityInstance, true)
   runTests()
 }
 
@@ -113,6 +134,7 @@ module.exports = {
   bikeTagImgurInstance,
   bikeTagRedditInstance,
   bikeTagSanityInstance,
+  bikeTagTwitterInstance,
   getGameDataAsync,
   getLatestTagAsync,
   getTagAsync,

@@ -18,7 +18,7 @@
           game: 'portland',
         })
 
-        console.log('BikeTag Config', biketagAPI.getConfiguration())
+        console.log('BikeTag Config', biketagAPI.config())
 
         const tag5 = await biketagAPI.getTag({ tagnumber: 3, fields: ['slug'] })
         const tag4 = await biketagAPI.getTag({ tagnumber: 3 })

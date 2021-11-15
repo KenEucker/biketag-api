@@ -55,13 +55,11 @@ import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 import * as redditApi from './reddit'
 import * as twitterApi from './twitter'
-type TwitterClient = {
-  any?: any
-}
 
 import RedditClient from 'snoowrap'
 import ImgurClient from 'imgur'
 import sanityClient, { SanityClient } from '@sanity/client'
+import TwitterClient from 'twitter-v2'
 
 export const USERAGENT =
   'biketag-api (https://github.com/keneucker/biketag-api)'
@@ -84,12 +82,12 @@ export class BikeTagClient extends EventEmitter {
   private biketagConfig?: BikeTagCredentials
   private twitterConfig?: TwitterCredentials
 
-  constructor(readonly config: Credentials | BikeTagConfiguration) {
+  constructor(readonly configuration: Credentials | BikeTagConfiguration) {
     super()
 
     this.mostAvailableApi = undefined
 
-    const initConfig = this.setConfiguration(config ?? {})
+    const initConfig = this.config(configuration ?? {}, true, true)
     this.initializeClients(initConfig)
 
     /// Configure separate fetching strategies: plain, authed (default), cached (authed)
@@ -157,14 +155,7 @@ export class BikeTagClient extends EventEmitter {
 
       case 'tag':
         /// Set the game in the options, defaulting to the configured game
-        options.game = options.game
-          ? options.game
-          : (this.biketagConfig as Credentials).game
-
-        /// Set the album hash, if present (Imgur specific)
-        if (this.imgurConfig?.hash) {
-          options.hash = options.hash ?? this.imgurConfig.hash
-        }
+        options.game = options.game ? options.game : this.biketagConfig.game
 
         if (!options.slug) {
           if (options.tagnumber && typeof options.tagnumber !== 'undefined') {
@@ -189,8 +180,14 @@ export class BikeTagClient extends EventEmitter {
     }
 
     switch (options.source) {
+      case AvailableApis.imgur:
+        options.hash = options.hash ?? this.imgurConfig.hash
+        break
       case AvailableApis.reddit:
         options.subreddit = options.subreddit ?? this.redditConfig.subreddit
+        break
+      case AvailableApis.twitter:
+        options.account = options.account ?? this.twitterConfig.account
         break
     }
 
@@ -281,139 +278,141 @@ export class BikeTagClient extends EventEmitter {
   }
 
   initializeClients(config?: BikeTagConfiguration): BikeTagConfiguration {
-    config = config ?? this.getConfiguration()
+    config = config ?? this.config()
 
     if (
       config.imgur &&
-      isImgurCredentials(this.imgurConfig) &&
-      isImgurApiReady(this.imgurConfig)
+      isImgurCredentials(config.imgur) &&
+      isImgurApiReady(config.imgur)
     ) {
       this.imgurClient = new ImgurClient(config.imgur)
     }
     if (
       config.sanity &&
-      isSanityCredentials(this.sanityConfig) &&
-      isSanityApiReady(this.sanityConfig)
+      isSanityCredentials(config.sanity) &&
+      isSanityApiReady(config.sanity)
     ) {
       this.sanityClient = sanityClient(config.sanity)
     }
     if (
       config.reddit &&
-      isRedditCredentials(this.redditConfig) &&
-      isRedditApiReady(this.redditConfig)
+      isRedditCredentials(config.reddit) &&
+      isRedditApiReady(config.reddit)
     ) {
       this.redditClient = new RedditClient(config.reddit)
     }
     if (
       config.twitter &&
-      isTwitterCredentials(this.twitterConfig) &&
-      isTwitterApiReady(this.twitterConfig)
+      isTwitterCredentials(config.twitter) &&
+      isTwitterApiReady(config.twitter)
     ) {
-      // this.twitterClient = new TwitterClient(config.twitter)
+      this.twitterClient = new TwitterClient(config.twitter)
     }
 
     return config
   }
 
-  setConfiguration(
-    config: Credentials | BikeTagConfiguration | PartialBikeTagConfiguration,
+  config(
+    config?: Credentials | BikeTagConfiguration | PartialBikeTagConfiguration,
     overwrite = true,
     reInitialize = false
   ): BikeTagConfiguration {
-    const parsedConfig = assignBikeTagConfiguration(
-      config as BikeTagConfiguration
-    )
+    if (config) {
+      const parsedConfig = assignBikeTagConfiguration(
+        config as BikeTagConfiguration
+      )
 
-    const initClientConfig = (
-      type: AvailableApis,
-      parsedConfig: BikeTagConfiguration,
-      overwrite = true
-    ) => {
-      const configName = `${AvailableApis[type]}Config`
-      const config = parsedConfig[AvailableApis[type]]
-      let createCredentialsMethod: any = createBikeTagCredentials
+      const initClientConfig = (
+        type: AvailableApis,
+        parsedConfig: BikeTagConfiguration,
+        overwrite = true
+      ) => {
+        const configName = `${AvailableApis[type]}Config`
+        const config = parsedConfig[AvailableApis[type]]
+        let createCredentialsMethod: any = createBikeTagCredentials
 
-      switch (type) {
-        case AvailableApis.imgur:
-          createCredentialsMethod = createImgurCredentials
-          break
-        case AvailableApis.reddit:
-          createCredentialsMethod = createRedditCredentials
-          break
-        case AvailableApis.sanity:
-          createCredentialsMethod = createSanityCredentials
-          break
-        case AvailableApis.twitter:
-          createCredentialsMethod = createTwitterCredentials
-          break
+        switch (type) {
+          case AvailableApis.imgur:
+            createCredentialsMethod = createImgurCredentials
+            break
+          case AvailableApis.reddit:
+            createCredentialsMethod = createRedditCredentials
+            break
+          case AvailableApis.sanity:
+            createCredentialsMethod = createSanityCredentials
+            break
+          case AvailableApis.twitter:
+            createCredentialsMethod = createTwitterCredentials
+            break
+        }
+
+        return !overwrite && this[configName] && config
+          ? createCredentialsMethod(config, this[configName])
+          : config ?? this[configName]
       }
 
-      return !overwrite && this[configName] && config
-        ? createCredentialsMethod(config, this[configName])
-        : config ?? this[configName]
+      const biketagConfig = initClientConfig(
+        AvailableApis.biketag,
+        parsedConfig,
+        overwrite
+      )
+      const imgurConfig = initClientConfig(
+        AvailableApis.imgur,
+        parsedConfig,
+        overwrite
+      )
+      const sanityConfig = initClientConfig(
+        AvailableApis.sanity,
+        parsedConfig,
+        overwrite
+      )
+      const redditConfig = initClientConfig(
+        AvailableApis.reddit,
+        parsedConfig,
+        overwrite
+      )
+      const twitterConfig = initClientConfig(
+        AvailableApis.twitter,
+        parsedConfig,
+        overwrite
+      )
+
+      if (reInitialize) {
+        const initializeConfig: BikeTagConfiguration = {
+          biketag: undefined,
+          imgur: undefined,
+          reddit: undefined,
+          sanity: undefined,
+          twitter: undefined,
+        }
+
+        if (!_.isEqual(this.imgurConfig, imgurConfig)) {
+          initializeConfig.imgur = imgurConfig
+        }
+        if (!_.isEqual(this.redditConfig, redditConfig)) {
+          initializeConfig.reddit = redditConfig
+        }
+        if (!_.isEqual(this.sanityConfig, sanityConfig)) {
+          initializeConfig.sanity = sanityConfig
+        }
+        if (!_.isEqual(this.twitterConfig, twitterConfig)) {
+          initializeConfig.twitter = twitterConfig
+        }
+
+        this.initializeClients(initializeConfig)
+      }
+
+      this.biketagConfig = biketagConfig
+      this.imgurConfig = imgurConfig
+      this.sanityConfig = sanityConfig
+      this.redditConfig = redditConfig
+      this.twitterConfig = twitterConfig
     }
 
-    const biketagConfig = initClientConfig(
-      AvailableApis.biketag,
-      parsedConfig,
-      overwrite
-    )
-    const imgurConfig = initClientConfig(
-      AvailableApis.imgur,
-      parsedConfig,
-      overwrite
-    )
-    const sanityConfig = initClientConfig(
-      AvailableApis.sanity,
-      parsedConfig,
-      overwrite
-    )
-    const redditConfig = initClientConfig(
-      AvailableApis.reddit,
-      parsedConfig,
-      overwrite
-    )
-    const twitterConfig = initClientConfig(
-      AvailableApis.twitter,
-      parsedConfig,
-      overwrite
-    )
-
-    if (reInitialize) {
-      const initializeConfig: BikeTagConfiguration = {
-        biketag: undefined,
-        imgur: undefined,
-        reddit: undefined,
-        sanity: undefined,
-        twitter: undefined,
-      }
-
-      if (!_.isEqual(this.imgurConfig, imgurConfig)) {
-        initializeConfig.imgur = imgurConfig
-      }
-      if (!_.isEqual(this.redditConfig, redditConfig)) {
-        initializeConfig.reddit = redditConfig
-      }
-      if (!_.isEqual(this.sanityConfig, sanityConfig)) {
-        initializeConfig.sanity = sanityConfig
-      }
-      if (!_.isEqual(this.twitterConfig, twitterConfig)) {
-        initializeConfig.twitter = twitterConfig
-      }
-
-      this.initializeClients(initializeConfig)
-    }
-
-    this.biketagConfig = biketagConfig
-    this.imgurConfig = imgurConfig
-    this.sanityConfig = sanityConfig
-    this.redditConfig = redditConfig
-    this.twitterConfig = twitterConfig
-
-    return this.getConfiguration()
+    return this._config()
   }
 
-  getConfiguration(config?: BikeTagConfiguration): BikeTagConfiguration {
+  _config(config?: BikeTagConfiguration): BikeTagConfiguration {
     return {
       biketag: config?.biketag ?? this.biketagConfig,
       sanity: config?.sanity ?? this.sanityConfig,
@@ -442,7 +441,7 @@ export class BikeTagClient extends EventEmitter {
       typeof payload === 'string' ? { game: payload } : payload
     const { client, options, api } = this.getDefaultAPI(
       onlyApplicableOpts,
-      { source: AvailableApis.sanity },
+      { source: AvailableApis[AvailableApis.sanity] },
       'game'
     )
 
@@ -616,7 +615,9 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  content(options: any = {}): SanityClient {
+  content(opts?: any): SanityClient {
+    const options = opts ?? this.sanityConfig
+
     if (isSanityCredentials(options)) {
       return sanityClient(options)
     }
@@ -624,7 +625,8 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating a sanity client')
   }
 
-  images(options: any = {}): ImgurClient {
+  images(opts?: any): ImgurClient {
+    const options = opts ?? this.imgurConfig
     if (isImgurCredentials(options)) {
       return new ImgurClient(options)
     }
@@ -632,7 +634,8 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating an imgur client')
   }
 
-  discussions(options: any = {}): RedditClient {
+  discussions(opts?: any): RedditClient {
+    const options = opts ?? this.redditConfig
     if (isRedditCredentials(options)) {
       return new RedditClient(options)
     }
@@ -640,13 +643,14 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating an imgur client')
   }
 
-  // mentions(options: any = {}): TwitterClient {
-  //   if (isTwitterCredentials(options)) {
-  //     return new TwitterClient(options)
-  //   }
+  mentions(opts: any): TwitterClient {
+    const options = opts ?? this.twitterConfig
+    if (isTwitterCredentials(options)) {
+      return new TwitterClient(options)
+    }
 
-  //   throw new Error('options are invalid for creating an twitter client')
-  // }
+    throw new Error('options are invalid for creating an twitter client')
+  }
 
   // shares(options: any = {}): InstagramClient {
   //   if (isInstagramCredentials(options)) {

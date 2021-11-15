@@ -20,8 +20,10 @@ export type UpdateTagPayload = Partial<TagData> & ImgurUploadPayload
 
 function isValidUpdatePayload(utp: UpdateTagPayload) {
   return (
-    typeof utp.imageHash === 'string' &&
-    (typeof utp.title === 'string' || typeof utp.description === 'string')
+    (typeof utp.imageHash === 'string' &&
+      (typeof utp.title === 'string' || typeof utp.description === 'string')) ||
+    typeof utp.title === 'string' ||
+    typeof utp.description === 'string'
   )
 }
 
@@ -110,7 +112,7 @@ export async function updateTag(
           }
         }
       } else {
-        throw new Error('one update payload is invalid')
+        console.error('one update payload is invalid', utp)
       }
 
       resolve({

@@ -110,7 +110,7 @@ export async function updateTag(
           }
         }
       } else {
-        throw new Error('one update payload is invalid')
+        console.error('one update payload is invalid', utp)
       }
 
       resolve({

@@ -28,7 +28,6 @@ export async function getTags(
       let fetcher = redditPosts
       while (!fetcher.isFinished) {
         fetcher = await fetcher.fetchMore({ amount: maxPerRequest })
-        console.log({ fetcher })
         redditPosts.concat(fetcher)
       }
 
@@ -39,7 +38,9 @@ export async function getTags(
       const bikeTags: TagData[] = []
 
       for (const biketagPost of redditBikeTagData) {
-        bikeTags.push(await getBikeTagInformationFromRedditData(biketagPost))
+        bikeTags.push(
+          await getBikeTagInformationFromRedditData(biketagPost, options.game)
+        )
       }
 
       const response = {

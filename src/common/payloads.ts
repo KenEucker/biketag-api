@@ -3,6 +3,7 @@ import { Game, RequireAtLeastOne, TagData } from './types'
 export type getTagsPayload = {
   fields?: string[]
   slugs?: string[]
+  account?: string
   subreddit?: string
   time?: 'year' | 'hour' | 'day' | 'week' | 'month' | 'all'
   sort?: 'new' | 'relevance' | 'hot' | 'top' | 'comments'
@@ -30,6 +31,8 @@ export type getTagPayload = {
   sort?: 'new'
   limit?: number
   subreddit?: string
+  account?: string
+  game: string
   slug: string
   fields?: string[]
 }

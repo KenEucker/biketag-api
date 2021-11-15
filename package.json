@@ -55,10 +55,12 @@
     "axios": "^0.21.1",
     "axios-cache-adapter": "^2.7.3",
     "form-data": "^4.0.0",
-    "imgur": "git://github.com/keneucker/node-imgur.git#release",
+    "imgur": "https://github.com/keneucker/node-imgur/tarball/release",
+    "lodash": "^4.17.21",
     "snoowrap": "^1.23.0",
     "stream-browserify": "^3.0.0",
     "tinycache": "^1.1.2",
+    "twitter-v2": "^1.1.0",
     "util": "^0.12.3"
   },
   "devDependencies": {
@@ -72,6 +74,7 @@
     "@typescript-eslint/parser": "^4.22.0",
     "clean-webpack-plugin": "^4.0.0-alpha.0",
     "commitizen": "^4.2.4",
+    "crypto-browserify": "^3.12.0",
     "cz-conventional-changelog": "^3.0.1",
     "dotenv": "^10.0.0",
     "eslint": "^7.0.0",

@@ -1,69 +1,44 @@
-import type { ImgurClient } from 'imgur'
+import TwitterClient from 'twitter-v2'
+import { getTagsPayload } from '../common/payloads'
 import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
-import {
-  getBikeTagNumberFromImage,
-  getBikeTagFromImgurImageSet,
-} from './helpers'
+import { getBikeTagFromTwitterPost } from './helpers'
 
 export async function getTags(
-  client: ImgurClient,
-  options: any
+  client: TwitterClient,
+  options: getTagsPayload
 ): Promise<BikeTagApiResponse<TagData[]>> {
   const tagsData: TagData[] = []
-  let images: any[] = []
-
-  const getGroupedImages = (ungroupedImages) => {
-    const groupedImages: any[] = []
-
-    ungroupedImages.forEach((image: any) => {
-      const tagnumber = getBikeTagNumberFromImage(image)
-      groupedImages[tagnumber] = groupedImages[tagnumber]
-        ? groupedImages[tagnumber]
-        : []
-      groupedImages[tagnumber].push(image)
-    })
-
-    return groupedImages
-  }
-
-  if (options.tagnumbers?.length && options.hash) {
-    const albumInfo = await (client.getAlbum(options.hash) as any)
-    const imagesData: TagData[] = albumInfo.data?.images?.filter(
-      (image: any) =>
-        options.tagnumbers.indexOf(getBikeTagNumberFromImage(image)) !== -1
-    )
-    images = getGroupedImages(imagesData)
-  } else if (options.slugs?.length) {
-    const imagesData: TagData[] = []
-    const imagePromises: Promise<TagData>[] = []
-    let success = true
-    const addToArray = (image: any) => {
-      if (image?.data) imagesData.push(image.data)
-      success = image.success && success
+  // let fetching = true
+  const tenYearsAgo = new Date()
+  // const nowYearsAgo = new Date()
+  tenYearsAgo.setFullYear(tenYearsAgo.getFullYear() - 10)
+  // while (fetching) {
+  const data: any = await client.get(
+    `tweets/search/recent?expansions=attachments.media_keys&media.fields=preview_image_url,url`,
+    {
+      query: `from: ${options.account}`,
+      // start_time: nowYearsAgo.toISOString(),
+      // end_time: tenYearsAgo.toISOString(),
+      max_results: '100',
     }
-    options.slugs.forEach(async (slug: string) =>
-      imagePromises.push(client.getImage(slug).then(addToArray) as any)
-    )
+  )
 
-    await Promise.all(imagePromises).then((allImages: any[]) => {
-      images = getGroupedImages(allImages)
-    })
-  } else if (options.hash) {
-    const albumInfo = await client.getAlbum(options.hash)
-    const albumImages = albumInfo?.data?.images || []
-
-    images = getGroupedImages(albumImages)
+  if (data) {
+    console.log('count:', data.data.length, data)
+    for (const datum of data.data) {
+      tagsData.push(
+        getBikeTagFromTwitterPost(datum, options.game, data.includes?.media)
+      )
+    }
+    // } else {
+    //   fetching = false
+    // }
   }
-
-  images.forEach((images) => {
-    const tagData = getBikeTagFromImgurImageSet(images[0], images[1], options)
-    tagsData.push(tagData)
-  })
 
   return {
     data: tagsData,
     success: true,
-    source: AvailableApis[AvailableApis.imgur],
+    source: AvailableApis[AvailableApis.twitter],
     status: 200,
   }
 }
