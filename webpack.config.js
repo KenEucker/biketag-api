@@ -1,12 +1,18 @@
 const path = require('path')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const {
+  CleanWebpackPlugin
+} = require('clean-webpack-plugin')
 const nodeExternals = require('webpack-node-externals')
 
 const generalConfig = {
-  devtool: 'cheap-module-source-map',
+  devtool: false,
   watchOptions: {
     aggregateTimeout: 600,
     ignored: /node_modules/,
+  },
+  performance: {
+    maxAssetSize: 1550000,
+    maxEntrypointSize: 1550000,
   },
   plugins: [
     new CleanWebpackPlugin({
@@ -15,13 +21,11 @@ const generalConfig = {
     }),
   ],
   module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
-      },
-    ],
+    rules: [{
+      test: /\.tsx?$/,
+      use: 'ts-loader',
+      exclude: /node_modules/,
+    }, ],
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
@@ -62,10 +66,13 @@ module.exports = (env, argv) => {
   Object.assign(browserConfig, generalConfig)
 
   if (argv.mode === 'development') {
-  } else if (argv.mode === 'production') {
-    nodeConfig.devtool = false
-    browserConfig.devtool = false
-  } else {
+    nodeConfig.devtool = 'cheap-module-source-map'
+    browserConfig.devtool = 'cheap-module-source-map'
+    nodeConfig.performance.maxAssetSize *= 2
+    browserConfig.performance.maxAssetSize *= 2
+    nodeConfig.performance.maxEntrypointSize *= 2
+    browserConfig.performance.maxEntrypointSize *= 2
+  } else if (argv.mode === 'production') {} else {
     throw new Error('Specify env')
   }
 
