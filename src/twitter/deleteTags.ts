@@ -1,46 +1,10 @@
-import ImgurClient from 'imgur'
 import { deleteTagsPayload } from '../common/payloads'
-import { AvailableApis, BikeTagApiResponse, ImgurImage } from '../common/types'
-const getImageHashFromImgurImage = (a: any): any => {
-  return { a }
-}
+import TwitterClient from 'twitter-v2'
+import { BikeTagApiResponse } from '../common/types'
 
 export async function deleteTag(
-  client: ImgurClient,
+  client: TwitterClient,
   payload: deleteTagsPayload
 ): Promise<BikeTagApiResponse<any>> {
-  const responses = []
-  const deleteHashes = []
-  let tags = payload.tags
-
-  if (!tags.length && (payload.tagnumbers || payload.slugs)) {
-    tags = await this.getTags(payload.tagnumbers ?? payload.slugs)
-  }
-  for (const tag of tags) {
-    if (tag.foundImageUrl) {
-      deleteHashes.push(
-        getImageHashFromImgurImage({ link: tag.foundImageUrl } as ImgurImage)
-      )
-    }
-    if (tag.mysteryImageUrl) {
-      deleteHashes.push(
-        getImageHashFromImgurImage({ link: tag.mysteryImageUrl } as ImgurImage)
-      )
-    }
-  }
-
-  if (!deleteHashes.length) {
-    throw new Error('Imgur delete hashes not set')
-  }
-
-  for (const hash of deleteHashes) {
-    responses.push(await client.deleteImage(hash))
-  }
-
-  return {
-    data: responses,
-    success: true,
-    source: AvailableApis[AvailableApis.imgur],
-    status: 200,
-  } as BikeTagApiResponse<any>
+  throw new Error('deleteTags not implemented for Twitter adapter')
 }
