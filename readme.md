@@ -148,34 +148,34 @@ client = new BikeTagClient({
 
 The acceptable fields for a BikeTagConfiguration object are outlined below:
 
-|     Key/Api     | Description                                                                                                                         |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `game`          | [BikeTag] a string of the name of the game to load                                                                                  |
-| `clientKey`     | [BikeTag] The biketag Client Key for your access to the BikeTag API                                                                 |
-| `clientToken`   | [BikeTag] The biketag Client Token for your access to the BikeTag API                                                               |
-| `accessToken`   | [BikeTag] The biketag Access Token acquired via authorization (externally)                                                          |
-| `hash`          | [Imgur] The imgur album hash to target when working with BikeTag posts                                                              |
-| `clientId`      | [Imgur] The imgur Client ID to use when pulling data from Imgur as a source                                                         |
-| `clientSecret`  | [Imgur] The imgur Client Secret to use when authenticating using the ImgurClient                                                    |
-| `accessToken`   | [Imgur] The Imgur Access Token acquired via authorization (externally)                                                              |
-| `dataset`       | [Sanity] The sanity dataset to target when working with BikeTag posts                                                               |
-| `projectId`     | [Sanity] The sanity Project Id                                                                                                      |
-| `username`      | [Sanity] The sanity username to use for authentication                                                                              |
-| `password`      | [Sanity] The sanity user password to use for authenticaiton                                                                         |
-| `apiVersion`    | [Sanity] use current UTC date - see "specifying API version" in Sanity.IO docs                                                      |
-| `useCdn`        | [Sanity] `false` if you want to ensure fresh data (or are using an access token)                                                    |
-| `token`         | [Sanity] The sanity Access Token acquired via authorization (externally)                                                            |
-| `subreddit`     | [Reddit] The reddit subreddit to target when working with BikeTag posts                                                             |
-| `username`      | [Reddit] The reddit username to use for authentication                                                                              |
-| `password`      | [Reddit] The reddit user password to use for authenticaiton                                                                         |
-| `userAgent`     | [Reddit] the API user Agent (required)                                                                                              |
-| `clientId`      | [Reddit] The reddit Client ID to use when pulling data from Imgur as a source                                                       |
-| `clientSecret`  | [Reddit] The reddit Client Secret to use when authenticating using the RedditClient                                                 |
-| `consumer_key`  | [Twitter] The twitter consumer key used for authentication                                                                          |
-|  consumer_secret | [Twitter] The twitter consumer secret used for authentication                                                                      |
-|  access_token_key | [Twitter] the twitter access token key used for authentication                                                                    |
-| `access_token_secret`| [Twitter] The twitter access token secret used for authentication                                                              | 
-| `account`       | [Twitter] The twitter account to search when using the Twitter API                                                                  |   
+|     Key/Api      | Description                                                                               |
+| ---------------  | ------------------------------------------------------------------------------------------|
+| `game`           | [BikeTag] a string of the name of the game to load                                        |
+| `clientKey`      | [BikeTag] The biketag Client Key for your access to the BikeTag API                       |
+| `clientToken`    | [BikeTag] The biketag Client Token for your access to the BikeTag API                     |
+| `accessToken`    | [BikeTag] The biketag Access Token acquired via authorization (externally)                |
+| `hash`           | [Imgur] The imgur album hash to target when working with BikeTag posts                    |
+| `clientId`       | [Imgur] The imgur Client ID to use when pulling data from Imgur as a source               |
+| `clientSecret`   | [Imgur] The imgur Client Secret to use when authenticating using the ImgurClient          |
+| `accessToken`    | [Imgur] The Imgur Access Token acquired via authorization (externally)                    |
+| `dataset`        | [Sanity] The sanity dataset to target when working with BikeTag posts                     |
+| `projectId`      | [Sanity] The sanity Project Id                                                            |
+| `username`       | [Sanity] The sanity username to use for authentication                                    |
+| `password`       | [Sanity] The sanity user password to use for authenticaiton                               |
+| `apiVersion`     | [Sanity] use current UTC date - see "specifying API version" in Sanity.IO docs            |
+| `useCdn`         | [Sanity] `false` if you want to ensure fresh data (or are using an access token)          |
+| `token`          | [Sanity] The sanity Access Token acquired via authorization (externally)                  |
+| `subreddit`      | [Reddit] The reddit subreddit to target when working with BikeTag posts                   |
+| `username`       | [Reddit] The reddit username to use for authentication                                    |
+| `password`       | [Reddit] The reddit user password to use for authenticaiton                               |
+| `userAgent`      | [Reddit] the API user Agent (required)                                                    |
+| `clientId`       | [Reddit] The reddit Client ID to use when pulling data from Imgur as a source             |
+| `clientSecret`   | [Reddit] The reddit Client Secret to use when authenticating using the RedditClient       |
+| `consumer_key`   | [Twitter] The twitter consumer key used for authentication                                |
+| `consumer_secret`| [Twitter] The twitter consumer secret used for authentication                             |
+| `access_token_key`| [Twitter] The twitter access token key used for authentication                           |
+| `access_token_secret`| [Twitter] The twitter access token secret used for authentication                     | 
+| `account`       | [Twitter] The twitter account to search when using the Twitter API                         |   
 
 </div>
 
@@ -257,6 +257,7 @@ Using the typescript library configured and developed on the node-imgur v2 proje
 
 Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly by going out and playing a round of [BikeTag in your city](https://biketag.org)!
 
+[twitter]: https://developer.twitter.com/en/docs/twitter-api
 [github]: https://github.com/sponsors/KenEucker
 [patreon]: https://patreon.com/BikeTag
 [node-imgur]: https://github.com/kaimallea/node-imgur
