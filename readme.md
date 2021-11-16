@@ -153,7 +153,7 @@ The acceptable fields for a BikeTagConfiguration object are outlined below:
 | `game`          | [BikeTag] a string of the name of the game to load                                                                                  |
 | `clientKey`     | [BikeTag] The biketag Client Key for your access to the BikeTag API                                                                 |
 | `clientToken`   | [BikeTag] The biketag Client Token for your access to the BikeTag API                                                               |
-| `accessToken`   | [BikeTag] The biketag Cccess Token acquired via authorization (externally)                                                          |
+| `accessToken`   | [BikeTag] The biketag Access Token acquired via authorization (externally)                                                          |
 | `hash`          | [Imgur] The imgur album hash to target when working with BikeTag posts                                                              |
 | `clientId`      | [Imgur] The imgur Client ID to use when pulling data from Imgur as a source                                                         |
 | `clientSecret`  | [Imgur] The imgur Client Secret to use when authenticating using the ImgurClient                                                    |
@@ -170,8 +170,12 @@ The acceptable fields for a BikeTagConfiguration object are outlined below:
 | `password`      | [Reddit] The reddit user password to use for authenticaiton                                                                         |
 | `userAgent`     | [Reddit] the API user Agent (required)                                                                                              |
 | `clientId`      | [Reddit] The reddit Client ID to use when pulling data from Imgur as a source                                                       |
-| `clientSecret`  | [Reddit] The reddit Client Secret to use when authenticating using the ImgurClient                                                  |
-| `refreshToken`  | [Reddit] The reddit Refresh Token acquired via authorization (externally)                                                           |
+| `clientSecret`  | [Reddit] The reddit Client Secret to use when authenticating using the RedditClient                                                 |
+| `consumer_key`  | [Twitter] The twitter consumer key used for authentication                                                                          |
+|  consumer_secret | [Twitter] The twitter consumer secret used for authentication                                                                      |
+|  access_token_key | [Twitter] the twitter access token key used for authentication                                                                    |
+| `access_token_secret`| [Twitter] The twitter access token secret used for authentication                                                              | 
+| `account`       | [Twitter] The twitter account to search when using the Twitter API                                                                  |   
 
 </div>
 
@@ -246,6 +250,7 @@ const firstFivePortlandTags = await biketagAPI.getTags([1,2,3,4,5], { source: 'r
 ## Credits
 
 </div>
+
 This project is heavily influenced by the [node-imgur][node-imgur] package, the Imgur API and it's documentation, and Sanity.IO's javascript client.
 
 Using the typescript library configured and developed on the node-imgur v2 project: https://github.com/kaimallea/node-imgur, this package comes bundled with testing using jest and automated releases using github actions. Many thanks to Kaimallea for collaborating with me on the imgur API because I learned so much along the way!
