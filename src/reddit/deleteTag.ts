@@ -1,10 +1,10 @@
-import { SanityClient } from '@sanity/client'
+import RedditClient from 'snoowrap'
+import { deleteTagPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 
 export async function deleteTag(
-  client: SanityClient
-  // slug?: string,
-  // tagnumber?: number,
+  client: RedditClient,
+  payload: deleteTagPayload
 ): Promise<BikeTagApiResponse<boolean>> {
-  return { client } as any as BikeTagApiResponse<boolean>
+  throw new Error('deleteTag not implemented for Reddit adapter')
 }

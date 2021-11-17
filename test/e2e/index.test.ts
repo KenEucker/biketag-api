@@ -1,5 +1,5 @@
 import {
-  getGameDataAsync,
+  getGameAsync,
   getTagAsync,
   getLatestTagAsync,
   getTagsAsync,
@@ -8,7 +8,7 @@ import {
   bikeTagImgurInstance,
   bikeTagRedditInstance,
   bikeTagTwitterInstance,
-} from './index'
+} from '../../examples/node/index'
 
 test('BikeTagClient integration tests run when they can', async () => {
   expect(true).toBeTruthy()
@@ -16,7 +16,7 @@ test('BikeTagClient integration tests run when they can', async () => {
 
 if (bikeTagSanityInstance) {
   test('BikeTagClient sanity instance can retrieve game data', async () => {
-    const testGameData = await getGameDataAsync(bikeTagSanityInstance)
+    const testGameData = await getGameAsync(bikeTagSanityInstance)
 
     expect(testGameData).toMatchSnapshot()
   })
@@ -74,19 +74,25 @@ if (bikeTagImgurInstance) {
 
 if (bikeTagRedditInstance) {
   test('BikeTagClient reddit instance can retrieve tag data', async () => {
-    const testTagData = await getTagAsync(bikeTagRedditInstance, false, { source: 'reddit' })
+    const testTagData = await getTagAsync(bikeTagRedditInstance, false, {
+      source: 'reddit',
+    })
 
     expect(testTagData).toMatchSnapshot()
   })
 
   test('BikeTagClient reddit instance can retrieve tag 1 data', async () => {
-    const testTagData = await getTag1Async(bikeTagRedditInstance, false, { source: 'reddit' })
+    const testTagData = await getTag1Async(bikeTagRedditInstance, false, {
+      source: 'reddit',
+    })
 
     expect(testTagData).toMatchSnapshot()
   })
 
   test('BikeTagClient reddit instance can retrieve latest tag data', async () => {
-    const testTagData = await getLatestTagAsync(bikeTagRedditInstance, false, { source: 'reddit' })
+    const testTagData = await getLatestTagAsync(bikeTagRedditInstance, false, {
+      source: 'reddit',
+    })
 
     expect(testTagData).toMatchSnapshot()
   })

@@ -1,4 +1,4 @@
-import { Handler } from './'
+import { Handler } from '.'
 // import { URLSearchParams } from 'url';
 
 const RequiredFieldErrorResponse = (method: string) => {

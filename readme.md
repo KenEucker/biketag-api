@@ -15,12 +15,19 @@
   <a href="https://github.com/sponsors/KenEucker">
     <img alt="Sponsors" src="https://img.shields.io/github/sponsors/keneucker">
   </a>
+  <a href="https://gitter.im/biketagorg/community">
+    <img alt="Sponsors" src="https://badges.gitter.im/gitterHQ/gitter.png">
+  </a>
 </p>
 <p align="center">
   <a href="https://github.com/keneucker/biketag-api/discussions">
     <img alt="Join the community on GitHub Discussions" src="https://img.shields.io/badge/Join%20the%20community-on%20GitHub%20Discussions-blue">
   </a>
 </p>
+
+<div align="center">
+<img alt="biketag-api logo" src="https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/biketag-api-logo.jpg" height="auto" width="200" style="border-radius:25%;">
+</div>
 
 <div align="center">
 
@@ -144,30 +151,34 @@ client = new BikeTagClient({
 
 The acceptable fields for a BikeTagConfiguration object are outlined below:
 
-|     Key/Api     | Description                                                                                                                         |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `game`          | [BikeTag] a string of the name of the game to load                                                                                  |
-| `clientKey`     | [BikeTag] The biketag Client Key for your access to the BikeTag API                                                                 |
-| `clientToken`   | [BikeTag] The biketag Client Token for your access to the BikeTag API                                                               |
-| `accessToken`   | [BikeTag] The biketag Cccess Token acquired via authorization (externally)                                                          |
-| `hash`          | [Imgur] The imgur album hash to target when working with BikeTag posts                                                              |
-| `clientId`      | [Imgur] The imgur Client ID to use when pulling data from Imgur as a source                                                         |
-| `clientSecret`  | [Imgur] The imgur Client Secret to use when authenticating using the ImgurClient                                                    |
-| `accessToken`   | [Imgur] The Imgur Access Token acquired via authorization (externally)                                                              |
-| `dataset`       | [Sanity] The sanity dataset to target when working with BikeTag posts                                                               |
-| `projectId`     | [Sanity] The sanity Project Id                                                                                                      |
-| `username`      | [Sanity] The sanity username to use for authentication                                                                              |
-| `password`      | [Sanity] The sanity user password to use for authenticaiton                                                                         |
-| `apiVersion`    | [Sanity] use current UTC date - see "specifying API version" in Sanity.IO docs                                                      |
-| `useCdn`        | [Sanity] `false` if you want to ensure fresh data (or are using an access token)                                                    |
-| `token`         | [Sanity] The sanity Access Token acquired via authorization (externally)                                                            |
-| `subreddit`     | [Reddit] The reddit subreddit to target when working with BikeTag posts                                                             |
-| `username`      | [Reddit] The reddit username to use for authentication                                                                              |
-| `password`      | [Reddit] The reddit user password to use for authenticaiton                                                                         |
-| `userAgent`     | [Reddit] the API user Agent (required)                                                                                              |
-| `clientId`      | [Reddit] The reddit Client ID to use when pulling data from Imgur as a source                                                       |
-| `clientSecret`  | [Reddit] The reddit Client Secret to use when authenticating using the ImgurClient                                                  |
-| `refreshToken`  | [Reddit] The reddit Refresh Token acquired via authorization (externally)                                                           |
+|     Key              | [API] Description                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------|
+| `game    `           | [BikeTag] a string of the name of the game to load                                        |
+| `clientKey    `      | [BikeTag] The biketag Client Key for your access to the BikeTag API                       |
+| `clientToken    `    | [BikeTag] The biketag Client Token for your access to the BikeTag API                     |
+| `accessToken    `    | [BikeTag] The biketag Access Token acquired via authorization (externally)                |
+| `hash    `           | [Imgur] The imgur album hash to target when working with BikeTag posts                    |
+| `clientId    `       | [Imgur] The imgur Client ID to use when pulling data from Imgur as a source               |
+| `clientSecret    `   | [Imgur] The imgur Client Secret to use when authenticating using the ImgurClient          |
+| `accessToken    `    | [Imgur] The Imgur Access Token acquired via authorization (externally)                    |
+| `dataset    `        | [Sanity] The sanity dataset to target when working with BikeTag posts                     |
+| `projectId    `      | [Sanity] The sanity Project Id                                                            |
+| `username    `       | [Sanity] The sanity username to use for authentication                                    |
+| `password    `       | [Sanity] The sanity user password to use for authenticaiton                               |
+| `apiVersion    `     | [Sanity] use current UTC date - see "specifying API version" in Sanity.IO docs            |
+| `useCdn    `         | [Sanity] `false` if you want to ensure fresh data (or are using an access token)          |
+| `token    `          | [Sanity] The sanity Access Token acquired via authorization (externally)                  |
+| `subreddit    `      | [Reddit] The reddit subreddit to target when working with BikeTag posts                   |
+| `username    `       | [Reddit] The reddit username to use for authentication                                    |
+| `password    `       | [Reddit] The reddit user password to use for authenticaiton                               |
+| `userAgent`          | [Reddit] the API user Agent (required)                                                    |
+| `clientId`           | [Reddit] The reddit Client ID to use when pulling data from Imgur as a source             |
+| `clientSecret`       | [Reddit] The reddit Client Secret to use when authenticating using the RedditClient       |
+| `consumer_key`       | [Twitter] The twitter consumer key used for authentication                                |
+| `consumer_secret`    | [Twitter] The twitter consumer secret used for authentication                             |
+| `access_token_key`   | [Twitter] The twitter access token key used for authentication                            |
+| `access_token_secret`| [Twitter] The twitter access token secret used for authentication                         | 
+| `account`            | [Twitter] The twitter account to search when using the Twitter API                         |   
 
 </div>
 
@@ -180,7 +191,7 @@ You can get tags one by one or all at once for a given game using the `getTag` a
 
 ```ts
 // retrieves the BikeTag game data 'portland' game
-const biketagPortlandLatest = await biketagAPI.getGameData()
+const biketagPortlandLatest = await biketagAPI.getGame()
 
 // retrieves the latest BikeTag posted for the 'portland' game from the most available API
 const biketagPortlandLatest = await biketagAPI.getTag()
@@ -242,12 +253,14 @@ const firstFivePortlandTags = await biketagAPI.getTags([1,2,3,4,5], { source: 'r
 ## Credits
 
 </div>
+
 This project is heavily influenced by the [node-imgur][node-imgur] package, the Imgur API and it's documentation, and Sanity.IO's javascript client.
 
 Using the typescript library configured and developed on the node-imgur v2 project: https://github.com/kaimallea/node-imgur, this package comes bundled with testing using jest and automated releases using github actions. Many thanks to Kaimallea for collaborating with me on the imgur API because I learned so much along the way!
 
 Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly by going out and playing a round of [BikeTag in your city](https://biketag.org)!
 
+[twitter]: https://developer.twitter.com/en/docs/twitter-api
 [github]: https://github.com/sponsors/KenEucker
 [patreon]: https://patreon.com/BikeTag
 [node-imgur]: https://github.com/kaimallea/node-imgur
@@ -280,6 +293,7 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
 
   [![gun.eco][gun-image]](https://gun.eco/docs/API)
 
+  [biketag-logo]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/biketag-api-logo.jpg
   [imgur-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/imgur-logo.png
   [sanity-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/sanity-logo.png
   [reddit-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/reddit-logo.png

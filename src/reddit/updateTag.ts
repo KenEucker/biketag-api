@@ -1,14 +1,10 @@
-import { SanityClient } from '@sanity/client'
-import { Payload, BikeTagApiResponse } from '../common/types'
-
-export interface UpdateTagPayload
-  extends Pick<Payload, 'title' | 'description'> {
-  slug: string
-}
+import RedditClient from 'snoowrap'
+import { updateTagPayload } from '../common/payloads'
+import { BikeTagApiResponse } from '../common/types'
 
 export async function updateTag(
-  client: SanityClient
-  // payload: UpdateTagPayload | UpdateTagPayload[]
-): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-  return { client } as any as BikeTagApiResponse<boolean>
+  client: RedditClient,
+  payload: updateTagPayload
+): Promise<BikeTagApiResponse<boolean>> {
+  throw new Error('updateTag not implemented for Reddit adapter')
 }

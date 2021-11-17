@@ -80,8 +80,8 @@ const getLatestTagAsync = async (client, out = false, opts = {}) => {
   return latest
 }
 
-const getGameDataAsync = async (client, out = false, opts = {}) => {
-  const testGameData = await client.getGameData('test', opts)
+const getGameAsync = async (client, out = false, opts = {}) => {
+  const testGameData = await client.getGame('test', opts)
   log('success fully retrieved game data', testGameData, out)
 
   return testGameData
@@ -104,7 +104,7 @@ const runTests = async () => {
     await getTagsAsync(bikeTagSanityInstance, true)
 
     console.log("Game from Sanity")
-    await getGameDataAsync(bikeTagSanityInstance, true)
+    await getGameAsync(bikeTagSanityInstance, true)
   }
 
   if (bikeTagTwitterInstance) {
@@ -125,7 +125,7 @@ const runTests = async () => {
 }
 
 if (require.main === module) {
-  if (bikeTagSanityInstance) getGameDataAsync(bikeTagSanityInstance, true)
+  if (bikeTagSanityInstance) getGameAsync(bikeTagSanityInstance, true)
   runTests()
 }
 
@@ -135,7 +135,7 @@ module.exports = {
   bikeTagRedditInstance,
   bikeTagSanityInstance,
   bikeTagTwitterInstance,
-  getGameDataAsync,
+  getGameAsync,
   getLatestTagAsync,
   getTagAsync,
   getTag1Async,

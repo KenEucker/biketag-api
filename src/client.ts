@@ -1,6 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
 import { EventEmitter } from 'events'
-// import { getAuthorizationHeader } from './getAuthorizationHeader'
 import { BIKETAG_API_PREFIX } from './common/endpoints'
 import {
   Credentials,
@@ -21,7 +20,7 @@ import {
   getTagPayload,
   getTagsPayload,
   updateTagPayload,
-  getGameDataPayload,
+  getGamePayload,
   uploadTagImagePayload,
   deleteTagPayload,
   deleteTagsPayload,
@@ -47,7 +46,7 @@ import {
   isTwitterApiReady,
 } from './common/methods'
 import { setup } from 'axios-cache-adapter'
-import _ from 'lodash'
+import { isEqual } from 'lodash'
 import * as BikeTagExpressions from './common/expressions'
 import * as BikeTagGetters from './common/getters'
 import * as sanityApi from './sanity'
@@ -277,9 +276,28 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  initializeClients(config?: BikeTagConfiguration): BikeTagConfiguration {
+  private getConfig(config?: BikeTagConfiguration): BikeTagConfiguration {
+    return {
+      biketag: config?.biketag ?? this.biketagConfig,
+      sanity: config?.sanity ?? this.sanityConfig,
+      imgur: config?.imgur ?? this.imgurConfig,
+      reddit: config?.reddit ?? this.redditConfig,
+      twitter: config?.twitter ?? this.twitterConfig,
+    } as BikeTagConfiguration
+  }
+
+  private initializeClients(
+    config?: BikeTagConfiguration
+  ): BikeTagConfiguration {
     config = config ?? this.config()
 
+    // if (
+    //   config.biketag &&
+    //   isBikeTagCredentials(config.biketag) &&
+    //   isBikeTagApiReady(config.biketag)
+    // ) {
+    //   this.biketagClient = new Gun<BikeTagState>()
+    // }
     if (
       config.imgur &&
       isImgurCredentials(config.imgur) &&
@@ -386,16 +404,16 @@ export class BikeTagClient extends EventEmitter {
           twitter: undefined,
         }
 
-        if (!_.isEqual(this.imgurConfig, imgurConfig)) {
+        if (!isEqual(this.imgurConfig, imgurConfig)) {
           initializeConfig.imgur = imgurConfig
         }
-        if (!_.isEqual(this.redditConfig, redditConfig)) {
+        if (!isEqual(this.redditConfig, redditConfig)) {
           initializeConfig.reddit = redditConfig
         }
-        if (!_.isEqual(this.sanityConfig, sanityConfig)) {
+        if (!isEqual(this.sanityConfig, sanityConfig)) {
           initializeConfig.sanity = sanityConfig
         }
-        if (!_.isEqual(this.twitterConfig, twitterConfig)) {
+        if (!isEqual(this.twitterConfig, twitterConfig)) {
           initializeConfig.twitter = twitterConfig
         }
 
@@ -409,17 +427,7 @@ export class BikeTagClient extends EventEmitter {
       this.twitterConfig = twitterConfig
     }
 
-    return this._config()
-  }
-
-  _config(config?: BikeTagConfiguration): BikeTagConfiguration {
-    return {
-      biketag: config?.biketag ?? this.biketagConfig,
-      sanity: config?.sanity ?? this.sanityConfig,
-      imgur: config?.imgur ?? this.imgurConfig,
-      reddit: config?.reddit ?? this.redditConfig,
-      twitter: config?.twitter ?? this.twitterConfig,
-    } as BikeTagConfiguration
+    return this.getConfig()
   }
 
   plainRequest(options: AxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
@@ -434,8 +442,10 @@ export class BikeTagClient extends EventEmitter {
     return this.fetcher(options)
   }
 
-  getGameData(
-    payload: RequireAtLeastOne<getGameDataPayload> | string | undefined
+  /// ****************************  Game Data Methods   ************************************ ///
+
+  getGame(
+    payload: RequireAtLeastOne<getGamePayload> | string | undefined
   ): Promise<BikeTagApiResponse<GameData>> {
     const onlyApplicableOpts =
       typeof payload === 'string' ? { game: payload } : payload
@@ -445,7 +455,7 @@ export class BikeTagClient extends EventEmitter {
       'game'
     )
 
-    return api.getGameData(client, options).catch((e) => {
+    return api.getGame(client, options).catch((e) => {
       return {
         status: 500,
         data: null,
@@ -456,65 +466,7 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  importTag(
-    payload:
-      | RequireAtLeastOne<importTagPayload>
-      | RequireAtLeastOne<importTagPayload>[]
-  ): Promise<BikeTagApiResponse<TagData[]>> {
-    return payload as unknown as Promise<BikeTagApiResponse<TagData[]>>
-  }
-
-  deleteTag(
-    payload: deleteTagPayload | number,
-    opts?: RequireAtLeastOne<Credentials>
-  ): Promise<BikeTagApiResponse<any>> {
-    const { client, options, api } = this.getDefaultAPI(payload, opts)
-    let clientMethod = api.deleteTag
-
-    switch (options.source) {
-      case AvailableApis.imgur:
-        clientMethod = {
-          getTag: this.getPassthroughApiMethod(api.getTag, client),
-        }
-        break
-    }
-
-    return clientMethod(client, options).catch((e) => {
-      return Promise.resolve({
-        status: 500,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
-      })
-    })
-  }
-
-  deleteTags(
-    payload: deleteTagsPayload | number[],
-    opts?: RequireAtLeastOne<Credentials>
-  ): Promise<BikeTagApiResponse<any>> {
-    const { client, options, api } = this.getDefaultAPI(payload, opts)
-    let clientMethod = api.deleteTags
-
-    switch (options.source) {
-      case AvailableApis.imgur:
-        clientMethod = clientMethod.bind({
-          getTags: this.getPassthroughApiMethod(api.getTags, client),
-        })
-        break
-    }
-
-    return clientMethod(client, options).catch((e) => {
-      return Promise.resolve({
-        status: 500,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
-      })
-    })
-  }
+  /// ****************************  Tag Data Methods   ************************************ ///
 
   getTag(
     payload: RequireAtLeastOne<getTagPayload> | number,
@@ -615,6 +567,69 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
+  importTag(
+    payload:
+      | RequireAtLeastOne<importTagPayload>
+      | RequireAtLeastOne<importTagPayload>[]
+  ): Promise<BikeTagApiResponse<TagData[]>> {
+    return payload as unknown as Promise<BikeTagApiResponse<TagData[]>>
+  }
+
+  deleteTag(
+    payload: deleteTagPayload | number,
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<any>> {
+    const { client, options, api } = this.getDefaultAPI(payload, opts)
+    let clientMethod = api.deleteTag
+
+    switch (options.source) {
+      case AvailableApis.imgur:
+        clientMethod = {
+          getTag: this.getPassthroughApiMethod(api.getTag, client),
+        }
+        break
+    }
+
+    return clientMethod(client, options).catch((e) => {
+      return Promise.resolve({
+        status: 500,
+        data: null,
+        error: e,
+        success: false,
+        source: AvailableApis[options.source],
+      })
+    })
+  }
+
+  deleteTags(
+    payload: deleteTagsPayload | number[],
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<any>> {
+    const { client, options, api } = this.getDefaultAPI(payload, opts)
+    let clientMethod = api.deleteTags
+
+    switch (options.source) {
+      case AvailableApis.imgur:
+        clientMethod = clientMethod.bind({
+          getTags: this.getPassthroughApiMethod(api.getTags, client),
+        })
+        break
+    }
+
+    return clientMethod(client, options).catch((e) => {
+      return Promise.resolve({
+        status: 500,
+        data: null,
+        error: e,
+        success: false,
+        source: AvailableApis[options.source],
+      })
+    })
+  }
+
+  /// ****************************  Client Instance Methods   ************************************ ///
+
+  /// Content powered by Sanity IO Client
   content(opts?: any): SanityClient {
     const options = opts ?? this.sanityConfig
 
@@ -625,6 +640,7 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating a sanity client')
   }
 
+  /// Images powered by Imgur Client
   images(opts?: any): ImgurClient {
     const options = opts ?? this.imgurConfig
     if (isImgurCredentials(options)) {
@@ -634,6 +650,7 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating an imgur client')
   }
 
+  /// Discussions powered by RedditClient
   discussions(opts?: any): RedditClient {
     const options = opts ?? this.redditConfig
     if (isRedditCredentials(options)) {
@@ -643,6 +660,7 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating an imgur client')
   }
 
+  /// Mentions powered by TwitterClient
   mentions(opts: any): TwitterClient {
     const options = opts ?? this.twitterConfig
     if (isTwitterCredentials(options)) {
@@ -652,6 +670,7 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating an twitter client')
   }
 
+  /// Mentions powered by InstagramClient
   // shares(options: any = {}): InstagramClient {
   //   if (isInstagramCredentials(options)) {
   //     return new InstagramClient(options)
@@ -660,10 +679,11 @@ export class BikeTagClient extends EventEmitter {
   //   throw new Error('options are invalid for creating an instagram client')
   // }
 
-  data(): BikeTagClient {
-    /// TODO: return gun.js
-    return this
-  }
+  /// Data provided by Gun Client
+  // data(): Gun<BikeTagState> {
+  //   /// TODO: return gun.js
+  //   return this.biketagClient
+  // }
 }
 
 export type { BikeTagCredentials, BikeTagConfiguration }
