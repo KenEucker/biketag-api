@@ -1,0 +1,8 @@
+# ignore everything
+*
+
+# except these files
+!_config.yml
+!browser.js
+!index.html
+!.gitignore

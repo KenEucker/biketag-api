@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="utf-8">
-
+  <meta name="referrer" content="no-referrer" />
+  
   <!-- Production BikeTag Client -->
   <script src="https://cdn.jsdelivr.net/npm/biketag/biketag.js"></script>
 
@@ -234,16 +235,23 @@
   </div>
 
   <!-- BikeTag Browser Code -->
-  <script src="browser.js"></script>
+  <script src="/browser.js"></script>
   <script>
     /// Configure BikeTag API Opts
     const options = {
       imgur: {
-        clientId: "4fa12c6ce36984b",
+        clientId: "IMGUR_CLIENT_ID",
+        clientSecret: "IMGUR_CLIENT_SECRET",
       },
       sanity: {
-        projectId: "x37ikhvs",
-        dataset: "production",
+        projectId: "SANITY_PROJECT_ID",
+        dataset: "SANITY_DATASET",
+      },
+      reddit: {
+        clientId: "REDDIT_CLIENT_ID",
+        clientSecret: "REDDIT_CLIENT_SECRET",
+        username: "REDDIT_USERNAME",
+        password: "REDDIT_PASSWORD",
       },
     }
 
