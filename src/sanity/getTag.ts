@@ -1,5 +1,5 @@
 import { SanityClient } from '@sanity/client'
-import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import {
   constructTagFromSanityObject,
   constructSanityFieldsQuery,
@@ -10,7 +10,7 @@ import { getTagPayload } from '../common/payloads'
 export async function getTag(
   client: SanityClient,
   options: getTagPayload
-): Promise<BikeTagApiResponse<TagData>> {
+): Promise<BikeTagApiResponse<Tag>> {
   if (!options) {
     throw new Error('no options')
   }
@@ -63,6 +63,6 @@ export async function getTag(
     }
 
     // return BikeTagApiResponse
-    return response as BikeTagApiResponse<TagData>
+    return response as BikeTagApiResponse<Tag>
   })
 }

@@ -1,13 +1,13 @@
 import TwitterClient from 'twitter-v2'
 import { getTagsPayload } from '../common/payloads'
-import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import { getBikeTagFromTwitterPost } from './helpers'
 
 export async function getTags(
   client: TwitterClient,
   options: getTagsPayload
-): Promise<BikeTagApiResponse<TagData[]>> {
-  const tagsData: TagData[] = []
+): Promise<BikeTagApiResponse<Tag[]>> {
+  const tagsData: Tag[] = []
   // let fetching = true
   const tenYearsAgo = new Date()
   // const nowYearsAgo = new Date()

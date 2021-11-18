@@ -1,5 +1,5 @@
 import RedditClient from 'snoowrap'
-import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import { getTagsPayload } from '../common/payloads'
 import {
   getBikeTagInformationFromRedditData,
@@ -9,7 +9,7 @@ import {
 export async function getTags(
   client: RedditClient,
   options: getTagsPayload
-): Promise<BikeTagApiResponse<TagData[]>> {
+): Promise<BikeTagApiResponse<Tag[]>> {
   if (!options) {
     throw new Error('no options')
   }
@@ -35,7 +35,7 @@ export async function getTags(
         redditPosts,
         this.images
       )
-      const bikeTags: TagData[] = []
+      const bikeTags: Tag[] = []
 
       for (const biketagPost of redditBikeTagData) {
         bikeTags.push(
@@ -50,6 +50,6 @@ export async function getTags(
         source: AvailableApis[AvailableApis.reddit],
       }
 
-      return response as BikeTagApiResponse<TagData[]>
+      return response as BikeTagApiResponse<Tag[]>
     })
 }

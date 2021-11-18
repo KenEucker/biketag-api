@@ -3,7 +3,7 @@ import {
   AvailableApis,
   BikeTagApiResponse,
   ImgurImage,
-  TagData,
+  Tag,
 } from '../common/types'
 import {
   getBikeTagNumberFromImage,
@@ -14,7 +14,7 @@ import {
 export async function getTag(
   client: ImgurClient,
   options: any
-): Promise<BikeTagApiResponse<TagData>> {
+): Promise<BikeTagApiResponse<Tag>> {
   if (!options.hash) {
     throw new Error('no Imgur album hash set')
   }
@@ -52,7 +52,7 @@ export async function getTag(
     groupedImages[tagnumber].push(image)
   })
 
-  const tagsData: TagData[] = []
+  const tagsData: Tag[] = []
   groupedImages.forEach((images) => {
     tagsData.push(getBikeTagFromImgurImageSet(images[0], images[1], options))
   })
@@ -62,5 +62,5 @@ export async function getTag(
     success: !!tagsData.length,
     source: AvailableApis[AvailableApis.imgur],
     status: 200,
-  } as BikeTagApiResponse<TagData>
+  } as BikeTagApiResponse<Tag>
 }

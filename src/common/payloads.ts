@@ -1,4 +1,4 @@
-import { Game, RequireAtLeastOne, TagData } from './types'
+import { Game, RequireAtLeastOne, Tag } from './types'
 
 export type getTagsPayload = {
   fields?: string[]
@@ -21,7 +21,7 @@ export type deleteTagPayload = {
 export type deleteTagsPayload = {
   slugs?: string[]
   tagnumbers: number[]
-  tags?: Partial<TagData>[]
+  tags?: Partial<Tag>[]
   game: string
 }
 
@@ -38,7 +38,7 @@ export type getTagPayload = {
 }
 
 export type updateTagPayload = {
-  tag: RequireAtLeastOne<TagData>
+  tag: RequireAtLeastOne<Tag>
   game: string
 }
 
@@ -56,7 +56,7 @@ export type getGamePayload = {
 }
 
 export type importTagPayload = Pick<
-  TagData,
+  Tag,
   | 'discussionUrl'
   | 'mysteryImageUrl'
   | 'foundImageUrl'

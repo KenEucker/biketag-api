@@ -1,4 +1,4 @@
-import { geopoint, TagData } from './types'
+import { geopoint, Tag } from './types'
 import {
   getTagnumberFromSlugRegex,
   getTagNumbersFromTextRegex,
@@ -425,21 +425,21 @@ export const getSanityImageUrlHashFromText = (
 }
 
 export const getImgurFoundImageHashFromBikeTagData = (
-  tag: TagData,
+  tag: Tag,
   cache?: typeof TinyCache
 ): string => {
   return getImageHashFromText(tag.foundImageUrl, cache)
 }
 
 export const getImgurFoundDescriptionFromBikeTagData = (
-  tag: TagData,
+  tag: Tag,
   cache?: typeof TinyCache
 ): string =>
   `#${tag.tagnumber} proof${
     tag.foundLocation ? ` found at (${tag.foundLocation})` : ''
   } by ${tag.player}`
 export const getImgurFoundTitleFromBikeTagData = (
-  tag: TagData,
+  tag: Tag,
   cache?: typeof TinyCache
 ): string =>
   `${
@@ -449,13 +449,13 @@ export const getImgurFoundTitleFromBikeTagData = (
   }`
 
 export const getImgurMysteryImageHashFromBikeTagData = (
-  tag: TagData,
+  tag: Tag,
   cache?: typeof TinyCache
 ): string => {
   return getImageHashFromText(tag.mysteryImageUrl, cache)
 }
 export const getImgurMysteryTitleFromBikeTagData = (
-  tag: TagData,
+  tag: Tag,
   cache?: typeof TinyCache
 ): string =>
   `${
@@ -465,7 +465,7 @@ export const getImgurMysteryTitleFromBikeTagData = (
   } ${tag.discussionUrl ? `{${tag.discussionUrl}}` : ''}`
 
 export const getImgurMysteryDescriptionFromBikeTagData = (
-  tag: TagData,
+  tag: Tag,
   cache?: typeof TinyCache
 ): string =>
   `#${tag.tagnumber} tag (hint: ${tag.hint ? tag.hint : ''} ) by ${tag.player}`

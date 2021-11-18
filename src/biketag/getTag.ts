@@ -1,8 +1,8 @@
-import { BikeTagApiResponse, TagData } from '../common/types'
+import { BikeTagApiResponse, Tag } from '../common/types'
 
 export async function getTag(
   client: any,
   imageHash: string
-): Promise<BikeTagApiResponse<TagData>> {
+): Promise<BikeTagApiResponse<Tag>> {
   throw 'not implemented'
 }

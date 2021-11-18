@@ -1,6 +1,6 @@
-import { TagData, GameData } from './types'
+import { Tag, GameData } from './types'
 
-export const createTag = (tagData: any = {}): TagData => {
+export const createTag = (tagData: any = {}): Tag => {
   return {
     tagnumber: tagData.tagnumber ?? 'latest',
     mysteryImage: tagData.mysteryImage,
@@ -17,7 +17,7 @@ export const createTag = (tagData: any = {}): TagData => {
     foundImageUrl: tagData.foundImageUrl ?? '',
     _id: tagData._id,
     _type: tagData._type,
-  } as TagData
+  } as Tag
 }
 
 export const tagDataFields = Object.keys(createTag())

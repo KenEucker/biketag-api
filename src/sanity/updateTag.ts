@@ -1,12 +1,12 @@
 import { SanityClient } from '@sanity/client'
 import { constructSanityObjectFromTag } from './helpers'
-import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 export interface SanityUploadPayload {
   _id: string
   _type: string
   slug: string
 }
-export type UpdateTagPayload = Partial<TagData> & SanityUploadPayload
+export type UpdateTagPayload = Partial<Tag> & SanityUploadPayload
 
 function isValidUpdatePayload(utp: UpdateTagPayload) {
   return (

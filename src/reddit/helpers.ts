@@ -1,5 +1,5 @@
 import { createTag } from '../common/data'
-import { TagData } from '../common/types'
+import { Tag } from '../common/types'
 import { Submission } from 'snoowrap/dist/snoowrap.d'
 import {
   getCreditFromText,
@@ -231,7 +231,7 @@ export async function getBikeTagsFromRedditPosts(
 export async function getBikeTagInformationFromRedditData(
   redditPostData: any,
   game?: string
-): Promise<TagData> {
+): Promise<Tag> {
   if (!redditPostData.tagNumbers) {
     /// TODO: handle a link that is an image gallery and has only one tag number attached
     redditPostData.tagNumbers = [redditPostData.tagNumber]
@@ -251,7 +251,7 @@ export async function getBikeTagInformationFromRedditData(
       : null
   const gps = redditPostData.gps
 
-  const tagData: Partial<TagData> = {
+  const tagData: Partial<Tag> = {
     foundLocation: redditPostData.foundAt,
     player: redditPostData.credit,
     hint: redditPostData.hint,

@@ -1,4 +1,4 @@
-import { TagData } from '../common/types'
+import { Tag } from '../common/types'
 import {
   getDiscussionUrlFromText,
   getFoundLocationFromText,
@@ -59,7 +59,7 @@ export function getBikeTagFromTwitterPost(
   post: any,
   game = '',
   media: any[] = []
-): TagData {
+): Tag {
   const { text } = post
   const tagnumbers = getTagNumbersFromText(text)
   const name = constructTagNumberSlug(tagnumbers[0], game)
@@ -86,7 +86,7 @@ export function getBikeTagFromTwitterPost(
       ? player.substring(0, trailingPeriod)
       : player
 
-  const tagData: TagData = {
+  const tagData: Tag = {
     tagnumber: (tagnumbers as []).length ? tagnumbers[0] : 0,
     name,
     slug: name,

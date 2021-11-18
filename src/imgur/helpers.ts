@@ -1,5 +1,5 @@
 import * as expressions from '../common/expressions'
-import { ImgurImage, TagData } from '../common/types'
+import { ImgurImage, Tag } from '../common/types'
 import { getCreditFromText, getImageHashFromText } from '../common/getters'
 import { cacheKeys } from '../common/data'
 
@@ -270,12 +270,12 @@ export function getBikeTagFromImgurImageSet(
   mysteryImage: ImgurImage,
   foundImage?: ImgurImage,
   opts?: any
-): TagData {
+): Tag {
   const game = opts?.game || ''
   const tagnumber = getTagNumbersFromText(mysteryImage.description)[0] as number
   const name = constructTagNumberSlug(tagnumber, game)
 
-  const tagData: TagData = {
+  const tagData: Tag = {
     tagnumber,
     name,
     slug: name,

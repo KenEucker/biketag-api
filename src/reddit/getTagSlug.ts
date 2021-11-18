@@ -1,10 +1,10 @@
 // import { SanityClient } from '@sanity/client';
-import { BikeTagApiResponse, TagData } from '../common/types'
+import { BikeTagApiResponse, Tag } from '../common/types'
 
-export async function getTagSlug(): Promise<BikeTagApiResponse<TagData>> {
+export async function getTagSlug(): Promise<BikeTagApiResponse<Tag>> {
   // client: SanityClient,
   // game: string,
   // tagnumber?: number,
   // slug?: string,
-  return {} as BikeTagApiResponse<TagData>
+  return {} as BikeTagApiResponse<Tag>
 }

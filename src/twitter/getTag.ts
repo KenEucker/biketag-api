@@ -1,13 +1,13 @@
 import TwitterClient from 'twitter-v2'
 import { getTagPayload } from '../common/payloads'
-import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import { getBikeTagFromTwitterPost } from './helpers'
 
 export async function getTag(
   client: TwitterClient,
   options: getTagPayload
-): Promise<BikeTagApiResponse<TagData[]>> {
-  const tagsData: TagData[] = []
+): Promise<BikeTagApiResponse<Tag[]>> {
+  const tagsData: Tag[] = []
 
   const data: any = await client.get(
     `tweets/search/recent?expansions=attachments.media_keys&media.fields=preview_image_url,url`,
