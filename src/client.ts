@@ -664,7 +664,9 @@ export class BikeTagClient extends EventEmitter {
 
     if (isBikeTagCredentials(options)) {
       if (options.game) {
-        return this.biketagClient.get(options.game) as unknown as BikeTagGunClient
+        return this.biketagClient.get(
+          options.game
+        ) as unknown as BikeTagGunClient
       } else {
         return new Gun<BikeTagGameState>(options)
       }
