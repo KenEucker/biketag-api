@@ -1,7 +1,7 @@
 import {
   getGameAsync,
   getTagAsync,
-  getLatestTagAsync,
+  getCurrentTagAsync,
   getTagsAsync,
   getTag1Async,
   bikeTagSanityInstance,
@@ -34,7 +34,7 @@ if (bikeTagSanityInstance) {
   })
 
   test('BikeTagClient sanity instance can retrieve latest tag data', async () => {
-    const testTagData = await getLatestTagAsync(bikeTagSanityInstance)
+    const testTagData = await getCurrentTagAsync(bikeTagSanityInstance)
 
     expect(testTagData).toMatchSnapshot()
   })
@@ -60,7 +60,7 @@ if (bikeTagImgurInstance) {
   })
 
   test('BikeTagClient imgur instance can retrieve latest tag data', async () => {
-    const testTagData = await getLatestTagAsync(bikeTagImgurInstance)
+    const testTagData = await getCurrentTagAsync(bikeTagImgurInstance)
 
     expect(testTagData).toMatchSnapshot()
   })
@@ -90,7 +90,7 @@ if (bikeTagRedditInstance) {
   })
 
   test('BikeTagClient reddit instance can retrieve latest tag data', async () => {
-    const testTagData = await getLatestTagAsync(bikeTagRedditInstance, false, {
+    const testTagData = await getCurrentTagAsync(bikeTagRedditInstance, false, {
       source: 'reddit',
     })
 
@@ -119,7 +119,7 @@ if (bikeTagTwitterInstance) {
   })
 
   test('BikeTagClient twitter instance can retrieve latest tag data', async () => {
-    const testTagData = await getLatestTagAsync(bikeTagTwitterInstance)
+    const testTagData = await getCurrentTagAsync(bikeTagTwitterInstance)
 
     expect(testTagData).toMatchSnapshot()
   })

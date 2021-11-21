@@ -468,6 +468,15 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
+  /// ****************************  Queue Methods   **************************************** ///
+  getQueue(): void {
+    throw 'not implemented'
+  }
+
+  queueTagImage(): void {
+    throw 'not implemented'
+  }
+
   /// ****************************  Tag Data Methods   ************************************ ///
 
   getTag(
@@ -652,9 +661,17 @@ export class BikeTagClient extends EventEmitter {
   /// Data provided by Gun Client
   data(opts: any = {}): BikeTagGunClient {
     const options = opts ?? this.biketagConfig
+
     if (isBikeTagCredentials(options)) {
-      return this.biketagClient
+      if (options.game) {
+        return this.biketagClient.get(options.game) as unknown as BikeTagGunClient
+      } else {
+        return new Gun<BikeTagGameState>(options)
+      }
     }
+
+    /// Always return a valid gun client, because we can
+    return new Gun<BikeTagGameState>(options)
   }
 
   /// Content powered by Sanity IO Client
@@ -682,6 +699,7 @@ export class BikeTagClient extends EventEmitter {
   discussions(opts: any = {}): RedditClient {
     const options = opts ?? this.redditConfig
     if (isRedditCredentials(options)) {
+      /// TODO: Always return the context of a given game subreddit?
       return new RedditClient(options)
     }
 

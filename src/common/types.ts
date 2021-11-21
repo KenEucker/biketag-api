@@ -92,7 +92,11 @@ export interface ClientKey {
   clientToken: string
 }
 
-export type BikeTagCredentials = ClientKey & AccessToken & CommonData
+export interface ClientPeers {
+  peers: string[]
+}
+
+export type BikeTagCredentials = ClientPeers & ClientKey & AccessToken & CommonData 
 
 export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
