@@ -80,7 +80,7 @@ export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
   password: string
 }
 
-export interface Game {
+export interface CommonData {
   game: string
   source?: AvailableApis | string
 }
@@ -92,7 +92,7 @@ export interface ClientKey {
   clientToken: string
 }
 
-export type BikeTagCredentials = ClientKey & AccessToken & Game
+export type BikeTagCredentials = ClientKey & AccessToken & CommonData
 
 export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
@@ -177,7 +177,7 @@ export interface Tag {
   foundImageUrl: string
 }
 
-export interface GameData {
+export interface Game {
   name: string
   ambassadors: Ambassador[]
   boundary: boundary
@@ -205,13 +205,29 @@ export type PartialBikeTagConfiguration = RequireAtLeastOne<{
   twitter: Partial<TwitterCredentials>
 }>
 
-export interface BikeTagState {
-  tags: Tag[]
-  players: Player[]
-  ambassadors: Ambassador[]
-  games: Game[]
-  settings: Setting[]
-  regions: Region[]
+export interface Tags {
+  [key: string]: Tag
 }
 
-export type BikTagGunClient = IGunChainReference<BikeTagState>
+export interface Players {
+  [key: string]: Player
+}
+
+export interface Settings {
+  [key: string]: Setting
+}
+
+export type BikeTagGame = {
+  game: Game
+  currentTagNumber: number
+  players: Players
+  tags: Tags
+  queue: Tags
+  settings: Settings
+}
+
+export interface BikeTagGameState {
+  [key: string]: BikeTagGame
+}
+
+export type BikeTagGunClient = IGunChainReference<BikeTagGameState>

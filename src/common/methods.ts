@@ -14,7 +14,7 @@ import {
   BikeTagCredentials,
   Payload,
   BikeTagConfiguration,
-  Game,
+  CommonData,
   TwitterCredentials,
 } from './types'
 import FormData from 'form-data'
@@ -174,7 +174,7 @@ export const isBikeTagCredentials = (
   credentials: BikeTagCredentials | Credentials
 ): boolean => {
   return (
-    (credentials as Game)?.game !== undefined ||
+    (credentials as CommonData)?.game !== undefined ||
     ((credentials as ClientKey)?.clientToken !== undefined &&
       (credentials as ClientKey)?.clientKey !== undefined)
   )

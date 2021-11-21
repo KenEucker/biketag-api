@@ -1,5 +1,6 @@
 import { SanityClient } from '@sanity/client'
 import { deleteTagsPayload } from '../common/payloads'
+import { HttpStatusCode } from '../common/responses'
 import { AvailableApis, BikeTagApiResponse } from '../common/types'
 
 export async function deleteTags(
@@ -21,7 +22,7 @@ export async function deleteTags(
       return {
         data: null,
         success: false,
-        status: 0,
+        status: HttpStatusCode.NotAcceptable,
         source: AvailableApis[AvailableApis.sanity],
       }
     }
@@ -32,7 +33,7 @@ export async function deleteTags(
     return {
       data: result,
       success: true,
-      status: 1,
+      status: HttpStatusCode.Ok,
       source: AvailableApis[AvailableApis.sanity],
     }
   })

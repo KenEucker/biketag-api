@@ -5,30 +5,31 @@ import {
   getBikeTagInformationFromRedditData,
   getBikeTagsFromRedditPosts,
 } from './helpers'
+import { HttpStatusCode } from '../common/responses'
 
 export async function getTag(
   client: RedditClient,
-  options: getTagPayload
+  payload: getTagPayload
 ): Promise<BikeTagApiResponse<Tag | undefined>> {
-  if (!options) {
+  if (!payload) {
     throw new Error('no options')
   }
 
-  if (!options.subreddit) {
+  if (!payload.subreddit) {
     throw new Error('no subreddit set')
   }
 
-  const query = `subreddit:${options.subreddit} title:Bike Tag ${
-    options.tagnumber ?? ''
+  const query = `subreddit:${payload.subreddit} title:Bike Tag ${
+    payload.tagnumber ?? ''
   }`
 
-  options.sort = options.sort ?? 'new'
-  options.limit = 1
-  options.time = options.time ?? 'all'
+  payload.sort = payload.sort ?? 'new'
+  payload.limit = 1
+  payload.time = payload.time ?? 'all'
 
   return client
-    .getSubreddit(options.subreddit)
-    .search({ query, ...options })
+    .getSubreddit(payload.subreddit)
+    .search({ query, ...payload })
     .then(async (redditPosts) => {
       const redditBikeTagData: Tag[] = await getBikeTagsFromRedditPosts(
         redditPosts,
@@ -38,9 +39,9 @@ export async function getTag(
       const response = {
         data: await getBikeTagInformationFromRedditData(
           redditBikeTagData[0],
-          options.game
+          payload.game
         ),
-        status: 1,
+        status: HttpStatusCode.Found,
         success: true,
         source: AvailableApis[AvailableApis.reddit],
       }

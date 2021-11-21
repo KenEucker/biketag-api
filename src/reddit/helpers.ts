@@ -1,4 +1,4 @@
-import { createTag } from '../common/data'
+import { createTagObject } from '../common/data'
 import { Tag } from '../common/types'
 import { Submission } from 'snoowrap/dist/snoowrap.d'
 import {
@@ -263,5 +263,5 @@ export async function getBikeTagInformationFromRedditData(
     foundImageUrl: proofTagURL,
   }
 
-  return createTag(tagData)
+  return createTagObject(tagData)
 }

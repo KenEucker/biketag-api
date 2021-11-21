@@ -1,4 +1,5 @@
 import type { ImgurClient } from 'imgur'
+import { HttpStatusCode } from '../common/responses'
 import {
   AvailableApis,
   BikeTagApiResponse,
@@ -28,7 +29,7 @@ export async function getTag(
     )
   } else if (
     !options.tagnumber &&
-    options.slug === 'latest' &&
+    options.slug === 'current' &&
     albumInfo.data?.images?.length > 1
   ) {
     const sortedImages = sortImgurImagesByTagNumber(albumInfo.data.images)
@@ -61,6 +62,6 @@ export async function getTag(
     data: tagsData[0],
     success: !!tagsData.length,
     source: AvailableApis[AvailableApis.imgur],
-    status: 200,
+    status: HttpStatusCode.Found,
   } as BikeTagApiResponse<Tag>
 }

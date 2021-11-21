@@ -1,11 +1,12 @@
 import TwitterClient from 'twitter-v2'
 import { getTagsPayload } from '../common/payloads'
+import { HttpStatusCode } from '../common/responses'
 import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import { getBikeTagFromTwitterPost } from './helpers'
 
 export async function getTags(
   client: TwitterClient,
-  options: getTagsPayload
+  payload: getTagsPayload
 ): Promise<BikeTagApiResponse<Tag[]>> {
   const tagsData: Tag[] = []
   // let fetching = true
@@ -16,7 +17,7 @@ export async function getTags(
   const data: any = await client.get(
     `tweets/search/recent?expansions=attachments.media_keys&media.fields=preview_image_url,url`,
     {
-      query: `from: ${options.account}`,
+      query: `from: ${payload.account}`,
       // start_time: nowYearsAgo.toISOString(),
       // end_time: tenYearsAgo.toISOString(),
       max_results: '100',
@@ -27,7 +28,7 @@ export async function getTags(
     console.log('count:', data.data.length, data)
     for (const datum of data.data) {
       tagsData.push(
-        getBikeTagFromTwitterPost(datum, options.game, data.includes?.media)
+        getBikeTagFromTwitterPost(datum, payload.game, data.includes?.media)
       )
     }
     // } else {
@@ -39,6 +40,6 @@ export async function getTags(
     data: tagsData,
     success: true,
     source: AvailableApis[AvailableApis.twitter],
-    status: 200,
+    status: HttpStatusCode.Ok,
   }
 }

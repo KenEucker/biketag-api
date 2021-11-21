@@ -9,7 +9,8 @@ import {
   getImgurMysteryImageHashFromBikeTagData,
   getImageHashFromText,
 } from '../common/getters'
-import { createTag } from '../common/data'
+import { createTagObject } from '../common/data'
+import { HttpStatusCode } from '../common/responses'
 
 export interface ImgurUploadPayload {
   imageHash: string
@@ -116,10 +117,10 @@ export async function updateTag(
       }
 
       resolve({
-        data: createTag(utp),
+        data: createTagObject(utp),
         success,
         source: AvailableApis[AvailableApis.imgur],
-        status: 200,
+        status: HttpStatusCode.Ok,
       })
     })
   }
@@ -135,7 +136,7 @@ export async function updateTag(
         data: e.message,
         success: false,
         source: AvailableApis[AvailableApis.imgur],
-        status: 200,
+        status: HttpStatusCode.Ok,
       }
     })
 }

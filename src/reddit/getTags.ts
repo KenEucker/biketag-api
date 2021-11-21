@@ -5,25 +5,26 @@ import {
   getBikeTagInformationFromRedditData,
   getBikeTagsFromRedditPosts,
 } from './helpers'
+import { HttpStatusCode } from '../common/responses'
 
 export async function getTags(
   client: RedditClient,
-  options: getTagsPayload
+  payload: getTagsPayload
 ): Promise<BikeTagApiResponse<Tag[]>> {
-  if (!options) {
+  if (!payload) {
     throw new Error('no options')
   }
 
-  const query = `subreddit:${options.subreddit} title:Bike Tag`
+  const query = `subreddit:${payload.subreddit} title:Bike Tag`
   const maxPerRequest = 500
 
-  options.sort = options.sort ?? 'new'
-  options.limit = options.limit ?? maxPerRequest
-  options.time = options.time ?? 'all'
+  payload.sort = payload.sort ?? 'new'
+  payload.limit = payload.limit ?? maxPerRequest
+  payload.time = payload.time ?? 'all'
 
   return client
-    .getSubreddit(options.subreddit)
-    .search({ query, ...options })
+    .getSubreddit(payload.subreddit)
+    .search({ query, ...payload })
     .then(async (redditPosts) => {
       let fetcher = redditPosts
       while (!fetcher.isFinished) {
@@ -39,13 +40,13 @@ export async function getTags(
 
       for (const biketagPost of redditBikeTagData) {
         bikeTags.push(
-          await getBikeTagInformationFromRedditData(biketagPost, options.game)
+          await getBikeTagInformationFromRedditData(biketagPost, payload.game)
         )
       }
 
       const response = {
         data: bikeTags,
-        status: 1,
+        status: HttpStatusCode.Ok,
         success: true,
         source: AvailableApis[AvailableApis.reddit],
       }

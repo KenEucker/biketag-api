@@ -1,8 +1,8 @@
-import { Tag, GameData } from './types'
+import { Tag, Game } from './types'
 
-export const createTag = (tagData: any = {}): Tag => {
+export const createTagObject = (tagData: any = {}): Tag => {
   return {
-    tagnumber: tagData.tagnumber ?? 'latest',
+    tagnumber: tagData.tagnumber ?? 'current',
     mysteryImage: tagData.mysteryImage,
     mysteryImageUrl: tagData.mysteryImageUrl ?? '',
     game: tagData.game ?? '',
@@ -20,7 +20,7 @@ export const createTag = (tagData: any = {}): Tag => {
   } as Tag
 }
 
-export const tagDataFields = Object.keys(createTag())
+export const tagDataFields = Object.keys(createTagObject())
 
 export const tagDataReferenceFields = ['game', 'player']
 
@@ -31,7 +31,7 @@ export const tagDataObjectFields = {
   mysteryImage: 'asset->_ref',
 }
 
-export const createGame = (gameData: any = {}): GameData => {
+export const createGameObject = (gameData: any = {}): Game => {
   return {
     name: gameData.name ?? '',
     ambassadors: gameData.ambassadors ?? [],
@@ -42,13 +42,13 @@ export const createGame = (gameData: any = {}): GameData => {
     logo: gameData.logo,
     region: gameData.region ?? '',
     slug: gameData.slug ?? '',
-  } as GameData
+  } as Game
 }
 
 export const gameDataReferenceFields = ['region']
 export const gameDataArrayFields = ['ambassadors', 'tags']
 
-export const gameDataFields = Object.keys(createGame())
+export const gameDataFields = Object.keys(createGameObject())
 
 export const gameDataAssetFields = ['logo']
 export const gameDataObjectFields = {

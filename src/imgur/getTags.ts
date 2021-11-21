@@ -1,4 +1,5 @@
 import type { ImgurClient } from 'imgur'
+import { HttpStatusCode } from '../common/responses'
 import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import {
   getBikeTagNumberFromImage,
@@ -64,6 +65,6 @@ export async function getTags(
     data: tagsData,
     success: true,
     source: AvailableApis[AvailableApis.imgur],
-    status: 200,
+    status: HttpStatusCode.Ok,
   }
 }

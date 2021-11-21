@@ -6,29 +6,30 @@ import {
 } from './helpers'
 import { tagDataFields } from '../common/data'
 import { getTagsPayload } from '../common/payloads'
+import { HttpStatusCode } from '../common/responses'
 
 export async function getTags(
   client: SanityClient,
-  options: getTagsPayload
+  payload: getTagsPayload
 ): Promise<BikeTagApiResponse<Tag[]>> {
-  if (!options) {
+  if (!payload) {
     throw new Error('no options')
   }
 
   let slugs = ''
   let tagnumbers = ''
 
-  if (options.slugs?.length) {
-    slugs = `&& slug.current in ${JSON.stringify(options.slugs)}`
+  if (payload.slugs?.length) {
+    slugs = `&& slug.current in ${JSON.stringify(payload.slugs)}`
   }
 
-  if (options.tagnumbers?.length) {
-    tagnumbers = `&& tagnumber in ${JSON.stringify(options.tagnumbers)}`
+  if (payload.tagnumbers?.length) {
+    tagnumbers = `&& tagnumber in ${JSON.stringify(payload.tagnumbers)}`
   }
 
-  const fieldsFilter = options.fields?.length ? options.fields : tagDataFields
+  const fieldsFilter = payload.fields?.length ? payload.fields : tagDataFields
   const fields = constructSanityFieldsQuery(fieldsFilter)
-  const query = `*[_type == "tag" && game._ref in *[_type=="game" && lower(name)=="${options.game.toLowerCase()}"]._id ${slugs} ${tagnumbers}]{${fields}}`
+  const query = `*[_type == "tag" && game._ref in *[_type=="game" && lower(name)=="${payload.game.toLowerCase()}"]._id ${slugs} ${tagnumbers}]{${fields}}`
   const params = {}
 
   return client.fetch(query, params).then((tags) => {
@@ -38,7 +39,7 @@ export async function getTags(
 
     const response = {
       data: tagsData,
-      status: 1,
+      status: HttpStatusCode.Found,
       success: true,
       source: AvailableApis[AvailableApis.sanity],
     }

@@ -1,4 +1,4 @@
-import { Game, RequireAtLeastOne, Tag } from './types'
+import { CommonData, RequireAtLeastOne, Tag } from './types'
 
 export type getTagsPayload = {
   fields?: string[]
@@ -63,4 +63,6 @@ export type importTagPayload = Pick<
   | 'mentionUrl'
   | 'shareUrl'
 > &
-  Game
+  CommonData
+
+export type getQueuePayload = CommonData
