@@ -1,5 +1,6 @@
 import ImgurClient from 'imgur'
 import { deleteTagsPayload } from '../common/payloads'
+import { HttpStatusCode } from '../common/responses'
 import { AvailableApis, BikeTagApiResponse, ImgurImage } from '../common/types'
 import { getImageHashFromImgurImage } from './helpers'
 
@@ -39,6 +40,6 @@ export async function deleteTag(
     data: responses,
     success: true,
     source: AvailableApis[AvailableApis.imgur],
-    status: 200,
+    status: HttpStatusCode.Ok,
   } as BikeTagApiResponse<any>
 }

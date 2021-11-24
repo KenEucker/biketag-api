@@ -29,9 +29,9 @@
         })
 
         const tags = await biketagAPI.getTag(undefined, {source: 'imgur'})
-        const latestTag = await biketagAPI.getTags()
+        const currentTag = await biketagAPI.getTags()
 
-        console.log({tags, latestTag})
+        console.log({tags, currentTag})
 
         const config = biketagAPI.config()
         document.getElementById('data').innerHTML = JSON.stringify(config)

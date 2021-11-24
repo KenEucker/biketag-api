@@ -1,7 +1,8 @@
 import { SanityClient } from '@sanity/client'
-import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import { uploadTagImagePayload } from '../common/payloads'
 import { constructSanityObjectFromTag } from './helpers'
+import { HttpStatusCode } from '../common/responses'
 
 export async function uploadTagImage(
   client: SanityClient,
@@ -18,7 +19,7 @@ export async function uploadTagImage(
     const updateTag = {
       tagnumber: uploadPayload.tagnumber,
       slug: uploadPayload.slug,
-    } as TagData
+    } as Tag
     switch (uploadPayload.type) {
       case 'found':
         updateTag.foundImage = uploadResponse._id
@@ -38,7 +39,7 @@ export async function uploadTagImage(
 
   return {
     success: true,
-    status: 1,
+    status: HttpStatusCode.Created,
     source: AvailableApis[AvailableApis.sanity],
     data: uploadResponses,
   }

@@ -1,23 +1,22 @@
-import { updateTagPayload } from '../common/payloads'
+import { getQueuePayload } from '../common/payloads'
 import { HttpStatusCode } from '../common/responses'
 import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import { BikeTagGunClient } from '../common/types'
 
-export async function updateTag(
+export async function getQueue(
   client: BikeTagGunClient,
-  payload: updateTagPayload
-): Promise<BikeTagApiResponse<Tag>> {
-  const tag: Tag = await new Promise((r) => {
+  payload: getQueuePayload
+): Promise<BikeTagApiResponse<Tag[]>> {
+  const tags: Tag[] = await new Promise((r) => {
     return client
       .get(payload.game)
-      .get('tags')
-      .get(payload.tag.slug)
-      .put(payload.tag)
-      .once((t) => r(t as unknown as Tag))
+      .get('queue')
+      .map()
+      .once((t) => r(Object.values(t) as unknown as Tag[]))
   })
 
   return {
-    data: tag,
+    data: tags,
     status: HttpStatusCode.Ok,
     success: true,
     source: AvailableApis[AvailableApis.biketag],

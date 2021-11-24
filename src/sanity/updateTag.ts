@@ -1,12 +1,13 @@
 import { SanityClient } from '@sanity/client'
 import { constructSanityObjectFromTag } from './helpers'
-import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
+import { HttpStatusCode } from '../common/responses'
 export interface SanityUploadPayload {
   _id: string
   _type: string
   slug: string
 }
-export type UpdateTagPayload = Partial<TagData> & SanityUploadPayload
+export type UpdateTagPayload = Partial<Tag> & SanityUploadPayload
 
 function isValidUpdatePayload(utp: UpdateTagPayload) {
   return (
@@ -33,7 +34,7 @@ export async function updateTag(
 
   return {
     success: true,
-    status: 1,
+    status: HttpStatusCode.Ok,
     source: AvailableApis[AvailableApis.sanity],
     data: successPayloads,
   }

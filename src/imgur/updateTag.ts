@@ -1,5 +1,5 @@
 import type { ImgurClient, ImgurApiResponse } from 'imgur'
-import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import {
   getImgurFoundImageHashFromBikeTagData,
   getImgurFoundDescriptionFromBikeTagData,
@@ -9,14 +9,15 @@ import {
   getImgurMysteryImageHashFromBikeTagData,
   getImageHashFromText,
 } from '../common/getters'
-import { createTag } from '../common/data'
+import { createTagObject } from '../common/data'
+import { HttpStatusCode } from '../common/responses'
 
 export interface ImgurUploadPayload {
   imageHash: string
   title: string
   description: string
 }
-export type UpdateTagPayload = Partial<TagData> & ImgurUploadPayload
+export type UpdateTagPayload = Partial<Tag> & ImgurUploadPayload
 
 function isValidUpdatePayload(utp: UpdateTagPayload) {
   return (
@@ -33,25 +34,25 @@ export function getUpdateTagPayloadFromTagData(
 ): UpdateTagPayload {
   return {
     imageHash: mystery
-      ? getImgurMysteryImageHashFromBikeTagData(tagData as TagData)
-      : getImgurFoundImageHashFromBikeTagData(tagData as TagData),
+      ? getImgurMysteryImageHashFromBikeTagData(tagData as Tag)
+      : getImgurFoundImageHashFromBikeTagData(tagData as Tag),
     title: mystery
-      ? getImgurMysteryTitleFromBikeTagData(tagData as TagData)
-      : getImgurFoundTitleFromBikeTagData(tagData as TagData),
+      ? getImgurMysteryTitleFromBikeTagData(tagData as Tag)
+      : getImgurFoundTitleFromBikeTagData(tagData as Tag),
     description: mystery
-      ? getImgurMysteryDescriptionFromBikeTagData(tagData as TagData)
-      : getImgurFoundDescriptionFromBikeTagData(tagData as TagData),
+      ? getImgurMysteryDescriptionFromBikeTagData(tagData as Tag)
+      : getImgurFoundDescriptionFromBikeTagData(tagData as Tag),
   }
 }
 
 export async function updateTag(
   client: ImgurClient,
   payload: UpdateTagPayload | UpdateTagPayload[]
-): Promise<BikeTagApiResponse<TagData> | BikeTagApiResponse<TagData>[]> {
-  const promises: Promise<BikeTagApiResponse<TagData>>[] = []
+): Promise<BikeTagApiResponse<Tag> | BikeTagApiResponse<Tag>[]> {
+  const promises: Promise<BikeTagApiResponse<Tag>>[] = []
   const payloads = Array.isArray(payload) ? payload : [payload]
 
-  const createUpdatePromise = (utp): Promise<BikeTagApiResponse<TagData>> => {
+  const createUpdatePromise = (utp): Promise<BikeTagApiResponse<Tag>> => {
     const imgurMysteryImagePayload = getUpdateTagPayloadFromTagData(utp)
     const imgurFoundImagePayload = getUpdateTagPayloadFromTagData(utp, false)
 
@@ -116,10 +117,10 @@ export async function updateTag(
       }
 
       resolve({
-        data: createTag(utp),
+        data: createTagObject(utp),
         success,
         source: AvailableApis[AvailableApis.imgur],
-        status: 200,
+        status: HttpStatusCode.Ok,
       })
     })
   }
@@ -135,7 +136,7 @@ export async function updateTag(
         data: e.message,
         success: false,
         source: AvailableApis[AvailableApis.imgur],
-        status: 200,
+        status: HttpStatusCode.Ok,
       }
     })
 }

@@ -1,36 +1,37 @@
 import RedditClient from 'snoowrap'
-import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import { getTagPayload } from '../common/payloads'
 import {
   getBikeTagInformationFromRedditData,
   getBikeTagsFromRedditPosts,
 } from './helpers'
+import { HttpStatusCode } from '../common/responses'
 
 export async function getTag(
   client: RedditClient,
-  options: getTagPayload
-): Promise<BikeTagApiResponse<TagData | undefined>> {
-  if (!options) {
+  payload: getTagPayload
+): Promise<BikeTagApiResponse<Tag | undefined>> {
+  if (!payload) {
     throw new Error('no options')
   }
 
-  if (!options.subreddit) {
+  if (!payload.subreddit) {
     throw new Error('no subreddit set')
   }
 
-  const query = `subreddit:${options.subreddit} title:Bike Tag ${
-    options.tagnumber ?? ''
+  const query = `subreddit:${payload.subreddit} title:Bike Tag ${
+    payload.tagnumber ?? ''
   }`
 
-  options.sort = options.sort ?? 'new'
-  options.limit = 1
-  options.time = options.time ?? 'all'
+  payload.sort = payload.sort ?? 'new'
+  payload.limit = 1
+  payload.time = payload.time ?? 'all'
 
   return client
-    .getSubreddit(options.subreddit)
-    .search({ query, ...options })
+    .getSubreddit(payload.subreddit)
+    .search({ query, ...payload })
     .then(async (redditPosts) => {
-      const redditBikeTagData: TagData[] = await getBikeTagsFromRedditPosts(
+      const redditBikeTagData: Tag[] = await getBikeTagsFromRedditPosts(
         redditPosts,
         this.images
       )
@@ -38,13 +39,13 @@ export async function getTag(
       const response = {
         data: await getBikeTagInformationFromRedditData(
           redditBikeTagData[0],
-          options.game
+          payload.game
         ),
-        status: 1,
+        status: HttpStatusCode.Found,
         success: true,
         source: AvailableApis[AvailableApis.reddit],
       }
 
-      return response as BikeTagApiResponse<TagData>
+      return response as BikeTagApiResponse<Tag>
     })
 }

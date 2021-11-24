@@ -1,6 +1,7 @@
 import {
   AccessToken,
   ClientKey,
+  ClientPeers,
   SanityAccessToken,
   ImgurAccessToken,
   ImgurClientId,
@@ -14,7 +15,7 @@ import {
   BikeTagCredentials,
   Payload,
   BikeTagConfiguration,
-  Game,
+  CommonData,
   TwitterCredentials,
 } from './types'
 import FormData from 'form-data'
@@ -174,7 +175,8 @@ export const isBikeTagCredentials = (
   credentials: BikeTagCredentials | Credentials
 ): boolean => {
   return (
-    (credentials as Game)?.game !== undefined ||
+    (credentials as CommonData)?.game !== undefined ||
+    (credentials as ClientPeers)?.peers !== undefined ||
     ((credentials as ClientKey)?.clientToken !== undefined &&
       (credentials as ClientKey)?.clientKey !== undefined)
   )
@@ -370,6 +372,7 @@ export const createBikeTagCredentials = (
   defaults: Partial<BikeTagCredentials> = {}
 ): BikeTagCredentials => {
   return {
+    peers: credentials.peers ?? defaults.peers,
     game: credentials.game ?? defaults.game,
     source: credentials.source ?? defaults.source,
     clientKey: credentials.clientKey?.length

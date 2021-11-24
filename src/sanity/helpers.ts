@@ -2,8 +2,8 @@ import { SanityClient } from '@sanity/client'
 import {
   tagDataReferenceFields,
   gameDataReferenceFields,
-  createGame,
-  createTag,
+  createGameObject,
+  createTagObject,
   tagDataFields,
   tagDataObjectFields,
   gameDataFields,
@@ -40,9 +40,9 @@ export function constructTagFromSanityObject(
     }
   })
 
-  tagData.slug = tagData.slug?.current ?? 'latest'
+  tagData.slug = tagData.slug?.current ?? 'current'
 
-  return createTag(tagData)
+  return createTagObject(tagData)
 }
 
 export function constructObjectIdFromSlug(slug: string): string {
@@ -114,7 +114,7 @@ export async function constructSanityObjectFromTag(
     current: tagData.slug?.current ?? tagData.slug,
   }
 
-  return createTag(tagData)
+  return createTagObject(tagData)
 }
 
 export function constructGameFromSanityObject(
@@ -147,7 +147,7 @@ export function constructGameFromSanityObject(
 
   gameData.slug = gameData.slug?.current ?? gameData.slug
 
-  return createGame(gameData)
+  return createGameObject(gameData)
 }
 
 export function constructSanityFieldsQuery(

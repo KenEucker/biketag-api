@@ -1,5 +1,6 @@
-import { Readable } from 'stream'
 import { ImageData } from 'imgur/lib/common/types'
+import { IGunChainReference } from 'gun/types/chain'
+export { Payload } from 'imgur/lib/common/types'
 
 export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>
@@ -79,7 +80,7 @@ export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
   password: string
 }
 
-export interface Game {
+export interface CommonData {
   game: string
   source?: AvailableApis | string
 }
@@ -91,7 +92,14 @@ export interface ClientKey {
   clientToken: string
 }
 
-export type BikeTagCredentials = ClientKey & AccessToken & Game
+export interface ClientPeers {
+  peers: string[]
+}
+
+export type BikeTagCredentials = ClientPeers &
+  ClientKey &
+  AccessToken &
+  CommonData
 
 export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
@@ -123,6 +131,14 @@ export type boundary = {
   geo: geopoint
 }
 
+export type Setting = {
+  slug: string
+  name: string
+  description: string
+  key: string
+  value: string
+}
+
 export type Region = {
   description: string
   name: string
@@ -150,11 +166,9 @@ export type Ambassador = {
   zipcode: number
 }
 
-interface CommonData {
+export interface Tag {
   slug: string
   name: string
-}
-export interface TagData extends CommonData {
   tagnumber: number
   mysteryImage?: string
   mysteryImageUrl: string
@@ -169,15 +183,8 @@ export interface TagData extends CommonData {
   foundImage?: string
   foundImageUrl: string
 }
-export interface AlbumData extends CommonData {
-  cover: string | null
-  cover_width: number | null
-  cover_height: number | null
-  images: TagData[]
-  images_count: number
-}
 
-export interface GameData {
+export interface Game {
   name: string
   ambassadors: Ambassador[]
   boundary: boundary
@@ -187,18 +194,6 @@ export interface GameData {
   logo: string
   region: Region
   slug: string
-}
-
-export interface Payload {
-  image?: string
-  base64?: string
-  type?: 'stream' | 'url' | 'base64'
-  name?: string
-  title?: string
-  description?: string
-  album?: string
-  stream?: Readable
-  disable_audio?: '1' | '0'
 }
 
 export type BikeTagConfiguration = {
@@ -217,8 +212,29 @@ export type PartialBikeTagConfiguration = RequireAtLeastOne<{
   twitter: Partial<TwitterCredentials>
 }>
 
-export type BikeTagApiWrapper = {
-  client: any
-  api: any
-  options: any
+export interface Tags {
+  [key: string]: Tag
 }
+
+export interface Players {
+  [key: string]: Player
+}
+
+export interface Settings {
+  [key: string]: Setting
+}
+
+export type BikeTagGame = {
+  game: Game
+  currentTagNumber: number
+  players: Players
+  tags: Tags
+  queue: Tags
+  settings: Settings
+}
+
+export interface BikeTagGameState {
+  [key: string]: BikeTagGame
+}
+
+export type BikeTagGunClient = IGunChainReference<BikeTagGameState>

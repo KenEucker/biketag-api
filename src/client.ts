@@ -3,8 +3,8 @@ import { EventEmitter } from 'events'
 import { BIKETAG_API_PREFIX } from './common/endpoints'
 import {
   Credentials,
-  TagData,
-  GameData,
+  Tag,
+  Game,
   BikeTagApiResponse,
   ImgurCredentials,
   SanityCredentials,
@@ -15,6 +15,8 @@ import {
   PartialBikeTagConfiguration,
   AvailableApis,
   TwitterCredentials,
+  BikeTagGunClient,
+  BikeTagGameState,
 } from './common/types'
 import {
   getTagPayload,
@@ -59,6 +61,8 @@ import RedditClient from 'snoowrap'
 import ImgurClient from 'imgur'
 import sanityClient, { SanityClient } from '@sanity/client'
 import TwitterClient from 'twitter-v2'
+import Gun from 'gun/gun'
+import { HttpStatusCode } from './common/responses'
 
 export const USERAGENT =
   'biketag-api (https://github.com/keneucker/biketag-api)'
@@ -71,6 +75,7 @@ export class BikeTagClient extends EventEmitter {
   private cachedFetcher: AxiosInstance
 
   private mostAvailableApi: AvailableApis
+  private biketagClient?: BikeTagGunClient
   private imgurClient?: ImgurClient
   private sanityClient?: SanityClient
   private redditClient?: RedditClient
@@ -163,13 +168,13 @@ export class BikeTagClient extends EventEmitter {
               options.game
             )
           } else {
-            options.slug = 'latest'
+            options.slug = 'current'
           }
         }
 
         /// Explicitely set the number if we happen to have the slug but not the tagnumber
         if (!options.tagnumber) {
-          if (options.slug !== 'latest') {
+          if (options.slug !== 'current') {
             options.tagnumber = BikeTagGetters.getTagnumberFromSlug(
               options.slug
             )
@@ -227,7 +232,8 @@ export class BikeTagClient extends EventEmitter {
         break
       default:
       case AvailableApis.biketag:
-        client = api = biketagApi
+        client = this.biketagClient
+        api = biketagApi
         break
     }
 
@@ -259,7 +265,7 @@ export class BikeTagClient extends EventEmitter {
       return (this.mostAvailableApi = AvailableApis.twitter)
     }
 
-    return undefined
+    return (this.mostAvailableApi = AvailableApis.biketag)
   }
 
   private getPassthroughApiMethod(
@@ -291,13 +297,9 @@ export class BikeTagClient extends EventEmitter {
   ): BikeTagConfiguration {
     config = config ?? this.config()
 
-    // if (
-    //   config.biketag &&
-    //   isBikeTagCredentials(config.biketag) &&
-    //   isBikeTagApiReady(config.biketag)
-    // ) {
-    //   this.biketagClient = new Gun<BikeTagState>()
-    // }
+    if (config.biketag && isBikeTagCredentials(config.biketag)) {
+      this.biketagClient = new Gun<BikeTagGameState>(config.biketag)
+    }
     if (
       config.imgur &&
       isImgurCredentials(config.imgur) &&
@@ -446,7 +448,7 @@ export class BikeTagClient extends EventEmitter {
 
   getGame(
     payload: RequireAtLeastOne<getGamePayload> | string | undefined
-  ): Promise<BikeTagApiResponse<GameData>> {
+  ): Promise<BikeTagApiResponse<Game>> {
     const onlyApplicableOpts =
       typeof payload === 'string' ? { game: payload } : payload
     const { client, options, api } = this.getDefaultAPI(
@@ -457,7 +459,7 @@ export class BikeTagClient extends EventEmitter {
 
     return api.getGame(client, options).catch((e) => {
       return {
-        status: 500,
+        status: HttpStatusCode.InternalServerError,
         data: null,
         error: e,
         success: false,
@@ -466,12 +468,21 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
+  /// ****************************  Queue Methods   **************************************** ///
+  getQueue(): void {
+    throw 'not implemented'
+  }
+
+  queueTagImage(): void {
+    throw 'not implemented'
+  }
+
   /// ****************************  Tag Data Methods   ************************************ ///
 
   getTag(
     payload: RequireAtLeastOne<getTagPayload> | number,
     opts?: RequireAtLeastOne<Credentials>
-  ): Promise<BikeTagApiResponse<TagData>> {
+  ): Promise<BikeTagApiResponse<Tag>> {
     const { client, options, api } = this.getDefaultAPI(payload, opts)
     let clientMethod = api.getTag
 
@@ -485,7 +496,7 @@ export class BikeTagClient extends EventEmitter {
 
     return clientMethod(client, options).catch((e) => {
       return {
-        status: 500,
+        status: HttpStatusCode.InternalServerError,
         data: null,
         error: e,
         success: false,
@@ -497,7 +508,7 @@ export class BikeTagClient extends EventEmitter {
   getTags(
     payload?: getTagsPayload | number[],
     opts?: RequireAtLeastOne<Credentials>
-  ): Promise<BikeTagApiResponse<TagData[]>> {
+  ): Promise<BikeTagApiResponse<Tag[]>> {
     const { client, options, api } = this.getDefaultAPI(payload, opts)
     let clientMethod = api.getTags
 
@@ -511,7 +522,7 @@ export class BikeTagClient extends EventEmitter {
 
     return clientMethod(client, options).catch((e) => {
       return {
-        status: 500,
+        status: HttpStatusCode.InternalServerError,
         data: null,
         error: e,
         success: false,
@@ -541,7 +552,7 @@ export class BikeTagClient extends EventEmitter {
 
     return clientMethod(client, options).catch((e) => {
       return Promise.resolve({
-        status: 500,
+        status: HttpStatusCode.InternalServerError,
         data: null,
         error: e,
         success: false,
@@ -558,7 +569,7 @@ export class BikeTagClient extends EventEmitter {
 
     return api.uploadTagImage(client, options).catch((e) => {
       return Promise.resolve({
-        status: 500,
+        status: HttpStatusCode.InternalServerError,
         data: null,
         error: e,
         success: false,
@@ -571,8 +582,8 @@ export class BikeTagClient extends EventEmitter {
     payload:
       | RequireAtLeastOne<importTagPayload>
       | RequireAtLeastOne<importTagPayload>[]
-  ): Promise<BikeTagApiResponse<TagData[]>> {
-    return payload as unknown as Promise<BikeTagApiResponse<TagData[]>>
+  ): Promise<BikeTagApiResponse<Tag[]>> {
+    return payload as unknown as Promise<BikeTagApiResponse<Tag[]>>
   }
 
   deleteTag(
@@ -592,7 +603,7 @@ export class BikeTagClient extends EventEmitter {
 
     return clientMethod(client, options).catch((e) => {
       return Promise.resolve({
-        status: 500,
+        status: HttpStatusCode.InternalServerError,
         data: null,
         error: e,
         success: false,
@@ -618,7 +629,7 @@ export class BikeTagClient extends EventEmitter {
 
     return clientMethod(client, options).catch((e) => {
       return Promise.resolve({
-        status: 500,
+        status: HttpStatusCode.InternalServerError,
         data: null,
         error: e,
         success: false,
@@ -627,10 +638,46 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
+  /// ****************************  Player Data Methods   ************************************ ///
+
+  getPlayer(): void {
+    throw 'not implemented'
+  }
+
+  /// ****************************  Ambassador Data Methods   ******************************** ///
+
+  getAmbassador(): void {
+    throw 'not implemented'
+  }
+
+  /// ****************************  Setting Data Methods   *********************************** ///
+
+  getSetting(): void {
+    throw 'not implemented'
+  }
+
   /// ****************************  Client Instance Methods   ************************************ ///
 
+  /// Data provided by Gun Client
+  data(opts: any = {}): BikeTagGunClient {
+    const options = opts ?? this.biketagConfig
+
+    if (isBikeTagCredentials(options)) {
+      if (options.game) {
+        return this.biketagClient.get(
+          options.game
+        ) as unknown as BikeTagGunClient
+      } else {
+        return new Gun<BikeTagGameState>(options)
+      }
+    }
+
+    /// Always return a valid gun client, because we can
+    return new Gun<BikeTagGameState>(options)
+  }
+
   /// Content powered by Sanity IO Client
-  content(opts?: any): SanityClient {
+  content(opts: any = {}): SanityClient {
     const options = opts ?? this.sanityConfig
 
     if (isSanityCredentials(options)) {
@@ -641,7 +688,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   /// Images powered by Imgur Client
-  images(opts?: any): ImgurClient {
+  images(opts: any = {}): ImgurClient {
     const options = opts ?? this.imgurConfig
     if (isImgurCredentials(options)) {
       return new ImgurClient(options)
@@ -651,9 +698,10 @@ export class BikeTagClient extends EventEmitter {
   }
 
   /// Discussions powered by RedditClient
-  discussions(opts?: any): RedditClient {
+  discussions(opts: any = {}): RedditClient {
     const options = opts ?? this.redditConfig
     if (isRedditCredentials(options)) {
+      /// TODO: Always return the context of a given game subreddit?
       return new RedditClient(options)
     }
 
@@ -661,7 +709,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   /// Mentions powered by TwitterClient
-  mentions(opts: any): TwitterClient {
+  mentions(opts: any = {}): TwitterClient {
     const options = opts ?? this.twitterConfig
     if (isTwitterCredentials(options)) {
       return new TwitterClient(options)
@@ -670,19 +718,13 @@ export class BikeTagClient extends EventEmitter {
     throw new Error('options are invalid for creating an twitter client')
   }
 
-  /// Mentions powered by InstagramClient
+  /// Shares powered by InstagramClient
   // shares(options: any = {}): InstagramClient {
   //   if (isInstagramCredentials(options)) {
   //     return new InstagramClient(options)
   //   }
 
   //   throw new Error('options are invalid for creating an instagram client')
-  // }
-
-  /// Data provided by Gun Client
-  // data(): Gun<BikeTagState> {
-  //   /// TODO: return gun.js
-  //   return this.biketagClient
   // }
 }
 

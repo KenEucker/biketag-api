@@ -1,5 +1,6 @@
 import type { ImgurClient } from 'imgur'
-import { AvailableApis, BikeTagApiResponse, TagData } from '../common/types'
+import { HttpStatusCode } from '../common/responses'
+import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import {
   getBikeTagNumberFromImage,
   getBikeTagFromImgurImageSet,
@@ -8,8 +9,8 @@ import {
 export async function getTags(
   client: ImgurClient,
   options: any
-): Promise<BikeTagApiResponse<TagData[]>> {
-  const tagsData: TagData[] = []
+): Promise<BikeTagApiResponse<Tag[]>> {
+  const tagsData: Tag[] = []
   let images: any[] = []
 
   const getGroupedImages = (ungroupedImages) => {
@@ -28,14 +29,14 @@ export async function getTags(
 
   if (options.tagnumbers?.length && options.hash) {
     const albumInfo = await (client.getAlbum(options.hash) as any)
-    const imagesData: TagData[] = albumInfo.data?.images?.filter(
+    const imagesData: Tag[] = albumInfo.data?.images?.filter(
       (image: any) =>
         options.tagnumbers.indexOf(getBikeTagNumberFromImage(image)) !== -1
     )
     images = getGroupedImages(imagesData)
   } else if (options.slugs?.length) {
-    const imagesData: TagData[] = []
-    const imagePromises: Promise<TagData>[] = []
+    const imagesData: Tag[] = []
+    const imagePromises: Promise<Tag>[] = []
     let success = true
     const addToArray = (image: any) => {
       if (image?.data) imagesData.push(image.data)
@@ -64,6 +65,6 @@ export async function getTags(
     data: tagsData,
     success: true,
     source: AvailableApis[AvailableApis.imgur],
-    status: 200,
+    status: HttpStatusCode.Ok,
   }
 }

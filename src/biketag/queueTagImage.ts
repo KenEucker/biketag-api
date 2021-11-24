@@ -1,11 +1,11 @@
 import { BikeTagClient } from '../client'
-import { Payload, BikeTagApiResponse, TagData } from '../common/types'
+import { Payload, BikeTagApiResponse, Tag } from '../common/types'
 // import { UPLOAD_ENDPOINT } from '../common/endpoints';
 
 export async function queueTagImage(
   client: BikeTagClient,
   payload: string | string[] | Payload | Payload[]
-): Promise<BikeTagApiResponse<TagData> | BikeTagApiResponse<TagData>[]> {
+): Promise<BikeTagApiResponse<Tag> | BikeTagApiResponse<Tag>[]> {
   if (Array.isArray(payload)) {
     const promises = payload.map((p: string | Payload) => {
       // const form = createForm(p);
@@ -20,7 +20,7 @@ export async function queueTagImage(
       //   client.emit('uploadProgress', { ...progress, id });
       // });
 
-      return p as unknown as Promise<BikeTagApiResponse<TagData>>
+      return p as unknown as Promise<BikeTagApiResponse<Tag>>
     })
     return await Promise.all(promises)
   }
@@ -36,5 +36,5 @@ export async function queueTagImage(
   //   client.emit('uploadProgress', { ...progress, id });
   // });
 
-  return client as unknown as BikeTagApiResponse<TagData>
+  return client as unknown as BikeTagApiResponse<Tag>
 }
