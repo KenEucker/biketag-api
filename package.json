@@ -34,7 +34,7 @@
     "build": "tsc",
     "build:prod": "echo 'webpack handles the compilation process ✅'",
     "compile": "webpack --mode development",
-    "compile:prod": "webpack --mode production && npm run expose",
+    "compile:prod": "npm run remove-gun-log && webpack --mode production && npm run expose",
     "analyse": "webpack --mode production --json | npx webpack-bundle-size-analyzer",
     "expose": "cp -v dist/* ./",
     "watch": "webpack --mode=development --watch --progress",
@@ -49,7 +49,7 @@
     "lint:staged": "npx --no-install lint-staged",
     "commit": "cz",
     "convert": "typeconv -f ts -t oapi -o openapi 'src/**/*.ts'",
-    "postinstall": "gun-annoyance-remove"
+    "remove-gun-log": "gun-annoyance-remove || true"
   },
   "dependencies": {
     "@sanity/client": "^2.8.0",
