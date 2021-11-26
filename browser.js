@@ -35,7 +35,7 @@ function biketagExample(options = {}) {
 
         opts.game = opts.game ? opts.game : 'test'
         let biketagAPI = getBikeTagApi(opts, true)
-        const game = await biketagAPI.getGameData(opts.game)
+        const game = await biketagAPI.getGame(opts.game)
         const pagesEl = document.getElementById('pageContent')
         const logoEl = document.getElementById('logo')
         const currentImageEl = document.getElementById('currentImage')
@@ -187,7 +187,7 @@ function biketagExample(options = {}) {
     /// Populate the Change Game Selector from all available games
     const setAllGames = async (opts) => {
         const biketagAPI = getBikeTagApi(opts, true)
-        const allGames = await biketagAPI.getGameData()
+        const allGames = await biketagAPI.getGame()
 
         if (allGames.data && allGames.data.length) {
               console.info("\x1b[44mGame Data Retrieved\x1b[0m", { allGames })
