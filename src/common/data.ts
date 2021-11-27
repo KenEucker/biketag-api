@@ -121,3 +121,4 @@ export const createSettingObject = (settingData: any = {}): Setting => {
     value: settingData.value ?? '',
   } as Setting
 }
+export const settingDataFields = Object.keys(createSettingObject())

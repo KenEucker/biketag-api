@@ -57,22 +57,15 @@ const log = (message, response, toLog = false) => {
   }
 }
 
-const getTagAsync = async (client, out = false, opts = {}) => {
-  const tag1 = await client.getTag(undefined, opts)
-  log('successfully retrieved tag 1 data by slug', tag1, out)
-
-  return tag1
-}
-
 const getTag1Async = async (client, out = false, opts = {}) => {
-  const tag1 = await client.getTag(1, opts)
+  const tag1 = await client.tags(1, opts)
   log('successfully retrieved tag 1 data by number', tag1, out)
 
   return tag1
 }
 
 const getTagsAsync = async (client, out = false, opts = {}) => {
-  const tags = await client.getTags(undefined, opts)
+  const tags = await client.tags(undefined, opts)
   log('successfully retrieved tags data', tags, out)
 
   return tags
@@ -86,17 +79,31 @@ const getCurrentTagAsync = async (client, out = false, opts = {}) => {
 }
 
 const getGameAsync = async (client, out = false, opts = {}) => {
-  const testGameData = await client.getGame(undefined, opts)
+  const testGameData = await client.game(undefined, opts)
   log('success fully retrieved game data', testGameData, out)
 
   return testGameData
 }
 
 const getPlayersAsync = async (client, out = false, opts = {}) => {
-  const testPlayerData = await client.getPlayers(undefined, opts)
+  const testPlayerData = await client.players(undefined, opts)
   log('success fully retrieved player data', testPlayerData, out)
 
   return testPlayerData
+}
+
+const getAmbassadorsAsync = async (client, out = false, opts = {}) => {
+  const testAmbassadorData = await client.ambassadors(undefined, opts)
+  log('success fully retrieved ambassador data', testAmbassadorData, out)
+
+  return testAmbassadorData
+}
+
+const getSettingsAsync = async (client, out = false, opts = {}) => {
+  const testSettingData = await client.settings(undefined, opts)
+  log('success fully retrieved game settings', testSettingData, out)
+
+  return testSettingData
 }
 
 const runTests = async (out = false) => {
@@ -133,6 +140,11 @@ const runTests = async (out = false) => {
     await getGameAsync(bikeTagSanityInstance, out)
     console.log(pretty("All Players from Sanity"))
     await getPlayersAsync(bikeTagSanityInstance, out)
+    console.log(pretty("All Ambassadors from Sanity"))
+    await getAmbassadorsAsync(bikeTagSanityInstance, out)
+
+    console.log("Game Settings from Sanity")
+    await getSettingsAsync(bikeTagSanityInstance, out)
   }
 
   if (bikeTagTwitterInstance) {
@@ -165,7 +177,6 @@ module.exports = {
   bikeTagTwitterInstance,
   getGameAsync,
   getCurrentTagAsync,
-  getTagAsync,
   getTag1Async,
   getTagsAsync,
   imgurInstanceOpts,

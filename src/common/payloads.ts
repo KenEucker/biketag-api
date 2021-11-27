@@ -76,19 +76,20 @@ export type getPlayerPayload = {
   game: string
 }
 
-export type getSettingsPayload = {
-  fields?: string[]
-  slug?: string
-  game: string
-}
 export type getSettingPayload = {
   fields?: string[]
   slug?: string
   game: string
 }
+export type getSettingsPayload = {
+  fields?: string[]
+  slugs?: string[]
+  game: string
+}
+
 export type getAmbassadorsPayload = {
   fields?: string[]
-  slug?: string
+  slugs?: string[]
   game: string
 }
 export type getAmbassadorPayload = {

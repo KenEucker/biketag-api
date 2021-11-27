@@ -144,51 +144,51 @@ export class BikeTagClient extends EventEmitter {
     source: AvailableApis | string | undefined = this.getMostAvailableAPI()
   ): ApiOptions {
     const optsIsArray = Array.isArray(opts)
-    let options: any = {}
+    let payload: any = {}
 
     switch (typeof opts) {
       case 'object':
         if (optsIsArray && opts.length) {
           if (typeof opts[0] === 'string') {
-            options.slugs = opts
+            payload.slugs = opts
           } else if (typeof opts[0] === 'number') {
-            options.tagnumbers = opts
+            payload.tagnumbers = opts
           } else {
-            options.payload = opts
+            payload.payload = opts
           }
         } else {
-          options = opts
+          payload = opts
         }
         break
 
       case 'string':
-        options.slugs = optsIsArray ? opts : [opts]
+        payload.slugs = optsIsArray ? opts : [opts]
         break
 
       case 'number':
-        options.tagnumbers = optsIsArray ? opts : [opts]
+        payload.tagnumbers = optsIsArray ? opts : [opts]
         break
 
       default:
-        options = {}
+        payload = {}
         break
     }
 
     switch (typeof source) {
       case 'string':
-        options.source = AvailableApis[source]
+        payload.source = AvailableApis[source]
         break
 
       case 'undefined':
-        options.source = this.getMostAvailableAPI()
+        payload.source = this.getMostAvailableAPI()
         break
 
       default:
-        options.source = source
+        payload.source = source
         break
     }
 
-    return options
+    return payload
   }
 
   private getDefaultOptions(
@@ -834,22 +834,45 @@ export class BikeTagClient extends EventEmitter {
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Ambassador[]>> {
     return this.getAmbassadors(
-      this.getInitialPayload(payload) as getAmbassadorsPayload,
+      this.getInitialPayload(payload) as unknown as getAmbassadorsPayload,
       opts
     )
   }
 
   getAmbassador(
-    payload?: getAmbassadorPayload | string,
+    payload: getAmbassadorPayload | string,
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Ambassador>> {
-    const { client, options, api } = this.getAPI(
-      payload,
-      opts,
-      DataTypes.ambassador
-    )
-    throw 'not implemented'
+    const { client, options, api } = this.getAPI(payload, opts)
+    const clientMethod = api.getAmbassador
+
+    /// If the client adapter implements a direct way to retrieve a single ambassador
+    if (clientMethod) {
+      return clientMethod(client, options).catch((e) => {
+        return {
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source: AvailableApis[options.source],
+        }
+      })
+    }
+
+    /// Else, use the get all and filter method
+    return this.getAmbassadors(
+      this.getInitialPayload(payload) as getAmbassadorsPayload,
+      opts
+    ).then((r) => {
+      return {
+        data: r.data?.length ? r.data[0] : null,
+        status: r.status,
+        source: r.source,
+        success: r.success,
+      }
+    })
   }
+
   getAmbassadors(
     payload?: getAmbassadorsPayload | string[],
     opts?: Credentials
@@ -859,7 +882,25 @@ export class BikeTagClient extends EventEmitter {
       opts,
       DataTypes.ambassador
     )
-    throw 'not implemented'
+    let clientMethod = api.getAmbassadors
+
+    switch (options.source) {
+      case AvailableApis.imgur:
+        clientMethod = clientMethod.bind({
+          getTags: this.getPassthroughApiMethod(api.getTags, client),
+        })
+        break
+    }
+
+    return clientMethod(client, options).catch((e) => {
+      return Promise.resolve({
+        status: HttpStatusCode.InternalServerError,
+        data: null,
+        error: e,
+        success: false,
+        source: AvailableApis[options.source],
+      })
+    })
   }
 
   /// ****************************  Setting Data Methods   ********************************* ///
@@ -870,21 +911,43 @@ export class BikeTagClient extends EventEmitter {
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Setting[]>> {
     return this.getSettings(
-      this.getInitialPayload(payload) as getSettingsPayload,
+      this.getInitialPayload(payload) as unknown as getSettingsPayload,
       opts
     )
   }
 
   getSetting(
-    payload?: getSettingPayload | string[],
+    payload?: getSettingPayload | string,
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Setting>> {
-    const { client, options, api } = this.getAPI(
-      payload,
-      opts,
-      DataTypes.setting
-    )
-    throw 'not implemented'
+    const { client, options, api } = this.getAPI(payload, opts)
+    const clientMethod = api.getSetting
+
+    /// If the client adapter implements a direct way to retrieve a single setting
+    if (clientMethod) {
+      return clientMethod(client, options).catch((e) => {
+        return {
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source: AvailableApis[options.source],
+        }
+      })
+    }
+
+    /// Else, use the get all and filter method
+    return this.getSettings(
+      this.getInitialPayload(payload) as unknown as getSettingsPayload,
+      opts
+    ).then((r) => {
+      return {
+        data: r.data?.length ? r.data[0] : null,
+        status: r.status,
+        source: r.source,
+        success: r.success,
+      }
+    })
   }
 
   getSettings(
@@ -896,7 +959,17 @@ export class BikeTagClient extends EventEmitter {
       opts,
       DataTypes.setting
     )
-    throw 'not implemented'
+    const clientMethod = api.getSettings
+
+    return clientMethod(client, options).catch((e) => {
+      return Promise.resolve({
+        status: HttpStatusCode.InternalServerError,
+        data: null,
+        error: e,
+        success: false,
+        source: AvailableApis[options.source],
+      })
+    })
   }
 
   /// ****************************  Client Instance Methods   ****************************** ///

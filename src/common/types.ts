@@ -136,6 +136,7 @@ export type ApiOptions = RequireAtLeastOne<{
   source: AvailableApis | string
   hash?: string
   slugs?: string[]
+  fields?: string[]
   slug?: string
   tagnumbers?: number[]
   tagnumber?: number
