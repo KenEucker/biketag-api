@@ -18,7 +18,7 @@
     "type": "patreon",
     "url": "https://www.patreon.com/biketag"
   },
-  "homepage": "https://github.com/keneucker/biketag-api#readme",
+  "homepage": "https://keneucker.github.io/biketag-api/",
   "scripts": {
     "dev": "npm run dev:browser",
     "dev:node": "node examples/node/index.js",
