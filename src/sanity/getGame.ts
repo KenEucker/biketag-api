@@ -12,7 +12,7 @@ export async function getGame(
   payload: getGamePayload
 ): Promise<BikeTagApiResponse<Game | Game[]>> {
   if (!payload) {
-    throw new Error('no options')
+    throw new Error('no payload options')
   }
 
   const fields = constructSanityFieldsQuery(payload.fields, 'game')

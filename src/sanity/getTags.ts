@@ -12,10 +12,6 @@ export async function getTags(
   client: SanityClient,
   payload: getTagsPayload
 ): Promise<BikeTagApiResponse<Tag[]>> {
-  if (!payload) {
-    throw new Error('no options')
-  }
-
   let slugs = ''
   let tagnumbers = ''
 

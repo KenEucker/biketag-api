@@ -13,7 +13,7 @@ export async function getTag(
   payload: getTagPayload
 ): Promise<BikeTagApiResponse<Tag>> {
   if (!payload) {
-    throw new Error('no options')
+    throw new Error('no payload options')
   }
 
   if (!payload.slug?.length && !payload.tagnumber) {

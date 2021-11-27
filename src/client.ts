@@ -160,17 +160,17 @@ export class BikeTagClient extends EventEmitter {
 
     switch (optsType) {
       case 'game':
-        options.game = options.game ?? options.slug ?? this.biketagConfig.game
+        options.game = options.game ?? options.slug ?? this.biketagConfig?.game
         options.slug = options.slug ?? options.game?.toLowerCase() ?? undefined
         break
 
       case 'player':
-        options.game = options.game ? options.game : this.biketagConfig.game
+        options.game = options.game ? options.game : this.biketagConfig?.game
         break
 
       case 'tag':
         /// Set the game in the options, defaulting to the configured game
-        options.game = options.game ? options.game : this.biketagConfig.game
+        options.game = options.game ? options.game : this.biketagConfig?.game
 
         if (!options.slug) {
           if (options.tagnumber && typeof options.tagnumber !== 'undefined') {

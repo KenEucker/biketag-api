@@ -11,10 +11,6 @@ export async function getTags(
   client: RedditClient,
   payload: getTagsPayload
 ): Promise<BikeTagApiResponse<Tag[]>> {
-  if (!payload) {
-    throw new Error('no options')
-  }
-
   const query = `subreddit:${payload.subreddit} title:Bike Tag`
   const maxPerRequest = 500
 
