@@ -507,7 +507,6 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  Game Data Methods   ************************************ ///
 
-  /// TODO: start of general interface implementation
   game(
     payload: RequireAtLeastOne<getGamePayload> | string | undefined
   ): Promise<BikeTagApiResponse<Game>> {
@@ -538,7 +537,6 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  Queue Methods   **************************************** ///
 
-  /// TODO: start of general interface implementation
   queue(
     payload: any,
     opts?: RequireAtLeastOne<Credentials>
@@ -564,7 +562,6 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  Tag Data Methods   ************************************ ///
 
-  /// TODO: start of general interface implementation
   tags(
     payload: getTagPayload | getTagsPayload | number | number[],
     opts?: RequireAtLeastOne<Credentials>
@@ -751,7 +748,6 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  Player Data Methods   ********************************** ///
 
-  /// TODO: start of general interface implementation
   players(
     payload: getPlayerPayload | getPlayersPayload | string | string[],
     opts?: Credentials
@@ -828,7 +824,6 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  Ambassador Data Methods   ****************************** ///
 
-  /// TODO: start of general interface implementation
   ambassadors(
     payload: getAmbassadorPayload | getAmbassadorsPayload | string | string[],
     opts?: Credentials
@@ -905,7 +900,6 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  Setting Data Methods   ********************************* ///
 
-  /// TODO: start of general interface implementation
   settings(
     payload: getSettingPayload | getSettingsPayload | string | string[],
     opts?: Credentials
