@@ -1,4 +1,4 @@
-import { Tag, Game, Player } from './types'
+import { Tag, Game, Player, Ambassador } from './types'
 
 export const cacheKeys = {
   sanityUrlText: `sanity::`,
@@ -79,10 +79,34 @@ export const createPlayerObject = (playerData: any = {}): Player => {
     tags: playerData.tags ?? [],
     games: playerData.games ?? (playerData.game ? [playerData.game] : []),
     name: playerData.name ?? '',
-    bicon: playerData.bicon ?? '',
+    avatar: playerData.avatar ?? '',
   } as Player
 }
 
 export const playerDataFields = Object.keys(createPlayerObject())
+export const playerDataReferenceFields = ['games', 'tags']
 export const playerDataArrayFields = ['games', 'tags']
-export const playerDataAssetFields = ['bicon']
+export const playerDataAssetFields = ['avatar']
+export const playerDataObjectFields = {
+  avatar: 'asset->_ref',
+}
+
+export const createAmbassadorObject = (
+  ambassadorData: any = {}
+): Ambassador => {
+  return {
+    address1: ambassadorData.address1 ?? '',
+    address2: ambassadorData.address2 ?? '',
+    city: ambassadorData.city ?? '',
+    country: ambassadorData.country ?? '',
+    email: ambassadorData.email ?? '',
+    name: ambassadorData.name ?? '',
+    phone: ambassadorData.phone ?? '',
+    player: ambassadorData.player ?? '',
+    slug: ambassadorData.slug ?? '',
+    zipcode: ambassadorData.zipcode ?? '',
+  } as Ambassador
+}
+
+export const ambassadorDataFields = Object.keys(createPlayerObject())
+export const ambassadorDataReferenceFields = ['player']

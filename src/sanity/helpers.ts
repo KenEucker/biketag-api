@@ -10,6 +10,13 @@ import {
   gameDataArrayFields,
   tagDataAssetFields,
   gameDataObjectFields,
+  playerDataFields,
+  playerDataReferenceFields,
+  playerDataObjectFields,
+  playerDataArrayFields,
+  createPlayerObject,
+  ambassadorDataReferenceFields,
+  createAmbassadorObject,
 } from '../common/data'
 
 export function constructTagFromSanityObject(
@@ -150,6 +157,66 @@ export function constructGameFromSanityObject(
   return createGameObject(gameData)
 }
 
+export function constructPlayerFromSanityObject(
+  data: any,
+  fields: string[] = []
+): any {
+  const playerData = fields.length
+    ? fields.reduce((o: any, f: any) => {
+        o[f] = data[f]
+        return o
+      }, {})
+    : data
+
+  playerDataReferenceFields.forEach((f) => {
+    if (playerData[f] && typeof playerData[f] !== 'undefined') {
+      const isArrayField = playerDataArrayFields.indexOf(f) !== -1
+      if (isArrayField) {
+        playerData[f] = playerData[f].map((a) => a.name)
+      } else {
+        playerData[f] = playerData[f].name
+      }
+    }
+  })
+
+  Object.keys(playerDataObjectFields).forEach((f) => {
+    if (playerData[f] && typeof playerData[f] !== 'undefined') {
+      const objectTree = playerDataObjectFields[f].split('->')
+      let targetObj: any = playerData[f]
+      objectTree.forEach((o) => {
+        targetObj = targetObj[o] ?? undefined
+      })
+      playerData[f] = targetObj
+    }
+  })
+
+  playerData.slug = playerData.slug?.current ?? playerData.slug
+
+  return createPlayerObject(playerData)
+}
+
+export function constructAmbassadorFromSanityObject(
+  data: any,
+  fields: string[] = []
+): any {
+  const ambassadorData = fields.length
+    ? fields.reduce((o: any, f: any) => {
+        o[f] = data[f]
+        return o
+      }, {})
+    : data
+
+  ambassadorDataReferenceFields.forEach((f) => {
+    if (ambassadorData[f] && typeof ambassadorData[f] !== 'undefined') {
+      ambassadorData[f] = ambassadorData[f].name
+    }
+  })
+
+  ambassadorData.slug = ambassadorData.slug?.current ?? ambassadorData.slug
+
+  return createAmbassadorObject(ambassadorData)
+}
+
 export function constructSanityFieldsQuery(
   fields: string[] = [],
   type = 'tag'
@@ -169,14 +236,22 @@ export function constructSanityFieldsQuery(
       referenceFields = tagDataReferenceFields
       fields = fields.length ? fields : tagDataFields
       break
+
+    case 'player':
+      referenceFields = playerDataReferenceFields
+      fields = fields.length ? fields : playerDataFields
+      arrayFields = playerDataArrayFields
+      break
   }
 
   return fields
     .reduce((o: any, f: any) => {
-      const isRefrerenceField = referenceFields.indexOf(f) != -1
-      const isArrayField = arrayFields.indexOf(f) != -1
+      const isRefrerenceField = referenceFields.indexOf(f) !== -1
+      const isArrayField = arrayFields.indexOf(f) !== -1
       o += `${
-        isArrayField
+        isArrayField && isRefrerenceField
+          ? `"${f}": ${f}[]->{name}`
+          : isArrayField
           ? `"${f}": ${f}[]->name`
           : isRefrerenceField
           ? `${f}->{name}`

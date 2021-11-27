@@ -148,7 +148,7 @@ export type Region = {
 
 export type Player = {
   name: string
-  bicon: string
+  avatar: string
   games: string[]
   tags: string[]
 }

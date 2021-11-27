@@ -144,6 +144,8 @@ export class BikeTagClient extends EventEmitter {
         ? { tagnumber: opts }
         : Array.isArray(opts) && optsType === 'tag'
         ? { tagnumbers: opts }
+        : Array.isArray(opts) && optsType === 'player'
+        ? { slugs: opts }
         : Array.isArray(opts)
         ? { payload: opts }
         : opts ?? {}
@@ -158,8 +160,12 @@ export class BikeTagClient extends EventEmitter {
 
     switch (optsType) {
       case 'game':
-        options.game = options.game ?? options.slug
+        options.game = options.game ?? options.slug ?? this.biketagConfig.game
         options.slug = options.slug ?? options.game?.toLowerCase() ?? undefined
+        break
+
+      case 'player':
+        options.game = options.game ? options.game : this.biketagConfig.game
         break
 
       case 'tag':
@@ -674,7 +680,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getPlayers(
-    payload: getPlayersPayload,
+    payload: getPlayersPayload | string[],
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Player[]>> {
     const { client, options, api } = this.getDefaultAPI(payload, opts)
