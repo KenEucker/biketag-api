@@ -17,6 +17,7 @@ import {
   BikeTagConfiguration,
   CommonData,
   TwitterCredentials,
+  Tag,
 } from './types'
 import FormData from 'form-data'
 import TinyCache from 'tinycache'
@@ -429,4 +430,14 @@ export const assignBikeTagConfiguration = (
     : parsedConfig.twitter
 
   return configuration
+}
+
+export const sortTagsByTagNumber = (tags: Tag[], sort = 'new'): Tag[] => {
+  let sorter = (a, b) => b.tagnumber - a.tagnumber
+
+  if (sort !== 'new') {
+    sorter = (a, b) => a.tagnumber - b.tagnumber
+  }
+
+  return tags.sort(sorter)
 }

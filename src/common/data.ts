@@ -79,16 +79,16 @@ export const createPlayerObject = (playerData: any = {}): Player => {
     tags: playerData.tags ?? [],
     games: playerData.games ?? (playerData.game ? [playerData.game] : []),
     name: playerData.name ?? '',
-    avatar: playerData.avatar ?? '',
+    bicon: playerData.bicon ?? '',
   } as Player
 }
 
 export const playerDataFields = Object.keys(createPlayerObject())
 export const playerDataReferenceFields = ['games', 'tags']
 export const playerDataArrayFields = ['games', 'tags']
-export const playerDataAssetFields = ['avatar']
+export const playerDataAssetFields = ['bicon']
 export const playerDataObjectFields = {
-  avatar: 'asset->_ref',
+  bicon: 'asset->_ref',
 }
 
 export const createAmbassadorObject = (

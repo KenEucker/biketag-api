@@ -680,7 +680,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getPlayers(
-    payload: getPlayersPayload | string[],
+    payload?: getPlayersPayload | string[],
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Player[]>> {
     const { client, options, api } = this.getDefaultAPI(payload, opts)
