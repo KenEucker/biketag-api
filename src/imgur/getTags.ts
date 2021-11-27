@@ -1,4 +1,5 @@
 import type { ImgurClient } from 'imgur'
+import { getTagsPayload } from '../common/payloads'
 import { HttpStatusCode } from '../common/responses'
 import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import {
@@ -8,7 +9,7 @@ import {
 
 export async function getTags(
   client: ImgurClient,
-  options: any
+  payload: getTagsPayload
 ): Promise<BikeTagApiResponse<Tag[]>> {
   const tagsData: Tag[] = []
   let images: any[] = []
@@ -27,14 +28,14 @@ export async function getTags(
     return groupedImages
   }
 
-  if (options.tagnumbers?.length && options.hash) {
-    const albumInfo = await (client.getAlbum(options.hash) as any)
+  if (payload.tagnumbers?.length && payload.hash) {
+    const albumInfo = await (client.getAlbum(payload.hash) as any)
     const imagesData: Tag[] = albumInfo.data?.images?.filter(
       (image: any) =>
-        options.tagnumbers.indexOf(getBikeTagNumberFromImage(image)) !== -1
+        payload.tagnumbers.indexOf(getBikeTagNumberFromImage(image)) !== -1
     )
     images = getGroupedImages(imagesData)
-  } else if (options.slugs?.length) {
+  } else if (payload.slugs?.length) {
     const imagesData: Tag[] = []
     const imagePromises: Promise<Tag>[] = []
     let success = true
@@ -42,22 +43,22 @@ export async function getTags(
       if (image?.data) imagesData.push(image.data)
       success = image.success && success
     }
-    options.slugs.forEach(async (slug: string) =>
+    payload.slugs.forEach(async (slug: string) =>
       imagePromises.push(client.getImage(slug).then(addToArray) as any)
     )
 
     await Promise.all(imagePromises).then((allImages: any[]) => {
       images = getGroupedImages(allImages)
     })
-  } else if (options.hash) {
-    const albumInfo = await client.getAlbum(options.hash)
+  } else if (payload.hash) {
+    const albumInfo = await client.getAlbum(payload.hash)
     const albumImages = albumInfo?.data?.images || []
 
     images = getGroupedImages(albumImages)
   }
 
   images.forEach((images) => {
-    const tagData = getBikeTagFromImgurImageSet(images[0], images[1], options)
+    const tagData = getBikeTagFromImgurImageSet(images[0], images[1], payload)
     tagsData.push(tagData)
   })
 

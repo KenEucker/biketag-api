@@ -92,6 +92,14 @@ const getGameAsync = async (client, out = false, opts = {}) => {
   return testGameData
 }
 
+const getPlayersAsync = async (client, out = false, opts = {}) => {
+  const testPlayerData = await client.getPlayers(undefined, opts)
+  log('success fully retrieved player data', testPlayerData, out)
+  console.log(testPlayerData.data[0])
+
+  return testPlayerData
+}
+
 const runTests = async (out = false) => {
   if (biketagDefaultInstance) {
     console.log(pretty("Default BikeTag Client Instantiated"), biketagDefaultInstanceOpts)
@@ -107,6 +115,10 @@ const runTests = async (out = false) => {
     await getTagAsync(bikeTagImgurInstance, out)
     console.log(pretty("Current Tag from Imgur"))
     await getCurrentTagAsync(bikeTagImgurInstance, out)
+    console.log(pretty("All Players from Imgur"))
+    await getPlayersAsync(bikeTagImgurInstance, out)
+    console.log("Game from Imgur")
+    // await getGameAsync(bikeTagImgurInstance, out)
   }
 
   if (bikeTagSanityInstance) {
@@ -118,6 +130,8 @@ const runTests = async (out = false) => {
 
     console.log("Game from Sanity")
     await getGameAsync(bikeTagSanityInstance, out)
+    console.log(pretty("All Players from Sanity"))
+    await getPlayersAsync(bikeTagSanityInstance, out)
   }
 
   if (bikeTagTwitterInstance) {

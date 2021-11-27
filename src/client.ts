@@ -17,6 +17,9 @@ import {
   TwitterCredentials,
   BikeTagGunClient,
   BikeTagGameState,
+  Player,
+  Ambassador,
+  Setting,
 } from './common/types'
 import {
   getTagPayload,
@@ -27,6 +30,8 @@ import {
   deleteTagPayload,
   deleteTagsPayload,
   importTagPayload,
+  getPlayersPayload,
+  getPlayerPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -139,6 +144,8 @@ export class BikeTagClient extends EventEmitter {
         ? { tagnumber: opts }
         : Array.isArray(opts) && optsType === 'tag'
         ? { tagnumbers: opts }
+        : Array.isArray(opts) && optsType === 'player'
+        ? { slugs: opts }
         : Array.isArray(opts)
         ? { payload: opts }
         : opts ?? {}
@@ -153,8 +160,12 @@ export class BikeTagClient extends EventEmitter {
 
     switch (optsType) {
       case 'game':
-        options.game = options.game ?? options.slug
+        options.game = options.game ?? options.slug ?? this.biketagConfig.game
         options.slug = options.slug ?? options.game?.toLowerCase() ?? undefined
+        break
+
+      case 'player':
+        options.game = options.game ? options.game : this.biketagConfig.game
         break
 
       case 'tag':
@@ -469,11 +480,18 @@ export class BikeTagClient extends EventEmitter {
   }
 
   /// ****************************  Queue Methods   **************************************** ///
-  getQueue(): void {
+  getQueue(): Promise<BikeTagApiResponse<Tag[]>> {
+    /// get the queued tag information (player, images)
     throw 'not implemented'
   }
 
   queueTagImage(): void {
+    /// take player information and a tag image (either found or mystery) and add it to the queue
+    throw 'not implemented'
+  }
+
+  submitQueuedTag(): void {
+    /// using the player information and the tag number, send the submit tag request to the biketag server
     throw 'not implemented'
   }
 
@@ -640,19 +658,69 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  Player Data Methods   ************************************ ///
 
-  getPlayer(): void {
-    throw 'not implemented'
+  getPlayer(
+    payload: getPlayerPayload | string[],
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<Player>> {
+    const _payload = Array.isArray(payload)
+      ? {
+          slugs: payload,
+          game: this.biketagConfig.game,
+        }
+      : { ...payload, slugs: [payload.slug] }
+
+    return this.getPlayers(_payload, opts).then((r) => {
+      return {
+        data: r.data?.length ? r.data[0] : null,
+        status: r.status,
+        source: r.source,
+        success: r.success,
+      }
+    })
+  }
+
+  getPlayers(
+    payload: getPlayersPayload | string[],
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<Player[]>> {
+    const { client, options, api } = this.getDefaultAPI(payload, opts)
+    let clientMethod = api.getPlayers
+
+    switch (options.source) {
+      case AvailableApis.imgur:
+        clientMethod = clientMethod.bind({
+          getTags: this.getPassthroughApiMethod(api.getTags, client),
+        })
+        break
+    }
+
+    return clientMethod(client, options).catch((e) => {
+      return Promise.resolve({
+        status: HttpStatusCode.InternalServerError,
+        data: null,
+        error: e,
+        success: false,
+        source: AvailableApis[options.source],
+      })
+    })
   }
 
   /// ****************************  Ambassador Data Methods   ******************************** ///
 
-  getAmbassador(): void {
+  getAmbassador(): Promise<BikeTagApiResponse<Ambassador>> {
+    throw 'not implemented'
+  }
+  getAmbassadors(): Promise<BikeTagApiResponse<Ambassador[]>> {
     throw 'not implemented'
   }
 
   /// ****************************  Setting Data Methods   *********************************** ///
 
-  getSetting(): void {
+  getSetting(): Promise<BikeTagApiResponse<Setting>> {
+    throw 'not implemented'
+  }
+
+  getSettings(): Promise<BikeTagApiResponse<Setting[]>> {
     throw 'not implemented'
   }
 

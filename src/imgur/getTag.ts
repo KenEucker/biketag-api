@@ -1,4 +1,5 @@
 import type { ImgurClient } from 'imgur'
+import { getTagPayload } from '../common/payloads'
 import { HttpStatusCode } from '../common/responses'
 import {
   AvailableApis,
@@ -14,7 +15,7 @@ import {
 
 export async function getTag(
   client: ImgurClient,
-  options: any
+  options: getTagPayload
 ): Promise<BikeTagApiResponse<Tag>> {
   if (!options.hash) {
     throw new Error('no Imgur album hash set')
