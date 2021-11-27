@@ -224,6 +224,11 @@ export class BikeTagClient extends EventEmitter {
         break
     }
 
+    if (overrides.source) {
+      options.source = AvailableApis[overrides.source]
+      delete overrides.source
+    }
+
     /// Source defaults
     switch (options.source) {
       case AvailableApis.imgur:
@@ -290,13 +295,7 @@ export class BikeTagClient extends EventEmitter {
       return this.mostAvailableApi
     }
 
-    if (
-      this.biketagConfig &&
-      isBikeTagCredentials(this.biketagConfig) &&
-      isBikeTagApiReady(this.biketagConfig)
-    ) {
-      return (this.mostAvailableApi = AvailableApis.biketag)
-    } else if (this.imgurConfig && this.imgurClient) {
+    if (this.imgurConfig && this.imgurClient) {
       return (this.mostAvailableApi = AvailableApis.imgur)
     } else if (this.sanityConfig && this.sanityClient) {
       return (this.mostAvailableApi = AvailableApis.sanity)
@@ -304,9 +303,15 @@ export class BikeTagClient extends EventEmitter {
       return (this.mostAvailableApi = AvailableApis.reddit)
     } else if (this.twitterConfig && this.twitterClient) {
       return (this.mostAvailableApi = AvailableApis.twitter)
+    } else if (
+      this.biketagConfig &&
+      isBikeTagCredentials(this.biketagConfig) &&
+      isBikeTagApiReady(this.biketagConfig)
+    ) {
+      return (this.mostAvailableApi = AvailableApis.biketag)
     }
 
-    return (this.mostAvailableApi = AvailableApis.biketag)
+    return null
   }
 
   private getPassthroughApiMethod(
