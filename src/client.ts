@@ -221,6 +221,16 @@ export class BikeTagClient extends EventEmitter {
             options.slug = 'current'
           }
         }
+
+        if (!options.tagnumber) {
+          if (options.tagnumbers?.length === 1) {
+            options.tagnumber = options.tagnumbers[0]
+          } else if (options.slug && options.slug !== 'current') {
+            options.tagnumber = BikeTagGetters.getTagnumberFromSlug(
+              options.slug
+            )
+          }
+        }
         break
     }
 
