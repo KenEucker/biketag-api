@@ -185,13 +185,22 @@ The acceptable fields for a BikeTagConfiguration object are outlined below:
 ### **⚠️ For brevity, the rest of the examples will leave out the import and/or instantiation step.**
 
 
+### Get Game Information
+
+You can get game information by providing the name.
+
+```ts
+// retrieves the BikeTag game data 'portland' game
+const biketagPortland = await biketagAPI.getGame('portland')
+```
+
 ### Get Tags
 
 You can get tags one by one or all at once for a given game using the `getTag` and `getTags` methods. You can also explicitely set the data adapter to any of the configurable sources (biketag, imgur, sanity, reddit, twitter):
 
 ```ts
 // retrieves the BikeTag game data 'portland' game
-const biketagPortlandCurrent = await biketagAPI.getGame()
+const biketagPortland = await biketagAPI.getGame('portland')
 
 // retrieves the latest BikeTag posted for the 'portland' game from the most available API
 const biketagPortlandCurrent = await biketagAPI.getTag()
@@ -206,6 +215,14 @@ const allPortlandTags = await biketagAPI.getTags(undefined, { source: 'sanity' }
 const firstFivePortlandTags = await biketagAPI.getTags([1,2,3,4,5], { source: 'reddit' })
 ```
 
+### Get Players
+
+You can get the players of a game by calling getPlayers
+
+```ts
+// retrieves the BikeTag game data 'portland' game
+const biketagPortland = await biketagAPI.getGame('portland')
+```
 
 ### There are a series of getter methods, accessible by `biketagAPI.getters`. Their use is explained below: 
 <div align="center">
