@@ -12,10 +12,6 @@ export async function getPlayers(
   client: SanityClient,
   payload: getPlayersPayload
 ): Promise<BikeTagApiResponse<Player[]>> {
-  if (!payload) {
-    throw new Error('no options')
-  }
-
   const fields = constructSanityFieldsQuery(payload.fields, 'player')
   const fieldsFilter = payload.fields?.length
     ? payload.fields

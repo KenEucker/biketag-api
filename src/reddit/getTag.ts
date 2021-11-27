@@ -12,7 +12,7 @@ export async function getTag(
   payload: getTagPayload
 ): Promise<BikeTagApiResponse<Tag | undefined>> {
   if (!payload) {
-    throw new Error('no options')
+    throw new Error('no payload options')
   }
 
   if (!payload.subreddit) {
