@@ -53,12 +53,12 @@ const bikeTagRedditInstance = redditInstanceOpts.reddit && redditInstanceOpts.re
 const pretty = m => `\x1b[44m${m}\x1b[0m`
 const log = (message, response, toLog = false) => {
   if (toLog) {
-    console.log(pretty(response.success ? message : 'error', response.success ? response.data : response.status), {data: response.data, error: response.error})
+    console.log(pretty(response.success ? message : 'error', response.success ? response.data : response.error), {data: response.data})
   }
 }
 
 const getTagAsync = async (client, out = false, opts = {}) => {
-  const tag1 = await client.getTag(`test-tag-1`, opts)
+  const tag1 = await client.getTag(undefined, opts)
   log('successfully retrieved tag 1 data by slug', tag1, out)
 
   return tag1
@@ -86,7 +86,7 @@ const getCurrentTagAsync = async (client, out = false, opts = {}) => {
 }
 
 const getGameAsync = async (client, out = false, opts = {}) => {
-  const testGameData = await client.getGame('test', opts)
+  const testGameData = await client.getGame(undefined, opts)
   log('success fully retrieved game data', testGameData, out)
 
   return testGameData
@@ -111,13 +111,13 @@ const runTests = async (out = false) => {
   if (bikeTagImgurInstance) {
     console.log(pretty("Imgur BikeTag Client Instantiated"), imgurInstanceOpts)
     console.log(pretty("Tag #1 from Imgur"))
-    await getTagAsync(bikeTagImgurInstance, out)
+    await getTag1Async(bikeTagImgurInstance, out)
     console.log(pretty("Current Tag from Imgur"))
     await getCurrentTagAsync(bikeTagImgurInstance, out)
     console.log(pretty("All Tags from Imgur"))
-    await getTagsAsync(bikeTagImgurInstance, out)
+    // await getTagsAsync(bikeTagImgurInstance, out)
     console.log(pretty("All Players from Imgur"))
-    await getPlayersAsync(bikeTagImgurInstance, out, {sort: 'relevance'})
+    await getPlayersAsync(bikeTagImgurInstance, out)
     console.log("Game from Imgur")
     // await getGameAsync(bikeTagImgurInstance, out)
   }

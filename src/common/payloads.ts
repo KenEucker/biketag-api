@@ -76,6 +76,27 @@ export type getPlayerPayload = {
   game: string
 }
 
+export type getSettingsPayload = {
+  fields?: string[]
+  slug?: string
+  game: string
+}
+export type getSettingPayload = {
+  fields?: string[]
+  slug?: string
+  game: string
+}
+export type getAmbassadorsPayload = {
+  fields?: string[]
+  slug?: string
+  game: string
+}
+export type getAmbassadorPayload = {
+  fields?: string[]
+  slug?: string
+  game: string
+}
+
 export type importTagPayload = Pick<
   Tag,
   | 'discussionUrl'

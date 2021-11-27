@@ -1,4 +1,4 @@
-import { Tag, Game, Player, Ambassador } from './types'
+import { Tag, Game, Player, Ambassador, Setting } from './types'
 
 export const cacheKeys = {
   sanityUrlText: `sanity::`,
@@ -21,7 +21,7 @@ export const cacheKeys = {
 
 export const createTagObject = (tagData: any = {}): Tag => {
   return {
-    tagnumber: tagData.tagnumber ?? 'current',
+    tagnumber: tagData.tagnumber ?? '',
     mysteryImage: tagData.mysteryImage,
     mysteryImageUrl: tagData.mysteryImageUrl ?? '',
     game: tagData.game ?? '',
@@ -78,8 +78,9 @@ export const createPlayerObject = (playerData: any = {}): Player => {
   return {
     tags: playerData.tags ?? [],
     games: playerData.games ?? (playerData.game ? [playerData.game] : []),
-    name: playerData.name ?? '',
     bicon: playerData.bicon ?? '',
+    name: playerData.name ?? '',
+    slug: playerData.slug ?? '',
   } as Player
 }
 
@@ -110,3 +111,13 @@ export const createAmbassadorObject = (
 
 export const ambassadorDataFields = Object.keys(createPlayerObject())
 export const ambassadorDataReferenceFields = ['player']
+
+export const createSettingObject = (settingData: any = {}): Setting => {
+  return {
+    slug: settingData.slug ?? '',
+    description: settingData.description ?? '',
+    name: settingData.name ?? '',
+    key: settingData.key ?? '',
+    value: settingData.value ?? '',
+  } as Setting
+}

@@ -6,6 +6,7 @@ export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>
 }[keyof T]
 
+/// ****************************  BikeTag Enums   ************************************** ///
 export enum AvailableApis {
   biketag,
   imgur,
@@ -14,6 +15,15 @@ export enum AvailableApis {
   twitter,
 }
 
+export enum DataTypes {
+  ambassador,
+  game,
+  player,
+  setting,
+  tag,
+}
+
+/// ****************************  Imgur Credential Objects   *************************** ///
 export interface ImgurAccessToken {
   accessToken: string
 }
@@ -26,6 +36,7 @@ export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
   hash?: string
   clientSecret: string
 }
+/// ****************************  Twitter Credential Objects   ************************* ///
 export interface TwitterAccessToken {
   access_token_key?: string
   access_token_secret?: string
@@ -43,6 +54,7 @@ export interface TwitterCredentials
   account?: string
 }
 
+/// ****************************  Reddit Credential Objects   ************************** ///
 export interface RedditRefreshToken {
   refreshToken: string
 }
@@ -64,6 +76,7 @@ export interface RedditCredentials
   subreddit: string
 }
 
+/// ****************************  Sanity Credential Objects   ************************** ///
 export interface SanityAccessToken {
   token: string
 }
@@ -80,6 +93,7 @@ export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
   password: string
 }
 
+/// ****************************  BikeTag Credential Objects   ************************* ///
 export interface CommonData {
   game: string
   source?: AvailableApis | string
@@ -107,6 +121,7 @@ export type Credentials = Partial<BikeTagCredentials> &
   Partial<ImgurCredentials> &
   Partial<TwitterCredentials>
 
+/// ****************************  BikeTag API Objects   ******************************** ///
 export interface BikeTagApiResponse<
   T = Record<string, unknown> | Record<string, unknown>[] | string | boolean
 > {
@@ -116,11 +131,25 @@ export interface BikeTagApiResponse<
   source: AvailableApis | string
 }
 
+export type ApiOptions = RequireAtLeastOne<{
+  game: string
+  source: AvailableApis | string
+  hash?: string
+  slugs?: string[]
+  slug?: string
+  tagnumbers?: number[]
+  tagnumber?: number
+  subreddit?: string
+  account?: string
+}>
+
+/// ****************************  Imgur API Objects   ********************************** ///
 export type ImgurImage = Pick<
   ImageData,
   'id' | 'description' | 'title' | 'link' | 'datetime'
 >
 
+/// ****************************  Sanity API Objects   ********************************* ///
 export type geopoint = {
   lat: number
   long: number
@@ -131,6 +160,7 @@ export type boundary = {
   geo: geopoint
 }
 
+/// ****************************  Sanity Data Types   ********************************** ///
 export type Setting = {
   slug: string
   name: string
@@ -140,13 +170,14 @@ export type Setting = {
 }
 
 export type Region = {
-  description: string
-  name: string
   slug: string
+  name: string
+  description: string
   zipcode: number
 }
 
 export type Player = {
+  slug: string
   name: string
   bicon: string
   games: string[]
@@ -154,16 +185,16 @@ export type Player = {
 }
 
 export type Ambassador = {
+  slug: string
+  name: string
   address1: string
   address2: string
   city: string
   country: string
+  zipcode: number
   email: string
-  name: string
   phone: string
   player: Player
-  slug: string
-  zipcode: number
 }
 
 export interface Tag {
@@ -185,6 +216,7 @@ export interface Tag {
 }
 
 export interface Game {
+  slug: string
   name: string
   ambassadors: Ambassador[]
   boundary: boundary
@@ -193,9 +225,9 @@ export interface Game {
   subreddit: string
   logo: string
   region: Region
-  slug: string
 }
 
+/// ****************************  BikeTag Configurations   ***************************** ///
 export type BikeTagConfiguration = {
   biketag: BikeTagCredentials
   sanity: SanityCredentials
@@ -212,6 +244,7 @@ export type PartialBikeTagConfiguration = RequireAtLeastOne<{
   twitter: Partial<TwitterCredentials>
 }>
 
+/// ****************************  Gun Data State   ************************************* ///
 export interface Tags {
   [key: string]: Tag
 }

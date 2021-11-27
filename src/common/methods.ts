@@ -447,10 +447,10 @@ export const sortPlayers = (players: Player[], sort = 'new'): Player[] => {
   let sorter = (a, b) => b.name.localeCompare(a.name)
 
   switch (sort) {
-    case 'hot':
+    case 'top':
       sorter = (a, b) => b.tags.length - a.tags.length
       break
-    case 'top':
+    case 'comments':
       sorter = (a, b) => a.name.localeCompare(b.name)
       break
     case 'relevance':
