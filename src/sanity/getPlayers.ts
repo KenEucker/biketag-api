@@ -7,6 +7,7 @@ import {
 import { playerDataFields } from '../common/data'
 import { getPlayersPayload } from '../common/payloads'
 import { HttpStatusCode } from '../common/responses'
+import { sortPlayers } from '../common/methods'
 
 export async function getPlayers(
   client: SanityClient,
@@ -27,7 +28,7 @@ export async function getPlayers(
     )
 
     const response = {
-      data: playersData,
+      data: sortPlayers(playersData, payload.sort),
       status: HttpStatusCode.Found,
       success: true,
       source: AvailableApis[AvailableApis.sanity],

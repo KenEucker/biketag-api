@@ -7,6 +7,7 @@ import {
 import { tagDataFields } from '../common/data'
 import { getTagsPayload } from '../common/payloads'
 import { HttpStatusCode } from '../common/responses'
+import { sortTags } from '../common/methods'
 
 export async function getTags(
   client: SanityClient,
@@ -34,7 +35,7 @@ export async function getTags(
     )
 
     const response = {
-      data: tagsData,
+      data: sortTags(tagsData, payload.sort),
       status: HttpStatusCode.Found,
       success: true,
       source: AvailableApis[AvailableApis.sanity],

@@ -117,7 +117,7 @@ const runTests = async (out = false) => {
     console.log(pretty("All Tags from Imgur"))
     await getTagsAsync(bikeTagImgurInstance, out)
     console.log(pretty("All Players from Imgur"))
-    await getPlayersAsync(bikeTagImgurInstance, out)
+    await getPlayersAsync(bikeTagImgurInstance, out, {sort: 'relevance'})
     console.log("Game from Imgur")
     // await getGameAsync(bikeTagImgurInstance, out)
   }

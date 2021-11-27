@@ -60,6 +60,7 @@ export type getGamePayload = {
 export type getPlayersPayload = {
   fields?: string[]
   slugs?: string[]
+  sort?: 'new' | 'relevance' | 'hot' | 'top' | 'comments'
   hash?: string
   account?: string
   subreddit?: string
