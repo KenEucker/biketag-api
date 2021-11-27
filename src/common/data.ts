@@ -1,4 +1,23 @@
-import { Tag, Game } from './types'
+import { Tag, Game, Player } from './types'
+
+export const cacheKeys = {
+  sanityUrlText: `sanity::`,
+  imageHashText: `hash::`,
+  albumHash: `imgur::`,
+  redditPosts: `reddit::`,
+  bikeTagImage: `biketag::`,
+  bikeTagsByUser: `usertags::`,
+  hintText: `hint::`,
+  creditText: `credit::`,
+  locationText: `gps::`,
+  discussionText: `discussion::`,
+  mentionText: `mention::`,
+  tagNumberText: `tag::`,
+  imagesText: `images::`,
+  imageUrlText: `images::`,
+  gpsLocationText: `gps::`,
+  slugText: `slug::`,
+}
 
 export const createTagObject = (tagData: any = {}): Tag => {
   return {
@@ -55,21 +74,15 @@ export const gameDataObjectFields = {
   logo: 'asset->_ref',
 }
 
-export const cacheKeys = {
-  sanityUrlText: 'sanity::',
-  imageHashText: 'hash::',
-  albumHash: `imgur::`,
-  redditPosts: `reddit::`,
-  bikeTagImage: `biketag::`,
-  bikeTagsByUser: `usertags::`,
-  hintText: `hint::`,
-  creditText: `credit::`,
-  locationText: `gps::`,
-  discussionText: `discussion::`,
-  mentionText: `mention::`,
-  tagNumberText: `tag::`,
-  imagesText: `images::`,
-  imageUrlText: `images::`,
-  gpsLocationText: `gps::`,
-  slugText: `slug::`,
+export const createPlayerObject = (playerData: any = {}): Player => {
+  return {
+    tags: playerData.tags ?? [],
+    games: playerData.games ?? (playerData.game ? [playerData.game] : []),
+    name: playerData.name ?? '',
+    bicon: playerData.bicon ?? '',
+  } as Player
 }
+
+export const playerDataFields = Object.keys(createPlayerObject())
+export const playerDataArrayFields = ['games', 'tags']
+export const playerDataAssetFields = ['bicon']

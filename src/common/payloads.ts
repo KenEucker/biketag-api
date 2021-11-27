@@ -3,6 +3,7 @@ import { CommonData, RequireAtLeastOne, Tag } from './types'
 export type getTagsPayload = {
   fields?: string[]
   slugs?: string[]
+  hash?: string
   account?: string
   subreddit?: string
   time?: 'year' | 'hour' | 'day' | 'week' | 'month' | 'all'
@@ -30,6 +31,7 @@ export type getTagPayload = {
   time?: 'all'
   sort?: 'new'
   limit?: number
+  hash?: string
   subreddit?: string
   account?: string
   game: string
@@ -53,6 +55,24 @@ export type getGamePayload = {
   slug: string
   name: string
   fields?: string[]
+}
+
+export type getPlayersPayload = {
+  fields?: string[]
+  slugs?: string[]
+  hash?: string
+  account?: string
+  subreddit?: string
+  game: string
+}
+
+export type getPlayerPayload = {
+  fields?: string[]
+  slug?: string
+  hash?: string
+  account?: string
+  subreddit?: string
+  game: string
 }
 
 export type importTagPayload = Pick<

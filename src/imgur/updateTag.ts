@@ -1,4 +1,5 @@
 import type { ImgurClient, ImgurApiResponse } from 'imgur'
+import { updateTagPayload } from '../common/payloads'
 import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
 import {
   getImgurFoundImageHashFromBikeTagData,
@@ -47,7 +48,7 @@ export function getUpdateTagPayloadFromTagData(
 
 export async function updateTag(
   client: ImgurClient,
-  payload: UpdateTagPayload | UpdateTagPayload[]
+  payload: updateTagPayload | updateTagPayload[]
 ): Promise<BikeTagApiResponse<Tag> | BikeTagApiResponse<Tag>[]> {
   const promises: Promise<BikeTagApiResponse<Tag>>[] = []
   const payloads = Array.isArray(payload) ? payload : [payload]
