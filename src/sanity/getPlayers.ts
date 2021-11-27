@@ -1,7 +1,13 @@
 import { SanityClient } from '@sanity/client'
-import { AvailableApis, BikeTagApiResponse, Player } from '../common/types'
+import {
+  AvailableApis,
+  BikeTagApiResponse,
+  DataTypes,
+  Player,
+} from '../common/types'
 import {
   constructPlayerFromSanityObject,
+  constructSanityDocumentQuery,
   constructSanityFieldsQuery,
 } from './helpers'
 import { playerDataFields } from '../common/data'
@@ -13,14 +19,17 @@ export async function getPlayers(
   client: SanityClient,
   payload: getPlayersPayload
 ): Promise<BikeTagApiResponse<Player[]>> {
-  const fields = constructSanityFieldsQuery(payload.fields, 'player')
+  const fields = constructSanityFieldsQuery(payload.fields, DataTypes.player)
   const fieldsFilter = payload.fields?.length
     ? payload.fields
     : playerDataFields
-  const slugIsSet = payload.slugs?.length
-  const query = slugIsSet
-    ? `*[_type == "player" && slug.current in "${payload.slugs}"]{${fields}}`
-    : `*[_type == "player"]{${fields}}`
+  const query = constructSanityDocumentQuery(
+    DataTypes[DataTypes.player],
+    payload.game,
+    payload.slugs,
+    undefined,
+    fields
+  )
 
   return client.fetch(query, {}).then((players) => {
     const playersData = players.map((player: any) =>

@@ -17,7 +17,9 @@ import {
   createPlayerObject,
   ambassadorDataReferenceFields,
   createAmbassadorObject,
+  settingDataFields,
 } from '../common/data'
+import { DataTypes } from '../common/types'
 
 export function constructTagFromSanityObject(
   data: any,
@@ -217,30 +219,56 @@ export function constructAmbassadorFromSanityObject(
   return createAmbassadorObject(ambassadorData)
 }
 
+export function constructSanityDocumentQuery(
+  docType: string,
+  game?: string,
+  slugs: string[] = [],
+  tagnumbers: number[] = [],
+  fields: string[] = []
+): any {
+  const gameQuery = game
+    ? ` && game._ref in *[_type=="game" && lower(name)=="${game.toLowerCase()}"]._id`
+    : ''
+  const slugsQuery = slugs.length
+    ? ` && slug.current in ${JSON.stringify(slugs)}`
+    : ''
+  const tagnumbersQuery = tagnumbers.length
+    ? ` && tagnumber in ${JSON.stringify(tagnumbers)}`
+    : ''
+
+  return `*[_type == "${docType}"${gameQuery}${slugsQuery}${tagnumbersQuery}]{${fields}}`
+}
+
 export function constructSanityFieldsQuery(
   fields: string[] = [],
-  type = 'tag'
+  type: DataTypes = DataTypes.tag
 ): any {
   let referenceFields = [],
     arrayFields = []
 
   switch (type) {
-    case 'game':
+    case DataTypes.game:
       referenceFields = gameDataReferenceFields
       fields = fields.length ? fields : gameDataFields
       arrayFields = gameDataArrayFields
       break
 
     default:
-    case 'tag':
+    case DataTypes.tag:
       referenceFields = tagDataReferenceFields
       fields = fields.length ? fields : tagDataFields
       break
 
-    case 'player':
+    case DataTypes.player:
       referenceFields = playerDataReferenceFields
       fields = fields.length ? fields : playerDataFields
       arrayFields = playerDataArrayFields
+      break
+
+    case DataTypes.setting:
+      referenceFields = []
+      arrayFields = []
+      fields = fields.length ? fields : settingDataFields
       break
   }
 

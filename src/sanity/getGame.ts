@@ -1,5 +1,10 @@
 import { SanityClient } from '@sanity/client'
-import { AvailableApis, BikeTagApiResponse, Game } from '../common/types'
+import {
+  AvailableApis,
+  BikeTagApiResponse,
+  DataTypes,
+  Game,
+} from '../common/types'
 import {
   constructGameFromSanityObject,
   constructSanityFieldsQuery,
@@ -15,7 +20,7 @@ export async function getGame(
     throw new Error('no payload options')
   }
 
-  const fields = constructSanityFieldsQuery(payload.fields, 'game')
+  const fields = constructSanityFieldsQuery(payload.fields, DataTypes.game)
   const slugIsSet = payload.slug?.length
   const nameIsSet = payload.name?.length
   const query = slugIsSet

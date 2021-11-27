@@ -19,6 +19,10 @@ import {
   TwitterCredentials,
   Tag,
   Player,
+  RequireAtLeastOne,
+  Ambassador,
+  Setting,
+  Game,
 } from './types'
 import FormData from 'form-data'
 import TinyCache from 'tinycache'
@@ -431,6 +435,28 @@ export const assignBikeTagConfiguration = (
     : parsedConfig.twitter
 
   return configuration
+}
+
+export const isBikeTagData = (biketag: RequireAtLeastOne<Tag>): boolean => {
+  return !!biketag.tagnumber && !!biketag.game
+}
+
+export const isGameData = (ambassador: RequireAtLeastOne<Game>): boolean => {
+  return !!ambassador.name && !!ambassador.logo
+}
+
+export const isPlayerData = (player: RequireAtLeastOne<Player>): boolean => {
+  return !!player.name && !!player.bicon
+}
+
+export const isAmbassadorData = (
+  ambassador: RequireAtLeastOne<Ambassador>
+): boolean => {
+  return !!ambassador.name && !!ambassador.email
+}
+
+export const isSettingData = (setting: RequireAtLeastOne<Setting>): boolean => {
+  return !!setting.name && !!setting.key && !!setting.description
 }
 
 export const sortTags = (tags: Tag[], sort = 'new'): Tag[] => {
