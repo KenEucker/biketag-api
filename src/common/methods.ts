@@ -18,6 +18,7 @@ import {
   CommonData,
   TwitterCredentials,
   Tag,
+  Player,
 } from './types'
 import FormData from 'form-data'
 import TinyCache from 'tinycache'
@@ -432,7 +433,7 @@ export const assignBikeTagConfiguration = (
   return configuration
 }
 
-export const sortTagsByTagNumber = (tags: Tag[], sort = 'new'): Tag[] => {
+export const sortTags = (tags: Tag[], sort = 'new'): Tag[] => {
   let sorter = (a, b) => b.tagnumber - a.tagnumber
 
   if (sort !== 'new') {
@@ -440,4 +441,27 @@ export const sortTagsByTagNumber = (tags: Tag[], sort = 'new'): Tag[] => {
   }
 
   return tags.sort(sorter)
+}
+
+export const sortPlayers = (players: Player[], sort = 'new'): Player[] => {
+  let sorter = (a, b) => b.name.localeCompare(a.name)
+
+  switch (sort) {
+    case 'top':
+      sorter = (a, b) => b.tags.length - a.tags.length
+      break
+    case 'comments':
+      sorter = (a, b) => a.name.localeCompare(b.name)
+      break
+    case 'relevance':
+      return players.reverse()
+      break
+    /// Don't sort
+    case 'new':
+    default:
+      return players
+      break
+  }
+
+  return players.sort(sorter)
 }

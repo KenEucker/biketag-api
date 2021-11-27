@@ -20,6 +20,8 @@ import {
   Player,
   Ambassador,
   Setting,
+  DataTypes,
+  ApiOptions,
 } from './common/types'
 import {
   getTagPayload,
@@ -32,6 +34,10 @@ import {
   importTagPayload,
   getPlayersPayload,
   getPlayerPayload,
+  getSettingPayload,
+  getAmbassadorPayload,
+  getAmbassadorsPayload,
+  getSettingsPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -131,69 +137,94 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  private getDefaultOptions(
-    opts: any,
-    optsType = 'tag',
-    source?: AvailableApis | string
-  ): any {
-    /// If the options passed in was a string, set it as the slug
-    const options =
-      typeof opts === 'string'
-        ? { slug: opts }
-        : typeof opts === 'number' && optsType === 'tag'
-        ? { tagnumber: opts }
-        : Array.isArray(opts) && optsType === 'tag'
-        ? { tagnumbers: opts }
-        : Array.isArray(opts) && optsType === 'player'
-        ? { slugs: opts }
-        : Array.isArray(opts)
-        ? { payload: opts }
-        : opts ?? {}
+  /// ****************************  Private Class Methods   ******************************** ///
 
-    if (typeof source === 'string') {
-      options.source = AvailableApis[source]
-    } else if (typeof source === 'undefined') {
-      options.source = this.getMostAvailableAPI()
-    } else {
-      options.source = source
+  private getInitialPayload(
+    opts: any,
+    source: AvailableApis | string | undefined = this.getMostAvailableAPI()
+  ): ApiOptions {
+    const optsIsArray = Array.isArray(opts)
+    let options: any = {}
+
+    switch (typeof opts) {
+      case 'object':
+        if (optsIsArray && opts.length) {
+          if (typeof opts[0] === 'string') {
+            options.slugs = opts
+          } else if (typeof opts[0] === 'number') {
+            options.tagnumbers = opts
+          } else {
+            options.payload = opts
+          }
+        } else {
+          options = opts
+        }
+        break
+
+      case 'string':
+        options.slugs = optsIsArray ? opts : [opts]
+        break
+
+      case 'number':
+        options.tagnumbers = optsIsArray ? opts : [opts]
+        break
+
+      default:
+        options = {}
+        break
     }
 
-    switch (optsType) {
-      case 'game':
+    switch (typeof source) {
+      case 'string':
+        options.source = AvailableApis[source]
+        break
+
+      case 'undefined':
+        options.source = this.getMostAvailableAPI()
+        break
+
+      default:
+        options.source = source
+        break
+    }
+
+    return options
+  }
+
+  private getDefaultOptions(
+    options: ApiOptions,
+    dataType: DataTypes = DataTypes.tag,
+    overrides: any = {}
+  ): ApiOptions {
+    /// Data defaults
+    switch (dataType) {
+      case DataTypes.game:
         options.game = options.game ?? options.slug ?? this.biketagConfig?.game
         options.slug = options.slug ?? options.game?.toLowerCase() ?? undefined
         break
 
-      case 'player':
+      case DataTypes.player:
         options.game = options.game ? options.game : this.biketagConfig?.game
         break
 
-      case 'tag':
+      case DataTypes.tag:
         /// Set the game in the options, defaulting to the configured game
         options.game = options.game ? options.game : this.biketagConfig?.game
 
-        if (!options.slug) {
-          if (options.tagnumber && typeof options.tagnumber !== 'undefined') {
+        if (!options.slug && !options.slugs) {
+          if (typeof options.tagnumber !== 'undefined') {
             options.slug = constructTagNumberSlug(
               options.tagnumber,
               options.game
             )
-          } else {
+          } else if (typeof options.tagnumbers === 'undefined') {
             options.slug = 'current'
-          }
-        }
-
-        /// Explicitely set the number if we happen to have the slug but not the tagnumber
-        if (!options.tagnumber) {
-          if (options.slug !== 'current') {
-            options.tagnumber = BikeTagGetters.getTagnumberFromSlug(
-              options.slug
-            )
           }
         }
         break
     }
 
+    /// Source defaults
     switch (options.source) {
       case AvailableApis.imgur:
         options.hash = options.hash ?? this.imgurConfig.hash
@@ -206,20 +237,19 @@ export class BikeTagClient extends EventEmitter {
         break
     }
 
-    return options
+    return { ...options, ...overrides }
   }
 
-  private getDefaultAPI(
-    opts: any = {},
-    overloads: any = {},
-    getOptionsDefault: string | undefined = undefined
+  private getAPI(
+    opts: any,
+    overrides: any = {},
+    dataType: DataTypes = DataTypes.tag
   ) {
-    const initialSource = overloads.source ?? this.getMostAvailableAPI()
-    delete overloads.source
-    const options = {
-      ...this.getDefaultOptions(opts, getOptionsDefault, initialSource),
-      ...overloads,
-    }
+    const options = this.getDefaultOptions(
+      this.getInitialPayload(opts),
+      dataType,
+      overrides
+    )
 
     let client: any = null
     let api: any = null
@@ -289,7 +319,10 @@ export class BikeTagClient extends EventEmitter {
       | TwitterClient
   ): any {
     return (opts) => {
-      return method(client, this.getDefaultOptions(opts))
+      return method(
+        client,
+        this.getDefaultOptions(this.getInitialPayload(opts))
+      )
     }
   }
 
@@ -342,6 +375,8 @@ export class BikeTagClient extends EventEmitter {
 
     return config
   }
+
+  /// ****************************  Generic Methods   ************************************** ///
 
   config(
     config?: Credentials | BikeTagConfiguration | PartialBikeTagConfiguration,
@@ -457,15 +492,22 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  Game Data Methods   ************************************ ///
 
+  /// TODO: start of general interface implementation
+  game(
+    payload: RequireAtLeastOne<getGamePayload> | string | undefined
+  ): Promise<BikeTagApiResponse<Game>> {
+    return this.getGame(payload)
+  }
+
   getGame(
     payload: RequireAtLeastOne<getGamePayload> | string | undefined
   ): Promise<BikeTagApiResponse<Game>> {
     const onlyApplicableOpts =
       typeof payload === 'string' ? { game: payload } : payload
-    const { client, options, api } = this.getDefaultAPI(
+    const { client, options, api } = this.getAPI(
       onlyApplicableOpts,
       { source: AvailableApis[AvailableApis.sanity] },
-      'game'
+      DataTypes.game
     )
 
     return api.getGame(client, options).catch((e) => {
@@ -480,6 +522,16 @@ export class BikeTagClient extends EventEmitter {
   }
 
   /// ****************************  Queue Methods   **************************************** ///
+
+  /// TODO: start of general interface implementation
+  queue(
+    payload: any,
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Tag[]>> {
+    /// TODO: determine if getQueue or queueTagImage or submitQueuedTag is intended
+    throw 'not implemented'
+  }
+
   getQueue(): Promise<BikeTagApiResponse<Tag[]>> {
     /// get the queued tag information (player, images)
     throw 'not implemented'
@@ -497,28 +549,50 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  Tag Data Methods   ************************************ ///
 
+  /// TODO: start of general interface implementation
+  tags(
+    payload: getTagPayload | getTagsPayload | number | number[],
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Tag[]>> {
+    /// TODO: determine if singular getTag or multiple getTags is intended
+    return this.getTags(this.getInitialPayload(payload) as getTagsPayload, opts)
+  }
+
   getTag(
     payload: RequireAtLeastOne<getTagPayload> | number,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag>> {
-    const { client, options, api } = this.getDefaultAPI(payload, opts)
+    const { client, options, api } = this.getAPI(payload, opts)
     let clientMethod = api.getTag
 
-    switch (options.source) {
-      case AvailableApis.reddit:
-        clientMethod = clientMethod.bind({
-          images: this.images({ ...this.imgurConfig, ...opts }),
-        })
-        break
+    /// If the client adapter implements a direct way to retrieve a single tag
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.reddit:
+          clientMethod = clientMethod.bind({
+            images: this.images({ ...this.imgurConfig, ...opts }),
+          })
+          break
+      }
+
+      return clientMethod(client, options).catch((e) => {
+        return {
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source: AvailableApis[options.source],
+        }
+      })
     }
 
-    return clientMethod(client, options).catch((e) => {
+    /// Else, use the get all and filter method
+    return this.getTags(options as getTagsPayload, opts).then((r) => {
       return {
-        status: HttpStatusCode.InternalServerError,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
+        data: r.data?.length ? r.data[0] : null,
+        status: r.status,
+        source: r.source,
+        success: r.success,
       }
     })
   }
@@ -527,7 +601,7 @@ export class BikeTagClient extends EventEmitter {
     payload?: getTagsPayload | number[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag[]>> {
-    const { client, options, api } = this.getDefaultAPI(payload, opts)
+    const { client, options, api } = this.getAPI(payload, opts)
     let clientMethod = api.getTags
 
     switch (options.source) {
@@ -549,11 +623,29 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
+  uploadTagImage(
+    payload: uploadTagImagePayload | uploadTagImagePayload[],
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<any | any[]>> {
+    const { client, options, api } = this.getAPI(payload, opts)
+
+    return api.uploadTagImage(client, options).catch((e) => {
+      return Promise.resolve({
+        status: HttpStatusCode.InternalServerError,
+        data: null,
+        error: e,
+        success: false,
+        source: AvailableApis[options.source],
+      })
+    })
+  }
+
+  /// TODO: change to generic update that accepts any data type
   updateTag(
     payload: updateTagPayload | updateTagPayload[],
     opts?: Credentials
   ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-    const { client, options, api } = this.getDefaultAPI(payload, opts)
+    const { client, options, api } = this.getAPI(payload, opts)
     let clientMethod = api.updateTag
 
     switch (options.source) {
@@ -579,23 +671,7 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  uploadTagImage(
-    payload: uploadTagImagePayload | uploadTagImagePayload[],
-    opts?: Credentials
-  ): Promise<BikeTagApiResponse<any | any[]>> {
-    const { client, options, api } = this.getDefaultAPI(payload, opts)
-
-    return api.uploadTagImage(client, options).catch((e) => {
-      return Promise.resolve({
-        status: HttpStatusCode.InternalServerError,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
-      })
-    })
-  }
-
+  /// TODO: change to generic import that accepts any data type
   importTag(
     payload:
       | RequireAtLeastOne<importTagPayload>
@@ -604,11 +680,12 @@ export class BikeTagClient extends EventEmitter {
     return payload as unknown as Promise<BikeTagApiResponse<Tag[]>>
   }
 
+  /// TODO: change to generic delete that accepts any data type
   deleteTag(
     payload: deleteTagPayload | number,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<any>> {
-    const { client, options, api } = this.getDefaultAPI(payload, opts)
+    const { client, options, api } = this.getAPI(payload, opts)
     let clientMethod = api.deleteTag
 
     switch (options.source) {
@@ -630,11 +707,12 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
+  /// TODO: change to generic delete that accepts any data type
   deleteTags(
     payload: deleteTagsPayload | number[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<any>> {
-    const { client, options, api } = this.getDefaultAPI(payload, opts)
+    const { client, options, api } = this.getAPI(payload, opts)
     let clientMethod = api.deleteTags
 
     switch (options.source) {
@@ -656,20 +734,44 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  /// ****************************  Player Data Methods   ************************************ ///
+  /// ****************************  Player Data Methods   ********************************** ///
+
+  /// TODO: start of general interface implementation
+  players(
+    payload: getPlayerPayload | getPlayersPayload | string | string[],
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<Player[]>> {
+    return this.getPlayers(
+      this.getInitialPayload(payload) as getPlayersPayload,
+      opts
+    )
+  }
 
   getPlayer(
-    payload: getPlayerPayload | string[],
+    payload: getPlayerPayload | string,
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Player>> {
-    const _payload = Array.isArray(payload)
-      ? {
-          slugs: payload,
-          game: this.biketagConfig.game,
-        }
-      : { ...payload, slugs: [payload.slug] }
+    const { client, options, api } = this.getAPI(payload, opts)
+    const clientMethod = api.getPlayer
 
-    return this.getPlayers(_payload, opts).then((r) => {
+    /// If the client adapter implements a direct way to retrieve a single player
+    if (clientMethod) {
+      return clientMethod(client, options).catch((e) => {
+        return {
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source: AvailableApis[options.source],
+        }
+      })
+    }
+
+    /// Else, use the get all and filter method
+    return this.getPlayers(
+      this.getInitialPayload(payload) as getPlayersPayload,
+      opts
+    ).then((r) => {
       return {
         data: r.data?.length ? r.data[0] : null,
         status: r.status,
@@ -683,7 +785,11 @@ export class BikeTagClient extends EventEmitter {
     payload?: getPlayersPayload | string[],
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Player[]>> {
-    const { client, options, api } = this.getDefaultAPI(payload, opts)
+    const { client, options, api } = this.getAPI(
+      payload,
+      opts,
+      DataTypes.player
+    )
     let clientMethod = api.getPlayers
 
     switch (options.source) {
@@ -705,26 +811,80 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  /// ****************************  Ambassador Data Methods   ******************************** ///
+  /// ****************************  Ambassador Data Methods   ****************************** ///
 
-  getAmbassador(): Promise<BikeTagApiResponse<Ambassador>> {
-    throw 'not implemented'
-  }
-  getAmbassadors(): Promise<BikeTagApiResponse<Ambassador[]>> {
-    throw 'not implemented'
-  }
-
-  /// ****************************  Setting Data Methods   *********************************** ///
-
-  getSetting(): Promise<BikeTagApiResponse<Setting>> {
-    throw 'not implemented'
+  /// TODO: start of general interface implementation
+  ambassadors(
+    payload: getAmbassadorPayload | getAmbassadorsPayload | string | string[],
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<Ambassador[]>> {
+    return this.getAmbassadors(
+      this.getInitialPayload(payload) as getAmbassadorsPayload,
+      opts
+    )
   }
 
-  getSettings(): Promise<BikeTagApiResponse<Setting[]>> {
+  getAmbassador(
+    payload?: getAmbassadorPayload | string,
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<Ambassador>> {
+    const { client, options, api } = this.getAPI(
+      payload,
+      opts,
+      DataTypes.ambassador
+    )
+    throw 'not implemented'
+  }
+  getAmbassadors(
+    payload?: getAmbassadorsPayload | string[],
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<Ambassador[]>> {
+    const { client, options, api } = this.getAPI(
+      payload,
+      opts,
+      DataTypes.ambassador
+    )
     throw 'not implemented'
   }
 
-  /// ****************************  Client Instance Methods   ************************************ ///
+  /// ****************************  Setting Data Methods   ********************************* ///
+
+  /// TODO: start of general interface implementation
+  settings(
+    payload: getSettingPayload | getSettingsPayload | string | string[],
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<Setting[]>> {
+    return this.getSettings(
+      this.getInitialPayload(payload) as getSettingsPayload,
+      opts
+    )
+  }
+
+  getSetting(
+    payload?: getSettingPayload | string[],
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<Setting>> {
+    const { client, options, api } = this.getAPI(
+      payload,
+      opts,
+      DataTypes.setting
+    )
+    throw 'not implemented'
+  }
+
+  getSettings(
+    payload?: getSettingsPayload | string[],
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<Setting[]>> {
+    const { client, options, api } = this.getAPI(
+      payload,
+      opts,
+      DataTypes.setting
+    )
+    throw 'not implemented'
+  }
+
+  /// ****************************  Client Instance Methods   ****************************** ///
 
   /// Data provided by Gun Client
   data(opts: any = {}): BikeTagGunClient {
@@ -785,15 +945,6 @@ export class BikeTagClient extends EventEmitter {
 
     throw new Error('options are invalid for creating an twitter client')
   }
-
-  /// Shares powered by InstagramClient
-  // shares(options: any = {}): InstagramClient {
-  //   if (isInstagramCredentials(options)) {
-  //     return new InstagramClient(options)
-  //   }
-
-  //   throw new Error('options are invalid for creating an instagram client')
-  // }
 }
 
 export type { BikeTagCredentials, BikeTagConfiguration }

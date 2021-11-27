@@ -1,8 +1,9 @@
 import type { ImgurClient } from 'imgur'
 import { createPlayerObject } from '../common/data'
+import { sortPlayers } from '../common/methods'
 import { getPlayersPayload } from '../common/payloads'
 import { HttpStatusCode } from '../common/responses'
-import { AvailableApis, BikeTagApiResponse, Player, Tag } from '../common/types'
+import { AvailableApis, BikeTagApiResponse, Player } from '../common/types'
 
 export async function getPlayers(
   client: ImgurClient,
@@ -36,7 +37,7 @@ export async function getPlayers(
   }
 
   return {
-    data: playersData,
+    data: sortPlayers(playersData, payload.sort),
     success: true,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,

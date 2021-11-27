@@ -60,6 +60,7 @@ export type getGamePayload = {
 export type getPlayersPayload = {
   fields?: string[]
   slugs?: string[]
+  sort?: 'new' | 'relevance' | 'hot' | 'top' | 'comments'
   hash?: string
   account?: string
   subreddit?: string
@@ -72,6 +73,27 @@ export type getPlayerPayload = {
   hash?: string
   account?: string
   subreddit?: string
+  game: string
+}
+
+export type getSettingsPayload = {
+  fields?: string[]
+  slug?: string
+  game: string
+}
+export type getSettingPayload = {
+  fields?: string[]
+  slug?: string
+  game: string
+}
+export type getAmbassadorsPayload = {
+  fields?: string[]
+  slug?: string
+  game: string
+}
+export type getAmbassadorPayload = {
+  fields?: string[]
+  slug?: string
   game: string
 }
 

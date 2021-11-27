@@ -1,5 +1,5 @@
 import type { ImgurClient } from 'imgur'
-import { sortTagsByTagNumber } from '../common/methods'
+import { sortTags } from '../common/methods'
 import { getTagsPayload } from '../common/payloads'
 import { HttpStatusCode } from '../common/responses'
 import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
@@ -63,10 +63,8 @@ export async function getTags(
     tagsData.push(tagData)
   })
 
-  const sortedTags = sortTagsByTagNumber(tagsData)
-
   return {
-    data: sortedTags,
+    data: sortTags(tagsData, payload.sort),
     success: true,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,
