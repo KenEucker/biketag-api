@@ -508,7 +508,7 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Game Data Methods   ************************************ ///
 
   game(
-    payload: RequireAtLeastOne<getGamePayload> | string | undefined
+    payload?: RequireAtLeastOne<getGamePayload> | string | undefined
   ): Promise<BikeTagApiResponse<Game>> {
     return this.getGame(payload)
   }
@@ -538,7 +538,7 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Queue Methods   **************************************** ///
 
   queue(
-    payload: any,
+    payload?: any,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag[]>> {
     /// TODO: determine if getQueue or queueTagImage or submitQueuedTag is intended
@@ -563,7 +563,7 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Tag Data Methods   ************************************ ///
 
   tags(
-    payload: getTagPayload | getTagsPayload | number | number[],
+    payload?: getTagPayload | getTagsPayload | number | number[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag[]>> {
     /// TODO: determine if singular getTag or multiple getTags is intended
@@ -749,7 +749,7 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Player Data Methods   ********************************** ///
 
   players(
-    payload: getPlayerPayload | getPlayersPayload | string | string[],
+    payload?: getPlayerPayload | getPlayersPayload | string | string[],
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Player[]>> {
     return this.getPlayers(
@@ -901,7 +901,7 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Setting Data Methods   ********************************* ///
 
   settings(
-    payload: getSettingPayload | getSettingsPayload | string | string[],
+    payload?: getSettingPayload | getSettingsPayload | string | string[],
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Setting[]>> {
     return this.getSettings(
