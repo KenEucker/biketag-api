@@ -508,21 +508,17 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Game Data Methods   ************************************ ///
 
   game(
-    payload?: RequireAtLeastOne<getGamePayload> | string | undefined
+    payload?: RequireAtLeastOne<getGamePayload> | string | undefined,
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Game>> {
-    return this.getGame(payload)
+    return this.getGame(payload, opts)
   }
 
   getGame(
-    payload: RequireAtLeastOne<getGamePayload> | string | undefined
+    payload: RequireAtLeastOne<getGamePayload> | string | undefined,
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Game>> {
-    const onlyApplicableOpts =
-      typeof payload === 'string' ? { game: payload } : payload
-    const { client, options, api } = this.getAPI(
-      onlyApplicableOpts,
-      { source: AvailableApis[AvailableApis.sanity] },
-      DataTypes.game
-    )
+    const { client, options, api } = this.getAPI(payload, opts, DataTypes.game)
 
     return api.getGame(client, options).catch((e) => {
       return {
@@ -571,7 +567,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getTag(
-    payload: RequireAtLeastOne<getTagPayload> | number,
+    payload?: RequireAtLeastOne<getTagPayload> | number,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag>> {
     const { client, options, api } = this.getAPI(payload, opts)
@@ -825,7 +821,7 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Ambassador Data Methods   ****************************** ///
 
   ambassadors(
-    payload: getAmbassadorPayload | getAmbassadorsPayload | string | string[],
+    payload?: getAmbassadorPayload | getAmbassadorsPayload | string | string[],
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Ambassador[]>> {
     return this.getAmbassadors(
@@ -911,7 +907,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getSetting(
-    payload?: getSettingPayload | string,
+    payload: getSettingPayload | string,
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Setting>> {
     const { client, options, api } = this.getAPI(payload, opts)
