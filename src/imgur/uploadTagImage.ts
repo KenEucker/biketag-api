@@ -7,11 +7,7 @@ import {
   getUpdateTagPayloadFromTagData,
 } from './helpers'
 import { HttpStatusCode } from '../common/responses'
-import {
-  BikeTagApiResponse,
-  ImgurImage,
-  Tag,
-} from '../common/types'
+import { BikeTagApiResponse, ImgurImage, Tag } from '../common/types'
 import { AvailableApis } from '../common/enums'
 
 export async function uploadTagImage(

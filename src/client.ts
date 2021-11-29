@@ -21,11 +21,7 @@ import {
   Setting,
   ApiOptions,
 } from './common/types'
-import {
-  AvailableApis,
-  DataTypes,
-  Errors,
-} from './common/enums'
+import { AvailableApis, DataTypes, Errors } from './common/enums'
 import {
   getTagPayload,
   getTagsPayload,
@@ -238,9 +234,13 @@ export class BikeTagClient extends EventEmitter {
         }
         break
       case DataTypes.queue:
-        options.hash = options.queueHash ?? options.hash ?? this.imgurConfig.queueHash ?? this.imgurConfig.hash 
+        options.hash =
+          options.queueHash ??
+          options.hash ??
+          this.imgurConfig.queueHash ??
+          this.imgurConfig.hash
         break
-        }
+    }
 
     if (overrides.source) {
       options.source = AvailableApis[overrides.source]
@@ -527,7 +527,11 @@ export class BikeTagClient extends EventEmitter {
     payload: RequireAtLeastOne<getGamePayload> | string | undefined,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Game>> {
-    const { client, options, api, source } = this.getAPI(payload, opts, DataTypes.game)
+    const { client, options, api, source } = this.getAPI(
+      payload,
+      opts,
+      DataTypes.game
+    )
     const clientMethod = api.getGame
 
     if (clientMethod) {
@@ -556,8 +560,13 @@ export class BikeTagClient extends EventEmitter {
 
   getQueue(
     payload?: RequireAtLeastOne<getQueuePayload>,
-    opts?: RequireAtLeastOne<Credentials>): Promise<BikeTagApiResponse<Tag[]>> {
-    const { client, options, api, source } = this.getAPI(payload, opts, DataTypes.queue)
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Tag[]>> {
+    const { client, options, api, source } = this.getAPI(
+      payload,
+      opts,
+      DataTypes.queue
+    )
     const clientMethod = api.getQueue
 
     /// If the client adapter implements the method
@@ -578,9 +587,14 @@ export class BikeTagClient extends EventEmitter {
 
   queueTagImage(
     payload?: RequireAtLeastOne<queueTagImagePayload>,
-    opts?: RequireAtLeastOne<Credentials>): Promise<BikeTagApiResponse<Tag>> {
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Tag>> {
     /// take player information and a tag image (either found or mystery) and add it to the queue
-    const { client, options, api, source } = this.getAPI(payload, opts, DataTypes.queue)
+    const { client, options, api, source } = this.getAPI(
+      payload,
+      opts,
+      DataTypes.queue
+    )
     const clientMethod = api.queueTagImage
 
     /// If the client adapter implements the method
@@ -601,9 +615,14 @@ export class BikeTagClient extends EventEmitter {
 
   submitQueuedTag(
     payload?: RequireAtLeastOne<queueTagImagePayload>,
-    opts?: RequireAtLeastOne<Credentials>): Promise<BikeTagApiResponse<Tag>> {
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Tag>> {
     /// using the player information and the tag number, send the submit tag request to the biketag server
-    const { client, options, api, source } = this.getAPI(payload, opts, DataTypes.queue)
+    const { client, options, api, source } = this.getAPI(
+      payload,
+      opts,
+      DataTypes.queue
+    )
     const clientMethod = api.submitQueuedTag
 
     /// If the client adapter implements the method
@@ -762,7 +781,6 @@ export class BikeTagClient extends EventEmitter {
           source,
         })
       })
-
     } else {
       throw new Error(`updateTag ${Errors.NotImplemented} ${source}`)
     }
@@ -774,7 +792,7 @@ export class BikeTagClient extends EventEmitter {
       | RequireAtLeastOne<importTagPayload>
       | RequireAtLeastOne<importTagPayload>[],
     opts?: RequireAtLeastOne<Credentials>
-    ): Promise<BikeTagApiResponse<Tag[]>> {
+  ): Promise<BikeTagApiResponse<Tag[]>> {
     const { source } = this.getAPI(payload, opts)
     throw new Error(`updateTag ${Errors.NotImplemented} ${source}`)
   }
@@ -805,7 +823,6 @@ export class BikeTagClient extends EventEmitter {
           source,
         })
       })
-    
     } else {
       throw new Error(`deleteTag ${Errors.NotImplemented} ${source}`)
     }
@@ -837,7 +854,6 @@ export class BikeTagClient extends EventEmitter {
           source,
         })
       })
-
     } else {
       throw new Error(`deleteTags ${Errors.NotImplemented} ${source}`)
     }
@@ -947,7 +963,11 @@ export class BikeTagClient extends EventEmitter {
     payload: RequireAtLeastOne<getAmbassadorPayload> | string,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Ambassador>> {
-    const { client, options, api } = this.getAPI(payload, opts, DataTypes.ambassador)
+    const { client, options, api } = this.getAPI(
+      payload,
+      opts,
+      DataTypes.ambassador
+    )
     const clientMethod = api.getAmbassador
 
     /// If the client adapter implements a direct way to retrieve a single ambassador
@@ -1031,7 +1051,11 @@ export class BikeTagClient extends EventEmitter {
     payload: RequireAtLeastOne<getSettingPayload> | string,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Setting>> {
-    const { client, options, api } = this.getAPI(payload, opts, DataTypes.setting)
+    const { client, options, api } = this.getAPI(
+      payload,
+      opts,
+      DataTypes.setting
+    )
     const clientMethod = api.getSetting
 
     /// If the client adapter implements a direct way to retrieve a single setting

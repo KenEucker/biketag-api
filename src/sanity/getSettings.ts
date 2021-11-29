@@ -1,12 +1,6 @@
 import { SanityClient } from '@sanity/client'
-import {
-  BikeTagApiResponse,
-  Setting,
-} from '../common/types'
-import {
-  AvailableApis,
-  DataTypes,
-} from '../common/enums'
+import { BikeTagApiResponse, Setting } from '../common/types'
+import { AvailableApis, DataTypes } from '../common/enums'
 import {
   constructPlayerFromSanityObject,
   constructSanityDocumentQuery,

@@ -1,9 +1,7 @@
 import { ImageData } from 'imgur/lib/common/types'
 import { IGunChainReference } from 'gun/types/chain'
 export { Payload } from 'imgur/lib/common/types'
-import {
-  AvailableApis,
-} from '../common/enums'
+import { AvailableApis } from '../common/enums'
 
 export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>
