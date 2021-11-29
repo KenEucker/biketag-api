@@ -19,7 +19,8 @@ import {
   createAmbassadorObject,
   settingDataFields,
 } from '../common/data'
-import { DataTypes } from '../common/types'
+import { DataTypes } from '../common/enums'
+import { Tag } from '../common/types'
 
 export function constructTagFromSanityObject(
   data: any,

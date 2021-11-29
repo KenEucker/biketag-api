@@ -46,9 +46,18 @@ export type updateTagPayload = {
 
 export type uploadTagImagePayload = {
   tagnumber: number
-  type: 'found' | 'mystery' | 'queued'
+  type: 'found' | 'mystery'
   slug?: string
   stream: ReadableStream
+}
+
+export type ImgurUploadPayload = {
+  image: string
+  title?: string
+  description?: string
+  type?: string
+  hash?: string
+  album?: string
 }
 
 export type getGamePayload = {
@@ -109,3 +118,11 @@ export type importTagPayload = Pick<
   CommonData
 
 export type getQueuePayload = CommonData
+
+export type queueTagImagePayload = {
+  tagnumber: number
+  type: 'found' | 'mystery'
+  player: string
+  stream: ReadableStream
+  queueHash?: string
+} & Partial<Tag>

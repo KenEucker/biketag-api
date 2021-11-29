@@ -1,8 +1,9 @@
 import { SanityClient } from '@sanity/client'
-import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
+import { BikeTagApiResponse, Tag } from '../common/types'
 import { uploadTagImagePayload } from '../common/payloads'
 import { constructSanityObjectFromTag } from './helpers'
 import { HttpStatusCode } from '../common/responses'
+import { AvailableApis } from '../common/enums'
 
 export async function uploadTagImage(
   client: SanityClient,
@@ -21,15 +22,12 @@ export async function uploadTagImage(
       slug: uploadPayload.slug,
     } as Tag
     switch (uploadPayload.type) {
-      case 'found':
-        updateTag.foundImage = uploadResponse._id
-        break
       case 'mystery':
         updateTag.mysteryImage = uploadResponse._id
         break
-      default:
-      case 'queued':
-        updateTag.foundImage = `${uploadResponse._id},`
+
+      case 'found':
+        updateTag.foundImage = uploadResponse._id
         break
     }
 

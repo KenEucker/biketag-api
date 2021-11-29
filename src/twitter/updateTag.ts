@@ -1,6 +1,7 @@
 import { updateTagPayload } from '../common/payloads'
 import { BikeTagApiResponse, Tag } from '../common/types'
 import TwitterClient from 'twitter-v2'
+import { Errors } from '../common/enums'
 
 export async function updateTag(
   client: TwitterClient,
@@ -9,5 +10,5 @@ export async function updateTag(
   // const promises: Promise<BikeTagApiResponse<TagData>>[] = []
   // const payloads = Array.isArray(payload) ? payload : [payload]
 
-  throw new Error('updateTag not implemented for Twitter adapter')
+  throw new Error(`updateTag ${Errors.NotImplemented} Twitter`)
 }

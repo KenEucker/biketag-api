@@ -1,82 +1,580 @@
 <!DOCTYPE html>
-<html lang="en">
-  <title>BikeTag Example Dashboard</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script type="text/javascript" src="/dist/biketag.js"></script>
-  <body>
-    <div id="container"></div>
+<html>
 
-    <script>
-      ;(async () => {
-        const biketagAPI = new biketag({
-          projectId: 'x37ikhvs',
-          accessToken:
-            'skT5BHdVV4KxSzf2ugg1gg8P7fR1ws22Yk0Al3H2fEsSJ3KvAmR4TivtHlHeV5Ww9kIiO36TsPkEofZ39IBxZ03GKcOZqeExE2mgHXxEv9KuslRJezBQK55oYXll9kQqKwHSU3skZ3plLzRsRPosiOiyn8BJg43xcsyQuvovXKxFg4Bh907n',
-          dataset: 'production',
-          useCdn: false,
-          game: 'portland',
-        })
+<head>
+  <meta charset="utf-8">
+  <meta name="referrer" content="no-referrer" />
 
-        console.log('BikeTag Config', biketagAPI.config())
+  <!-- Production BikeTag Client -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/biketag/biketag.js"></script> -->
 
-        const tag5 = await biketagAPI.getTag({ tagnumber: 3, fields: ['slug'] })
-        const tag4 = await biketagAPI.getTag({ tagnumber: 3 })
-        const tag3 = await biketagAPI.getTag({ slug: 'portland-tag-3' })
-        const tag2 = await biketagAPI.getTag(2)
-        const tag1 = await biketagAPI.getTag('portland-tag-1')
-        const tags = [tag1, tag2, tag3]
+  <!-- Local BikeTag Client -->
+  <script src="/dist/biketag.js"></script>
 
-        console.log({ tags })
+  <!-- Lazy Load Client -->
+  <script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-rc.2/lazyload.js"></script>
 
-        const showImagesAndData = (tags, id) => {
-          const container = document.getElementById(id)
+  <!-- Styles -->
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-          const appendTagImageAndData = (tag) => {
-            console.log({ tag })
-            const inner = document.createElement('div')
+    body {
+      margin: 0;
+      font-family: Arial;
+    }
 
-            const img1 = document.createElement('img')
-            const img2 = document.createElement('img')
+    .header {
+      text-align: center;
+      padding: 32px;
+    }
 
-            img1.src = tag.foundImageUrl
-            img1.width = '300'
-            img2.src = tag.mysteryImageUrl
-            img2.width = '300'
+    .row {
+      display: -ms-flexbox;
+      /* IE10 */
+      display: flex;
+      -ms-flex-wrap: wrap;
+      /* IE10 */
+      flex-wrap: wrap;
+      padding: 0 4px;
+    }
 
-            const dataDiv = document.createElement('div')
-            dataDiv.innerHTML = JSON.stringify(tag)
+    /* Create four equal columns that sits next to each other */
+    .column {
+      -ms-flex: 25%;
+      /* IE10 */
+      flex: 25%;
+      max-width: 25%;
+      padding: 0 4px;
+    }
 
-            inner.appendChild(img1)
-            inner.appendChild(img2)
-            inner.appendChild(dataDiv)
+    .column img {
+      margin-top: 8px;
+      vertical-align: middle;
+      width: 100%;
+    }
 
-            return inner
+    /* Responsive layout - makes a two column-layout instead of four columns */
+    @media screen and (max-width: 800px) {
+      .column {
+        -ms-flex: 50%;
+        flex: 50%;
+        max-width: 50%;
+      }
+    }
+
+    /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+    @media screen and (max-width: 600px) {
+      .column {
+        -ms-flex: 100%;
+        flex: 100%;
+        max-width: 100%;
+      }
+    }
+
+    #pages {
+      position: relative;
+    }
+
+    #loaderContainer {
+      margin: 0px;
+      display: none;
+      padding: 0px;
+      position: absolute;
+      right: 0px;
+      top: 0px;
+      width: 100%;
+      height: 100%;
+      background-color: rgb(255, 255, 255);
+      z-index: 30001;
+      opacity: 0.8;
+    }
+
+    #loaderContainer.loading {
+      display: block;
+    }
+
+    #loaderContainer.loading #loader {
+      position: absolute;
+      color: White;
+      top: 50%;
+      left: 45%;
+      border: 16px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 16px solid #3498db;
+      width: 120px;
+      height: 120px;
+      background-color: rgba(0, 0, 0, 45);
+      -webkit-animation: spin 2s linear infinite;
+      /* Safari */
+      animation: spin 2s linear infinite;
+    }
+
+    /* Safari */
+    @-webkit-keyframes spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+      }
+
+      100% {
+        -webkit-transform: rotate(360deg);
+      }
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* #gameDirectory img {
+      max-width: 10vw;
+    }
+
+    #gameDirectory>div {
+      text-align: center;
+      display: inline-grid;
+    }*/
+
+    #gameDirectory {
+      margin-top: 2em;
+    }
+
+    .card {
+      color: black;
+      padding: 1rem;
+      height: 8em;
+      text-align: center;
+      display: inline-grid;
+      font-family: monospace;
+      font-size: 16px;
+      font-weight: bold;
+      margin: auto;
+    }
+
+    .cards {
+      width: 100%;
+      margin: 0 auto;
+      display: grid;
+      grid-gap: 1rem;
+    }
+
+    .cards img {
+      max-height: 15vh;
+    }
+
+    /* Screen larger than 600px? 2 column */
+    @media (min-width: 600px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Screen larger than 900px? 3 columns */
+    @media (min-width: 900px) {
+      .cards {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .hidden {
+      visibility: hidden;
+      display: none;
+    }
+
+    #logo {
+      max-height: 40vh;
+    }
+
+    #currentImage img {
+      max-height: 25vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loaderContainer">
+    <div id="loader"></div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <img id="logo"
+      src="https://cdn.sanity.io/images/x37ikhvs/production/dd6d8069fdfc6a4b7f9670977f0959301587534f-1200x600.png"
+      style="max-width:25vw;">
+    <h1>BikeTag Starter</h1>
+    <div id="currentImage" class="hidden">
+      <h3>Current Mystery Location</h3>
+      <img>
+    </div>
+    <p>See all of the images for the <span id="game"></span> game.</p>
+    <select id="gameChanger" onChange="javascript:window.changeGame(this);">
+      <option></option>
+    </select>
+  </div>
+
+  <!-- Pagination -->
+  <div id="pages" style="text-align: center">
+    <div>
+      <a href="javascript:window.prevPage()" id="btn_prev">Prev</a>
+      <span id="page"></span>
+      <a href="javascript:window.nextPage()" id="btn_next">Next</a>
+    </div>
+    <div id="pageContent"></div>
+  </div>
+
+  <!-- Directory -->
+
+  <h1>BikeTag Game Directory</h1>
+  <div id="gameDirectory" class="cards">
+  </div>
+
+  <!-- BikeTag Browser Code -->
+  <script src="browser.js"></script>
+  <script>
+    /// Configure BikeTag API Opts
+    const options = {
+      imgur: {
+        hash: "QjnikOm",
+        clientId: "4fa12c6ce36984b",
+      },
+      sanity: {
+        projectId: "x37ikhvs",
+        dataset: "production",
+      },
+    }
+
+    function biketagExample(options = {}) {
+      let num_pages = 0;
+      let current_page = 1;
+      let previous_page = current_page;
+      const rows_per_page = 3;
+      const sanityBaseCDNUrl =
+        `https://cdn.sanity.io/images/${options.sanity?.projectId ?? 'x37ikhvs'}/${options.sanity?.dataset ?? 'production'}/`
+
+      /// Setup
+      const getBikeTagApi = (opts, reinitialize = false) => {
+        if (!window.biketagApi) {
+          window.biketagApi = new biketag(opts)
+        } else {
+          console.log('setting new BikeTag config', {
+            config: window.biketagApi.config(opts, false, reinitialize)
+          })
+        }
+
+        return window.biketagApi
+      }
+
+      /// Change Game Selector Event
+      const changeGame = async (elem) => {
+        if (elem.selectedIndex > -1) {
+          load({
+            ...options,
+            game: elem[elem.selectedIndex].value
+          })
+        }
+      }
+
+      /// Load BikeTag Game Data into UI
+      const load = async (opts) => {
+        const loaderEl = document.getElementById('loaderContainer')
+        loaderEl.classList.add('loading')
+
+        opts.game = opts.game ? opts.game : 'test'
+        let biketagAPI = getBikeTagApi(opts, true)
+        const game = await biketagAPI.game(opts.game)
+        const pagesEl = document.getElementById('pageContent')
+        const logoEl = document.getElementById('logo')
+        const currentImageEl = document.getElementById('currentImage')
+
+        pagesEl.innerHTML = ""
+        num_pages = 0
+        current_page = previous_page = 1
+        currentImageEl.classList.add('hidden')
+
+        const createImage = (url) => {
+          const imgEl = document.createElement('img')
+          const ext = /[^.]+$/.exec(url)
+          if (['.jpg', '.jpeg', '.png', '.bmp'].indexOf(ext) !== -1) {
+            url = url.replace(ext, `l${ext}`)
+          } else if (ext.indexOf('.com/') === 0 && url.indexOf('//imgur.com/')) {
+            url = `${url.replace('//imgur.com', '//i.imgur.com')}l.jpg`
           }
 
-          tags.map((tag) =>
-            container.appendChild(appendTagImageAndData(tag.data))
-          )
+          imgEl.dataset.src = url
+          imgEl.class = 'lazyload'
+          imgEl.style = "width:100%;max-width:35vw"
+
+          return imgEl
         }
 
-        const outputTagTable = (tags, id) => {
-          let txt = '<table>'
+        const createPage = (num = 1, rows = 4) => {
+          const pageEl = document.createElement('div')
 
-          tags.forEach((tag) => {
-            for (key in tag) {
-              txt += '<tr><td><strong>' + key + '</strong></td></tr>'
-              txt +=
-                '<tr><td>' +
-                (tag[key] ? tag[key].toString() : 'undefined') +
-                '</td></tr>'
-            }
+          pageEl.id = `page-${num}`
+          pageEl.class = 'row'
+
+          if (num > 1) {
+            pageEl.style.display = "none";
+            pageEl.style.visibility = "hidden";
+          }
+
+          for (let i = 1; i <= rows; i++) {
+            const columnEl = document.createElement('div')
+
+            columnEl.class = 'column'
+            columnEl.id = `c${i}`
+            pageEl.append(columnEl)
+          }
+
+          return pageEl
+        }
+
+        if (game.data) {
+          console.info("\x1b[44mDisplaying Game\x1b[0m", game.data)
+
+          const gameTextEl = document.getElementById("game")
+          gameTextEl.innerText = game.data.name
+
+          currentImageEl.querySelector('img').src = `https://${game.data.slug}.biketag.org/current`
+          currentImageEl.classList.remove('hidden')
+          logoEl.src = getLogoImageUrl(game.data)
+
+          biketagAPI = getBikeTagApi({
+            ...opts,
+            imgur: {
+              hash: game.data.mainhash,
+            },
+            reddit: {
+              subreddit: game.data.subreddit,
+            },
+          }, true)
+          const config = biketagAPI.config()
+
+          const albumTagsData = await biketagAPI.tags(undefined, config.imgur.hash ? {
+            source: 'imgur'
+          } : {
+            source: 'reddit',
+            hash: 'n0'
           })
-          txt += '</table>'
-          document.getElementById(id).innerHTML = txt
+          const biketags = albumTagsData && albumTagsData.data ? albumTagsData.data : []
+          window.biketags = biketags
+
+          console.info(
+            `BikeTag Client Configured -> ${biketags.length ? 'BikeTags Retrieved' : `No BikeTags For Game: ${game.data.name}`}`, {
+              game: game.data,
+              biketags,
+            })
+
+          if (biketags.length) {
+            const imagesToLoad = []
+            let pageContentEl = null
+            let columns = []
+            for (let i = 0, j = 0, k = 0; i < biketags.length; ++i) {
+              const foundImageUrl = biketags[i].foundImageUrl
+              const mysteryImgUrl = biketags[i].mysteryImageUrl
+
+              if (!(mysteryImgUrl || foundImageUrl)) {
+                return
+              }
+
+              if (k === 0) {
+                /// Create new page
+                k++
+                pageContentEl = createPage(++num_pages)
+
+                columns = [
+                  pageContentEl.querySelector('#c1'),
+                  pageContentEl.querySelector('#c2'),
+                  pageContentEl.querySelector('#c3'),
+                  pageContentEl.querySelector('#c4'),
+                ]
+              }
+
+              if (foundImageUrl) {
+                const foundImage = createImage(foundImageUrl)
+                imagesToLoad.push(foundImage)
+                columns[j++].appendChild(foundImage)
+              }
+
+              if (j > 3) {
+                j = 0
+                k++
+              }
+
+              if (mysteryImgUrl) {
+                const mysteryImage = createImage(mysteryImgUrl)
+                imagesToLoad.push(mysteryImage)
+                columns[j++].appendChild(mysteryImage)
+              }
+
+              if (j > 3) {
+                j = 0
+                k++
+              }
+
+              if (k > rows_per_page) {
+                pagesEl.appendChild(pageContentEl)
+                pageContentEl = null
+                k = 0
+              }
+            }
+
+            if (pageContentEl) {
+              pagesEl.appendChild(pageContentEl)
+            }
+
+            lazyload(imagesToLoad)
+            changePage(1)
+          }
+          loaderEl.classList.remove('loading')
+        }
+      }
+
+      /// Populate the Change Game Selector from all available games
+      const setAllGames = async (opts) => {
+        const biketagAPI = getBikeTagApi(opts, true)
+        const allGames = await biketagAPI.game()
+
+        if (allGames.data && allGames.data.length) {
+          console.info("\x1b[44mGame Data Retrieved\x1b[0m", {
+            allGames
+          })
+
+          const gameChangerEl = document.getElementById('gameChanger')
+          const gameDirectoryEl = document.getElementById('gameDirectory')
+          for (let game of allGames.data) {
+            const gameSelectEl = document.createElement('option')
+            const gameIconEl = document.createElement('a')
+            const gameIconImageEl = document.createElement('img')
+            const gameIconTextEl = document.createElement('span')
+            gameIconEl.className = 'card'
+            gameIconEl.href = `https://${game.slug}.biketag.org`
+            gameIconImageEl.src = getLogoImageUrl(game)
+            gameIconTextEl.innerText = game.name
+            if (game.logo) {
+              gameIconTextEl.classList.add('hidden')
+            }
+            gameIconEl.append(gameIconImageEl)
+            gameIconEl.append(gameIconTextEl)
+            gameDirectoryEl.append(gameIconEl)
+
+            gameSelectEl.text = game.name
+            gameSelectEl.value = game.slug
+            gameChangerEl.appendChild(gameSelectEl)
+          }
+        } else {
+          console.info("\033[41mGame Data Could Not Be Retrieved\x1b[0m", allGames)
+          if (!/0.0.0.0/.test(window.location.host)) {
+            const portNumberIndex = window.location.host.indexOf(':')
+            const zeeroZeroZeroZeroUrl =
+              `http://0.0.0.0${portNumberIndex !== -1 ? window.location.host.substring(portNumberIndex) : ''}`
+            const retyMessate =
+              `Request is not being made from <a href="${zeeroZeroZeroZeroUrl}">${zeeroZeroZeroZeroUrl}</a>.<br>If you are running this on your local machine, (localhost), try 0.0.0.0 instead.`
+            const currentImageEl = document.getElementById('currentImage')
+            const currentImageHeadingEl = currentImageEl.querySelector('h3')
+
+            currentImageHeadingEl.innerHTML = retyMessate
+            currentImageEl.classList.remove('hidden')
+
+            console.log(retyMessate)
+          }
+        }
+      }
+
+      /// Helpers
+      const getLogoImageUrl = (game = {}) => game.logo ?
+        `${sanityBaseCDNUrl}${game.logo.replace('image-', '').replace('-png', '.png').replace('-jpg','.jpg')}` :
+        `${sanityBaseCDNUrl}dd6d8069fdfc6a4b7f9670977f0959301587534f-1200x600.png`
+
+      /// ... Pagination Methods ... ///
+      const prevPage = () => {
+        if (current_page > 1) {
+          previous_page = current_page;
+          current_page--;
+          changePage(current_page);
+        }
+      }
+
+      const nextPage = () => {
+        if (current_page < numPages()) {
+          previous_page = current_page;
+          current_page++;
+          changePage(current_page);
+        }
+      }
+
+      const changePage = (page) => {
+        var btn_next = document.getElementById("btn_next");
+        var btn_prev = document.getElementById("btn_prev");
+        var pageContentEls = document.querySelectorAll("#pageContent > *");
+        var page_span = document.getElementById("page");
+
+        // Validate page
+        if (page < 1) page = 1;
+        if (page > numPages()) page = numPages();
+
+        console.log('changePage', {
+          page,
+          pageContentEls,
+          current_page,
+          previous_page
+        })
+        if (pageContentEls.length) {
+          if (previous_page < pageContentEls.length) {
+            pageContentEls[previous_page - 1].style.display = "none";
+            pageContentEls[previous_page - 1].style.visibility = "hidden";
+          }
+
+          pageContentEls[current_page - 1].style.display = "flex";
+          pageContentEls[current_page - 1].style.visibility = "visible";
+        }
+        page_span.innerHTML = page + "/" + numPages();
+
+        if (page == 1) {
+          btn_prev.style.visibility = "hidden";
+        } else {
+          btn_prev.style.visibility = "visible";
         }
 
-        showImagesAndData(tags, 'container')
-      })()
-    </script>
-  </body>
+        if (page == numPages()) {
+          btn_next.style.visibility = "hidden";
+        } else {
+          btn_prev.style.visibility = "visible";
+          btn_next.style.visibility = "visible";
+        }
+      }
+
+      const numPages = () => {
+        return Math.ceil(num_pages / rows_per_page);
+      }
+
+      /// ... BOOTSTRAP ... ///
+      setAllGames(options)
+
+      /// ... LOAD .. ///
+      window.onload = function () {
+        changePage(1);
+      };
+
+      window.changePage = changePage
+      window.changeGame = changeGame
+      window.nextPage = nextPage
+      window.prevPage = prevPage
+    }
+
+    /// Run
+    biketagExample(options)
+  </script>
+</body>
+
 </html>

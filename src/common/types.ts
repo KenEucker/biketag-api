@@ -1,27 +1,11 @@
 import { ImageData } from 'imgur/lib/common/types'
 import { IGunChainReference } from 'gun/types/chain'
 export { Payload } from 'imgur/lib/common/types'
+import { AvailableApis } from '../common/enums'
 
 export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>
 }[keyof T]
-
-/// ****************************  BikeTag Enums   ************************************** ///
-export enum AvailableApis {
-  biketag,
-  imgur,
-  sanity,
-  reddit,
-  twitter,
-}
-
-export enum DataTypes {
-  ambassador,
-  game,
-  player,
-  setting,
-  tag,
-}
 
 /// ****************************  Imgur Credential Objects   *************************** ///
 export interface ImgurAccessToken {
@@ -34,6 +18,7 @@ export interface ImgurClientId {
 
 export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
   hash?: string
+  queueHash?: string
   clientSecret: string
 }
 /// ****************************  Twitter Credential Objects   ************************* ///
@@ -135,6 +120,7 @@ export type ApiOptions = RequireAtLeastOne<{
   game: string
   source: AvailableApis | string
   hash?: string
+  queueHash?: string
   slugs?: string[]
   fields?: string[]
   slug?: string

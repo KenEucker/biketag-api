@@ -2,11 +2,12 @@ import type { ImgurClient } from 'imgur'
 import { sortTags } from '../common/methods'
 import { getTagsPayload } from '../common/payloads'
 import { HttpStatusCode } from '../common/responses'
-import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
+import { BikeTagApiResponse, Tag } from '../common/types'
 import {
   getBikeTagNumberFromImage,
   getBikeTagFromImgurImageSet,
 } from './helpers'
+import { AvailableApis } from '../common/enums'
 
 export async function getTags(
   client: ImgurClient,

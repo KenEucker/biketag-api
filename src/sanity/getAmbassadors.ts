@@ -1,10 +1,6 @@
 import { SanityClient } from '@sanity/client'
-import {
-  AvailableApis,
-  BikeTagApiResponse,
-  DataTypes,
-  Ambassador,
-} from '../common/types'
+import { AvailableApis, DataTypes } from '../common/enums'
+import { BikeTagApiResponse, Ambassador } from '../common/types'
 import {
   constructAmbassadorFromSanityObject,
   constructSanityDocumentQuery,
