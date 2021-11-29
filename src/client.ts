@@ -559,7 +559,7 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Tag Data Methods   ************************************ ///
 
   tags(
-    payload?: getTagPayload | getTagsPayload | number | number[],
+    payload?: RequireAtLeastOne<getTagPayload> | RequireAtLeastOne<getTagsPayload> | number | number[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag[]>> {
     /// TODO: determine if singular getTag or multiple getTags is intended
@@ -606,7 +606,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getTags(
-    payload?: getTagsPayload | number[],
+    payload?: RequireAtLeastOne<getTagsPayload> | number[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag[]>> {
     const { client, options, api } = this.getAPI(payload, opts)
@@ -632,7 +632,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   uploadTagImage(
-    payload: uploadTagImagePayload | uploadTagImagePayload[],
+    payload: RequireAtLeastOne<uploadTagImagePayload> | RequireAtLeastOne<uploadTagImagePayload>[],
     opts?: Credentials
   ): Promise<BikeTagApiResponse<any | any[]>> {
     const { client, options, api } = this.getAPI(payload, opts)
@@ -650,8 +650,8 @@ export class BikeTagClient extends EventEmitter {
 
   /// TODO: change to generic update that accepts any data type
   updateTag(
-    payload: updateTagPayload | updateTagPayload[],
-    opts?: Credentials
+    payload: RequireAtLeastOne<updateTagPayload> | RequireAtLeastOne<updateTagPayload>[],
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
     const { client, options, api } = this.getAPI(payload, opts)
     let clientMethod = api.updateTag
@@ -681,8 +681,7 @@ export class BikeTagClient extends EventEmitter {
 
   /// TODO: change to generic import that accepts any data type
   importTag(
-    payload:
-      | RequireAtLeastOne<importTagPayload>
+    payload: RequireAtLeastOne<importTagPayload>
       | RequireAtLeastOne<importTagPayload>[]
   ): Promise<BikeTagApiResponse<Tag[]>> {
     return payload as unknown as Promise<BikeTagApiResponse<Tag[]>>
@@ -690,7 +689,7 @@ export class BikeTagClient extends EventEmitter {
 
   /// TODO: change to generic delete that accepts any data type
   deleteTag(
-    payload: deleteTagPayload | number,
+    payload: RequireAtLeastOne<deleteTagPayload> | number,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<any>> {
     const { client, options, api } = this.getAPI(payload, opts)
@@ -717,7 +716,7 @@ export class BikeTagClient extends EventEmitter {
 
   /// TODO: change to generic delete that accepts any data type
   deleteTags(
-    payload: deleteTagsPayload | number[],
+    payload: RequireAtLeastOne<deleteTagsPayload> | number[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<any>> {
     const { client, options, api } = this.getAPI(payload, opts)
@@ -745,8 +744,8 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Player Data Methods   ********************************** ///
 
   players(
-    payload?: getPlayerPayload | getPlayersPayload | string | string[],
-    opts?: Credentials
+    payload?: RequireAtLeastOne<getPlayerPayload> | RequireAtLeastOne<getPlayersPayload> | string | string[],
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Player[]>> {
     return this.getPlayers(
       this.getInitialPayload(payload) as getPlayersPayload,
@@ -755,8 +754,8 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getPlayer(
-    payload: getPlayerPayload | string,
-    opts?: Credentials
+    payload: RequireAtLeastOne<getPlayerPayload> | string,
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Player>> {
     const { client, options, api } = this.getAPI(payload, opts)
     const clientMethod = api.getPlayer
@@ -789,8 +788,8 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getPlayers(
-    payload?: getPlayersPayload | string[],
-    opts?: Credentials
+    payload?: RequireAtLeastOne<getPlayersPayload> | string[],
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Player[]>> {
     const { client, options, api } = this.getAPI(
       payload,
@@ -821,8 +820,8 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Ambassador Data Methods   ****************************** ///
 
   ambassadors(
-    payload?: getAmbassadorPayload | getAmbassadorsPayload | string | string[],
-    opts?: Credentials
+    payload?: RequireAtLeastOne<getAmbassadorPayload> | RequireAtLeastOne<getAmbassadorsPayload> | string | string[],
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Ambassador[]>> {
     return this.getAmbassadors(
       this.getInitialPayload(payload) as unknown as getAmbassadorsPayload,
@@ -831,8 +830,8 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getAmbassador(
-    payload: getAmbassadorPayload | string,
-    opts?: Credentials
+    payload: RequireAtLeastOne<getAmbassadorPayload> | string,
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Ambassador>> {
     const { client, options, api } = this.getAPI(payload, opts)
     const clientMethod = api.getAmbassador
@@ -865,8 +864,8 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getAmbassadors(
-    payload?: getAmbassadorsPayload | string[],
-    opts?: Credentials
+    payload?: RequireAtLeastOne<getAmbassadorsPayload> | string[],
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Ambassador[]>> {
     const { client, options, api } = this.getAPI(
       payload,
@@ -897,8 +896,8 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Setting Data Methods   ********************************* ///
 
   settings(
-    payload?: getSettingPayload | getSettingsPayload | string | string[],
-    opts?: Credentials
+    payload?: RequireAtLeastOne<getSettingPayload> | RequireAtLeastOne<getSettingsPayload> | string | string[],
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Setting[]>> {
     return this.getSettings(
       this.getInitialPayload(payload) as unknown as getSettingsPayload,
@@ -907,8 +906,8 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getSetting(
-    payload: getSettingPayload | string,
-    opts?: Credentials
+    payload: RequireAtLeastOne<getSettingPayload> | string,
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Setting>> {
     const { client, options, api } = this.getAPI(payload, opts)
     const clientMethod = api.getSetting
@@ -941,8 +940,8 @@ export class BikeTagClient extends EventEmitter {
   }
 
   getSettings(
-    payload?: getSettingsPayload | string[],
-    opts?: Credentials
+    payload?: RequireAtLeastOne<getSettingsPayload> | string[],
+    opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Setting[]>> {
     const { client, options, api } = this.getAPI(
       payload,
