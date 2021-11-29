@@ -3,7 +3,8 @@ import { createPlayerObject } from '../common/data'
 import { sortPlayers } from '../common/methods'
 import { getPlayersPayload } from '../common/payloads'
 import { HttpStatusCode } from '../common/responses'
-import { AvailableApis, BikeTagApiResponse, Player } from '../common/types'
+import { BikeTagApiResponse, Player } from '../common/types'
+import { AvailableApis } from '../common/enums'
 
 export async function getPlayers(
   client: ImgurClient,

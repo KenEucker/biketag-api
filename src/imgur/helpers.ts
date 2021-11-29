@@ -1,6 +1,15 @@
 import * as expressions from '../common/expressions'
 import { ImgurImage, Tag } from '../common/types'
-import { getCreditFromText, getImageHashFromText } from '../common/getters'
+import {
+  getCreditFromText,
+  getImageHashFromText,
+  getImgurFoundDescriptionFromBikeTagData,
+  getImgurFoundImageHashFromBikeTagData,
+  getImgurFoundTitleFromBikeTagData,
+  getImgurMysteryDescriptionFromBikeTagData,
+  getImgurMysteryImageHashFromBikeTagData,
+  getImgurMysteryTitleFromBikeTagData,
+} from '../common/getters'
 import { cacheKeys } from '../common/data'
 
 import TinyCache from 'tinycache'
@@ -9,6 +18,17 @@ import {
   putCacheIfExists,
   constructTagNumberSlug,
 } from '../common/methods'
+
+export interface ImgurUploadPayload {
+  imageHash: string
+  type?: string
+  image?: string
+  title: string
+  description: string
+  hash?: string
+  album?: string
+}
+export type UploadTagImagePayload = Partial<Tag> & Partial<ImgurUploadPayload>
 
 export function sortImgurImagesByUploadDate(
   images: ImgurImage[] = [],
@@ -380,4 +400,62 @@ export const getImageHashFromImgurImage = (
   cache?: typeof TinyCache
 ): string => {
   return getImageHashFromText(image.link, cache)
+}
+
+export const isValidUpdatePayload = (utp: UploadTagImagePayload): boolean => {
+  return (
+    (typeof utp.imageHash === 'string' &&
+      (typeof utp.title === 'string' || typeof utp.description === 'string')) ||
+    typeof utp.title === 'string' ||
+    typeof utp.description === 'string'
+  )
+}
+
+export const isValidUploadTagImagePayload = (
+  utp: UploadTagImagePayload
+): boolean => {
+  return (
+    /// TODO: do better type checking here
+    utp &&
+    typeof utp.image !== 'undefined' &&
+    (typeof utp.title === 'string' || typeof utp.description === 'string')
+  )
+}
+
+export const getUpdateTagPayloadFromTagData = (
+  payload: UploadTagImagePayload,
+  mystery = false
+): UploadTagImagePayload => {
+  return {
+    imageHash: mystery
+      ? getImgurMysteryImageHashFromBikeTagData(payload as Tag)
+      : getImgurFoundImageHashFromBikeTagData(payload as Tag),
+    title: mystery
+      ? getImgurMysteryTitleFromBikeTagData(payload as Tag)
+      : getImgurFoundTitleFromBikeTagData(payload as Tag),
+    description: mystery
+      ? getImgurMysteryDescriptionFromBikeTagData(payload as Tag)
+      : getImgurFoundDescriptionFromBikeTagData(payload as Tag),
+  }
+}
+
+export function getUploadTagImagePayloadFromTagData(
+  tagData: UploadTagImagePayload,
+  mystery = false
+): UploadTagImagePayload {
+  return {
+    album: tagData.album ?? tagData.hash,
+    type: tagData.type ?? 'url',
+    image: mystery ? tagData.mysteryImage : tagData.foundImage,
+    title:
+      tagData.title ??
+      (mystery
+        ? getImgurMysteryTitleFromBikeTagData(tagData as Tag)
+        : getImgurFoundTitleFromBikeTagData(tagData as Tag)),
+    description:
+      tagData.description ??
+      (mystery
+        ? getImgurMysteryDescriptionFromBikeTagData(tagData as Tag)
+        : getImgurFoundDescriptionFromBikeTagData(tagData as Tag)),
+  }
 }

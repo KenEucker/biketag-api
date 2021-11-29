@@ -1,10 +1,12 @@
 import { SanityClient } from '@sanity/client'
 import {
-  AvailableApis,
   BikeTagApiResponse,
-  DataTypes,
   Setting,
 } from '../common/types'
+import {
+  AvailableApis,
+  DataTypes,
+} from '../common/enums'
 import {
   constructPlayerFromSanityObject,
   constructSanityDocumentQuery,

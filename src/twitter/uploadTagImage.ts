@@ -1,6 +1,7 @@
 import { uploadTagImagePayload } from '../common/payloads'
 import { BikeTagApiResponse, Tag } from '../common/types'
 import TwitterClient from 'twitter-v2'
+import { Errors } from '../common/enums'
 
 export async function uploadTagImage(
   client: TwitterClient,
@@ -9,5 +10,5 @@ export async function uploadTagImage(
   // const promises: Promise<BikeTagApiResponse<TagData>>[] = []
   // const payloads = Array.isArray(payload) ? payload : [payload]
 
-  throw new Error('uploadTagImage not implemented for Twitter adapter')
+  throw new Error(`uploadTagImage ${Errors.NotImplemented} Twitter`)
 }

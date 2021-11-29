@@ -2,9 +2,8 @@ import type { ImgurClient } from 'imgur'
 import { ImgurApiResponse, Payload } from 'imgur/lib/common/types'
 import { createTagObject } from '../common/data'
 import {
-  UploadTagImagePayload,
+  getUploadTagImagePayloadFromTagData,
   isValidUploadTagImagePayload,
-  getUpdateTagPayloadFromTagData,
 } from './helpers'
 import { HttpStatusCode } from '../common/responses'
 import {
@@ -12,28 +11,26 @@ import {
   ImgurImage,
   Tag,
 } from '../common/types'
-import { AvailableApis } from '../common/enums'
+import { queueTagImagePayload } from '../common/payloads'
+import {
+  AvailableApis,
+} from '../common/enums'
 
-export async function uploadTagImage(
+export async function queueTagImage(
   client: ImgurClient,
-  payload: UploadTagImagePayload | UploadTagImagePayload[]
+  payload: queueTagImagePayload | queueTagImagePayload[]
 ): Promise<BikeTagApiResponse<Tag> | BikeTagApiResponse<Tag>[]> {
   const promises: Promise<BikeTagApiResponse<Tag>>[] = []
   const payloads = Array.isArray(payload) ? payload : [payload]
 
   const createUploadPromise = (
-    utp: UploadTagImagePayload
+    utp: queueTagImagePayload
   ): Promise<BikeTagApiResponse<Tag>> => {
     let success = true
     const mysteryImageUploadPayload =
       !utp.mysteryImageUrl && utp.mysteryImage
-        ? getUpdateTagPayloadFromTagData(utp, true)
+        ? getUploadTagImagePayloadFromTagData(utp)
         : null
-    const foundImageUrlUploadPayload =
-      !utp.foundImageUrl && utp.foundImage
-        ? getUpdateTagPayloadFromTagData(utp)
-        : null
-
     return new Promise(async (resolve) => {
       if (isValidUploadTagImagePayload(mysteryImageUploadPayload)) {
         const mysteryImageUpload = (await client.upload(
@@ -41,14 +38,6 @@ export async function uploadTagImage(
         )) as ImgurApiResponse<ImgurImage>
         utp.mysteryImageUrl = mysteryImageUpload.data?.link
         success = success && mysteryImageUpload.success
-      }
-
-      if (isValidUploadTagImagePayload(foundImageUrlUploadPayload)) {
-        const foundImageUpload = (await client.upload(
-          foundImageUrlUploadPayload as Payload
-        )) as ImgurApiResponse<ImgurImage>
-        utp.foundImageUrl = foundImageUpload.data?.link
-        success = success && foundImageUpload.success
       }
 
       resolve({

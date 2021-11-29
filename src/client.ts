@@ -13,16 +13,19 @@ import {
   BikeTagCredentials,
   BikeTagConfiguration,
   PartialBikeTagConfiguration,
-  AvailableApis,
   TwitterCredentials,
   BikeTagGunClient,
   BikeTagGameState,
   Player,
   Ambassador,
   Setting,
-  DataTypes,
   ApiOptions,
 } from './common/types'
+import {
+  AvailableApis,
+  DataTypes,
+  Errors,
+} from './common/enums'
 import {
   getTagPayload,
   getTagsPayload,
@@ -38,6 +41,8 @@ import {
   getAmbassadorPayload,
   getAmbassadorsPayload,
   getSettingsPayload,
+  getQueuePayload,
+  queueTagImagePayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -232,7 +237,10 @@ export class BikeTagClient extends EventEmitter {
           }
         }
         break
-    }
+      case DataTypes.queue:
+        options.hash = options.queueHash ?? options.hash ?? this.imgurConfig.queueHash ?? this.imgurConfig.hash 
+        break
+        }
 
     if (overrides.source) {
       options.source = AvailableApis[overrides.source]
@@ -297,6 +305,7 @@ export class BikeTagClient extends EventEmitter {
       client,
       api,
       options,
+      source: AvailableApis[options.source],
     }
   }
 
@@ -518,48 +527,109 @@ export class BikeTagClient extends EventEmitter {
     payload: RequireAtLeastOne<getGamePayload> | string | undefined,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Game>> {
-    const { client, options, api } = this.getAPI(payload, opts, DataTypes.game)
+    const { client, options, api, source } = this.getAPI(payload, opts, DataTypes.game)
+    const clientMethod = api.getGame
 
-    return api.getGame(client, options).catch((e) => {
-      return {
-        status: HttpStatusCode.InternalServerError,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
-      }
-    })
+    if (clientMethod) {
+      return clientMethod(client, options).catch((e) => {
+        return {
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source,
+        }
+      })
+    } else {
+      throw new Error(`getGame ${Errors.NotImplemented} ${source}`)
+    }
   }
 
   /// ****************************  Queue Methods   **************************************** ///
 
   queue(
-    payload?: any,
+    payload?: RequireAtLeastOne<getQueuePayload>,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag[]>> {
-    /// TODO: determine if getQueue or queueTagImage or submitQueuedTag is intended
-    throw 'not implemented'
+    return this.getQueue(payload, opts)
   }
 
-  getQueue(): Promise<BikeTagApiResponse<Tag[]>> {
-    /// get the queued tag information (player, images)
-    throw 'not implemented'
+  getQueue(
+    payload?: RequireAtLeastOne<getQueuePayload>,
+    opts?: RequireAtLeastOne<Credentials>): Promise<BikeTagApiResponse<Tag[]>> {
+    const { client, options, api, source } = this.getAPI(payload, opts, DataTypes.queue)
+    const clientMethod = api.getQueue
+
+    /// If the client adapter implements the method
+    if (clientMethod) {
+      return clientMethod(client, options).catch((e) => {
+        return {
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source,
+        }
+      })
+    } else {
+      throw new Error(`getQueue ${Errors.NotImplemented} ${source}`)
+    }
   }
 
-  queueTagImage(): void {
+  queueTagImage(
+    payload?: RequireAtLeastOne<queueTagImagePayload>,
+    opts?: RequireAtLeastOne<Credentials>): Promise<BikeTagApiResponse<Tag>> {
     /// take player information and a tag image (either found or mystery) and add it to the queue
-    throw 'not implemented'
+    const { client, options, api, source } = this.getAPI(payload, opts, DataTypes.queue)
+    const clientMethod = api.queueTagImage
+
+    /// If the client adapter implements the method
+    if (clientMethod) {
+      return clientMethod(client, options).catch((e) => {
+        return {
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source,
+        }
+      })
+    } else {
+      throw `queueTagImage ${Errors.NotImplemented} ${source}`
+    }
   }
 
-  submitQueuedTag(): void {
+  submitQueuedTag(
+    payload?: RequireAtLeastOne<queueTagImagePayload>,
+    opts?: RequireAtLeastOne<Credentials>): Promise<BikeTagApiResponse<Tag>> {
     /// using the player information and the tag number, send the submit tag request to the biketag server
-    throw 'not implemented'
+    const { client, options, api, source } = this.getAPI(payload, opts, DataTypes.queue)
+    const clientMethod = api.submitQueuedTag
+
+    /// If the client adapter implements the method
+    if (clientMethod) {
+      return clientMethod(client, options).catch((e) => {
+        return {
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source,
+        }
+      })
+    } else {
+      throw `submitQueuedTag ${Errors.NotImplemented} ${source}`
+    }
   }
 
   /// ****************************  Tag Data Methods   ************************************ ///
 
   tags(
-    payload?: RequireAtLeastOne<getTagPayload> | RequireAtLeastOne<getTagsPayload> | number | number[],
+    payload?:
+      | RequireAtLeastOne<getTagPayload>
+      | RequireAtLeastOne<getTagsPayload>
+      | number
+      | number[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag[]>> {
     /// TODO: determine if singular getTag or multiple getTags is intended
@@ -570,7 +640,7 @@ export class BikeTagClient extends EventEmitter {
     payload?: RequireAtLeastOne<getTagPayload> | number,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag>> {
-    const { client, options, api } = this.getAPI(payload, opts)
+    const { client, options, api, source } = this.getAPI(payload, opts)
     let clientMethod = api.getTag
 
     /// If the client adapter implements a direct way to retrieve a single tag
@@ -589,7 +659,7 @@ export class BikeTagClient extends EventEmitter {
           data: null,
           error: e,
           success: false,
-          source: AvailableApis[options.source],
+          source,
         }
       })
     }
@@ -609,82 +679,104 @@ export class BikeTagClient extends EventEmitter {
     payload?: RequireAtLeastOne<getTagsPayload> | number[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag[]>> {
-    const { client, options, api } = this.getAPI(payload, opts)
+    const { client, options, api, source } = this.getAPI(payload, opts)
     let clientMethod = api.getTags
 
-    switch (options.source) {
-      case AvailableApis.reddit:
-        clientMethod = clientMethod.bind({
-          images: this.images({ ...this.imgurConfig, ...opts }),
-        })
-        break
-    }
-
-    return clientMethod(client, options).catch((e) => {
-      return {
-        status: HttpStatusCode.InternalServerError,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.reddit:
+          clientMethod = clientMethod.bind({
+            images: this.images({ ...this.imgurConfig, ...opts }),
+          })
+          break
       }
-    })
+
+      return clientMethod(client, options).catch((e) => {
+        return {
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source,
+        }
+      })
+    } else {
+      throw new Error(`getTags ${Errors.NotImplemented} ${source}`)
+    }
   }
 
   uploadTagImage(
-    payload: RequireAtLeastOne<uploadTagImagePayload> | RequireAtLeastOne<uploadTagImagePayload>[],
+    payload:
+      | RequireAtLeastOne<uploadTagImagePayload>
+      | RequireAtLeastOne<uploadTagImagePayload>[],
     opts?: Credentials
   ): Promise<BikeTagApiResponse<any | any[]>> {
-    const { client, options, api } = this.getAPI(payload, opts)
+    const { client, options, api, source } = this.getAPI(payload, opts)
+    const clientMethod = api.uploadTagImage
 
-    return api.uploadTagImage(client, options).catch((e) => {
-      return Promise.resolve({
-        status: HttpStatusCode.InternalServerError,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
+    /// If the client adapter implements the method
+    if (clientMethod) {
+      return api.uploadTagImage(client, options).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source,
+        })
       })
-    })
+    } else {
+      throw new Error(`uploadTagImage ${Errors.NotImplemented} ${source}`)
+    }
   }
 
   /// TODO: change to generic update that accepts any data type
   updateTag(
-    payload: RequireAtLeastOne<updateTagPayload> | RequireAtLeastOne<updateTagPayload>[],
+    payload:
+      | RequireAtLeastOne<updateTagPayload>
+      | RequireAtLeastOne<updateTagPayload>[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
-    const { client, options, api } = this.getAPI(payload, opts)
+    const { client, options, api, source } = this.getAPI(payload, opts)
     let clientMethod = api.updateTag
 
-    switch (options.source) {
-      case AvailableApis.imgur:
-        clientMethod = clientMethod.bind({
-          getTag: this.getPassthroughApiMethod(api.getTag, client),
-          uploadTagImage: this.getPassthroughApiMethod(
-            api.uploadTagImage,
-            client
-          ),
-        })
-        break
-    }
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.imgur:
+          clientMethod = clientMethod.bind({
+            getTag: this.getPassthroughApiMethod(api.getTag, client),
+            uploadTagImage: this.getPassthroughApiMethod(
+              api.uploadTagImage,
+              client
+            ),
+          })
+          break
+      }
 
-    return clientMethod(client, options).catch((e) => {
-      return Promise.resolve({
-        status: HttpStatusCode.InternalServerError,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
+      return clientMethod(client, options).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source,
+        })
       })
-    })
+
+    } else {
+      throw new Error(`updateTag ${Errors.NotImplemented} ${source}`)
+    }
   }
 
   /// TODO: change to generic import that accepts any data type
   importTag(
-    payload: RequireAtLeastOne<importTagPayload>
-      | RequireAtLeastOne<importTagPayload>[]
-  ): Promise<BikeTagApiResponse<Tag[]>> {
-    return payload as unknown as Promise<BikeTagApiResponse<Tag[]>>
+    payload:
+      | RequireAtLeastOne<importTagPayload>
+      | RequireAtLeastOne<importTagPayload>[],
+    opts?: RequireAtLeastOne<Credentials>
+    ): Promise<BikeTagApiResponse<Tag[]>> {
+    const { source } = this.getAPI(payload, opts)
+    throw new Error(`updateTag ${Errors.NotImplemented} ${source}`)
   }
 
   /// TODO: change to generic delete that accepts any data type
@@ -692,26 +784,31 @@ export class BikeTagClient extends EventEmitter {
     payload: RequireAtLeastOne<deleteTagPayload> | number,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<any>> {
-    const { client, options, api } = this.getAPI(payload, opts)
+    const { client, options, api, source } = this.getAPI(payload, opts)
     let clientMethod = api.deleteTag
 
-    switch (options.source) {
-      case AvailableApis.imgur:
-        clientMethod = {
-          getTag: this.getPassthroughApiMethod(api.getTag, client),
-        }
-        break
-    }
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.imgur:
+          clientMethod = {
+            getTag: this.getPassthroughApiMethod(api.getTag, client),
+          }
+          break
+      }
 
-    return clientMethod(client, options).catch((e) => {
-      return Promise.resolve({
-        status: HttpStatusCode.InternalServerError,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
+      return clientMethod(client, options).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source,
+        })
       })
-    })
+    
+    } else {
+      throw new Error(`deleteTag ${Errors.NotImplemented} ${source}`)
+    }
   }
 
   /// TODO: change to generic delete that accepts any data type
@@ -719,32 +816,41 @@ export class BikeTagClient extends EventEmitter {
     payload: RequireAtLeastOne<deleteTagsPayload> | number[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<any>> {
-    const { client, options, api } = this.getAPI(payload, opts)
+    const { client, options, api, source } = this.getAPI(payload, opts)
     let clientMethod = api.deleteTags
 
-    switch (options.source) {
-      case AvailableApis.imgur:
-        clientMethod = clientMethod.bind({
-          getTags: this.getPassthroughApiMethod(api.getTags, client),
-        })
-        break
-    }
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.imgur:
+          clientMethod = clientMethod.bind({
+            getTags: this.getPassthroughApiMethod(api.getTags, client),
+          })
+          break
+      }
 
-    return clientMethod(client, options).catch((e) => {
-      return Promise.resolve({
-        status: HttpStatusCode.InternalServerError,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
+      return clientMethod(client, options).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source,
+        })
       })
-    })
+
+    } else {
+      throw new Error(`deleteTags ${Errors.NotImplemented} ${source}`)
+    }
   }
 
   /// ****************************  Player Data Methods   ********************************** ///
 
   players(
-    payload?: RequireAtLeastOne<getPlayerPayload> | RequireAtLeastOne<getPlayersPayload> | string | string[],
+    payload?:
+      | RequireAtLeastOne<getPlayerPayload>
+      | RequireAtLeastOne<getPlayersPayload>
+      | string
+      | string[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Player[]>> {
     return this.getPlayers(
@@ -791,36 +897,44 @@ export class BikeTagClient extends EventEmitter {
     payload?: RequireAtLeastOne<getPlayersPayload> | string[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Player[]>> {
-    const { client, options, api } = this.getAPI(
+    const { client, options, api, source } = this.getAPI(
       payload,
       opts,
       DataTypes.player
     )
     let clientMethod = api.getPlayers
 
-    switch (options.source) {
-      case AvailableApis.imgur:
-        clientMethod = clientMethod.bind({
-          getTags: this.getPassthroughApiMethod(api.getTags, client),
-        })
-        break
-    }
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.imgur:
+          clientMethod = clientMethod.bind({
+            getTags: this.getPassthroughApiMethod(api.getTags, client),
+          })
+          break
+      }
 
-    return clientMethod(client, options).catch((e) => {
-      return Promise.resolve({
-        status: HttpStatusCode.InternalServerError,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
+      return clientMethod(client, options).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source,
+        })
       })
-    })
+    } else {
+      throw new Error(`getPlayers ${Errors.NotImplemented} ${source}`)
+    }
   }
 
   /// ****************************  Ambassador Data Methods   ****************************** ///
 
   ambassadors(
-    payload?: RequireAtLeastOne<getAmbassadorPayload> | RequireAtLeastOne<getAmbassadorsPayload> | string | string[],
+    payload?:
+      | RequireAtLeastOne<getAmbassadorPayload>
+      | RequireAtLeastOne<getAmbassadorsPayload>
+      | string
+      | string[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Ambassador[]>> {
     return this.getAmbassadors(
@@ -833,7 +947,7 @@ export class BikeTagClient extends EventEmitter {
     payload: RequireAtLeastOne<getAmbassadorPayload> | string,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Ambassador>> {
-    const { client, options, api } = this.getAPI(payload, opts)
+    const { client, options, api } = this.getAPI(payload, opts, DataTypes.ambassador)
     const clientMethod = api.getAmbassador
 
     /// If the client adapter implements a direct way to retrieve a single ambassador
@@ -867,36 +981,44 @@ export class BikeTagClient extends EventEmitter {
     payload?: RequireAtLeastOne<getAmbassadorsPayload> | string[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Ambassador[]>> {
-    const { client, options, api } = this.getAPI(
+    const { client, options, api, source } = this.getAPI(
       payload,
       opts,
       DataTypes.ambassador
     )
     let clientMethod = api.getAmbassadors
 
-    switch (options.source) {
-      case AvailableApis.imgur:
-        clientMethod = clientMethod.bind({
-          getTags: this.getPassthroughApiMethod(api.getTags, client),
-        })
-        break
-    }
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.imgur:
+          clientMethod = clientMethod.bind({
+            getTags: this.getPassthroughApiMethod(api.getTags, client),
+          })
+          break
+      }
 
-    return clientMethod(client, options).catch((e) => {
-      return Promise.resolve({
-        status: HttpStatusCode.InternalServerError,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
+      return clientMethod(client, options).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source,
+        })
       })
-    })
+    } else {
+      throw new Error(`getAmbassadors ${Errors.NotImplemented} ${source}`)
+    }
   }
 
   /// ****************************  Setting Data Methods   ********************************* ///
 
   settings(
-    payload?: RequireAtLeastOne<getSettingPayload> | RequireAtLeastOne<getSettingsPayload> | string | string[],
+    payload?:
+      | RequireAtLeastOne<getSettingPayload>
+      | RequireAtLeastOne<getSettingsPayload>
+      | string
+      | string[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Setting[]>> {
     return this.getSettings(
@@ -909,7 +1031,7 @@ export class BikeTagClient extends EventEmitter {
     payload: RequireAtLeastOne<getSettingPayload> | string,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Setting>> {
-    const { client, options, api } = this.getAPI(payload, opts)
+    const { client, options, api } = this.getAPI(payload, opts, DataTypes.setting)
     const clientMethod = api.getSetting
 
     /// If the client adapter implements a direct way to retrieve a single setting
@@ -943,22 +1065,26 @@ export class BikeTagClient extends EventEmitter {
     payload?: RequireAtLeastOne<getSettingsPayload> | string[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Setting[]>> {
-    const { client, options, api } = this.getAPI(
+    const { client, options, api, source } = this.getAPI(
       payload,
       opts,
       DataTypes.setting
     )
     const clientMethod = api.getSettings
 
-    return clientMethod(client, options).catch((e) => {
-      return Promise.resolve({
-        status: HttpStatusCode.InternalServerError,
-        data: null,
-        error: e,
-        success: false,
-        source: AvailableApis[options.source],
+    if (clientMethod) {
+      return clientMethod(client, options).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e,
+          success: false,
+          source,
+        })
       })
-    })
+    } else {
+      throw new Error(`getSettings ${Errors.NotImplemented} ${source}`)
+    }
   }
 
   /// ****************************  Client Instance Methods   ****************************** ///

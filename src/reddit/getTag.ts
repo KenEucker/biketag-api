@@ -1,11 +1,12 @@
 import RedditClient from 'snoowrap'
-import { AvailableApis, BikeTagApiResponse, Tag } from '../common/types'
+import { BikeTagApiResponse, Tag } from '../common/types'
 import { getTagPayload } from '../common/payloads'
 import {
   getBikeTagInformationFromRedditData,
   getBikeTagsFromRedditPosts,
 } from './helpers'
 import { HttpStatusCode } from '../common/responses'
+import { AvailableApis } from '../common/enums'
 
 export async function getTag(
   client: RedditClient,
