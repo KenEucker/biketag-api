@@ -570,7 +570,8 @@ export class BikeTagClient extends EventEmitter {
     const { client, options, api, source } = this.getAPI(
       payload,
       opts,
-      DataTypes.game
+      DataTypes.game,
+      'getGame'
     )
     const clientMethod = api.getGame
 
