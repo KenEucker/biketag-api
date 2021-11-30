@@ -5,8 +5,7 @@ import {
   getBikeTagInformationFromRedditData,
   getBikeTagsFromRedditPosts,
 } from './helpers'
-import { HttpStatusCode } from '../common/responses'
-import { AvailableApis } from '../common/enums'
+import { HttpStatusCode, AvailableApis } from '../common/enums'
 
 export async function getTag(
   client: RedditClient,

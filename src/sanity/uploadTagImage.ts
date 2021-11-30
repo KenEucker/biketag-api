@@ -2,8 +2,7 @@ import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, Tag } from '../common/types'
 import { uploadTagImagePayload } from '../common/payloads'
 import { constructSanityObjectFromTag } from './helpers'
-import { HttpStatusCode } from '../common/responses'
-import { AvailableApis } from '../common/enums'
+import { HttpStatusCode, AvailableApis } from '../common/enums'
 
 export async function uploadTagImage(
   client: SanityClient,

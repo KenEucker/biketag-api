@@ -6,8 +6,7 @@ import {
 } from './helpers'
 import { tagDataFields } from '../common/data'
 import { getTagPayload } from '../common/payloads'
-import { HttpStatusCode } from '../common/responses'
-import { AvailableApis } from '../common/enums'
+import { HttpStatusCode, AvailableApis } from '../common/enums'
 
 export async function getTag(
   client: SanityClient,

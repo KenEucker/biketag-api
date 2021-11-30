@@ -1,5 +1,5 @@
 import { BikeTagClient } from '../client'
-import { IMAGE_ENDPOINT } from '../common/endpoints'
+import { UPDATE_ENDPOINT } from '../common/endpoints'
 import { Payload, BikeTagApiResponse } from '../common/types'
 
 export interface UpdateTagImagePayload
@@ -37,7 +37,7 @@ export async function updateTagImage(
   //   throw new Error('Update requires a title and/or description');
   // }
 
-  const url = `${IMAGE_ENDPOINT}/${payload.slug}`
+  const url = `${UPDATE_ENDPOINT}/${payload.slug}`
   return (await client.request({ url, method: 'DELETE' }))
     .data as unknown as BikeTagApiResponse<boolean>
 

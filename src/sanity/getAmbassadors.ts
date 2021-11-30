@@ -1,5 +1,5 @@
 import { SanityClient } from '@sanity/client'
-import { AvailableApis, DataTypes } from '../common/enums'
+import { AvailableApis, HttpStatusCode, DataTypes } from '../common/enums'
 import { BikeTagApiResponse, Ambassador } from '../common/types'
 import {
   constructAmbassadorFromSanityObject,
@@ -8,7 +8,6 @@ import {
 } from './helpers'
 import { ambassadorDataFields } from '../common/data'
 import { getAmbassadorsPayload } from '../common/payloads'
-import { HttpStatusCode } from '../common/responses'
 
 export async function getAmbassadors(
   client: SanityClient,

@@ -1,6 +1,6 @@
 import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, Tag } from '../common/types'
-import { AvailableApis, DataTypes } from '../common/enums'
+import { AvailableApis, HttpStatusCode, DataTypes } from '../common/enums'
 import {
   constructTagFromSanityObject,
   constructSanityFieldsQuery,
@@ -8,7 +8,6 @@ import {
 } from './helpers'
 import { tagDataFields } from '../common/data'
 import { getTagsPayload } from '../common/payloads'
-import { HttpStatusCode } from '../common/responses'
 import { sortTags } from '../common/methods'
 
 export async function getTags(

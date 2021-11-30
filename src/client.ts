@@ -1,5 +1,3 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
-import { EventEmitter } from 'events'
 import { BIKETAG_API_PREFIX } from './common/endpoints'
 import {
   Credentials,
@@ -21,7 +19,12 @@ import {
   Setting,
   ApiOptions,
 } from './common/types'
-import { AvailableApis, DataTypes, Errors } from './common/enums'
+import {
+  AvailableApis,
+  DataTypes,
+  Errors,
+  HttpStatusCode,
+} from './common/enums'
 import {
   getTagPayload,
   getTagsPayload,
@@ -59,8 +62,7 @@ import {
   isTwitterCredentials,
   isTwitterApiReady,
 } from './common/methods'
-import { setup } from 'axios-cache-adapter'
-import { isEqual } from 'lodash'
+
 import * as BikeTagExpressions from './common/expressions'
 import * as BikeTagGetters from './common/getters'
 import * as sanityApi from './sanity'
@@ -74,7 +76,11 @@ import ImgurClient from 'imgur'
 import sanityClient, { SanityClient } from '@sanity/client'
 import TwitterClient from 'twitter-v2'
 import Gun from 'gun/gun'
-import { HttpStatusCode } from './common/responses'
+
+import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
+import { EventEmitter } from 'events'
+import { setup } from 'axios-cache-adapter'
+import { isEqual } from 'lodash'
 
 export const USERAGENT =
   'biketag-api (https://github.com/keneucker/biketag-api)'

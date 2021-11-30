@@ -3,9 +3,8 @@ import { updateTagPayload } from '../common/payloads'
 import { BikeTagApiResponse, Tag } from '../common/types'
 import { getImageHashFromText } from '../common/getters'
 import { createTagObject } from '../common/data'
-import { HttpStatusCode } from '../common/responses'
 import { getUpdateTagPayloadFromTagData, isValidUpdatePayload } from './helpers'
-import { AvailableApis } from '../common/enums'
+import { AvailableApis, HttpStatusCode } from '../common/enums'
 
 export async function updateTag(
   client: ImgurClient,

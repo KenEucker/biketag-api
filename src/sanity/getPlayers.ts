@@ -1,6 +1,6 @@
 import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse, Player } from '../common/types'
-import { AvailableApis, DataTypes } from '../common/enums'
+import { AvailableApis, HttpStatusCode, DataTypes } from '../common/enums'
 import {
   constructPlayerFromSanityObject,
   constructSanityDocumentQuery,
@@ -8,7 +8,6 @@ import {
 } from './helpers'
 import { playerDataFields } from '../common/data'
 import { getPlayersPayload } from '../common/payloads'
-import { HttpStatusCode } from '../common/responses'
 import { sortPlayers } from '../common/methods'
 
 export async function getPlayers(

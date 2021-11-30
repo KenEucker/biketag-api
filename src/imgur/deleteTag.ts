@@ -1,9 +1,8 @@
 import ImgurClient from 'imgur'
 import { deleteTagPayload } from '../common/payloads'
-import { HttpStatusCode } from '../common/responses'
 import { BikeTagApiResponse, ImgurImage } from '../common/types'
 import { getImageHashFromImgurImage } from './helpers'
-import { AvailableApis } from '../common/enums'
+import { AvailableApis, HttpStatusCode } from '../common/enums'
 
 export async function deleteTag(
   client: ImgurClient,
