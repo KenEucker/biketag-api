@@ -1,6 +1,10 @@
-// import sanityClient from '@sanity/client';
-// import { getTags } from './getTags';
+const sanityGetTagsMethod = 'biketag.content.getTags'
+describe(sanityGetTagsMethod, () => {
+  test.todo(`${sanityGetTagsMethod} method requires ImgurHash from payload`)
 
-test('get tag works successfully', async () => {
-  expect(true).toBeTruthy()
+  test.todo(`${sanityGetTagsMethod} method resolves data of type Tag[]`)
+
+  test.todo(
+    `${sanityGetTagsMethod} method resolves status of HttpStatusCode.Ok`
+  )
 })

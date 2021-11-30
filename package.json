@@ -1,6 +1,6 @@
 {
   "name": "biketag",
-  "version": "1.10.7",
+  "version": "1.11.1",
   "description": "The Javascript client API for BikeTag Games",
   "main": "./biketag.node.js",
   "browser": "./biketag.js",
@@ -28,7 +28,7 @@
     "serve": "eleventy --serve",
     "serve:prod": "eleventy --serve --port=80",
     "start": "npm run serve:prod",
-    "test": "jest",
+    "test": "jest --verbose",
     "test:dev": "jest --silent=false",
     "test:ci": "jest --ci --coverage --maxWorkers=2",
     "build": "tsc",

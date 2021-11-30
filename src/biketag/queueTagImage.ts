@@ -1,6 +1,6 @@
 import { BikeTagClient } from '../client'
 import { Payload, BikeTagApiResponse, Tag } from '../common/types'
-// import { UPLOAD_ENDPOINT } from '../common/endpoints';
+import { QUEUE_ENDPOINT } from '../common/endpoints'
 
 export async function queueTagImage(
   client: BikeTagClient,

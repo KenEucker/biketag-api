@@ -2,9 +2,8 @@ import type { ImgurClient } from 'imgur'
 import { createPlayerObject } from '../common/data'
 import { sortPlayers } from '../common/methods'
 import { getPlayersPayload } from '../common/payloads'
-import { HttpStatusCode } from '../common/responses'
 import { BikeTagApiResponse, Player } from '../common/types'
-import { AvailableApis } from '../common/enums'
+import { AvailableApis, HttpStatusCode } from '../common/enums'
 
 export async function getPlayers(
   client: ImgurClient,
@@ -14,7 +13,8 @@ export async function getPlayers(
   const playerNames: string[] = []
 
   if (client) {
-    const { data: tags } = await this.getTags()
+    const { data: tags } = await this.getTags({ sort: 'relevance' })
+    let previousTag
 
     for (const tag of tags) {
       const playerIncludedIndex = playerNames.indexOf(tag.player)
@@ -22,18 +22,24 @@ export async function getPlayers(
       const includePlayerInList = payload.slugs?.length
         ? payload.slugs.indexOf(tag.player) !== -1
         : true
+
       if (includePlayerInList && playerNotYetIncluded) {
         playersData.push(
           createPlayerObject({
             name: tag.player,
-            tags: [tag],
+            tags: [{ ...tag, proof: previousTag }],
             games: [payload.game],
           })
         )
         playerNames.push(tag.player)
       } else if (includePlayerInList && !playerNotYetIncluded) {
-        playersData[playerIncludedIndex].tags.push(tag)
+        playersData[playerIncludedIndex].tags.push({
+          ...tag,
+          proof: previousTag,
+        })
       }
+
+      previousTag = tag
     }
   }
 

@@ -45,3 +45,33 @@ describe(`Built Module`, () => {
     expect(httpStatus.toString()).toMatch(/^\d+($|\r?\n)/)
   })
 })
+
+describe(`Module Interfaces directs calls to getter methods correctly`, () => {
+  test.todo(
+    'tags interface calls getTag [one] when passed a payload matching getTagPayload'
+  )
+  test.todo(
+    'tags interface calls getTags [many] when passed a payload matching getTagsPayload'
+  )
+
+  test.todo(
+    'players interface calls getPlayer [one] when passed a payload matching getPlayerPayload'
+  )
+  test.todo(
+    'players interface calls getPlayers [many] when passed a payload matching getPlayersPayload'
+  )
+
+  test.todo(
+    'ambassadors interface calls getAmbassador [one] when passed a payload matching getAmbassadorPayload'
+  )
+  test.todo(
+    'ambassadors interface calls getAmbassadors [many] when passed a payload matching getAmbassadorsPayload'
+  )
+
+  test.todo(
+    'settings interface calls getSetting [one] when passed a payload matching getSettingPayload'
+  )
+  test.todo(
+    'settings interface calls getSettings [many] when passed a payload matching getSettingsPayload'
+  )
+})

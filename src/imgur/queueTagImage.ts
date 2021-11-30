@@ -5,10 +5,9 @@ import {
   getUploadTagImagePayloadFromTagData,
   isValidUploadTagImagePayload,
 } from './helpers'
-import { HttpStatusCode } from '../common/responses'
 import { BikeTagApiResponse, ImgurImage, Tag } from '../common/types'
 import { queueTagImagePayload } from '../common/payloads'
-import { AvailableApis } from '../common/enums'
+import { AvailableApis, HttpStatusCode } from '../common/enums'
 
 export async function queueTagImage(
   client: ImgurClient,

@@ -1,5 +1,3 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
-import { EventEmitter } from 'events'
 import { BIKETAG_API_PREFIX } from './common/endpoints'
 import {
   Credentials,
@@ -21,7 +19,12 @@ import {
   Setting,
   ApiOptions,
 } from './common/types'
-import { AvailableApis, DataTypes, Errors } from './common/enums'
+import {
+  AvailableApis,
+  DataTypes,
+  Errors,
+  HttpStatusCode,
+} from './common/enums'
 import {
   getTagPayload,
   getTagsPayload,
@@ -59,8 +62,7 @@ import {
   isTwitterCredentials,
   isTwitterApiReady,
 } from './common/methods'
-import { setup } from 'axios-cache-adapter'
-import { isEqual } from 'lodash'
+
 import * as BikeTagExpressions from './common/expressions'
 import * as BikeTagGetters from './common/getters'
 import * as sanityApi from './sanity'
@@ -74,7 +76,11 @@ import ImgurClient from 'imgur'
 import sanityClient, { SanityClient } from '@sanity/client'
 import TwitterClient from 'twitter-v2'
 import Gun from 'gun/gun'
-import { HttpStatusCode } from './common/responses'
+
+import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
+import { EventEmitter } from 'events'
+import { setup } from 'axios-cache-adapter'
+import { isEqual } from 'lodash'
 
 export const USERAGENT =
   'biketag-api (https://github.com/keneucker/biketag-api)'
@@ -142,7 +148,8 @@ export class BikeTagClient extends EventEmitter {
 
   private getInitialPayload(
     opts: any,
-    source: AvailableApis | string | undefined = this.getMostAvailableAPI()
+    source?: AvailableApis | string,
+    method?: string
   ): ApiOptions {
     const optsIsArray = Array.isArray(opts)
     let payload: any = {}
@@ -181,7 +188,7 @@ export class BikeTagClient extends EventEmitter {
         break
 
       case 'undefined':
-        payload.source = this.getMostAvailableAPI()
+        payload.source = this.getMostAvailableAPI(method)
         break
 
       default:
@@ -266,10 +273,11 @@ export class BikeTagClient extends EventEmitter {
   private getAPI(
     opts: any,
     overrides: any = {},
-    dataType: DataTypes = DataTypes.tag
+    dataType: DataTypes = DataTypes.tag,
+    method?: string
   ) {
     const options = this.getDefaultOptions(
-      this.getInitialPayload(opts),
+      this.getInitialPayload(opts, undefined, method),
       dataType,
       overrides
     )
@@ -309,25 +317,57 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  private getMostAvailableAPI(): AvailableApis {
-    if (this.mostAvailableApi) {
+  private getMostAvailableAPI(method?: string): AvailableApis {
+    if (this.mostAvailableApi && !method) {
       return this.mostAvailableApi
     }
 
-    if (this.imgurConfig && this.imgurClient) {
-      return (this.mostAvailableApi = AvailableApis.imgur)
-    } else if (this.sanityConfig && this.sanityClient) {
-      return (this.mostAvailableApi = AvailableApis.sanity)
-    } else if (this.redditConfig && this.redditClient) {
-      return (this.mostAvailableApi = AvailableApis.reddit)
-    } else if (this.twitterConfig && this.twitterClient) {
-      return (this.mostAvailableApi = AvailableApis.twitter)
+    if (
+      this.imgurConfig &&
+      this.imgurClient &&
+      (!method || !!imgurApi[method])
+    ) {
+      if (!method) {
+        this.mostAvailableApi = AvailableApis.imgur
+      }
+      return AvailableApis.imgur
+    } else if (
+      this.sanityConfig &&
+      this.sanityClient &&
+      (!method || !!sanityApi[method])
+    ) {
+      if (!method) {
+        this.mostAvailableApi = AvailableApis.sanity
+      }
+      return AvailableApis.sanity
+    } else if (
+      this.redditConfig &&
+      this.redditClient &&
+      (!method || !!redditApi[method])
+    ) {
+      if (!method) {
+        this.mostAvailableApi = AvailableApis.reddit
+      }
+      return AvailableApis.reddit
+    } else if (
+      this.twitterConfig &&
+      this.twitterClient &&
+      (!method || !!twitterApi[method])
+    ) {
+      if (!method) {
+        this.mostAvailableApi = AvailableApis.twitter
+      }
+      return AvailableApis.twitter
     } else if (
       this.biketagConfig &&
       isBikeTagCredentials(this.biketagConfig) &&
-      isBikeTagApiReady(this.biketagConfig)
+      isBikeTagApiReady(this.biketagConfig) &&
+      (!method || !!biketagApi[method])
     ) {
-      return (this.mostAvailableApi = AvailableApis.biketag)
+      if (!method) {
+        this.mostAvailableApi = AvailableApis.biketag
+      }
+      return AvailableApis.biketag
     }
 
     return null
@@ -517,20 +557,21 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Game Data Methods   ************************************ ///
 
   game(
-    payload?: RequireAtLeastOne<getGamePayload> | string | undefined,
+    payload?: RequireAtLeastOne<getGamePayload> | string,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Game>> {
     return this.getGame(payload, opts)
   }
 
   getGame(
-    payload: RequireAtLeastOne<getGamePayload> | string | undefined,
+    payload?: RequireAtLeastOne<getGamePayload> | string,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Game>> {
     const { client, options, api, source } = this.getAPI(
       payload,
       opts,
-      DataTypes.game
+      DataTypes.game,
+      'getGame'
     )
     const clientMethod = api.getGame
 
@@ -549,7 +590,7 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  /// ****************************  Queue Methods   **************************************** ///
+  /// ****************************  Queue Data Methods   *********************************** ///
 
   queue(
     payload?: RequireAtLeastOne<getQueuePayload>,
@@ -652,7 +693,10 @@ export class BikeTagClient extends EventEmitter {
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag[]>> {
     /// TODO: determine if singular getTag or multiple getTags is intended
-    return this.getTags(this.getInitialPayload(payload) as getTagsPayload, opts)
+    return this.getTags(
+      this.getInitialPayload(payload, 'getTags') as getTagsPayload,
+      opts
+    )
   }
 
   getTag(
@@ -698,7 +742,12 @@ export class BikeTagClient extends EventEmitter {
     payload?: RequireAtLeastOne<getTagsPayload> | number[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag[]>> {
-    const { client, options, api, source } = this.getAPI(payload, opts)
+    const { client, options, api, source } = this.getAPI(
+      payload,
+      opts,
+      undefined,
+      'getTags'
+    )
     let clientMethod = api.getTags
 
     if (clientMethod) {
@@ -833,7 +882,12 @@ export class BikeTagClient extends EventEmitter {
     payload: RequireAtLeastOne<deleteTagsPayload> | number[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<any>> {
-    const { client, options, api, source } = this.getAPI(payload, opts)
+    const { client, options, api, source } = this.getAPI(
+      payload,
+      opts,
+      DataTypes.tag,
+      'deleteTags'
+    )
     let clientMethod = api.deleteTags
 
     if (clientMethod) {
@@ -870,7 +924,11 @@ export class BikeTagClient extends EventEmitter {
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Player[]>> {
     return this.getPlayers(
-      this.getInitialPayload(payload) as getPlayersPayload,
+      this.getInitialPayload(
+        payload,
+        undefined,
+        'getPlayers'
+      ) as getPlayersPayload,
       opts
     )
   }
@@ -879,7 +937,7 @@ export class BikeTagClient extends EventEmitter {
     payload: RequireAtLeastOne<getPlayerPayload> | string,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Player>> {
-    const { client, options, api } = this.getAPI(payload, opts)
+    const { client, options, api, source } = this.getAPI(payload, opts)
     const clientMethod = api.getPlayer
 
     /// If the client adapter implements a direct way to retrieve a single player
@@ -890,7 +948,7 @@ export class BikeTagClient extends EventEmitter {
           data: null,
           error: e,
           success: false,
-          source: AvailableApis[options.source],
+          source,
         }
       })
     }
@@ -916,7 +974,8 @@ export class BikeTagClient extends EventEmitter {
     const { client, options, api, source } = this.getAPI(
       payload,
       opts,
-      DataTypes.player
+      DataTypes.player,
+      'getPlayers'
     )
     let clientMethod = api.getPlayers
 
@@ -954,7 +1013,11 @@ export class BikeTagClient extends EventEmitter {
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Ambassador[]>> {
     return this.getAmbassadors(
-      this.getInitialPayload(payload) as unknown as getAmbassadorsPayload,
+      this.getInitialPayload(
+        payload,
+        undefined,
+        'getAmbassadors'
+      ) as unknown as getAmbassadorsPayload,
       opts
     )
   }
@@ -963,7 +1026,7 @@ export class BikeTagClient extends EventEmitter {
     payload: RequireAtLeastOne<getAmbassadorPayload> | string,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Ambassador>> {
-    const { client, options, api } = this.getAPI(
+    const { client, options, api, source } = this.getAPI(
       payload,
       opts,
       DataTypes.ambassador
@@ -978,7 +1041,7 @@ export class BikeTagClient extends EventEmitter {
           data: null,
           error: e,
           success: false,
-          source: AvailableApis[options.source],
+          source,
         }
       })
     }
@@ -1004,7 +1067,8 @@ export class BikeTagClient extends EventEmitter {
     const { client, options, api, source } = this.getAPI(
       payload,
       opts,
-      DataTypes.ambassador
+      DataTypes.ambassador,
+      'getAmbassadors'
     )
     let clientMethod = api.getAmbassadors
 
@@ -1042,7 +1106,11 @@ export class BikeTagClient extends EventEmitter {
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Setting[]>> {
     return this.getSettings(
-      this.getInitialPayload(payload) as unknown as getSettingsPayload,
+      this.getInitialPayload(
+        payload,
+        undefined,
+        'getSettings'
+      ) as unknown as getSettingsPayload,
       opts
     )
   }
@@ -1073,7 +1141,11 @@ export class BikeTagClient extends EventEmitter {
 
     /// Else, use the get all and filter method
     return this.getSettings(
-      this.getInitialPayload(payload) as unknown as getSettingsPayload,
+      this.getInitialPayload(
+        payload,
+        undefined,
+        'getSettings'
+      ) as unknown as getSettingsPayload,
       opts
     ).then((r) => {
       return {
@@ -1092,7 +1164,8 @@ export class BikeTagClient extends EventEmitter {
     const { client, options, api, source } = this.getAPI(
       payload,
       opts,
-      DataTypes.setting
+      DataTypes.setting,
+      'getSettings'
     )
     const clientMethod = api.getSettings
 

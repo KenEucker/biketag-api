@@ -1,8 +1,7 @@
 import { getQueuePayload } from '../common/payloads'
-import { HttpStatusCode } from '../common/responses'
 import { BikeTagApiResponse, Tag } from '../common/types'
 import { BikeTagGunClient } from '../common/types'
-import { AvailableApis } from '../common/enums'
+import { AvailableApis, HttpStatusCode } from '../common/enums'
 
 export async function getQueue(
   client: BikeTagGunClient,
