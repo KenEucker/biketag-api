@@ -462,10 +462,15 @@ export const isSettingData = (setting: RequireAtLeastOne<Setting>): boolean => {
 export const sortTags = (tags: Tag[], sort = 'new'): Tag[] => {
   let sorter = (a, b) => b.tagnumber - a.tagnumber
 
-  if (sort !== 'new') {
-    sorter = (a, b) => a.tagnumber - b.tagnumber
+  switch (sort) {
+    case 'new':
+      sorter = (a, b) => b.tagnumber - a.tagnumber
+      break
+    case 'relevance':
+    default:
+      sorter = (a, b) => a.tagnumber - b.tagnumber
+      break
   }
-
   return tags.sort(sorter)
 }
 
@@ -479,11 +484,12 @@ export const sortPlayers = (players: Player[], sort = 'new'): Player[] => {
     case 'comments':
       sorter = (a, b) => a.name.localeCompare(b.name)
       break
-    case 'relevance':
+    case 'new':
+      /// Since the players should already be sorted by first to last played, reverse the list
       return players.reverse()
       break
     /// Don't sort
-    case 'new':
+    case 'relevance':
     default:
       return players
       break

@@ -88,7 +88,6 @@ const getGameAsync = async (client, out = false, opts = {}) => {
 const getPlayersAsync = async (client, out = false, opts = {}) => {
   const testPlayerData = await client.players(undefined, opts)
   log('success fully retrieved player data', testPlayerData, out)
-  console.log({t: testPlayerData.data[10].tags[0], p: testPlayerData.data[10].tags[0].previous})
 
   return testPlayerData
 }

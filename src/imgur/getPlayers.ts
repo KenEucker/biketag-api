@@ -13,7 +13,7 @@ export async function getPlayers(
   const playerNames: string[] = []
 
   if (client) {
-    const { data: tags } = await this.getTags()
+    const { data: tags } = await this.getTags({ sort: 'relevance' })
     let previousTag
 
     for (const tag of tags) {
