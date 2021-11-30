@@ -27,7 +27,7 @@ export async function getPlayers(
         playersData.push(
           createPlayerObject({
             name: tag.player,
-            tags: [{ ...tag, previous: previousTag }],
+            tags: [{ ...tag, proof: previousTag }],
             games: [payload.game],
           })
         )
@@ -35,7 +35,7 @@ export async function getPlayers(
       } else if (includePlayerInList && !playerNotYetIncluded) {
         playersData[playerIncludedIndex].tags.push({
           ...tag,
-          previous: previousTag,
+          proof: previousTag,
         })
       }
 
