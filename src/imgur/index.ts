@@ -1,4 +1,5 @@
 export { deleteTag } from './deleteTag'
+export { deleteTags } from './deleteTags'
 export { getTags } from './getTags'
 export { getPlayers } from './getPlayers'
 export { updateTag } from './updateTag'

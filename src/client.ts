@@ -589,7 +589,7 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  /// ****************************  Queue Methods   **************************************** ///
+  /// ****************************  Queue Data Methods   *********************************** ///
 
   queue(
     payload?: RequireAtLeastOne<getQueuePayload>,

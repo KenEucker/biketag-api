@@ -7,8 +7,8 @@ import { AvailableApis, HttpStatusCode } from '../common/enums'
 export async function deleteTag(
   client: ImgurClient,
   payload: deleteTagPayload
-): Promise<BikeTagApiResponse<any>> {
-  const responses = []
+): Promise<BikeTagApiResponse<boolean[]>> {
+  const responses: boolean[] = []
   const hashes = []
 
   if (payload.tagnumber || payload.slug) {
@@ -30,7 +30,7 @@ export async function deleteTag(
   }
 
   for (const hash of hashes) {
-    responses.push(await client.deleteImage(hash))
+    responses.push((await client.deleteImage(hash)).data)
   }
 
   return {
@@ -38,5 +38,5 @@ export async function deleteTag(
     success: true,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,
-  } as BikeTagApiResponse<any>
+  }
 }

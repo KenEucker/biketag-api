@@ -1,23 +1,8 @@
-// import { ImgurClient } from './imgurClient';
-// import { getTag } from './getTag';
+const imgurGetTagsMethod = 'biketag.images.getTags'
+describe(imgurGetTagsMethod, () => {
+  test.todo(`${imgurGetTagsMethod} method requires ImgurHash from payload`)
 
-test('get image works successfully', async () => {
-  expect(true).toBeTruthy()
+  test.todo(`${imgurGetTagsMethod} method resolves data of type Tag[]`)
+
+  test.todo(`${imgurGetTagsMethod} method resolves status of HttpStatusCode.Ok`)
 })
-
-// test('returns an image response', async () => {
-//   const accessToken = 'abc123';
-//   const client = new BikeTagClient({ accessToken });
-//   const response = await getImage(client, 'CEddrgP');
-//   expect(response).toMatchInlineSnapshot(`
-//     Object {
-//       "data": Object {
-//         "description": "image-description",
-//         "id": "CEddrgP",
-//         "title": "image-title",
-//       },
-//       "status": 200,
-//       "success": true,
-//     }
-//   `);
-// });

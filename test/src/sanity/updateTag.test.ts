@@ -1,6 +1,12 @@
-// import sanityClient from '@sanity/client';
-// import { updateTag } from './updateTag';
+const updateTagsMethod = 'biketag.content.updateTags'
+describe(updateTagsMethod, () => {
+  test.todo(`${updateTagsMethod} method requires ImgurHash from payload`)
 
-test('update works successfully', async () => {
-  expect(true).toBeTruthy()
+  test.todo(
+    `${updateTagsMethod} method requires one of [hashes, tagnumbers, slugs] from payload`
+  )
+
+  test.todo(`${updateTagsMethod} method resolves data of type Tag[]`)
+
+  test.todo(`${updateTagsMethod} method resolves status of HttpStatusCode.Ok`)
 })

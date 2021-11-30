@@ -396,7 +396,7 @@ export const getBikeTagNumberIndexFromImgurImages = (
 }
 
 export const getImageHashFromImgurImage = (
-  image: ImgurImage,
+  image: Partial<ImgurImage>,
   cache?: typeof TinyCache
 ): string => {
   return getImageHashFromText(image.link, cache)

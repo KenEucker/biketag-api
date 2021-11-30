@@ -1,19 +1,14 @@
-// import { BikeTagClient } from '../client';
-// import { deleteTag } from './deleteTag';
+const imgurDeleteTagMethod = 'biketag.images.deleteTag'
+describe(imgurDeleteTagMethod, () => {
+  test.todo(`${imgurDeleteTagMethod} method requires ImgurHash from payload`)
 
-test('delete works successfully', async () => {
-  expect(true).toBeTruthy()
+  test.todo(
+    `${imgurDeleteTagMethod} method requires one of [hashes, tagnumber, slug] from payload`
+  )
+
+  test.todo(`${imgurDeleteTagMethod} method resolves data of type boolean[]`)
+
+  test.todo(
+    `${imgurDeleteTagMethod} method resolves status of HttpStatusCode.Ok`
+  )
 })
-
-// test('delete works successfully', async () => {
-//   const accessToken = 'abc123';
-//   const client = new BikeTagClient({ accessToken });
-//   const response = await deleteImage(client, 'CEddrgP');
-//   expect(response).toMatchInlineSnapshot(`
-//     Object {
-//       "data": true,
-//       "status": 200,
-//       "success": true,
-//     }
-//   `);
-// });

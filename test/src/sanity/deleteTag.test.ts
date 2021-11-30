@@ -1,6 +1,14 @@
-// import sanityClient from '@sanity/client';
-// import { deleteTag } from './deleteTag';
+const sanityDeleteTagMethod = 'biketag.content.deleteTag'
+describe(sanityDeleteTagMethod, () => {
+  test.todo(`${sanityDeleteTagMethod} method requires ImgurHash from payload`)
 
-test('delete tag works successfully', async () => {
-  expect(true).toBeTruthy()
+  test.todo(
+    `${sanityDeleteTagMethod} method requires one of [hashes, tagnumber, slug] from payload`
+  )
+
+  test.todo(`${sanityDeleteTagMethod} method resolves data of type boolean[]`)
+
+  test.todo(
+    `${sanityDeleteTagMethod} method resolves status of HttpStatusCode.Ok`
+  )
 })

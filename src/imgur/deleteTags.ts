@@ -1,14 +1,14 @@
 import ImgurClient from 'imgur'
 import { deleteTagsPayload } from '../common/payloads'
-import { BikeTagApiResponse, ImgurImage } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
 import { getImageHashFromImgurImage } from './helpers'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 
-export async function deleteTag(
+export async function deleteTags(
   client: ImgurClient,
   payload: deleteTagsPayload
-): Promise<BikeTagApiResponse<any>> {
-  const responses = []
+): Promise<BikeTagApiResponse<boolean[]>> {
+  const responses: boolean[] = []
   const deleteHashes = []
   let tags = payload.tags
 
@@ -17,13 +17,11 @@ export async function deleteTag(
   }
   for (const tag of tags) {
     if (tag.foundImageUrl) {
-      deleteHashes.push(
-        getImageHashFromImgurImage({ link: tag.foundImageUrl } as ImgurImage)
-      )
+      deleteHashes.push(getImageHashFromImgurImage({ link: tag.foundImageUrl }))
     }
     if (tag.mysteryImageUrl) {
       deleteHashes.push(
-        getImageHashFromImgurImage({ link: tag.mysteryImageUrl } as ImgurImage)
+        getImageHashFromImgurImage({ link: tag.mysteryImageUrl })
       )
     }
   }
@@ -33,7 +31,7 @@ export async function deleteTag(
   }
 
   for (const hash of deleteHashes) {
-    responses.push(await client.deleteImage(hash))
+    responses.push((await client.deleteImage(hash)).data)
   }
 
   return {
@@ -41,5 +39,5 @@ export async function deleteTag(
     success: true,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,
-  } as BikeTagApiResponse<any>
+  }
 }
