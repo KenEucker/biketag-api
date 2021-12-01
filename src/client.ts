@@ -812,7 +812,7 @@ export class BikeTagClient extends EventEmitter {
       switch (options.source) {
         case AvailableApis.imgur:
           clientMethod = clientMethod.bind({
-            getTag: this.getPassthroughApiMethod(api.getTag, client),
+            getTags: this.getPassthroughApiMethod(api.getTags, client),
             uploadTagImage: this.getPassthroughApiMethod(
               api.uploadTagImage,
               client
@@ -858,7 +858,7 @@ export class BikeTagClient extends EventEmitter {
       switch (options.source) {
         case AvailableApis.imgur:
           clientMethod = {
-            getTag: this.getPassthroughApiMethod(api.getTag, client),
+            getTags: this.getPassthroughApiMethod(api.getTags, client),
           }
           break
       }
