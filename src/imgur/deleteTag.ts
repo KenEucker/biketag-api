@@ -12,7 +12,7 @@ export async function deleteTag(
   const hashes = []
 
   if (payload.tagnumber || payload.slug) {
-    const tag = await this.getTag(payload.tagnumber ?? payload.slug)
+    const tag = await this.getTags(payload.tagnumber ?? payload.slug)
     if (tag.foundImageUrl) {
       hashes.push(
         getImageHashFromImgurImage({ link: tag.foundImageUrl } as ImgurImage)

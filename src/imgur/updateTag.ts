@@ -24,7 +24,7 @@ export async function updateTag(
         isValidUpdatePayload(imgurMysteryImagePayload) &&
         isValidUpdatePayload(imgurFoundImagePayload)
       ) {
-        const tagExistsForBikeTagAlbum = await this.getTag(utp.tagnumber)
+        const tagExistsForBikeTagAlbum = await this.getTags(utp.tagnumber)
         if (
           tagExistsForBikeTagAlbum.success &&
           tagExistsForBikeTagAlbum.data?.mysteryImageUrl?.length

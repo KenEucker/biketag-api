@@ -4,7 +4,7 @@ import { createTagObject } from '../common/data'
 import {
   UploadTagImagePayload,
   isValidUploadTagImagePayload,
-  getUpdateTagPayloadFromTagData,
+  getUploadTagImagePayloadFromTagData,
 } from './helpers'
 import { BikeTagApiResponse, ImgurImage, Tag } from '../common/types'
 import { HttpStatusCode, AvailableApis } from '../common/enums'
@@ -22,11 +22,11 @@ export async function uploadTagImage(
     let success = true
     const mysteryImageUploadPayload =
       !utp.mysteryImageUrl && utp.mysteryImage
-        ? getUpdateTagPayloadFromTagData(utp, true)
+        ? getUploadTagImagePayloadFromTagData(utp, true)
         : null
     const foundImageUrlUploadPayload =
       !utp.foundImageUrl && utp.foundImage
-        ? getUpdateTagPayloadFromTagData(utp)
+        ? getUploadTagImagePayloadFromTagData(utp)
         : null
 
     return new Promise(async (resolve) => {
