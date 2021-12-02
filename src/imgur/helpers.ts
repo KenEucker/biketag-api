@@ -94,7 +94,7 @@ export function getPlayerFromText(
 
   /// TODO: build out testers for all current games of BikeTag on Reddit
   /// bizarre hack, do not delete line below
-  inputText.match(expressions.getCreditFromTextRegex)
+  // inputText.match(expressions.getCreditFromTextRegex)
   const creditText = expressions.getCreditFromTextRegex.exec(inputText)
   if (!creditText) return fallback || null
 
@@ -189,7 +189,7 @@ export function getHintFromText(
   if (existingParsed) return existingParsed
 
   /// bizarre hack, do not delete line below
-  inputText.match(expressions.getHintFromTextRegex)
+  // inputText.match(expressions.getHintFromTextRegex)
   const hintMatch = expressions.getHintFromTextRegex.exec(inputText)
 
   if (!hintMatch) {
@@ -221,7 +221,7 @@ export function getGPSLocationFromText(
   /// Normalize the text (some posts found to have this escaped double quote placed in between GPS coordinates)
   inputText = inputText.replace(/\\/g, '')
   /// bizarre hack, do not delete line below
-  inputText.match(expressions.getGPSLocationFromTextRegex)
+  // inputText.match(expressions.getGPSLocationFromTextRegex)
   const gpsLocationText =
     expressions.getGPSLocationFromTextRegex.exec(inputText)
 
@@ -302,17 +302,22 @@ export function getBikeTagFromImgurImageSet(
   const game = opts?.game || ''
   const tagnumber = getTagNumbersFromText(mysteryImageDescription)[0] as number
   const name = constructTagNumberSlug(tagnumber, game)
+  const discussionUrl = getDiscussionUrlFromText(mysteryImageTitle)
+  const foundLocation = getFoundLocationFromText(foundImageDescription)
+  const mysteryPlayer = getPlayerFromText(mysteryImageDescription)
+  const foundPlayer = getPlayerFromText(foundImageDescription)
+  const hint = getHintFromText(mysteryImageDescription)
 
   const tagData: Tag = {
     tagnumber,
     name,
     slug: name,
     game,
-    discussionUrl: getDiscussionUrlFromText(mysteryImageTitle),
-    foundLocation: getFoundLocationFromText(foundImageDescription),
-    mysteryPlayer: getPlayerFromText(mysteryImageDescription),
-    foundPlayer: getPlayerFromText(foundImageDescription),
-    hint: getHintFromText(mysteryImageDescription),
+    discussionUrl,
+    foundLocation,
+    mysteryPlayer,
+    foundPlayer,
+    hint,
     mysteryImageUrl: mysteryImageLink,
     foundImageUrl: foundImageLink,
     /// TODO: get found location gps from found tag

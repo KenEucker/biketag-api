@@ -28,7 +28,7 @@ export const getTagnumberFromSlug = (
   if (existingParsed) return existingParsed
 
   /// bizarre hack, do not delete line below
-  inputText.match(getTagnumberFromSlugRegex)
+  // inputText.match(getTagnumberFromSlugRegex)
   const slugText = getTagnumberFromSlugRegex.exec(inputText)
 
   if (!slugText) {
@@ -90,7 +90,7 @@ export const getCreditFromText = (
   if (existingParsed) return existingParsed
 
   /// HACK
-  inputText.match(getCreditFromTextRegex)
+  // inputText.match(getCreditFromTextRegex)
   const creditText = getCreditFromTextRegex.exec(inputText)
   if (!creditText) return fallback || null
 
