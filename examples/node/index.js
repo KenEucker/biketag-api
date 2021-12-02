@@ -53,7 +53,7 @@ const bikeTagRedditInstance = redditInstanceOpts.reddit && redditInstanceOpts.re
 const pretty = m => `\x1b[44m${m}\x1b[0m`
 const log = (message, response, toLog = false) => {
   if (toLog) {
-    console.log(pretty(response.success ? message : 'error', response.success ? response.data : response.error), {data: response.data})
+    console.log(pretty(response.success ? message : 'error', response.success ? response.data : response.error), {data: response.data ?? response})
   }
 }
 
