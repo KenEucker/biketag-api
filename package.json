@@ -20,7 +20,7 @@
   },
   "homepage": "https://keneucker.github.io/biketag-api/",
   "scripts": {
-    "dev": "npm run dev:browser",
+    "dev": "npm run dev:node",
     "dev:node": "node examples/node/index.js",
     "dev:test": "jest examples/node/index.test.ts",
     "dev:browser": "npm-run-all --parallel watch serve",

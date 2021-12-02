@@ -1,7 +1,7 @@
 import { ImageData } from 'imgur/lib/common/types'
 import { IGunChainReference } from 'gun/types/chain'
 export { Payload } from 'imgur/lib/common/types'
-import { AvailableApis } from '../common/enums'
+import { AvailableApis, Errors } from '../common/enums'
 
 export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>
@@ -114,6 +114,7 @@ export interface BikeTagApiResponse<
   status: number
   success: boolean
   source: AvailableApis | string
+  error?: Errors
 }
 
 export type ApiOptions = RequireAtLeastOne<{
@@ -128,6 +129,7 @@ export type ApiOptions = RequireAtLeastOne<{
   tagnumber?: number
   subreddit?: string
   account?: string
+  concise?: boolean
 }>
 
 /// ****************************  Imgur API Objects   ********************************** ///
