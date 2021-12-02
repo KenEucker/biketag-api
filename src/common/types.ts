@@ -191,7 +191,8 @@ export interface Tag {
   mysteryImage?: string
   mysteryImageUrl: string
   game: string
-  player: string
+  mysteryPlayer: string
+  foundPlayer: string
   hint: string
   discussionUrl?: string
   mentionUrl?: string

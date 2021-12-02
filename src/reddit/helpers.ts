@@ -253,7 +253,7 @@ export async function getBikeTagInformationFromRedditData(
 
   const tagData: Partial<Tag> = {
     foundLocation: redditPostData.foundAt,
-    player: redditPostData.credit,
+    mysteryPlayer: redditPostData.credit,
     hint: redditPostData.hint,
     game: redditPostData.game ?? game,
     gps,

@@ -10,10 +10,13 @@ export async function deleteTags(
 ): Promise<BikeTagApiResponse<boolean[]>> {
   const responses: boolean[] = []
   const deleteHashes = []
-  let tags = payload.tags
+  let tags = payload.tags ?? []
 
   if (!tags.length && (payload.tagnumbers || payload.slugs)) {
-    tags = await this.getTags(payload.tagnumbers ?? payload.slugs)
+    const { data: tagsData } = await this.getTags(
+      payload.tagnumbers ?? payload.slugs
+    )
+    tags = tagsData?.length ? tagsData : []
   }
   for (const tag of tags) {
     if (tag.foundImageUrl) {

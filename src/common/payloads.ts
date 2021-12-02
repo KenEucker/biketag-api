@@ -122,7 +122,8 @@ export type getQueuePayload = CommonData
 export type queueTagImagePayload = {
   tagnumber: number
   type: 'found' | 'mystery'
-  player: string
+  mysteryPlayer: string
+  foundPlayer: string
   stream: ReadableStream
   queueHash?: string
 } & Partial<Tag>

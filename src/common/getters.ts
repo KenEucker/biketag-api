@@ -28,7 +28,7 @@ export const getTagnumberFromSlug = (
   if (existingParsed) return existingParsed
 
   /// bizarre hack, do not delete line below
-  inputText.match(getTagnumberFromSlugRegex)
+  // inputText.match(getTagnumberFromSlugRegex)
   const slugText = getTagnumberFromSlugRegex.exec(inputText)
 
   if (!slugText) {
@@ -90,7 +90,7 @@ export const getCreditFromText = (
   if (existingParsed) return existingParsed
 
   /// HACK
-  inputText.match(getCreditFromTextRegex)
+  // inputText.match(getCreditFromTextRegex)
   const creditText = getCreditFromTextRegex.exec(inputText)
   if (!creditText) return fallback || null
 
@@ -437,7 +437,7 @@ export const getImgurFoundDescriptionFromBikeTagData = (
 ): string =>
   `#${tag.tagnumber} proof${
     tag.foundLocation ? ` found at (${tag.foundLocation})` : ''
-  } by ${tag.player}`
+  } by ${tag.foundPlayer}`
 export const getImgurFoundTitleFromBikeTagData = (
   tag: Tag,
   cache?: typeof TinyCache
@@ -468,7 +468,9 @@ export const getImgurMysteryDescriptionFromBikeTagData = (
   tag: Tag,
   cache?: typeof TinyCache
 ): string =>
-  `#${tag.tagnumber} tag (hint: ${tag.hint ? tag.hint : ''} ) by ${tag.player}`
+  `#${tag.tagnumber} tag (hint: ${tag.hint ? tag.hint : ''} ) by ${
+    tag.mysteryPlayer
+  }`
 
 export const getBikeTagDescriptionFromData = (data: any): string => {
   return `#${data.currentTagNumber} tag ${

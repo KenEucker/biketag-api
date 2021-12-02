@@ -86,13 +86,15 @@ export function getPlayerFromText(
   fallback?: string,
   cache?: typeof TinyCache
 ): string | null {
+  if (!inputText) return fallback || null
+
   const cacheKey = `${cacheKeys.creditText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
   /// TODO: build out testers for all current games of BikeTag on Reddit
   /// bizarre hack, do not delete line below
-  inputText.match(expressions.getCreditFromTextRegex)
+  // inputText.match(expressions.getCreditFromTextRegex)
   const creditText = expressions.getCreditFromTextRegex.exec(inputText)
   if (!creditText) return fallback || null
 
@@ -187,7 +189,7 @@ export function getHintFromText(
   if (existingParsed) return existingParsed
 
   /// bizarre hack, do not delete line below
-  inputText.match(expressions.getHintFromTextRegex)
+  // inputText.match(expressions.getHintFromTextRegex)
   const hintMatch = expressions.getHintFromTextRegex.exec(inputText)
 
   if (!hintMatch) {
@@ -219,7 +221,7 @@ export function getGPSLocationFromText(
   /// Normalize the text (some posts found to have this escaped double quote placed in between GPS coordinates)
   inputText = inputText.replace(/\\/g, '')
   /// bizarre hack, do not delete line below
-  inputText.match(expressions.getGPSLocationFromTextRegex)
+  // inputText.match(expressions.getGPSLocationFromTextRegex)
   const gpsLocationText =
     expressions.getGPSLocationFromTextRegex.exec(inputText)
 
@@ -287,25 +289,38 @@ export function getImgurLinksFromText(
 }
 
 export function getBikeTagFromImgurImageSet(
-  mysteryImage: ImgurImage,
+  mysteryImage?: ImgurImage,
   foundImage?: ImgurImage,
   opts?: any
 ): Tag {
+  const foundImageLink = foundImage?.link
+  const foundImageDescription = foundImage?.description
+  const mysteryImageLink = mysteryImage?.link
+  const mysteryImageDescription = mysteryImage?.description
+  const mysteryImageTitle = mysteryImage?.title
+
   const game = opts?.game || ''
-  const tagnumber = getTagNumbersFromText(mysteryImage.description)[0] as number
+  const tagnumber = getTagNumbersFromText(mysteryImageDescription)[0] as number
   const name = constructTagNumberSlug(tagnumber, game)
+  const discussionUrl = getDiscussionUrlFromText(mysteryImageTitle)
+  const foundLocation = getFoundLocationFromText(foundImageDescription)
+  const mysteryPlayer = getPlayerFromText(mysteryImageDescription)
+  const foundPlayer = getPlayerFromText(foundImageDescription)
+  const hint = getHintFromText(mysteryImageDescription)
 
   const tagData: Tag = {
     tagnumber,
     name,
     slug: name,
     game,
-    discussionUrl: getDiscussionUrlFromText(mysteryImage.title),
-    foundLocation: getFoundLocationFromText(foundImage?.description),
-    player: getPlayerFromText(mysteryImage.description) as string,
-    hint: getHintFromText(mysteryImage.description) as string,
-    mysteryImageUrl: mysteryImage.link,
-    foundImageUrl: foundImage?.link,
+    discussionUrl,
+    foundLocation,
+    mysteryPlayer,
+    foundPlayer,
+    hint,
+    mysteryImageUrl: mysteryImageLink,
+    foundImageUrl: foundImageLink,
+    /// TODO: get found location gps from found tag
     gps: {
       lat: 0,
       long: 0,

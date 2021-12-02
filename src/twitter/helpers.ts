@@ -79,12 +79,12 @@ export function getBikeTagFromTwitterPost(
     }
   }
 
-  let player = getCreditFromText(text)
-  const trailingPeriod = player.lastIndexOf('.')
-  player =
-    trailingPeriod == player.length - 1
-      ? player.substring(0, trailingPeriod)
-      : player
+  let mysteryPlayer = getCreditFromText(text)
+  const trailingPeriod = mysteryPlayer.lastIndexOf('.')
+  mysteryPlayer =
+    trailingPeriod == mysteryPlayer.length - 1
+      ? mysteryPlayer.substring(0, trailingPeriod)
+      : mysteryPlayer
 
   const tagData: Tag = {
     tagnumber: (tagnumbers as []).length ? tagnumbers[0] : 0,
@@ -93,7 +93,8 @@ export function getBikeTagFromTwitterPost(
     game,
     discussionUrl: getDiscussionUrlFromText(text),
     foundLocation: getFoundLocationFromText(text, ''),
-    player,
+    mysteryPlayer: mysteryPlayer,
+    foundPlayer: '',
     hint: getHintFromText(text, '') as string,
     mysteryImageUrl,
     mentionUrl,

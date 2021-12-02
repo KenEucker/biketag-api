@@ -14,32 +14,45 @@ export async function getPlayers(
 
   if (client) {
     const { data: tags } = await this.getTags({ sort: 'relevance' })
-    let previousTag
 
     for (const tag of tags) {
-      const playerIncludedIndex = playerNames.indexOf(tag.player)
-      const playerNotYetIncluded = playerIncludedIndex === -1
-      const includePlayerInList = payload.slugs?.length
-        ? payload.slugs.indexOf(tag.player) !== -1
+      const mysteryPlayerIncludedIndex = playerNames.indexOf(tag.mysteryPlayer)
+      const mysteryPlayerNotYetIncluded = mysteryPlayerIncludedIndex === -1
+      const foundPlayerIncludedIndex = playerNames.indexOf(tag.foundPlayer)
+      const foundPlayerNotYetIncluded = mysteryPlayerIncludedIndex === -1
+      const includeMysteryPlayerInList = payload.slugs?.length
+        ? payload.slugs.indexOf(tag.mysteryPlayer) !== -1
+        : true
+      const includeFoundPlayerInList = payload.slugs?.length
+        ? payload.slugs.indexOf(tag.foundPlayer) !== -1
         : true
 
-      if (includePlayerInList && playerNotYetIncluded) {
+      if (includeMysteryPlayerInList && mysteryPlayerNotYetIncluded) {
         playersData.push(
           createPlayerObject({
-            name: tag.player,
-            tags: [{ ...tag, proof: previousTag }],
+            name: tag.mysteryPlayer,
+            tags: [tag],
             games: [payload.game],
           })
         )
-        playerNames.push(tag.player)
-      } else if (includePlayerInList && !playerNotYetIncluded) {
-        playersData[playerIncludedIndex].tags.push({
+        playerNames.push(tag.mysteryPlayer)
+      } else if (includeMysteryPlayerInList && !mysteryPlayerNotYetIncluded) {
+        playersData[mysteryPlayerIncludedIndex].tags.push({
           ...tag,
-          proof: previousTag,
+        })
+      } else if (includeFoundPlayerInList && foundPlayerNotYetIncluded) {
+        playersData.push(
+          createPlayerObject({
+            name: tag.foundPlayer,
+            tags: [tag],
+            games: [payload.game],
+          })
+        )
+      } else if (includeFoundPlayerInList && !foundPlayerNotYetIncluded) {
+        playersData[foundPlayerIncludedIndex].tags.push({
+          ...tag,
         })
       }
-
-      previousTag = tag
     }
   }
 
