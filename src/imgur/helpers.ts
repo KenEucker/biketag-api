@@ -86,6 +86,8 @@ export function getPlayerFromText(
   fallback?: string,
   cache?: typeof TinyCache
 ): string | null {
+  if (!inputText) return fallback || null
+
   const cacheKey = `${cacheKeys.creditText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
@@ -287,12 +289,18 @@ export function getImgurLinksFromText(
 }
 
 export function getBikeTagFromImgurImageSet(
-  mysteryImage: ImgurImage,
+  mysteryImage?: ImgurImage,
   foundImage?: ImgurImage,
   opts?: any
 ): Tag {
+  const foundImageLink = foundImage?.link
+  const foundImageDescription = foundImage?.description
+  const mysteryImageLink = mysteryImage?.link
+  const mysteryImageDescription = mysteryImage?.description
+  const mysteryImageTitle = mysteryImage?.title
+
   const game = opts?.game || ''
-  const tagnumber = getTagNumbersFromText(mysteryImage.description)[0] as number
+  const tagnumber = getTagNumbersFromText(mysteryImageDescription)[0] as number
   const name = constructTagNumberSlug(tagnumber, game)
 
   const tagData: Tag = {
@@ -300,13 +308,13 @@ export function getBikeTagFromImgurImageSet(
     name,
     slug: name,
     game,
-    discussionUrl: getDiscussionUrlFromText(mysteryImage.title),
-    foundLocation: getFoundLocationFromText(foundImage?.description),
-    mysteryPlayer: getPlayerFromText(mysteryImage.description) as string,
-    foundPlayer: getPlayerFromText(foundImage.description) as string,
-    hint: getHintFromText(mysteryImage.description) as string,
-    mysteryImageUrl: mysteryImage.link,
-    foundImageUrl: foundImage?.link,
+    discussionUrl: getDiscussionUrlFromText(mysteryImageTitle),
+    foundLocation: getFoundLocationFromText(foundImageDescription),
+    mysteryPlayer: getPlayerFromText(mysteryImageDescription),
+    foundPlayer: getPlayerFromText(foundImageDescription),
+    hint: getHintFromText(mysteryImageDescription),
+    mysteryImageUrl: mysteryImageLink,
+    foundImageUrl: foundImageLink,
     /// TODO: get found location gps from found tag
     gps: {
       lat: 0,
