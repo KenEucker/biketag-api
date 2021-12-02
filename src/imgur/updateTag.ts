@@ -25,15 +25,14 @@ export async function updateTag(
         isValidUpdatePayload(imgurFoundImagePayload)
       ) {
         const tagExistsForBikeTagAlbum = await this.getTags(utp.tagnumber)
-        if (
+        const tagExists =
           tagExistsForBikeTagAlbum.success &&
-          tagExistsForBikeTagAlbum.data?.mysteryImageUrl?.length
-        ) {
+          tagExistsForBikeTagAlbum.data.length
+        const existingTag = tagExists ? tagExistsForBikeTagAlbum.data[0] : null
+        if (existingTag && existingTag.mysteryImageUrl?.length) {
           const mysteryImageUpdated = (await client.updateImage({
             ...imgurMysteryImagePayload,
-            imageHash: getImageHashFromText(
-              tagExistsForBikeTagAlbum.data.mysteryImageUrl
-            ),
+            imageHash: getImageHashFromText(existingTag.mysteryImageUrl),
           })) as ImgurApiResponse<boolean>
 
           success = mysteryImageUpdated.data
@@ -50,15 +49,10 @@ export async function updateTag(
           }
         }
 
-        if (
-          tagExistsForBikeTagAlbum.success &&
-          tagExistsForBikeTagAlbum.data?.foundImageUrl?.length
-        ) {
+        if (existingTag && existingTag.foundImageUrl?.length) {
           const foundImageUpdated = (await client.updateImage({
             ...imgurFoundImagePayload,
-            imageHash: getImageHashFromText(
-              tagExistsForBikeTagAlbum.data.foundImageUrl
-            ),
+            imageHash: getImageHashFromText(existingTag.foundImageUrl),
           })) as ImgurApiResponse<boolean>
           success = success && foundImageUpdated.data
         } else {

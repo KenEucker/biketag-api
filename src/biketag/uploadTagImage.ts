@@ -2,21 +2,21 @@ import { BikeTagClient } from '../client'
 import { UPDATE_ENDPOINT } from '../common/endpoints'
 import { Payload, BikeTagApiResponse } from '../common/types'
 
-export interface UpdateTagImagePayload
+export interface UploadTagImagePayload
   extends Pick<Payload, 'title' | 'description'> {
   slug: string
 }
 
-// function isValidUpdatePayload(p: UpdateTagImagePayload) {
+// function isValidUpdatePayload(p: UploadTagImagePayload) {
 //   return typeof p.title === 'string' || typeof p.description === 'string';
 // }
 
-export async function updateTagImage(
+export async function uploadTagImage(
   client: BikeTagClient,
-  payload: UpdateTagImagePayload
+  payload: UploadTagImagePayload
 ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
   // if (Array.isArray(payload)) {
-  //   const promises = payload.map((p: UpdateTagImagePayload) => {
+  //   const promises = payload.map((p: UploadTagImagePayload) => {
   //     if (!isValidUpdatePayload(p)) {
   //       throw new Error('Update requires a title and/or description');
   //     }

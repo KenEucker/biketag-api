@@ -17,21 +17,21 @@ export async function getPlayers(
     let previousTag
 
     for (const tag of tags) {
-      const playerIncludedIndex = playerNames.indexOf(tag.player)
+      const playerIncludedIndex = playerNames.indexOf(tag.mysteryPlayer)
       const playerNotYetIncluded = playerIncludedIndex === -1
       const includePlayerInList = payload.slugs?.length
-        ? payload.slugs.indexOf(tag.player) !== -1
+        ? payload.slugs.indexOf(tag.mysteryPlayer) !== -1
         : true
 
       if (includePlayerInList && playerNotYetIncluded) {
         playersData.push(
           createPlayerObject({
-            name: tag.player,
+            name: tag.mysteryPlayer,
             tags: [{ ...tag, proof: previousTag }],
             games: [payload.game],
           })
         )
-        playerNames.push(tag.player)
+        playerNames.push(tag.mysteryPlayer)
       } else if (includePlayerInList && !playerNotYetIncluded) {
         playersData[playerIncludedIndex].tags.push({
           ...tag,

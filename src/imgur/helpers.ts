@@ -302,10 +302,12 @@ export function getBikeTagFromImgurImageSet(
     game,
     discussionUrl: getDiscussionUrlFromText(mysteryImage.title),
     foundLocation: getFoundLocationFromText(foundImage?.description),
-    player: getPlayerFromText(mysteryImage.description) as string,
+    mysteryPlayer: getPlayerFromText(mysteryImage.description) as string,
+    foundPlayer: getPlayerFromText(foundImage.description) as string,
     hint: getHintFromText(mysteryImage.description) as string,
     mysteryImageUrl: mysteryImage.link,
     foundImageUrl: foundImage?.link,
+    /// TODO: get found location gps from found tag
     gps: {
       lat: 0,
       long: 0,
