@@ -17,16 +17,12 @@ import {
   BikeTagConfiguration,
   CommonData,
   TwitterCredentials,
-  Tag,
-  Player,
   RequireAtLeastOne,
-  Ambassador,
-  Setting,
-  Game,
 } from './types'
 import FormData from 'form-data'
 import TinyCache from 'tinycache'
 import { USERAGENT } from '../client'
+import { Tag, Game, Player, Ambassador, Setting } from './schema'
 
 export const putCacheIfExists = (
   key: string,

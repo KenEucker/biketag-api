@@ -2,6 +2,7 @@ import { ImageData } from 'imgur/lib/common/types'
 import { IGunChainReference } from 'gun/types/chain'
 export { Payload } from 'imgur/lib/common/types'
 import { AvailableApis, Errors } from '../common/enums'
+import { Tag, Game, Player, Setting } from './schema'
 
 export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>
@@ -82,6 +83,7 @@ export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
 export interface CommonData {
   game: string
   source?: AvailableApis | string
+  concise?: boolean
 }
 export interface AccessToken {
   accessToken: string
@@ -149,74 +151,6 @@ export type boundary = {
   geo: geopoint
 }
 
-/// ****************************  Sanity Data Types   ********************************** ///
-export type Setting = {
-  slug: string
-  name: string
-  description: string
-  key: string
-  value: string
-}
-
-export type Region = {
-  slug: string
-  name: string
-  description: string
-  zipcode: number
-}
-
-export type Player = {
-  slug: string
-  name: string
-  bicon: string
-  games: string[]
-  tags: string[]
-}
-
-export type Ambassador = {
-  slug: string
-  name: string
-  address1: string
-  address2: string
-  city: string
-  country: string
-  zipcode: number
-  email: string
-  phone: string
-  player: Player
-}
-
-export interface Tag {
-  slug: string
-  name: string
-  tagnumber: number
-  mysteryImage?: string
-  mysteryImageUrl: string
-  game: string
-  mysteryPlayer: string
-  foundPlayer: string
-  hint: string
-  discussionUrl?: string
-  mentionUrl?: string
-  shareUrl?: string
-  foundLocation: string
-  gps: geopoint
-  foundImage?: string
-  foundImageUrl: string
-}
-
-export interface Game {
-  slug: string
-  name: string
-  ambassadors: Ambassador[]
-  boundary: boundary
-  mainhash: string
-  queuehash: string
-  subreddit: string
-  logo: string
-  region: Region
-}
-
 /// ****************************  BikeTag Configurations   ***************************** ///
 export type BikeTagConfiguration = {
   biketag: BikeTagCredentials
@@ -261,3 +195,7 @@ export interface BikeTagGameState {
 }
 
 export type BikeTagGunClient = IGunChainReference<BikeTagGameState>
+
+export type BikeTagServerConfiguration = BikeTagConfiguration & {
+  host: string
+}

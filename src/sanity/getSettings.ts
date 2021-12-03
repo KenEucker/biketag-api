@@ -1,5 +1,5 @@
 import { SanityClient } from '@sanity/client'
-import { BikeTagApiResponse, Setting } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
 import { AvailableApis, HttpStatusCode, DataTypes } from '../common/enums'
 import {
   constructPlayerFromSanityObject,
@@ -7,6 +7,7 @@ import {
   constructSanityFieldsQuery,
 } from './helpers'
 import { getSettingsPayload } from '../common/payloads'
+import { Setting } from '../common/schema'
 
 export async function getSettings(
   client: SanityClient,

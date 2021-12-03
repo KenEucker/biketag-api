@@ -5,7 +5,8 @@ import {
   getUploadTagImagePayloadFromTagData,
   isValidUploadTagImagePayload,
 } from './helpers'
-import { BikeTagApiResponse, ImgurImage, Tag } from '../common/types'
+import { BikeTagApiResponse, ImgurImage } from '../common/types'
+import { Tag } from '../common/schema'
 import { queueTagImagePayload } from '../common/payloads'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 

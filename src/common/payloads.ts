@@ -1,4 +1,5 @@
-import { CommonData, RequireAtLeastOne, Tag } from './types'
+import { Tag } from './schema'
+import { CommonData, RequireAtLeastOne } from './types'
 
 export type getTagsPayload = {
   fields?: string[]
@@ -10,21 +11,18 @@ export type getTagsPayload = {
   sort?: 'new' | 'relevance' | 'hot' | 'top' | 'comments'
   limit?: number
   tagnumbers: number[]
-  game: string
-}
+} & CommonData
 
 export type deleteTagPayload = {
   slug?: string
   tagnumber?: string
-  game?: string
-}
+} & CommonData
 
 export type deleteTagsPayload = {
   slugs?: string[]
   tagnumbers: number[]
   tags?: Partial<Tag>[]
-  game: string
-}
+} & CommonData
 
 export type getTagPayload = {
   tagnumber: number
@@ -34,22 +32,20 @@ export type getTagPayload = {
   hash?: string
   subreddit?: string
   account?: string
-  game: string
   slug: string
   fields?: string[]
-}
+} & CommonData
 
 export type updateTagPayload = {
   tag: RequireAtLeastOne<Tag>
-  game: string
-}
+} & CommonData
 
 export type uploadTagImagePayload = {
   tagnumber: number
   type: 'found' | 'mystery'
   slug?: string
   stream: ReadableStream
-}
+} & CommonData
 
 export type ImgurUploadPayload = {
   image: string
@@ -64,7 +60,7 @@ export type getGamePayload = {
   slug: string
   name: string
   fields?: string[]
-}
+} & CommonData
 
 export type getPlayersPayload = {
   fields?: string[]
@@ -73,8 +69,7 @@ export type getPlayersPayload = {
   hash?: string
   account?: string
   subreddit?: string
-  game: string
-}
+} & CommonData
 
 export type getPlayerPayload = {
   fields?: string[]
@@ -82,38 +77,30 @@ export type getPlayerPayload = {
   hash?: string
   account?: string
   subreddit?: string
-  game: string
-}
+} & CommonData
 
 export type getSettingPayload = {
   fields?: string[]
   slug?: string
-  game: string
-}
+} & CommonData
+
 export type getSettingsPayload = {
   fields?: string[]
   slugs?: string[]
-  game: string
-}
+} & CommonData
 
 export type getAmbassadorsPayload = {
   fields?: string[]
   slugs?: string[]
-  game: string
-}
+} & CommonData
 export type getAmbassadorPayload = {
   fields?: string[]
   slug?: string
-  game: string
-}
+} & CommonData
 
 export type importTagPayload = Pick<
   Tag,
-  | 'discussionUrl'
-  | 'mysteryImageUrl'
-  | 'foundImageUrl'
-  | 'mentionUrl'
-  | 'shareUrl'
+  'discussionUrl' | 'mysteryImageUrl' | 'foundImageUrl' | 'mentionUrl'
 > &
   CommonData
 

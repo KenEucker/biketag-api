@@ -3,6 +3,7 @@
   "exclude": ["src/coverage/", "test/"],
 
   "compilerOptions": {
+    "experimentalDecorators": true,
     "moduleResolution": "node",
     "module": "es6",
     "target": "es6",

@@ -1,8 +1,9 @@
 import TwitterClient from 'twitter-v2'
 import { getTagPayload } from '../common/payloads'
-import { BikeTagApiResponse, Tag } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
 import { getBikeTagFromTwitterPost } from './helpers'
 import { HttpStatusCode, AvailableApis } from '../common/enums'
+import { Tag } from '../common/schema'
 
 export async function getTag(
   client: TwitterClient,

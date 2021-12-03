@@ -2,7 +2,8 @@ import type { ImgurClient } from 'imgur'
 import { createPlayerObject } from '../common/data'
 import { sortPlayers } from '../common/methods'
 import { getPlayersPayload } from '../common/payloads'
-import { BikeTagApiResponse, Player } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
+import { Player } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 
 export async function getPlayers(

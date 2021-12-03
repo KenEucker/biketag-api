@@ -1,5 +1,6 @@
 import * as expressions from '../common/expressions'
-import { ImgurImage, Tag } from '../common/types'
+import { ImgurImage } from '../common/types'
+import { Tag } from '../common/schema'
 import {
   getCreditFromText,
   getImageHashFromText,

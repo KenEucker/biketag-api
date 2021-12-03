@@ -1,11 +1,12 @@
 import { SanityClient } from '@sanity/client'
-import { BikeTagApiResponse, Game } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
 import { AvailableApis, HttpStatusCode, DataTypes } from '../common/enums'
 import {
   constructGameFromSanityObject,
   constructSanityFieldsQuery,
 } from './helpers'
 import { getGamePayload } from '../common/payloads'
+import { Game } from '../common/schema'
 
 export async function getGame(
   client: SanityClient,

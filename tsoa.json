@@ -1,0 +1,12 @@
+{
+  "entryFile": "./src/server.ts",
+  "noImplicitAdditionalProperties": "silently-remove-extras",
+  "spec": {
+    "outputDirectory": "./dist",
+    "yaml": true,
+    "specVersion": 3
+  },
+  "routes": {
+    "basePath": "/v2"
+  }
+}

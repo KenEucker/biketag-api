@@ -1,5 +1,5 @@
 import { createTagObject } from '../common/data'
-import { Tag } from '../common/types'
+import { Tag } from '../common/schema'
 import { Submission } from 'snoowrap/dist/snoowrap.d'
 import {
   getCreditFromText,

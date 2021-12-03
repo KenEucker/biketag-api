@@ -1,5 +1,6 @@
 import RedditClient from 'snoowrap'
-import { BikeTagApiResponse, Tag } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
+import { Tag } from '../common/schema'
 import { getTagsPayload } from '../common/payloads'
 import {
   getBikeTagInformationFromRedditData,

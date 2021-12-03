@@ -1,4 +1,4 @@
-import { Tag } from '../common/types'
+import { Tag } from '../common/schema'
 import {
   getDiscussionUrlFromText,
   getFoundLocationFromText,
