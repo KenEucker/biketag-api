@@ -81,8 +81,8 @@ import { isEqual } from 'lodash'
 export const USERAGENT =
   'biketag-api (https://github.com/keneucker/biketag-api)'
 export class BikeTagClient extends EventEmitter {
-  expressions: any = BikeTagExpressions
-  getters: any = BikeTagGetters
+  static expressions = BikeTagExpressions
+  static getters = BikeTagGetters
 
   protected fetcher: AxiosInstance
   protected plainFetcher: AxiosInstance
