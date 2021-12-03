@@ -9,6 +9,7 @@ export const cacheKeys = {
   bikeTagsByUser: `usertags::`,
   hintText: `hint::`,
   creditText: `credit::`,
+  playerText: `player::`,
   locationText: `gps::`,
   discussionText: `discussion::`,
   mentionText: `mention::`,

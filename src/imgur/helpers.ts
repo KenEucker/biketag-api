@@ -1,6 +1,6 @@
 import * as expressions from '../common/expressions'
 import { ImgurImage } from '../common/types'
-import { Tag } from '../common/schema'
+import { Player, Tag } from '../common/schema'
 import {
   getCreditFromText,
   getImageHashFromText,
@@ -11,7 +11,7 @@ import {
   getImgurMysteryImageHashFromBikeTagData,
   getImgurMysteryTitleFromBikeTagData,
 } from '../common/getters'
-import { cacheKeys } from '../common/data'
+import { cacheKeys, createPlayerObject } from '../common/data'
 
 import TinyCache from 'tinycache'
 import {
@@ -80,6 +80,35 @@ export function getTagNumbersFromText(
 
   putCacheIfExists(cacheKey, tagNumbers, cache)
   return tagNumbers
+}
+
+export function getPlayerFromDataFromText(
+  inputText: string,
+  cache?: typeof TinyCache
+): Partial<Player> | undefined {
+  if (!inputText) return undefined
+
+  const cacheKey = `${cacheKeys.playerText}${inputText}`
+  const existingParsed = getCacheIfExists(cacheKey)
+  if (existingParsed) return existingParsed
+
+  const playerData = expressions.getPlayerFromInfoFromTextRegex.exec(inputText)
+  if (!playerData?.length) return undefined
+
+  const player = createPlayerObject({
+    name: playerData[1],
+    games: playerData[2].split(','),
+  })
+
+  if (!player.name?.length) {
+    /// TODO: this probably won't work
+    putCacheIfExists(cacheKey, false, cache)
+    return undefined
+  }
+
+  putCacheIfExists(cacheKey, player, cache)
+
+  return player
 }
 
 export function getPlayerFromText(
@@ -240,6 +269,10 @@ export function getGPSLocationFromText(
 
 export function getBikeTagNumberFromImage(image: ImgurImage): number {
   return image.description ? getTagNumbersFromText(image.description)[0] : -1
+}
+
+export function isPlayerImage(image: ImgurImage): boolean {
+  return !!getTagNumbersFromText(image.description)
 }
 
 export function sortImgurImagesByTagNumber(

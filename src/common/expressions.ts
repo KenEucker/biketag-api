@@ -10,6 +10,10 @@ export const getFoundLocationFromTextRegex = new RegExp(
   /(?:is\s*(at|the)?\s*\(?)(.+?)(?:\)|]|$)|(?:found\s*(at)?\s*\(?)(.+?)(?:\)|])|(?:found\s*at\s*\()(.+?)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/gim
 )
 
+export const getPlayerFromInfoFromTextRegex = new RegExp(
+  /(?:\[Player\s*)(.*)(?:]\s*\+\()(.*)(?=\))/i
+)
+
 export const getHintFromTextRegex = new RegExp(/(?:hint:\s*?)([^)]*)/i)
 
 export const getGPSLocationFromTextRegex = new RegExp(
