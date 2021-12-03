@@ -1,4 +1,4 @@
-import { geopoint, Tag } from './types'
+import { geopoint } from './types'
 import {
   getTagnumberFromSlugRegex,
   getTagNumbersFromTextRegex,
@@ -15,6 +15,7 @@ import {
 import { getCacheIfExists, putCacheIfExists } from '../common/methods'
 import { cacheKeys } from '../common/data'
 import TinyCache from 'tinycache'
+import { Tag } from './schema'
 
 export const getTagnumberFromSlug = (
   inputText: string,

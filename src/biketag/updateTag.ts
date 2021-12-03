@@ -1,5 +1,6 @@
 import { updateTagPayload } from '../common/payloads'
-import { BikeTagApiResponse, Tag } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
+import { Tag } from '../common/schema'
 import { BikeTagGunClient } from '../common/types'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 

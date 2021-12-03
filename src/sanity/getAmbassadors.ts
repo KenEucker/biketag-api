@@ -1,6 +1,7 @@
 import { SanityClient } from '@sanity/client'
 import { AvailableApis, HttpStatusCode, DataTypes } from '../common/enums'
-import { BikeTagApiResponse, Ambassador } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
+import { Ambassador } from '../common/schema'
 import {
   constructAmbassadorFromSanityObject,
   constructSanityDocumentQuery,

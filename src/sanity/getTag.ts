@@ -1,5 +1,6 @@
 import { SanityClient } from '@sanity/client'
-import { BikeTagApiResponse, Tag } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
+import { Tag } from '../common/schema'
 import {
   constructTagFromSanityObject,
   constructSanityFieldsQuery,

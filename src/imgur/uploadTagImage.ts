@@ -6,7 +6,8 @@ import {
   isValidUploadTagImagePayload,
   getUploadTagImagePayloadFromTagData,
 } from './helpers'
-import { BikeTagApiResponse, ImgurImage, Tag } from '../common/types'
+import { BikeTagApiResponse, ImgurImage } from '../common/types'
+import { Tag } from '../common/schema'
 import { HttpStatusCode, AvailableApis } from '../common/enums'
 
 export async function uploadTagImage(

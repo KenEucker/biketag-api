@@ -1,5 +1,6 @@
 import { BikeTagClient } from '../client'
-import { Payload, BikeTagApiResponse, Tag } from '../common/types'
+import { Payload, BikeTagApiResponse } from '../common/types'
+import { Tag } from '../common/schema'
 import { QUEUE_ENDPOINT } from '../common/endpoints'
 
 export async function queueTagImage(

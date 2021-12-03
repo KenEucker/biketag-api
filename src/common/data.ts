@@ -1,4 +1,4 @@
-import { Tag, Game, Player, Ambassador, Setting } from './types'
+import { Tag, Game, Player, Ambassador, Setting } from './schema'
 
 export const cacheKeys = {
   sanityUrlText: `sanity::`,

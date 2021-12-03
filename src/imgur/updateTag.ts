@@ -1,10 +1,11 @@
 import type { ImgurClient, ImgurApiResponse } from 'imgur'
 import { updateTagPayload } from '../common/payloads'
-import { BikeTagApiResponse, Tag } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
 import { getImageHashFromText } from '../common/getters'
 import { createTagObject } from '../common/data'
 import { getUpdateTagPayloadFromTagData, isValidUpdatePayload } from './helpers'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
+import { Tag } from '../common/schema'
 
 export async function updateTag(
   client: ImgurClient,

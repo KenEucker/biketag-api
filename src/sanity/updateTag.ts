@@ -1,7 +1,8 @@
 import { SanityClient } from '@sanity/client'
 import { constructSanityObjectFromTag } from './helpers'
 import { HttpStatusCode, AvailableApis } from '../common/enums'
-import { BikeTagApiResponse, Tag } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
+import { Tag } from '../common/schema'
 export interface SanityUploadPayload {
   _id: string
   _type: string

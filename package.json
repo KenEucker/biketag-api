@@ -21,6 +21,7 @@
   "homepage": "https://keneucker.github.io/biketag-api/",
   "scripts": {
     "dev": "npm run dev:node",
+    "dev:build": "npm run build && npm run compile && npm run expose && npm run dev",
     "dev:node": "node examples/node/index.js",
     "dev:test": "jest examples/node/index.test.ts",
     "dev:browser": "npm-run-all --parallel watch serve",
@@ -48,7 +49,7 @@
     "lint:write": "prettier . --write && eslint . --fix",
     "lint:staged": "npx --no-install lint-staged",
     "commit": "cz",
-    "convert": "typeconv -f ts -t oapi -o openapi 'src/**/*.ts'",
+    "convert": "tsoa",
     "remove-gun-log": "gun-annoyance-remove || true"
   },
   "dependencies": {
@@ -95,6 +96,7 @@
     "ts-jest": "^27.0.7",
     "ts-loader": "^9.1.1",
     "ts-node": "^10.4.0",
+    "tsoa": "^3.14.1",
     "typeconv": "^1.4.1",
     "typescript": "^4.2.4",
     "webpack": "^5.33.2",

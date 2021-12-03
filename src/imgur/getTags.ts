@@ -1,7 +1,8 @@
 import type { ImgurClient } from 'imgur'
 import { sortTags } from '../common/methods'
 import { getTagsPayload } from '../common/payloads'
-import { BikeTagApiResponse, Tag } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
+import { Tag } from '../common/schema'
 import {
   getBikeTagNumberFromImage,
   getBikeTagFromImgurImageSet,

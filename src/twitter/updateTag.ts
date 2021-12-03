@@ -1,7 +1,8 @@
 import { updateTagPayload } from '../common/payloads'
-import { BikeTagApiResponse, Tag } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
 import TwitterClient from 'twitter-v2'
 import { Errors } from '../common/enums'
+import { Tag } from '../common/schema'
 
 export async function updateTag(
   client: TwitterClient,

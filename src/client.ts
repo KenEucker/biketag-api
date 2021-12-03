@@ -1,8 +1,7 @@
 import { BIKETAG_API_PREFIX } from './common/endpoints'
+import { Game, Tag, Player, Ambassador, Setting } from './common/schema'
 import {
   Credentials,
-  Tag,
-  Game,
   BikeTagApiResponse,
   ImgurCredentials,
   SanityCredentials,
@@ -14,9 +13,6 @@ import {
   TwitterCredentials,
   BikeTagGunClient,
   BikeTagGameState,
-  Player,
-  Ambassador,
-  Setting,
   ApiOptions,
 } from './common/types'
 import {
@@ -88,21 +84,21 @@ export class BikeTagClient extends EventEmitter {
   expressions: any = BikeTagExpressions
   getters: any = BikeTagGetters
 
-  private fetcher: AxiosInstance
-  private plainFetcher: AxiosInstance
-  private cachedFetcher: AxiosInstance
+  protected fetcher: AxiosInstance
+  protected plainFetcher: AxiosInstance
+  protected cachedFetcher: AxiosInstance
 
-  private mostAvailableApi: AvailableApis
-  private biketagClient?: BikeTagGunClient
-  private imgurClient?: ImgurClient
-  private sanityClient?: SanityClient
-  private redditClient?: RedditClient
-  private twitterClient?: any
-  private sanityConfig?: SanityCredentials
-  private imgurConfig?: ImgurCredentials
-  private redditConfig?: RedditCredentials
-  private biketagConfig?: BikeTagCredentials
-  private twitterConfig?: TwitterCredentials
+  protected mostAvailableApi: AvailableApis
+  protected biketagClient?: BikeTagGunClient
+  protected imgurClient?: ImgurClient
+  protected sanityClient?: SanityClient
+  protected redditClient?: RedditClient
+  protected twitterClient?: any
+  protected sanityConfig?: SanityCredentials
+  protected imgurConfig?: ImgurCredentials
+  protected redditConfig?: RedditCredentials
+  protected biketagConfig?: BikeTagCredentials
+  protected twitterConfig?: TwitterCredentials
 
   constructor(readonly configuration: Credentials | BikeTagConfiguration) {
     super()
@@ -144,9 +140,9 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
-  /// ****************************  Private Class Methods   ******************************** ///
+  /// ****************************  protected Class Methods   ******************************** ///
 
-  private getInitialPayload(
+  protected getInitialPayload(
     opts: any,
     source?: AvailableApis | string,
     method?: string
@@ -199,7 +195,7 @@ export class BikeTagClient extends EventEmitter {
     return payload
   }
 
-  private getDefaultOptions(
+  protected getDefaultOptions(
     options: ApiOptions,
     dataType: DataTypes = DataTypes.tag,
     overrides: any = {}
@@ -274,7 +270,7 @@ export class BikeTagClient extends EventEmitter {
     return { ...options, ...overrides }
   }
 
-  private getClientAdapter(
+  protected getClientAdapter(
     opts: any,
     overrides: any = {},
     dataType: DataTypes = DataTypes.tag,
@@ -317,7 +313,7 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  private getMostAvailableClient(method?: string): AvailableApis {
+  protected getMostAvailableClient(method?: string): AvailableApis {
     if (this.mostAvailableApi && !method) {
       return this.mostAvailableApi
     }
@@ -373,7 +369,7 @@ export class BikeTagClient extends EventEmitter {
     return null
   }
 
-  private getPassthroughApiMethod(
+  protected getPassthroughApiMethod(
     method: any,
     client:
       | RedditClient
@@ -390,7 +386,7 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  private getConfig(config?: BikeTagConfiguration): BikeTagConfiguration {
+  protected getConfig(config?: BikeTagConfiguration): BikeTagConfiguration {
     return {
       biketag: config?.biketag ?? this.biketagConfig,
       sanity: config?.sanity ?? this.sanityConfig,
@@ -400,7 +396,7 @@ export class BikeTagClient extends EventEmitter {
     } as BikeTagConfiguration
   }
 
-  private initializeClients(
+  protected initializeClients(
     config?: BikeTagConfiguration
   ): BikeTagConfiguration {
     config = config ?? this.config()
@@ -911,7 +907,7 @@ export class BikeTagClient extends EventEmitter {
   deleteTags(
     payload: RequireAtLeastOne<deleteTagsPayload> | number[],
     opts?: RequireAtLeastOne<Credentials>
-  ): Promise<BikeTagApiResponse<any>> {
+  ): Promise<BikeTagApiResponse<boolean[]>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
       opts,
