@@ -5,6 +5,7 @@ import { getPlayersPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { Player } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
+import { getPlayerFromDataFromText } from './helpers'
 
 export async function getPlayers(
   client: ImgurClient,
@@ -15,12 +16,37 @@ export async function getPlayers(
 
   if (client) {
     const { data: tags } = await this.getTags({ sort: 'relevance' })
+    /// TODO: this better be cached because it's being called twice now
+    const albumInfo = await (client.getAlbum(payload.hash) as any)
+    const playerImages = albumInfo.data?.images?.reduce((o, i) => {
+      const player = getPlayerFromDataFromText(i.description)
+      if (player) {
+        player.bicon = i.link
+        o.push(player)
+      }
+      return o
+    }, [])
+
+    const includePlayer = (tag: any, name: string) => {
+      const filteredPlayers = playerImages.filter((p) => p.name === name)
+      const player = filteredPlayers?.length ? filteredPlayers[0] : {}
+
+      playersData.push(
+        createPlayerObject({
+          games: player.games?.length ? player.games : [payload.game],
+          bicon: player.bicon,
+          name,
+          tags: [tag],
+        })
+      )
+      playerNames.push(name)
+    }
 
     for (const tag of tags) {
       const mysteryPlayerIncludedIndex = playerNames.indexOf(tag.mysteryPlayer)
       const mysteryPlayerNotYetIncluded = mysteryPlayerIncludedIndex === -1
       const foundPlayerIncludedIndex = playerNames.indexOf(tag.foundPlayer)
-      const foundPlayerNotYetIncluded = mysteryPlayerIncludedIndex === -1
+      const foundPlayerNotYetIncluded = foundPlayerIncludedIndex === -1
       const includeMysteryPlayerInList = payload.slugs?.length
         ? payload.slugs.indexOf(tag.mysteryPlayer) !== -1
         : true
@@ -29,26 +55,13 @@ export async function getPlayers(
         : true
 
       if (includeMysteryPlayerInList && mysteryPlayerNotYetIncluded) {
-        playersData.push(
-          createPlayerObject({
-            name: tag.mysteryPlayer,
-            tags: [tag],
-            games: [payload.game],
-          })
-        )
-        playerNames.push(tag.mysteryPlayer)
+        includePlayer(tag, tag.mysteryPlayer)
       } else if (includeMysteryPlayerInList && !mysteryPlayerNotYetIncluded) {
         playersData[mysteryPlayerIncludedIndex].tags.push({
           ...tag,
         })
       } else if (includeFoundPlayerInList && foundPlayerNotYetIncluded) {
-        playersData.push(
-          createPlayerObject({
-            name: tag.foundPlayer,
-            tags: [tag],
-            games: [payload.game],
-          })
-        )
+        includePlayer(tag, tag.foundPlayer)
       } else if (includeFoundPlayerInList && !foundPlayerNotYetIncluded) {
         playersData[foundPlayerIncludedIndex].tags.push({
           ...tag,
