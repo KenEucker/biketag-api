@@ -14,6 +14,10 @@ export const getPlayerFromInfoFromTextRegex = new RegExp(
   /(?:\[Player\s*)(.*)(?:]\s*\+\()(.*)(?=\))/i
 )
 
+export const getGameFromInfoFromTextRegex = new RegExp(
+  /(((?:\[BikeTag\s*Game\s*)(.*)(?:]))((?:\s*#\()(.*)(?=\))\))?((?:\s*\|)(.*)(?=\|)\|)?)|(((?:{\s*)(.*)(?:}))((?:\s*\[)(.*)(?=\])\])?((?:\s*@\()(.*)(?=\))\))?)/i
+)
+
 export const getHintFromTextRegex = new RegExp(/(?:hint:\s*?)([^)]*)/i)
 
 export const getGPSLocationFromTextRegex = new RegExp(

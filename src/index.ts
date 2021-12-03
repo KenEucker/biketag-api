@@ -6,6 +6,10 @@ export {
   BikeTagCredentials,
 } from './client'
 
-export { createGameObject, createTagObject } from './common/data'
+export {
+  createGameObject,
+  createTagObject,
+  createPlayerObject,
+} from './common/data'
 
 export default BikeTagClient

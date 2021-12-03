@@ -5,7 +5,7 @@ import { getPlayersPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { Player } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { getPlayerFromDataFromText } from './helpers'
+import { getPlayerDataFromText } from './helpers'
 
 export async function getPlayers(
   client: ImgurClient,
@@ -19,7 +19,7 @@ export async function getPlayers(
     /// TODO: this better be cached because it's being called twice now
     const albumInfo = await (client.getAlbum(payload.hash) as any)
     const playerImages = albumInfo.data?.images?.reduce((o, i) => {
-      const player = getPlayerFromDataFromText(i.description)
+      const player = getPlayerDataFromText(i.description)
       if (player) {
         player.bicon = i.link
         o.push(player)

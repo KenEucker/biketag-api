@@ -1,6 +1,6 @@
 import * as expressions from '../common/expressions'
 import { ImgurImage } from '../common/types'
-import { Player, Tag } from '../common/schema'
+import { Game, Player, Tag } from '../common/schema'
 import {
   getCreditFromText,
   getImageHashFromText,
@@ -11,7 +11,7 @@ import {
   getImgurMysteryImageHashFromBikeTagData,
   getImgurMysteryTitleFromBikeTagData,
 } from '../common/getters'
-import { cacheKeys, createPlayerObject } from '../common/data'
+import { cacheKeys, createGameObject, createPlayerObject } from '../common/data'
 
 import TinyCache from 'tinycache'
 import {
@@ -82,7 +82,7 @@ export function getTagNumbersFromText(
   return tagNumbers
 }
 
-export function getPlayerFromDataFromText(
+export function getPlayerDataFromText(
   inputText: string,
   cache?: typeof TinyCache
 ): Partial<Player> | undefined {
@@ -109,6 +109,39 @@ export function getPlayerFromDataFromText(
   putCacheIfExists(cacheKey, player, cache)
 
   return player
+}
+
+export function getGameDataFromText(
+  inputText: string,
+  cache?: typeof TinyCache
+): Partial<Game> | undefined {
+  if (!inputText) return undefined
+
+  const cacheKey = `${cacheKeys.gameText}${inputText}`
+  const existingParsed = getCacheIfExists(cacheKey)
+  if (existingParsed) return existingParsed
+
+  const gameData = expressions.getGameFromInfoFromTextRegex.exec(inputText)
+  if (!gameData?.length) return undefined
+
+  const game = createGameObject({
+    name: gameData[3],
+    ambassadors: gameData[5].split(','),
+    queuehash: gameData[7],
+    region: gameData[10],
+    subreddit: gameData[12],
+    // twitter: gameData[15],
+  })
+
+  if (!game.name?.length) {
+    /// TODO: this probably won't work
+    putCacheIfExists(cacheKey, false, cache)
+    return undefined
+  }
+
+  putCacheIfExists(cacheKey, game, cache)
+
+  return game
 }
 
 export function getPlayerFromText(

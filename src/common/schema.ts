@@ -61,9 +61,10 @@ export interface Game {
   name: string
   ambassadors: Ambassador[]
   boundary: boundary
-  mainhash: string
-  queuehash: string
-  subreddit: string
+  mainhash?: string
+  queuehash?: string
+  subreddit?: string
+  twitter?: string
   logo: string
   region: Region
 }

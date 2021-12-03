@@ -59,6 +59,7 @@ export type ImgurUploadPayload = {
 export type getGamePayload = {
   slug: string
   name: string
+  hash?: string
   fields?: string[]
 } & CommonData
 
