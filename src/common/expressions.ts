@@ -11,7 +11,7 @@ export const getFoundLocationFromTextRegex = new RegExp(
 )
 
 export const getPlayerFromInfoFromTextRegex = new RegExp(
-  /^(?:\[Player\s*)(.*)(?:]\s*+\()(.*)(?=\))/i
+  /(?:\[Player\s*)(.*)(?:]\s*\+\()(.*)(?=\))/i
 )
 
 export const getHintFromTextRegex = new RegExp(/(?:hint:\s*?)([^)]*)/i)
