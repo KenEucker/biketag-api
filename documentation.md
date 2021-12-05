@@ -224,7 +224,7 @@ You can get the players of a game by calling getPlayers
 const biketagPortland = await client.getGame('portland')
 ```
 
-### There are a series of getter methods, accessible by `client.getters`. Their use is explained below: 
+### There are a series of getter methods, statically accessible by `BikeTagClient.getters`. Their use is explained below: 
 <div align="center">
 
 |     method               | Description                                                                                                                                     |
