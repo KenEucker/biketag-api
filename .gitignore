@@ -6,3 +6,5 @@
 !browser.js
 !index.html
 !.gitignore
+!favicon.ico
+!.nojekyll
