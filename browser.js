@@ -83,23 +83,23 @@ function biketagExample(options = {}) {
             return pageEl
         }
 
-        if (game.data) {
-            console.info("\x1b[44mDisplaying Game\x1b[0m", game.data)
+        if (game) {
+            console.info("\x1b[44mDisplaying Game\x1b[0m", game)
 
             const gameTextEl = document.getElementById("game")
-            gameTextEl.innerText = game.data.name
+            gameTextEl.innerText = game.name
 
-            currentImageEl.querySelector('img').src = `https://${game.data.slug}.biketag.org/current`
+            currentImageEl.querySelector('img').src = `https://${game.slug}.biketag.org/current`
             currentImageEl.classList.remove('hidden')
-            logoEl.src = getLogoImageUrl(game.data)
+            logoEl.src = getLogoImageUrl(game)
 
             biketagAPI = getBikeTagApi({
                 ...opts,
                 imgur: {
-                    hash: game.data.mainhash,
+                    hash: game.mainhash,
                 },
                 reddit: {
-                    subreddit: game.data.subreddit,
+                    subreddit: game.subreddit,
                 },
             }, true)
             const config = biketagAPI.config()
@@ -110,12 +110,12 @@ function biketagExample(options = {}) {
                 source: 'reddit',
                 hash: 'n0'
             })
-            const biketags = albumTagsData && albumTagsData.data ? albumTagsData.data : []
+            const biketags = albumTagsData ?? []
             window.biketags = biketags
 
             console.info(
-                `BikeTag Client Configured -> ${biketags.length ? 'BikeTags Retrieved' : `No BikeTags For Game: ${game.data.name}`}`, {
-                    game: game.data,
+                `BikeTag Client Configured -> ${biketags.length ? 'BikeTags Retrieved' : `No BikeTags For Game: ${game.name}`}`, {
+                    game: game,
                     biketags,
                 })
 
@@ -189,12 +189,12 @@ function biketagExample(options = {}) {
         const biketagAPI = getBikeTagApi(opts, true)
         const allGames = await biketagAPI.game()
 
-        if (allGames.data && allGames.data.length) {
+        if (allGames?.length) {
               console.info("\x1b[44mGame Data Retrieved\x1b[0m", { allGames })
 
             const gameChangerEl = document.getElementById('gameChanger')
             const gameDirectoryEl = document.getElementById('gameDirectory')
-            for (let game of allGames.data) {
+            for (let game of allGames) {
                 const gameSelectEl = document.createElement('option')
                 const gameIconEl = document.createElement('a')
                 const gameIconImageEl = document.createElement('img')
