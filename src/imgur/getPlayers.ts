@@ -57,15 +57,11 @@ export async function getPlayers(
       if (includeMysteryPlayerInList && mysteryPlayerNotYetIncluded) {
         includePlayer(tag, tag.mysteryPlayer)
       } else if (includeMysteryPlayerInList && !mysteryPlayerNotYetIncluded) {
-        playersData[mysteryPlayerIncludedIndex].tags.push({
-          ...tag,
-        })
+        playersData[mysteryPlayerIncludedIndex].tags.push(tag)
       } else if (includeFoundPlayerInList && foundPlayerNotYetIncluded) {
         includePlayer(tag, tag.foundPlayer)
       } else if (includeFoundPlayerInList && !foundPlayerNotYetIncluded) {
-        playersData[foundPlayerIncludedIndex].tags.push({
-          ...tag,
-        })
+        playersData[foundPlayerIncludedIndex].tags.push(tag)
       }
     }
   }
