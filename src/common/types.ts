@@ -1,6 +1,6 @@
-import { ImageData } from 'imgur/lib/common/types'
+import { ImageData } from 'imanagur/lib/common/types'
 import { IGunChainReference } from 'gun/types/chain'
-export { Payload } from 'imgur/lib/common/types'
+export { Payload } from 'imanagur/lib/common/types'
 import { AvailableApis, Errors } from '../common/enums'
 import { Tag, Game, Player, Setting } from './schema'
 

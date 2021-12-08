@@ -68,7 +68,7 @@ import * as redditApi from './reddit'
 import * as twitterApi from './twitter'
 
 import RedditClient from 'snoowrap'
-import ImgurClient from 'imgur'
+import ImgurClient from 'imanagur'
 import sanityClient, { SanityClient } from '@sanity/client'
 import TwitterClient from 'twitter-v2'
 import Gun from 'gun/gun'

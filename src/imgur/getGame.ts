@@ -1,4 +1,4 @@
-import type { ImgurClient } from 'imgur'
+import type { ImgurClient } from 'imanagur'
 import { createGameObject } from '../common/data'
 import { getGamePayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'

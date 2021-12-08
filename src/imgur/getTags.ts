@@ -1,4 +1,4 @@
-import type { ImgurClient } from 'imgur'
+import type { ImgurClient } from 'imanagur'
 import { sortTags } from '../common/methods'
 import { getTagsPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
