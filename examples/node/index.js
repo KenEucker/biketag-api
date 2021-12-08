@@ -17,7 +17,7 @@ const imgurInstanceOpts = {
     clientSecret: process.env.IMGUR_CLIENT_SECRET,
   }
 }
-const bikeTagImgurInstance = imgurInstanceOpts.imgur && imgurInstanceOpts.imgur.hash ? new BikeTagClient(imgurInstanceOpts) : null
+const bikeTagImgurInstance = imgurInstanceOpts.imgur && imgurInstanceOpts.imgur.clientId ? new BikeTagClient(imgurInstanceOpts) : null
 
 const twitterInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
@@ -121,6 +121,8 @@ const runTests = async (out = false) => {
 
   if (bikeTagImgurInstance) {
     console.log(pretty("Imgur BikeTag Client Instantiated"), imgurInstanceOpts)
+    console.log("Game from Imgur")
+    await getGameAsync(bikeTagImgurInstance, out)
     console.log(pretty("Tag #1 from Imgur"))
     await getTag1Async(bikeTagImgurInstance, out)
     console.log(pretty("Current Tag from Imgur"))
@@ -129,8 +131,6 @@ const runTests = async (out = false) => {
     await getTagsAsync(bikeTagImgurInstance, out)
     console.log(pretty("All Players from Imgur"))
     await getPlayersAsync(bikeTagImgurInstance, out)
-    console.log("Game from Imgur")
-    await getGameAsync(bikeTagImgurInstance, out)
   }
 
   if (bikeTagSanityInstance) {

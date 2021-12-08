@@ -19,7 +19,7 @@ export interface ImgurClientId {
 
 export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
   hash?: string
-  queueHash?: string
+  queuehash?: string
   clientSecret: string
 }
 /// ****************************  Twitter Credential Objects   ************************* ///
@@ -123,7 +123,7 @@ export type ApiOptions = RequireAtLeastOne<{
   game: string
   source: AvailableApis | string
   hash?: string
-  queueHash?: string
+  queuehash?: string
   slugs?: string[]
   fields?: string[]
   slug?: string

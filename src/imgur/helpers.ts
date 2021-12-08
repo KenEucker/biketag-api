@@ -111,6 +111,32 @@ export function getPlayerDataFromText(
   return player
 }
 
+export function getGameSlugFromText(
+  inputText: string,
+  cache?: typeof TinyCache
+): string | undefined {
+  if (!inputText) return undefined
+
+  const cacheKey = `${cacheKeys.gameSlugText}${inputText}`
+  const existingParsed = getCacheIfExists(cacheKey)
+  if (existingParsed) return existingParsed
+
+  const gameData = expressions.getGameSlugFromTextRegex.exec(inputText)
+  if (!gameData?.length) return undefined
+
+  const gameName = gameData[2]
+
+  if (!gameName) {
+    /// TODO: this probably won't work
+    putCacheIfExists(cacheKey, false, cache)
+    return undefined
+  }
+
+  putCacheIfExists(cacheKey, gameName, cache)
+
+  return gameName
+}
+
 export function getGameDataFromText(
   inputText: string,
   cache?: typeof TinyCache
@@ -125,12 +151,12 @@ export function getGameDataFromText(
   if (!gameData?.length) return undefined
 
   const game = createGameObject({
-    name: gameData[3],
-    ambassadors: gameData[5].split(','),
-    queuehash: gameData[7],
-    region: gameData[10],
-    subreddit: gameData[12],
-    // twitter: gameData[15],
+    name: gameData[10],
+    ambassadors: (gameData[12] ?? '').split(','),
+    queuehash: gameData[14],
+    region: gameData[3],
+    subreddit: gameData[5],
+    twitter: gameData[7],
   })
 
   if (!game.name?.length) {
