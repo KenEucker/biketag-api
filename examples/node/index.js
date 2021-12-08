@@ -1,14 +1,16 @@
 // @ts-ignore
-const { BikeTagClient } = require('../../biketag.node.js')
+const {
+  BikeTagClient
+} = require('../../biketag.node.js')
 require('dotenv').config()
 
 const biketagDefaultInstanceOpts = {
-  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME :'test',
+  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
 }
 const biketagDefaultInstance = null //new BikeTagClient(biketagDefaultInstanceOpts)
 
 const imgurInstanceOpts = {
-  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME :'test',
+  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
   imgur: {
     hash: process.env.IMGUR_HASH,
     clientId: process.env.IMGUR_CLIENT_ID,
@@ -18,7 +20,7 @@ const imgurInstanceOpts = {
 const bikeTagImgurInstance = imgurInstanceOpts.imgur && imgurInstanceOpts.imgur.hash ? new BikeTagClient(imgurInstanceOpts) : null
 
 const twitterInstanceOpts = {
-  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME :'test',
+  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
   twitter: {
     account: process.env.TWITTER_ACCOUNT,
     bearer_token: process.env.TWITTER_BEARER_TOKEN,
@@ -53,7 +55,9 @@ const bikeTagRedditInstance = redditInstanceOpts.reddit && redditInstanceOpts.re
 const pretty = m => `\x1b[44m${m}\x1b[0m`
 const log = (message, response, toLog = false) => {
   if (toLog) {
-    console.log(pretty(response.success ? message : 'error', response.success ? response.data : response.error), {data: response.data ?? response})
+    console.log(pretty(response.success ? message : 'error', response.success ? response.data : response.error), {
+      data: response.data ? response.data : response
+    })
   }
 }
 
@@ -126,7 +130,7 @@ const runTests = async (out = false) => {
     console.log(pretty("All Players from Imgur"))
     await getPlayersAsync(bikeTagImgurInstance, out)
     console.log("Game from Imgur")
-    // await getGameAsync(bikeTagImgurInstance, out)
+    await getGameAsync(bikeTagImgurInstance, out)
   }
 
   if (bikeTagSanityInstance) {
@@ -158,9 +162,14 @@ const runTests = async (out = false) => {
   if (bikeTagRedditInstance) {
     console.log(pretty("Reddit BikeTag Client Instantiated"), redditInstanceOpts)
     console.log(pretty("Current Tag from Reddit"))
-    await getCurrentTagAsync(bikeTagRedditInstance, out, {source: 'reddit'})
+    await getCurrentTagAsync(bikeTagRedditInstance, out, {
+      source: 'reddit'
+    })
     console.log(pretty("All Tags from Reddit"))
-    await getTagsAsync(bikeTagRedditInstance, out, {source: 'reddit', time: 'all'})
+    await getTagsAsync(bikeTagRedditInstance, out, {
+      source: 'reddit',
+      time: 'all'
+    })
   }
 }
 

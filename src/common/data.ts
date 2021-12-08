@@ -10,6 +10,7 @@ export const cacheKeys = {
   hintText: `hint::`,
   creditText: `credit::`,
   playerText: `player::`,
+  gameText: `game::`,
   locationText: `gps::`,
   discussionText: `discussion::`,
   mentionText: `mention::`,
@@ -54,15 +55,16 @@ export const tagDataObjectFields = {
 
 export const createGameObject = (gameData: any = {}): Game => {
   return {
-    name: gameData.name ?? '',
+    name: gameData.name ?? gameData.slug ?? '',
     ambassadors: gameData.ambassadors ?? [],
     boundary: gameData.boundary ?? {},
     mainhash: gameData.mainhash ?? '',
     queuehash: gameData.queuehash ?? '',
     subreddit: gameData.subreddit ?? '',
+    twitter: gameData.twitter ?? '',
     logo: gameData.logo,
     region: gameData.region ?? '',
-    slug: gameData.slug ?? '',
+    slug: gameData.slug ?? gameData.name ?? '',
   } as Game
 }
 
