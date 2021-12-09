@@ -15,8 +15,10 @@ export const getPlayerFromInfoFromTextRegex = new RegExp(
 )
 
 export const getGameFromInfoFromTextRegex = new RegExp(
-  /(((?:\[BikeTag\s*Game\s*)(.*)(?:]))((?:\s*#\()(.*)(?=\))\))?((?:\s*\|)(.*)(?=\|)\|)?)|(((?:{\s*)(.*)(?:}))((?:\s*\[)(.*)(?=\])\])?((?:\s*@\()(.*)(?=\))\))?)/i
+  /(((?:{\s*)(.*)(?:}))((?:\s*\[)(.*)(?=\])\])?((?:\s*@\()(.*)(?=\))\))?)\s*::\s*(((?:\[BikeTag\s*Game\s*)(.*)(?:]))((?:\s*#\()(.*)(?=\))\))?((?:\s*\|)(.*)(?=\|)\|)?)/i
 )
+
+export const getGameSlugFromTextRegex = new RegExp(/((\w*)\s*bike\s*tag!?)/i)
 
 export const getHintFromTextRegex = new RegExp(/(?:hint:\s*?)([^)]*)/i)
 

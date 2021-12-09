@@ -113,5 +113,5 @@ export type queueTagImagePayload = {
   mysteryPlayer: string
   foundPlayer: string
   stream: ReadableStream
-  queueHash?: string
+  queuehash?: string
 } & Partial<Tag>

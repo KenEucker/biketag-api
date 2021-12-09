@@ -10,6 +10,7 @@ export const cacheKeys = {
   hintText: `hint::`,
   creditText: `credit::`,
   playerText: `player::`,
+  gameSlugText: `slug::`,
   gameText: `game::`,
   locationText: `gps::`,
   discussionText: `discussion::`,

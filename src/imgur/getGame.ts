@@ -4,7 +4,7 @@ import { getGamePayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { Game } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { getGameDataFromText } from './helpers'
+import { getGameDataFromText, getGameSlugFromText } from './helpers'
 
 export async function getGame(
   client: ImgurClient,
@@ -13,12 +13,21 @@ export async function getGame(
   let game
 
   if (client) {
+    if (!payload.hash) {
+      const albumsInfo = await client.getAlbums('biketag')
+      for (const album of albumsInfo?.data) {
+        const gameAlbumData = getGameSlugFromText(album.title)
+        if (gameAlbumData) {
+          payload.hash = album.id
+        }
+      }
+    }
     const albumInfo = await client.getAlbum(payload.hash)
     /// TODO: save all game settings into the title of the image (serialized)
     const games = albumInfo.data?.images?.reduce((o, i) => {
       const gameData = getGameDataFromText(`${i.title}::${i.description}`)
       if (gameData) {
-        gameData.mainhash = i.id
+        gameData.mainhash = albumInfo.data.id
         gameData.logo = i.link
         o.push(gameData)
       }

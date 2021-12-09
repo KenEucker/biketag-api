@@ -238,9 +238,9 @@ export class BikeTagClient extends EventEmitter {
         break
       case DataTypes.queue:
         options.hash =
-          options.queueHash ??
+          options.queuehash ??
           options.hash ??
-          this.imgurConfig.queueHash ??
+          this.imgurConfig.queuehash ??
           this.imgurConfig.hash
         break
     }
@@ -570,9 +570,9 @@ export class BikeTagClient extends EventEmitter {
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Game> | Game> {
     const options = this.options(payload, DataTypes.game, opts, 'getGame')
-    return this.getGame(options as getGamePayload, opts).then((r) =>
-      options.concise ? r.data : r
-    )
+    return this.getGame(options as getGamePayload, opts).then((r) => {
+      return options.concise ? r.data : r
+    })
   }
 
   getGame(
@@ -588,15 +588,35 @@ export class BikeTagClient extends EventEmitter {
     const clientMethod = api.getGame
 
     if (clientMethod) {
-      return clientMethod(client, options).catch((e) => {
-        return {
-          status: HttpStatusCode.InternalServerError,
-          data: null,
-          error: e,
-          success: false,
-          source,
-        }
-      })
+      return clientMethod(client, options)
+        .then((retrievedGameResponse) => {
+          if (retrievedGameResponse.success && retrievedGameResponse.data) {
+            /// Set the most important game data (hash, subreddit, etc)
+            this.config({
+              game: retrievedGameResponse.data.name,
+              imgur: {
+                hash: retrievedGameResponse.data.mainhash,
+                queuehash: retrievedGameResponse.data.queuehash,
+              },
+              reddit: {
+                subreddit: retrievedGameResponse.data.subreddit,
+              },
+              twitter: {
+                account: retrievedGameResponse.data.twitter,
+              },
+            })
+          }
+          return retrievedGameResponse
+        })
+        .catch((e) => {
+          return {
+            status: HttpStatusCode.InternalServerError,
+            data: null,
+            error: e,
+            success: false,
+            source,
+          }
+        })
     } else {
       return Promise.reject(`getGame ${Errors.NotImplemented} ${source}`)
     }
