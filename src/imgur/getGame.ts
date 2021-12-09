@@ -26,7 +26,7 @@ export async function getGame(
     /// TODO: save all game settings into the title of the image (serialized)
     const games = albumInfo.data?.images?.reduce((o, i) => {
       const gameData = getGameDataFromText(`${i.title}::${i.description}`)
-      if (gameData) {
+      if (gameData && gameData.name === payload.slug) {
         gameData.mainhash = albumInfo.data.id
         gameData.logo = i.link
         o.push(gameData)

@@ -319,15 +319,6 @@ export class BikeTagClient extends EventEmitter {
     }
 
     if (
-      this.imgurConfig &&
-      this.imgurClient &&
-      (!method || !!imgurApi[method])
-    ) {
-      if (!method) {
-        this.mostAvailableApi = AvailableApis.imgur
-      }
-      return AvailableApis.imgur
-    } else if (
       this.sanityConfig &&
       this.sanityClient &&
       (!method || !!sanityApi[method])
@@ -354,6 +345,15 @@ export class BikeTagClient extends EventEmitter {
         this.mostAvailableApi = AvailableApis.twitter
       }
       return AvailableApis.twitter
+    } else if (
+      this.imgurConfig &&
+      this.imgurClient &&
+      (!method || !!imgurApi[method])
+    ) {
+      if (!method) {
+        this.mostAvailableApi = AvailableApis.imgur
+      }
+      return AvailableApis.imgur
     } else if (
       this.biketagConfig &&
       isBikeTagCredentials(this.biketagConfig) &&
