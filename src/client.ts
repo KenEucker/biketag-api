@@ -242,7 +242,7 @@ export class BikeTagClient extends EventEmitter {
         break
     }
 
-    if (overrides.source) {
+    if (typeof overrides.source !== 'undefined') {
       options.source = AvailableApis[overrides.source]
       delete overrides.source
     }

@@ -21,7 +21,7 @@ export type Player = {
   name: string
   bicon: string
   games: string[]
-  tags: string[]
+  tags: Tag[]
 }
 
 export type Ambassador = {

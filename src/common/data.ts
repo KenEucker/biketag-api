@@ -22,24 +22,30 @@ export const cacheKeys = {
   slugText: `slug::`,
 }
 
-export const createTagObject = (tagData: any = {}): Tag => {
+export const createTagObject = (
+  tagData: any = {},
+  foundTagData: any = {}
+): Tag => {
   return {
-    tagnumber: tagData.tagnumber ?? '',
-    mysteryImage: tagData.mysteryImage,
-    mysteryImageUrl: tagData.mysteryImageUrl ?? '',
+    _id: tagData._id,
+    _type: tagData._type,
+    /// Common Tag Data
     game: tagData.game ?? '',
     slug: tagData.slug ?? '',
     name: tagData.name ?? '',
+    tagnumber: tagData.tagnumber ?? '',
+    /// Mystery Tag Data
     mysteryPlayer: tagData.mysteryPlayer ?? '',
-    foundPlayer: tagData.foundPlayer ?? '',
+    mysteryImage: tagData.mysteryImage,
+    mysteryImageUrl: tagData.mysteryImageUrl ?? '',
     hint: tagData.hint ?? '',
     discussionUrl: tagData.discussionUrl ?? '',
-    foundLocation: tagData.foundLocation ?? '',
-    gps: tagData.gps ?? '',
-    foundImage: tagData.foundImage,
-    foundImageUrl: tagData.foundImageUrl ?? '',
-    _id: tagData._id,
-    _type: tagData._type,
+    /// Found Tag Data
+    foundPlayer: foundTagData.foundPlayer ?? tagData.foundPlayer ?? '',
+    foundImage: foundTagData.foundImage ?? tagData.foundImage,
+    foundImageUrl: foundTagData.foundImageUrl ?? tagData.foundImageUrl ?? '',
+    foundLocation: foundTagData.foundLocation ?? tagData.foundLocation ?? '',
+    gps: foundTagData.foundPlayer ?? tagData.gps ?? '',
   } as Tag
 }
 
