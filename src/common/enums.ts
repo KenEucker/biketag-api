@@ -7,6 +7,13 @@ export enum AvailableApis {
   twitter,
 }
 
+export enum ApiAvailability {
+  noConfig,
+  read,
+  write,
+  all,
+}
+
 export enum DataTypes {
   ambassador,
   game,

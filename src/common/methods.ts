@@ -23,6 +23,7 @@ import FormData from 'form-data'
 import TinyCache from 'tinycache'
 import { USERAGENT } from '../client'
 import { Tag, Game, Player, Ambassador, Setting } from './schema'
+import { ApiAvailability } from './enums'
 
 export const putCacheIfExists = (
   key: string,
@@ -124,8 +125,18 @@ export const isImgurCredentials = (credentials: ImgurCredentials): boolean => {
   )
 }
 
-export const isImgurApiReady = (credentials: ImgurCredentials): boolean => {
-  return credentials?.clientId !== undefined
+export const isImgurApiReady = (
+  credentials: ImgurCredentials
+): ApiAvailability => {
+  if (!(credentials.clientId || credentials.hash)) {
+    return 0
+  } else if (credentials.accessToken) {
+    return 3
+  } else if (credentials.clientId && credentials.clientSecret) {
+    return 2
+  }
+
+  return 1
 }
 
 export const hasRedditClientId = (arg: unknown): arg is RedditClientId => {
@@ -147,15 +158,27 @@ export const isRedditCredentials = (
   )
 }
 
-export const isRedditApiReady = (credentials: RedditCredentials): boolean => {
-  return (
+export const isRedditApiReady = (
+  credentials: RedditCredentials
+): ApiAvailability => {
+  if (
     credentials?.userAgent !== undefined &&
-    credentials?.clientId !== undefined &&
-    ((credentials?.clientSecret !== undefined &&
-      credentials?.refreshToken !== undefined) ||
-      (credentials?.username !== undefined &&
-        credentials?.password !== undefined))
-  )
+    credentials?.clientId !== undefined
+  ) {
+    if (
+      credentials?.clientSecret !== undefined &&
+      credentials?.refreshToken !== undefined
+    ) {
+      return 3
+    } else if (
+      credentials?.username !== undefined &&
+      credentials?.password !== undefined
+    ) {
+      return 2
+    }
+    return 1
+  }
+  return 0
 }
 
 export const isSanityCredentials = (
@@ -164,13 +187,18 @@ export const isSanityCredentials = (
   return credentials?.projectId !== undefined
 }
 
-export const isSanityApiReady = (credentials: SanityCredentials): boolean => {
-  return (
+export const isSanityApiReady = (
+  credentials: SanityCredentials
+): ApiAvailability => {
+  if (
     credentials.projectId !== undefined &&
     credentials.dataset !== undefined &&
-    credentials.token !== undefined &&
     credentials.apiVersion !== undefined
-  )
+  ) {
+    return credentials.token !== undefined ? 3 : 1
+  }
+
+  return 0
 }
 
 export const isBikeTagCredentials = (
@@ -186,11 +214,8 @@ export const isBikeTagCredentials = (
 
 export const isBikeTagApiReady = (
   credentials: BikeTagCredentials | Credentials
-): boolean => {
-  return (
-    (credentials as ClientKey).clientToken !== undefined &&
-    (credentials as ClientKey).clientKey !== undefined
-  )
+): ApiAvailability => {
+  return credentials ? 1 : 0
 }
 
 export const isBikeTagConfiguration = (
@@ -219,14 +244,21 @@ export const isTwitterCredentials = (
 
 export const isTwitterApiReady = (
   credentials: TwitterCredentials | Credentials
-): boolean => {
-  return (
-    credentials?.bearer_token !== undefined ||
-    (credentials.consumer_secret !== undefined &&
-      credentials.consumer_key !== undefined) ||
-    (credentials?.access_token_key !== undefined &&
-      credentials?.access_token_secret !== undefined)
-  )
+): ApiAvailability => {
+  if (credentials?.bearer_token !== undefined) {
+    return 3
+  } else if (
+    credentials.consumer_secret !== undefined &&
+    credentials.consumer_key !== undefined
+  ) {
+    return 2
+  } else if (
+    credentials?.access_token_key !== undefined &&
+    credentials?.access_token_secret !== undefined
+  ) {
+    return 2
+  }
+  return 0
 }
 
 export const isTwitterConfiguration = (

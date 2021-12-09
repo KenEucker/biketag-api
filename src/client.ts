@@ -88,7 +88,6 @@ export class BikeTagClient extends EventEmitter {
   protected plainFetcher: AxiosInstance
   protected cachedFetcher: AxiosInstance
 
-  protected mostAvailableApi: AvailableApis
   protected biketagClient?: BikeTagGunClient
   protected imgurClient?: ImgurClient
   protected sanityClient?: SanityClient
@@ -275,7 +274,7 @@ export class BikeTagClient extends EventEmitter {
     overrides: any = {},
     dataType: DataTypes = DataTypes.tag,
     method?: string
-  ) {
+  ): any {
     const options = this.options(opts, dataType, overrides, method)
 
     let client: any = null
@@ -314,57 +313,63 @@ export class BikeTagClient extends EventEmitter {
   }
 
   protected getMostAvailableClient(method?: string): AvailableApis {
-    if (this.mostAvailableApi && !method) {
-      return this.mostAvailableApi
-    }
-
     if (
+      this.imgurConfig &&
+      this.imgurClient &&
+      (!method || !!imgurApi[method])
+    ) {
+      return AvailableApis.imgur
+    } else if (
       this.sanityConfig &&
       this.sanityClient &&
       (!method || !!sanityApi[method])
     ) {
-      if (!method) {
-        this.mostAvailableApi = AvailableApis.sanity
-      }
       return AvailableApis.sanity
     } else if (
       this.redditConfig &&
       this.redditClient &&
       (!method || !!redditApi[method])
     ) {
-      if (!method) {
-        this.mostAvailableApi = AvailableApis.reddit
-      }
       return AvailableApis.reddit
     } else if (
       this.twitterConfig &&
       this.twitterClient &&
       (!method || !!twitterApi[method])
     ) {
-      if (!method) {
-        this.mostAvailableApi = AvailableApis.twitter
-      }
       return AvailableApis.twitter
-    } else if (
-      this.imgurConfig &&
-      this.imgurClient &&
-      (!method || !!imgurApi[method])
-    ) {
-      if (!method) {
-        this.mostAvailableApi = AvailableApis.imgur
-      }
-      return AvailableApis.imgur
     } else if (
       this.biketagConfig &&
       isBikeTagCredentials(this.biketagConfig) &&
       isBikeTagApiReady(this.biketagConfig) &&
       (!method || !!biketagApi[method])
     ) {
-      if (!method) {
-        this.mostAvailableApi = AvailableApis.biketag
-      }
       return AvailableApis.biketag
     }
+    // const sanityApiAvailability =
+    //   this.sanityConfig && this.sanityClient && (!method || !!sanityApi[method])
+    //     ? isSanityApiReady(this.sanityConfig)
+    //     : 0
+    // const imgurApiAvailability =
+    //   this.imgurConfig && this.imgurClient && (!method || !!imgurApi[method])
+    //     ? isImgurApiReady(this.imgurConfig)
+    //     : 0
+    // const redditApiAvailability =
+    //   this.redditConfig && this.redditClient && (!method || !!redditApi[method])
+    //     ? isRedditApiReady(this.redditConfig)
+    //     : 0
+    // const twitterApiAvailability =
+    //   this.twitterConfig &&
+    //   this.twitterClient &&
+    //   (!method || !!twitterApi[method])
+    //     ? isTwitterApiReady(this.twitterConfig)
+    //     : 0
+    // const bikeTagApiAvilability =
+    //   this.biketagConfig &&
+    //   isBikeTagCredentials(this.biketagConfig) &&
+    //   isBikeTagApiReady(this.biketagConfig) &&
+    //   (!method || !!biketagApi[method])
+    //     ? isBikeTagApiReady(this.biketagConfig)
+    //     : 0
 
     return null
   }
