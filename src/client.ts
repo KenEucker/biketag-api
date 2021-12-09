@@ -102,8 +102,6 @@ export class BikeTagClient extends EventEmitter {
   constructor(readonly configuration: Credentials | BikeTagConfiguration) {
     super()
 
-    this.mostAvailableApi = undefined
-
     const initConfig = this.config(configuration ?? {}, true, true)
     this.initializeClients(initConfig)
 
