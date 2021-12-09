@@ -243,8 +243,7 @@ export class BikeTagClient extends EventEmitter {
     }
 
     if (typeof overrides.source !== 'undefined') {
-      options.source = AvailableApis[overrides.source]
-      delete overrides.source
+      options.source = overrides.source
     }
 
     /// Source defaults
@@ -268,12 +267,12 @@ export class BikeTagClient extends EventEmitter {
   }
 
   protected getClientAdapter(
-    opts: any,
+    payload: any,
     overrides: any = {},
     dataType: DataTypes = DataTypes.tag,
     method?: string
   ): any {
-    const options = this.options(opts, dataType, overrides, method)
+    const options = this.options(payload, dataType, overrides, method)
 
     let client: any = null
     let api: any = null
