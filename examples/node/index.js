@@ -55,8 +55,13 @@ const bikeTagRedditInstance = redditInstanceOpts.reddit && redditInstanceOpts.re
 const pretty = m => `\x1b[44m${m}\x1b[0m`
 const log = (message, response, toLog = false) => {
   if (toLog) {
-    if (response.status) {
+    if (response && response.status) {
       console.log(pretty(response.success ? message : 'error'), response.success ? response.data : response.error)
+    } else if (!response) {
+      console.log(pretty('Error!'), {
+        response
+      })
+
     } else {
       console.log(pretty(message), {
         response
@@ -107,7 +112,7 @@ const getAmbassadorsAsync = async (pre, client, out = false, opts = {}) => {
   return testAmbassadorData
 }
 
-const getSettingsAsync = async (client, out = false, opts = {}) => {
+const getSettingsAsync = async (pre, client, out = false, opts = {}) => {
   const testSettingData = await client.settings(undefined, opts)
   log(`${pre} :: success fully retrieved game settings`, testSettingData, out)
 
@@ -124,10 +129,10 @@ const runTests = async (out = false) => {
   if (bikeTagImgurInstance) {
     console.log(pretty("Imgur BikeTag Client Instantiated"), imgurInstanceOpts)
     await getGameAsync("Imgur", bikeTagImgurInstance, out)
-    // await getTag1Async("Imgur", bikeTagImgurInstance, out)
-    // await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
-    // await getTagsAsync("Imgur", bikeTagImgurInstance, out)
-    // await getPlayersAsync("Imgur", bikeTagImgurInstance, out)
+    await getTag1Async("Imgur", bikeTagImgurInstance, out)
+    await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
+    await getTagsAsync("Imgur", bikeTagImgurInstance, out)
+    await getPlayersAsync("Imgur", bikeTagImgurInstance, out)
   }
 
   if (bikeTagSanityInstance) {
@@ -154,7 +159,6 @@ const runTests = async (out = false) => {
 }
 
 if (require.main === module) {
-  if (bikeTagSanityInstance) getGameAsync(bikeTagSanityInstance, true)
   runTests(true)
 }
 

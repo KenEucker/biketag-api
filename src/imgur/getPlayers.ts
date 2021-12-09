@@ -1,5 +1,5 @@
 import type { ImgurClient } from 'imanagur'
-import { createPlayerObject } from '../common/data'
+import { createPlayerObject, createTagObject } from '../common/data'
 import { sortPlayers } from '../common/methods'
 import { getPlayersPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
@@ -66,6 +66,29 @@ export async function getPlayers(
       } else if (includeFoundPlayerInList && !foundPlayerNotYetIncluded) {
         playersData[foundPlayerIncludedIndex].tags.push(tag)
       }
+    }
+
+    for (const player of playersData) {
+      const playerTagsByNumberIndexes = player.tags.reduce((o, t, i) => {
+        const correctedTagNumber =
+          t.mysteryPlayer === player.name ? t.tagnumber : t.tagnumber + 1
+        o[correctedTagNumber] = o[correctedTagNumber] || []
+        o[correctedTagNumber].push(i)
+        return o
+      }, [])
+
+      const regroupedTags = playerTagsByNumberIndexes.reduce((o, a) => {
+        const firstTag = player.tags[a[0]]
+        const firstTagIsMysteryTag = firstTag.mysteryPlayer === player.name
+        const secondTag = player.tags[a[1]] ?? {}
+        const mysteryTag = firstTagIsMysteryTag ? firstTag : secondTag
+        const foundTag = firstTagIsMysteryTag ? secondTag : firstTag
+
+        o.push(createTagObject(mysteryTag, foundTag))
+        return o
+      }, [])
+
+      player.tags = regroupedTags
     }
   }
 
