@@ -60,7 +60,16 @@ export async function getTags(
   }
 
   images.forEach((images) => {
-    const tagData = getBikeTagFromImgurImageSet(images[0], images[1], payload)
+    const image1IsFoundImage =
+      images[0].description.indexOf('found') !== -1 ||
+      images[0].description.indexOf('proof') !== -1
+    const foundImage = image1IsFoundImage ? images[0] : images[1]
+    const mysteryImage = image1IsFoundImage ? images[1] : images[0]
+    const tagData = getBikeTagFromImgurImageSet(
+      mysteryImage,
+      foundImage,
+      payload
+    )
     tagsData.push(tagData)
   })
 
