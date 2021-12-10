@@ -33,7 +33,7 @@ export const createTagObject = (
     game: tagData.game ?? '',
     slug: tagData.slug ?? '',
     name: tagData.name ?? '',
-    tagnumber: tagData.tagnumber ?? '',
+    tagnumber: tagData.tagnumber ?? 0,
     /// Mystery Tag Data
     mysteryPlayer: tagData.mysteryPlayer ?? '',
     mysteryImage: tagData.mysteryImage,
