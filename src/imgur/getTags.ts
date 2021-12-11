@@ -74,7 +74,7 @@ export async function getTags(
   })
 
   return {
-    data: sortTags(tagsData, payload.sort),
+    data: sortTags(tagsData, payload.sort, payload.limit),
     success: true,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,

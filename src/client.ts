@@ -37,7 +37,7 @@ import {
   getAmbassadorsPayload,
   getSettingsPayload,
   getQueuePayload,
-  queueTagImagePayload,
+  queueTagPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -663,8 +663,8 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  queueTagImage(
-    payload?: RequireAtLeastOne<queueTagImagePayload>,
+  queueTag(
+    payload?: RequireAtLeastOne<queueTagPayload>,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag>> {
     /// take player information and a tag image (either found or mystery) and add it to the queue
@@ -673,7 +673,7 @@ export class BikeTagClient extends EventEmitter {
       opts,
       DataTypes.queue
     )
-    const clientMethod = api.queueTagImage
+    const clientMethod = api.queueTag
 
     /// If the client adapter implements the method
     if (clientMethod) {
@@ -687,12 +687,12 @@ export class BikeTagClient extends EventEmitter {
         }
       })
     } else {
-      throw `queueTagImage ${Errors.NotImplemented} ${source}`
+      throw `queueTag ${Errors.NotImplemented} ${source}`
     }
   }
 
   submitQueuedTag(
-    payload?: RequireAtLeastOne<queueTagImagePayload>,
+    payload?: RequireAtLeastOne<queueTagPayload>,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag>> {
     /// using the player information and the tag number, send the submit tag request to the biketag server

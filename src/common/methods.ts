@@ -487,41 +487,89 @@ export const isSettingData = (setting: RequireAtLeastOne<Setting>): boolean => {
   return !!setting.name && !!setting.key && !!setting.description
 }
 
-export const sortTags = (tags: Tag[], sort = 'new'): Tag[] => {
-  let sorter = (a, b) => b.tagnumber - a.tagnumber
-
-  switch (sort) {
-    case 'new':
-      sorter = (a, b) => b.tagnumber - a.tagnumber
-      break
-    case 'relevance':
-    default:
-      sorter = (a, b) => a.tagnumber - b.tagnumber
-      break
-  }
-  return tags.sort(sorter)
-}
-
-export const sortPlayers = (players: Player[], sort = 'new'): Player[] => {
-  let sorter = (a, b) => b.name.localeCompare(a.name)
+export const sortTags = (tags: Tag[], sort = 'new', limit = 0): Tag[] => {
+  let sorted = tags
 
   switch (sort) {
     case 'top':
-      sorter = (a, b) => b.tags.length - a.tags.length
+      sorted = tags.sort((a, b) => b.tagnumber - a.tagnumber)
+      break
+    case 'new':
+      sorted = tags.sort((a, b) => b.tagnumber - a.tagnumber)
+      break
+    case 'relevance':
+    default:
+      sorted = tags.sort((a, b) => a.tagnumber - b.tagnumber)
+      break
+  }
+
+  return limit !== 0 ? sorted.slice(0, limit) : sorted
+}
+
+export const sortPlayers = (
+  players: Player[],
+  sort = 'new',
+  limit = 0
+): Player[] => {
+  let sorted = players
+
+  switch (sort) {
+    case 'top':
+      sorted = players.sort((a, b) => b.tags.length - a.tags.length)
       break
     case 'comments':
-      sorter = (a, b) => a.name.localeCompare(b.name)
+      sorted = players.sort((a, b) => a.name.localeCompare(b.name))
       break
     case 'new':
       /// Since the players should already be sorted by first to last played, reverse the list
-      return players.reverse()
+      sorted = players.reverse()
       break
     /// Don't sort
     case 'relevance':
     default:
-      return players
       break
   }
 
-  return players.sort(sorter)
+  return limit !== 0 ? sorted.slice(0, limit) : sorted
+}
+
+export const sortAmbassadors = (
+  ambassadors: Ambassador[],
+  sort = 'new',
+  limit = 0
+): Ambassador[] => {
+  const sorter = (a, b) => b.name.localeCompare(a.name)
+  let sorted = ambassadors
+
+  switch (sort) {
+    case 'top':
+      sorted = ambassadors.sort(sorter)
+      break
+    case 'new':
+      /// Since the players should already be sorted by first to last played, reverse the list
+      sorted = ambassadors.reverse()
+      break
+  }
+
+  return limit !== 0 ? sorted.slice(0, limit) : sorted
+}
+
+export const sortSettings = (
+  settings: Setting[],
+  sort = 'new',
+  limit = 0
+): Setting[] => {
+  let sorted = settings
+
+  switch (sort) {
+    case 'comments':
+      sorted = settings.sort((a, b) => a.name.localeCompare(b.name))
+      break
+    case 'new':
+      /// Since the players should already be sorted by first to last played, reverse the list
+      sorted = settings.reverse()
+      break
+  }
+
+  return limit !== 0 ? sorted.slice(0, limit) : sorted
 }

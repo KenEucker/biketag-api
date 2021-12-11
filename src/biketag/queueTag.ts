@@ -3,7 +3,7 @@ import { Payload, BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
 import { QUEUE_ENDPOINT } from '../common/endpoints'
 
-export async function queueTagImage(
+export async function queueTag(
   client: BikeTagClient,
   payload: string | string[] | Payload | Payload[]
 ): Promise<BikeTagApiResponse<Tag> | BikeTagApiResponse<Tag>[]> {

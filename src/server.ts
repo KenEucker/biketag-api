@@ -1,7 +1,7 @@
 import { Body, Delete, Get, Path, Patch, Post, Route, Put } from 'tsoa'
 import BikeTagClient, { BikeTagConfiguration } from '.'
 import {
-  queueTagImagePayload,
+  queueTagPayload,
   getTagsPayload,
   uploadTagImagePayload,
   updateTagPayload,
@@ -94,13 +94,13 @@ export class BikeTagServer extends BikeTagClient {
   // @ts-ignore
   queueImageRoute(
     // @ts-ignore
-    @Body() payload: queueTagImagePayload,
+    @Body() payload: queueTagPayload,
     // @ts-ignore
     @Path('game') game?: string,
     opts?: Credentials
   ): Promise<BikeTagApiResponse<Tag>> {
     payload.game = game ?? payload.game
-    return this.queueTagImage(
+    return this.queueTag(
       payload,
       opts as unknown as RequireAtLeastOne<Credentials>
     ) as Promise<BikeTagApiResponse<Tag>>
@@ -110,7 +110,7 @@ export class BikeTagServer extends BikeTagClient {
   // @ts-ignore
   submitRoute(
     // @ts-ignore
-    @Body() payload: queueTagImagePayload,
+    @Body() payload: queueTagPayload,
     // @ts-ignore
     @Path('game') game?: string,
     opts?: Credentials

@@ -77,7 +77,8 @@ const getTag1Async = async (pre, client, out = false, opts = {}) => {
   return tag1
 }
 
-const getTagsAsync = async (pre, client, out = false, opts = {}) => {
+const get10TagsAsync = async (pre, client, out = false, opts = {}) => {
+  opts.limit = opts.limit ? opts.limit : 10
   const tags = await client.tags(undefined, opts)
   log(`${pre} :: successfully retrieved tags data`, tags, out)
 
@@ -98,21 +99,24 @@ const getGameAsync = async (pre, client, out = false, opts = {}) => {
   return testGameData
 }
 
-const getPlayersAsync = async (pre, client, out = false, opts = {}) => {
+const get10PlayersAsync = async (pre, client, out = false, opts = {}) => {
+  opts.limit = opts.limit ? opts.limit : 10
   const testPlayerData = await client.players(undefined, opts)
   log(`${pre} :: success fully retrieved player data`, testPlayerData, out)
 
   return testPlayerData
 }
 
-const getAmbassadorsAsync = async (pre, client, out = false, opts = {}) => {
+const get10AmbassadorsAsync = async (pre, client, out = false, opts = {}) => {
+  opts.limit = opts.limit ? opts.limit : 10
   const testAmbassadorData = await client.ambassadors(undefined, opts)
   log(`${pre} :: success fully retrieved ambassador data`, testAmbassadorData, out)
 
   return testAmbassadorData
 }
 
-const getSettingsAsync = async (pre, client, out = false, opts = {}) => {
+const get10SettingsAsync = async (pre, client, out = false, opts = {}) => {
+  opts.limit = opts.limit ? opts.limit : 10
   const testSettingData = await client.settings(undefined, opts)
   log(`${pre} :: success fully retrieved game settings`, testSettingData, out)
 
@@ -122,7 +126,7 @@ const getSettingsAsync = async (pre, client, out = false, opts = {}) => {
 const runTests = async (out = false) => {
   if (biketagDefaultInstance) {
     console.log(pretty("Default BikeTag Client Instantiated"), biketagDefaultInstanceOpts)
-    await getTagsAsync(biketagDefaultInstance, out)
+    await get10TagsAsync(biketagDefaultInstance, out)
     // await getCurrentTagAsync(biketagDefaultInstance, out)
   }
 
@@ -131,30 +135,30 @@ const runTests = async (out = false) => {
     await getGameAsync("Imgur", bikeTagImgurInstance, out)
     await getTag1Async("Imgur", bikeTagImgurInstance, out)
     await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
-    await getTagsAsync("Imgur", bikeTagImgurInstance, out)
-    await getPlayersAsync("Imgur", bikeTagImgurInstance, out)
+    await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
+    await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
   }
 
   if (bikeTagSanityInstance) {
     console.log(pretty("Sanity BikeTag Client Instantiated"), sanityInstanceOpts)
     await getTag1Async("Sanity", bikeTagSanityInstance, out)
-    await getTagsAsync("Sanity", bikeTagSanityInstance, out)
+    await get10TagsAsync("Sanity", bikeTagSanityInstance, out)
     await getGameAsync("Sanity", bikeTagSanityInstance, out)
-    await getPlayersAsync("Sanity", bikeTagSanityInstance, out)
-    await getAmbassadorsAsync("Sanity", bikeTagSanityInstance, out)
-    await getSettingsAsync("Sanity", bikeTagSanityInstance, out)
+    await get10PlayersAsync("Sanity", bikeTagSanityInstance, out)
+    await get10AmbassadorsAsync("Sanity", bikeTagSanityInstance, out)
+    await get10SettingsAsync("Sanity", bikeTagSanityInstance, out)
   }
 
   if (bikeTagTwitterInstance) {
     console.log(pretty("Twitter BikeTag Client Instantiated"), twitterInstanceOpts)
     await getCurrentTagAsync("Twitter", bikeTagTwitterInstance)
-    await getTagsAsync("Twitter", bikeTagTwitterInstance, out)
+    await get10TagsAsync("Twitter", bikeTagTwitterInstance, out)
   }
 
   if (bikeTagRedditInstance) {
     console.log(pretty("Reddit BikeTag Client Instantiated"), redditInstanceOpts)
     await getCurrentTagAsync("Reddit", bikeTagRedditInstance, out)
-    await getTagsAsync("Reddit", bikeTagRedditInstance, out)
+    await get10TagsAsync("Reddit", bikeTagRedditInstance, out)
   }
 }
 
@@ -171,7 +175,7 @@ module.exports = {
   getGameAsync,
   getCurrentTagAsync,
   getTag1Async,
-  getTagsAsync,
+  get10TagsAsync,
   imgurInstanceOpts,
   redditInstanceOpts,
   sanityInstanceOpts,
