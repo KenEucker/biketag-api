@@ -31,7 +31,7 @@ export async function getTags(
     )
 
     const response = {
-      data: sortTags(tagsData, payload.sort),
+      data: sortTags(tagsData, payload.sort, payload.limit),
       status: HttpStatusCode.Found,
       success: true,
       source: AvailableApis[AvailableApis.sanity],

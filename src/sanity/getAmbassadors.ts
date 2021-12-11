@@ -9,6 +9,7 @@ import {
 } from './helpers'
 import { ambassadorDataFields } from '../common/data'
 import { getAmbassadorsPayload } from '../common/payloads'
+import { sortAmbassadors } from '../common/methods'
 
 export async function getAmbassadors(
   client: SanityClient,
@@ -35,7 +36,7 @@ export async function getAmbassadors(
     )
 
     const response = {
-      data: ambassadorsData,
+      data: sortAmbassadors(ambassadorsData, payload.sort, payload.limit),
       status: HttpStatusCode.Found,
       success: true,
       source: AvailableApis[AvailableApis.sanity],

@@ -93,7 +93,7 @@ export async function getPlayers(
   }
 
   return {
-    data: sortPlayers(playersData, payload.sort),
+    data: sortPlayers(playersData, payload.sort, payload.limit),
     success: true,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,

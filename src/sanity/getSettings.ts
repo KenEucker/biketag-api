@@ -8,6 +8,7 @@ import {
 } from './helpers'
 import { getSettingsPayload } from '../common/payloads'
 import { Setting } from '../common/schema'
+import { sortSettings } from '../common/methods'
 
 export async function getSettings(
   client: SanityClient,
@@ -29,7 +30,7 @@ export async function getSettings(
     )
 
     const response = {
-      data: settings,
+      data: sortSettings(settings, payload.sort, payload.limit),
       status: HttpStatusCode.Found,
       success: true,
       source: AvailableApis[AvailableApis.sanity],
