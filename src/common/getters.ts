@@ -130,7 +130,6 @@ export const getFoundLocationFromText = (
   const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
-  inputText.match(getFoundLocationFromTextRegex)
   const foundLocationText = getFoundLocationFromTextRegex.exec(inputText)
 
   if (!foundLocationText) {

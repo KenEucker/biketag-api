@@ -7,7 +7,7 @@ export const getCreditFromTextRegex = new RegExp(
 )
 
 export const getFoundLocationFromTextRegex = new RegExp(
-  /(?:is\s*(at|the)?\s*\(?)(.+?)(?:\)|]|$)|(?:found\s*(at)?\s*\(?)(.+?)(?:\)|])|(?:found\s*at\s*\()(.+?)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/gim
+  /(?:is\s*(at|the)?\s*\(?)(.+?)(?:\)|]|$)|(?:found\s*(at)?\s*\(?)(.+?)(?:\)|])|(?:found\s*at\s*\()(.+?)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/im
 )
 
 export const getPlayerFromInfoFromTextRegex = new RegExp(
