@@ -226,18 +226,18 @@ export function getDiscussionUrlFromText(
 
   /// TODO: build out testers for all current games of BikeTag on Reddit
   inputText.match(expressions.getDiscussionUrlFromTextRegex)
-  const foundLocationText =
+  const discussionUrlText =
     expressions.getDiscussionUrlFromTextRegex.exec(inputText)
 
-  if (!foundLocationText) {
+  if (!discussionUrlText) {
     putCacheIfExists(cacheKey, fallback, cache)
     return fallback as string
   }
 
-  const foundLocation = (foundLocationText[1] || '').trim()
-  putCacheIfExists(cacheKey, foundLocation, cache)
+  const discussionUrl = (discussionUrlText[1] || '').trim()
+  putCacheIfExists(cacheKey, discussionUrl, cache)
 
-  return foundLocation
+  return discussionUrl
 }
 
 export function getFoundLocationFromText(
@@ -253,7 +253,6 @@ export function getFoundLocationFromText(
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
-  inputText.match(expressions.getFoundLocationFromTextRegex)
   const foundLocationText =
     expressions.getFoundLocationFromTextRegex.exec(inputText)
 
@@ -262,7 +261,7 @@ export function getFoundLocationFromText(
     return fallback as string
   }
 
-  const foundLocation = (foundLocationText[1] || '').trim()
+  const foundLocation = (foundLocationText[4] || '').trim()
   putCacheIfExists(cacheKey, foundLocation, cache)
 
   return foundLocation
