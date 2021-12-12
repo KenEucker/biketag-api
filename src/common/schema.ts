@@ -43,6 +43,7 @@ export interface Tag {
   tagnumber: number
   mysteryImage?: string
   mysteryImageUrl: string
+  mysteryTime: number
   game: string
   mysteryPlayer: string
   foundPlayer: string
@@ -50,6 +51,7 @@ export interface Tag {
   discussionUrl?: string
   mentionUrl?: string
   shareUrl?: string
+  foundTime: number
   foundLocation: string
   gps: geopoint
   foundImage?: string
