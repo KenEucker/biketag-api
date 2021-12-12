@@ -469,11 +469,12 @@ export const getImgurMysteryTitleFromBikeTagData = (
 export const getImgurMysteryDescriptionFromBikeTagData = (
   tag: Tag,
   includeCredit = true,
+  includeHint = true,
   cache?: typeof TinyCache
 ): string =>
-  `#${tag.tagnumber} tag (hint: ${tag.hint ? tag.hint : ''}${
-    includeCredit ? `) by ${tag.mysteryPlayer}` : ''
-  }`
+  `#${tag.tagnumber} tag ${
+    includeHint && tag.hint ? `(hint: ${tag.hint}` : ''
+  }${includeCredit ? `) by ${tag.mysteryPlayer}` : ''}`
 
 export const getBikeTagDescriptionFromData = (data: any): string => {
   return `#${data.currentTagNumber} tag ${

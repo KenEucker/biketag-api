@@ -38,12 +38,14 @@ export const createTagObject = (
     mysteryPlayer: tagData.mysteryPlayer ?? '',
     mysteryImage: tagData.mysteryImage,
     mysteryImageUrl: tagData.mysteryImageUrl ?? '',
+    mysteryTime: tagData.mysteryTime ?? 0,
     hint: tagData.hint ?? '',
     discussionUrl: tagData.discussionUrl ?? '',
     /// Found Tag Data
     foundPlayer: foundTagData.foundPlayer ?? tagData.foundPlayer ?? '',
     foundImage: foundTagData.foundImage ?? tagData.foundImage,
     foundImageUrl: foundTagData.foundImageUrl ?? tagData.foundImageUrl ?? '',
+    foundTime: tagData.foundTime ?? 0,
     foundLocation: foundTagData.foundLocation ?? tagData.foundLocation ?? '',
     gps: foundTagData.foundPlayer ?? tagData.gps ?? '',
   } as Tag

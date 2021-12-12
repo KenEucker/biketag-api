@@ -388,9 +388,11 @@ export function getBikeTagFromImgurImageSet(
 ): Tag {
   const foundImageLink = foundImage?.link
   const foundImageDescription = foundImage?.description
+  const foundTime = foundImage?.datetime
   const mysteryImageLink = mysteryImage?.link
   const mysteryImageDescription = mysteryImage?.description
   const mysteryImageTitle = mysteryImage?.title
+  const mysteryTime = mysteryImage?.datetime
 
   const game = opts?.game || ''
   const tagnumber = getTagNumbersFromText(mysteryImageDescription)[0] as number
@@ -410,6 +412,8 @@ export function getBikeTagFromImgurImageSet(
     foundLocation,
     mysteryPlayer,
     foundPlayer,
+    foundTime,
+    mysteryTime,
     hint,
     mysteryImageUrl: mysteryImageLink,
     foundImageUrl: foundImageLink,
