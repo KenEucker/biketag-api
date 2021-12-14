@@ -138,7 +138,7 @@ export function constructGameFromSanityObject(
       }, {})
     : data
 
-  const settings = data.settings
+  const settings = data.settings ?? []
 
   gameDataReferenceFields.forEach((f) => {
     if (gameData[f] && typeof gameData[f] !== 'undefined') {
