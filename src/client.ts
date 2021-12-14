@@ -11,8 +11,6 @@ import {
   BikeTagConfiguration,
   PartialBikeTagConfiguration,
   TwitterCredentials,
-  BikeTagGunClient,
-  BikeTagGameState,
   ApiOptions,
 } from './common/types'
 import {
@@ -71,7 +69,6 @@ import RedditClient from 'snoowrap'
 import ImgurClient from 'imanagur'
 import sanityClient, { SanityClient } from '@sanity/client'
 import TwitterClient from 'twitter-v2'
-import Gun from 'gun/gun'
 
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
 import { EventEmitter } from 'events'
@@ -88,7 +85,6 @@ export class BikeTagClient extends EventEmitter {
   protected plainFetcher: AxiosInstance
   protected cachedFetcher: AxiosInstance
 
-  protected biketagClient?: BikeTagGunClient
   protected imgurClient?: ImgurClient
   protected sanityClient?: SanityClient
   protected redditClient?: RedditClient
@@ -296,8 +292,7 @@ export class BikeTagClient extends EventEmitter {
         break
       default:
       case AvailableApis.biketag:
-        client = this.biketagClient
-        api = biketagApi
+        client = api = biketagApi
         break
     }
 
@@ -403,9 +398,6 @@ export class BikeTagClient extends EventEmitter {
   ): BikeTagConfiguration {
     config = config ?? this.config()
 
-    if (config.biketag && isBikeTagCredentials(config.biketag)) {
-      this.biketagClient = new Gun<BikeTagGameState>(config.biketag)
-    }
     if (
       config.imgur &&
       isImgurCredentials(config.imgur) &&
@@ -1231,22 +1223,22 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Client Instance Methods   ****************************** ///
 
   /// Data provided by Gun Client
-  data(opts: any = {}): BikeTagGunClient {
-    const options = opts ?? this.biketagConfig
+  // data(opts: any = {}): BikeTagGunClient {
+  //   const options = opts ?? this.biketagConfig
 
-    if (isBikeTagCredentials(options)) {
-      if (options.game) {
-        return this.biketagClient.get(
-          options.game
-        ) as unknown as BikeTagGunClient
-      } else {
-        return new Gun<BikeTagGameState>(options)
-      }
-    }
+  //   if (isBikeTagCredentials(options)) {
+  //     if (options.game) {
+  //       return this.biketagClient.get(
+  //         options.game
+  //       ) as unknown as BikeTagGunClient
+  //     } else {
+  //       return new Gun<BikeTagGameState>(options)
+  //     }
+  //   }
 
-    /// Always return a valid gun client, because we can
-    return new Gun<BikeTagGameState>(options)
-  }
+  //   /// Always return a valid gun client, because we can
+  //   return new Gun<BikeTagGameState>(options)
+  // }
 
   /// Content powered by Sanity IO Client
   content(opts: any = {}): SanityClient {
