@@ -66,6 +66,7 @@ export const createGameObject = (gameData: any = {}): Game => {
   return {
     name: gameData.name ?? gameData.slug ?? '',
     ambassadors: gameData.ambassadors ?? [],
+    settings: gameData.settings ?? [],
     boundary: gameData.boundary ?? {},
     mainhash: gameData.mainhash ?? '',
     queuehash: gameData.queuehash ?? '',
@@ -77,8 +78,9 @@ export const createGameObject = (gameData: any = {}): Game => {
   } as Game
 }
 
-export const gameDataReferenceFields = ['region']
-export const gameDataArrayFields = ['ambassadors', 'tags']
+export const gameDataReferenceFields = ['region', 'settings']
+export const gameDataArrayFields = ['ambassadors', 'tags', 'settings']
+export const gameDataCustomFields = { settings: '[]->{key,value}' }
 
 export const gameDataFields = Object.keys(createGameObject())
 
