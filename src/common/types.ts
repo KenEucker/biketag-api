@@ -1,5 +1,4 @@
 import { ImageData } from 'imanagur/lib/common/types'
-import { IGunChainReference } from 'gun/types/chain'
 export { Payload } from 'imanagur/lib/common/types'
 import { AvailableApis, Errors } from '../common/enums'
 import { Tag, Game, Player, Setting } from './schema'
@@ -193,8 +192,6 @@ export type BikeTagGame = {
 export interface BikeTagGameState {
   [key: string]: BikeTagGame
 }
-
-export type BikeTagGunClient = IGunChainReference<BikeTagGameState>
 
 export type BikeTagServerConfiguration = BikeTagConfiguration & {
   host: string
