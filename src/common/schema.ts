@@ -58,10 +58,15 @@ export interface Tag {
   foundImageUrl: string
 }
 
+export interface settingsArray {
+  [key: string]: string
+}
+
 export interface Game {
   slug: string
   name: string
   ambassadors: Ambassador[]
+  settings: settingsArray
   boundary: boundary
   mainhash?: string
   queuehash?: string
