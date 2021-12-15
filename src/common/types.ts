@@ -115,7 +115,7 @@ export interface BikeTagApiResponse<
   status: number
   success: boolean
   source: AvailableApis | string
-  error?: Errors
+  error?: Errors | string
 }
 
 export type ApiOptions = RequireAtLeastOne<{

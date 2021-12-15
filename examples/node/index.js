@@ -7,7 +7,7 @@ require('dotenv').config()
 const biketagDefaultInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
 }
-const biketagDefaultInstance = null //new BikeTagClient(biketagDefaultInstanceOpts)
+const biketagDefaultInstance = new BikeTagClient(biketagDefaultInstanceOpts)
 
 const imgurInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
@@ -81,6 +81,7 @@ const get10TagsAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
   const tags = await client.tags(undefined, opts)
   log(`${pre} :: successfully retrieved tags data`, tags, out)
+  console.log(tags[0])
 
   return tags
 }
@@ -126,8 +127,11 @@ const get10SettingsAsync = async (pre, client, out = false, opts = {}) => {
 const runTests = async (out = false) => {
   if (biketagDefaultInstance) {
     console.log(pretty("Default BikeTag Client Instantiated"), biketagDefaultInstanceOpts)
-    await get10TagsAsync(biketagDefaultInstance, out)
-    // await getCurrentTagAsync(biketagDefaultInstance, out)
+    // await getGameAsync("BikeTag", biketagDefaultInstance, out)
+    await getTag1Async("BikeTag", biketagDefaultInstance, out)
+    await getCurrentTagAsync("BikeTag", biketagDefaultInstance, out)
+    await get10TagsAsync("BikeTag", biketagDefaultInstance, out)
+    // await get10PlayersAsync("BikeTag", biketagDefaultInstance, out)
   }
 
   if (bikeTagImgurInstance) {
