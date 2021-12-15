@@ -7,7 +7,7 @@ require('dotenv').config()
 const biketagDefaultInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
 }
-const biketagDefaultInstance = new BikeTagClient(biketagDefaultInstanceOpts)
+const biketagDefaultInstance = null //new BikeTagClient(biketagDefaultInstanceOpts)
 
 const imgurInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',

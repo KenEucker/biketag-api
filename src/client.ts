@@ -198,12 +198,12 @@ export class BikeTagClient extends EventEmitter {
       case DataTypes.game:
         options.game = options.game ?? options.slug ?? this.biketagConfig?.game
         options.slug = options.slug ?? options.game?.toLowerCase() ?? undefined
-        options.slugs = options.slug ? [options.slug] : []
+        // options.slugs = options.slug ? [options.slug] : []
         break
 
       case DataTypes.player:
         options.game = options.game ? options.game : this.biketagConfig?.game
-        options.slugs = options.slug ? [options.slug] : []
+        // options.slugs = options.slug ? [options.slug] : []
         break
 
       case DataTypes.tag:
@@ -219,9 +219,10 @@ export class BikeTagClient extends EventEmitter {
           } else if (typeof options.tagnumbers === 'undefined') {
             options.slug = 'current'
           }
-        } else if (options.slug) {
-          options.slugs = [options.slug]
         }
+        // } else if (options.slug) {
+        //   options.slugs = [options.slug]
+        // }
 
         if (!options.tagnumber) {
           if (options.tagnumbers?.length === 1) {
@@ -231,9 +232,10 @@ export class BikeTagClient extends EventEmitter {
               options.slug
             )
           }
-        } else if (!options.tagnumbers?.length) {
-          options.tagnumbers = [options.tagnumber]
         }
+        // } else if (!options.tagnumbers?.length) {
+        //   options.tagnumbers = [options.tagnumber]
+        // }
         break
       case DataTypes.queue:
         options.hash =
