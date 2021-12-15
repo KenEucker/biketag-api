@@ -1,7 +1,7 @@
 import { AccessToken } from './common/types'
 import { hasClientKey, hasAccessToken } from './common/methods'
 import { BikeTagClient } from './client'
-import { BIKETAG_API_PREFIX, AUTHORIZE_ENDPOINT } from './common/endpoints'
+import { BIKETAG_API_HOST, AUTHORIZE_ENDPOINT } from './common/endpoints'
 
 export async function getAuthorizationHeader(
   client: BikeTagClient
@@ -21,7 +21,7 @@ export async function getAuthorizationHeader(
 
   const options: Record<string, unknown> = {
     url: AUTHORIZE_ENDPOINT,
-    baseURL: BIKETAG_API_PREFIX,
+    baseURL: BIKETAG_API_HOST,
     params: {
       clientKey,
       type: 'token',

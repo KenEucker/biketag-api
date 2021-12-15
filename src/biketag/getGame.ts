@@ -1,22 +1,23 @@
 import { BikeTagClient } from '../client'
 import {
-  TAGS_ENDPOINT,
+  GAMES_ENDPOINT,
   BIKETAG_API_HOST,
   API_VERSION,
 } from '../common/endpoints'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { getTagsPayload } from '../common/payloads'
-import { Tag } from '../common/schema'
+import { getGamePayload } from '../common/payloads'
+import { Game } from '../common/schema'
 import { BikeTagApiResponse } from '../common/types'
 
-export async function getTags(
+export async function getGame(
   client: BikeTagClient,
-  payload: getTagsPayload
-): Promise<BikeTagApiResponse<Tag[]>> {
+  payload: getGamePayload
+): Promise<BikeTagApiResponse<Game[]>> {
   delete payload.source
 
   const response = await client.cachedRequest({
-    url: `https://${payload.game}.${BIKETAG_API_HOST}/${API_VERSION}/${TAGS_ENDPOINT}`,
+    // "https://toronto.biketag.io/api/api/game"
+    url: `https://${payload.game}.${BIKETAG_API_HOST}/${API_VERSION}/${GAMES_ENDPOINT}`,
     data: payload,
   })
 

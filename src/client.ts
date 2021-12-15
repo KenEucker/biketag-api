@@ -1,4 +1,4 @@
-import { BIKETAG_API_PREFIX } from './common/endpoints'
+import { BIKETAG_API_HOST } from './common/endpoints'
 import { Game, Tag, Player, Ambassador, Setting } from './common/schema'
 import {
   Credentials,
@@ -110,7 +110,7 @@ export class BikeTagClient extends EventEmitter {
     })
 
     this.fetcher = axios.create({
-      baseURL: BIKETAG_API_PREFIX,
+      baseURL: BIKETAG_API_HOST,
       headers: {
         'user-agent': USERAGENT,
       },
@@ -118,7 +118,7 @@ export class BikeTagClient extends EventEmitter {
     })
 
     this.cachedFetcher = setup({
-      baseURL: BIKETAG_API_PREFIX,
+      baseURL: BIKETAG_API_HOST,
       cache: {
         maxAge: 15 * 60 * 1000,
         exclude: {
@@ -198,10 +198,12 @@ export class BikeTagClient extends EventEmitter {
       case DataTypes.game:
         options.game = options.game ?? options.slug ?? this.biketagConfig?.game
         options.slug = options.slug ?? options.game?.toLowerCase() ?? undefined
+        options.slugs = options.slug ? [options.slug] : []
         break
 
       case DataTypes.player:
         options.game = options.game ? options.game : this.biketagConfig?.game
+        options.slugs = options.slug ? [options.slug] : []
         break
 
       case DataTypes.tag:
@@ -217,6 +219,8 @@ export class BikeTagClient extends EventEmitter {
           } else if (typeof options.tagnumbers === 'undefined') {
             options.slug = 'current'
           }
+        } else if (options.slug) {
+          options.slugs = [options.slug]
         }
 
         if (!options.tagnumber) {
@@ -227,6 +231,8 @@ export class BikeTagClient extends EventEmitter {
               options.slug
             )
           }
+        } else if (!options.tagnumbers?.length) {
+          options.tagnumbers = [options.tagnumber]
         }
         break
       case DataTypes.queue:
@@ -292,7 +298,8 @@ export class BikeTagClient extends EventEmitter {
         break
       default:
       case AvailableApis.biketag:
-        client = api = biketagApi
+        client = this
+        api = biketagApi
         break
     }
 

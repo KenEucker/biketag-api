@@ -1,1 +1,6 @@
-export default {}
+export { getGame } from './getGame'
+export { getTag } from './getTag'
+export { getTags } from './getTags'
+export { getSettings } from './getSettings'
+export { getPlayers } from './getPlayers'
+export { getAmbassadors } from './getAmbassadors'
