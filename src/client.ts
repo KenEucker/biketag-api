@@ -554,6 +554,11 @@ export class BikeTagClient extends EventEmitter {
     return this.getConfig()
   }
 
+  // TODO: remove
+  toRemove(): string {
+    return 'remove'
+  }
+
   plainRequest(options: AxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
     return this.plainFetcher(options)
   }
