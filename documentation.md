@@ -224,7 +224,7 @@ You can get the players of a game by calling getPlayers
 const biketagPortland = await client.getGame('portland')
 ```
 
-### There are a series of getter methods, accessible by `client.getters`. Their use is explained below: 
+### There are a series of getter methods, statically accessible by `BikeTagClient.getters`. Their use is explained below: 
 <div align="center">
 
 |     method               | Description                                                                                                                                     |
@@ -306,14 +306,9 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
 
   [![twitter.com][twitter-image]](https://developer.twitter.com/en/docs)
 
-  Data powered by gun.eco
-
-  [![gun.eco][gun-image]](https://gun.eco/docs/API)
-
   [biketag-logo]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/biketag-api-logo.jpg
   [imgur-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/imgur-logo.png
   [sanity-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/sanity-logo.png
   [reddit-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/reddit-logo.png
-  [gun-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/gun-logo.png
   [twitter-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/twitter-logo.png
 </div>

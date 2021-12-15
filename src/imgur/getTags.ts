@@ -1,4 +1,4 @@
-import type { ImgurClient } from 'imgur'
+import type { ImgurClient } from 'imanagur'
 import { sortTags } from '../common/methods'
 import { getTagsPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
@@ -61,12 +61,21 @@ export async function getTags(
   }
 
   images.forEach((images) => {
-    const tagData = getBikeTagFromImgurImageSet(images[0], images[1], payload)
+    const image1IsFoundImage =
+      images[0].description.indexOf('found') !== -1 ||
+      images[0].description.indexOf('proof') !== -1
+    const foundImage = image1IsFoundImage ? images[0] : images[1]
+    const mysteryImage = image1IsFoundImage ? images[1] : images[0]
+    const tagData = getBikeTagFromImgurImageSet(
+      mysteryImage,
+      foundImage,
+      payload
+    )
     tagsData.push(tagData)
   })
 
   return {
-    data: sortTags(tagsData, payload.sort),
+    data: sortTags(tagsData, payload.sort, payload.limit),
     success: true,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,

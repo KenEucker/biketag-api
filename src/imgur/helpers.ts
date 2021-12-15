@@ -1,6 +1,6 @@
 import * as expressions from '../common/expressions'
 import { ImgurImage } from '../common/types'
-import { Player, Tag } from '../common/schema'
+import { Game, Player, Tag } from '../common/schema'
 import {
   getCreditFromText,
   getImageHashFromText,
@@ -11,7 +11,7 @@ import {
   getImgurMysteryImageHashFromBikeTagData,
   getImgurMysteryTitleFromBikeTagData,
 } from '../common/getters'
-import { cacheKeys, createPlayerObject } from '../common/data'
+import { cacheKeys, createGameObject, createPlayerObject } from '../common/data'
 
 import TinyCache from 'tinycache'
 import {
@@ -82,7 +82,7 @@ export function getTagNumbersFromText(
   return tagNumbers
 }
 
-export function getPlayerFromDataFromText(
+export function getPlayerDataFromText(
   inputText: string,
   cache?: typeof TinyCache
 ): Partial<Player> | undefined {
@@ -109,6 +109,65 @@ export function getPlayerFromDataFromText(
   putCacheIfExists(cacheKey, player, cache)
 
   return player
+}
+
+export function getGameSlugFromText(
+  inputText: string,
+  cache?: typeof TinyCache
+): string | undefined {
+  if (!inputText) return undefined
+
+  const cacheKey = `${cacheKeys.gameSlugText}${inputText}`
+  const existingParsed = getCacheIfExists(cacheKey)
+  if (existingParsed) return existingParsed
+
+  const gameData = expressions.getGameSlugFromTextRegex.exec(inputText)
+  if (!gameData?.length) return undefined
+
+  const gameName = gameData[2]
+
+  if (!gameName) {
+    /// TODO: this probably won't work
+    putCacheIfExists(cacheKey, false, cache)
+    return undefined
+  }
+
+  putCacheIfExists(cacheKey, gameName, cache)
+
+  return gameName
+}
+
+export function getGameDataFromText(
+  inputText: string,
+  cache?: typeof TinyCache
+): Partial<Game> | undefined {
+  if (!inputText) return undefined
+
+  const cacheKey = `${cacheKeys.gameText}${inputText}`
+  const existingParsed = getCacheIfExists(cacheKey)
+  if (existingParsed) return existingParsed
+
+  const gameData = expressions.getGameFromInfoFromTextRegex.exec(inputText)
+  if (!gameData?.length) return undefined
+
+  const game = createGameObject({
+    name: gameData[10],
+    ambassadors: (gameData[12] ?? '').split(','),
+    queuehash: gameData[14],
+    region: gameData[3],
+    subreddit: gameData[5],
+    twitter: gameData[7],
+  })
+
+  if (!game.name?.length) {
+    /// TODO: this probably won't work
+    putCacheIfExists(cacheKey, false, cache)
+    return undefined
+  }
+
+  putCacheIfExists(cacheKey, game, cache)
+
+  return game
 }
 
 export function getPlayerFromText(
@@ -167,18 +226,18 @@ export function getDiscussionUrlFromText(
 
   /// TODO: build out testers for all current games of BikeTag on Reddit
   inputText.match(expressions.getDiscussionUrlFromTextRegex)
-  const foundLocationText =
+  const discussionUrlText =
     expressions.getDiscussionUrlFromTextRegex.exec(inputText)
 
-  if (!foundLocationText) {
+  if (!discussionUrlText) {
     putCacheIfExists(cacheKey, fallback, cache)
     return fallback as string
   }
 
-  const foundLocation = (foundLocationText[1] || '').trim()
-  putCacheIfExists(cacheKey, foundLocation, cache)
+  const discussionUrl = (discussionUrlText[1] || '').trim()
+  putCacheIfExists(cacheKey, discussionUrl, cache)
 
-  return foundLocation
+  return discussionUrl
 }
 
 export function getFoundLocationFromText(
@@ -194,7 +253,6 @@ export function getFoundLocationFromText(
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
-  inputText.match(expressions.getFoundLocationFromTextRegex)
   const foundLocationText =
     expressions.getFoundLocationFromTextRegex.exec(inputText)
 
@@ -203,7 +261,7 @@ export function getFoundLocationFromText(
     return fallback as string
   }
 
-  const foundLocation = (foundLocationText[1] || '').trim()
+  const foundLocation = (foundLocationText[4] || '').trim()
   putCacheIfExists(cacheKey, foundLocation, cache)
 
   return foundLocation
@@ -329,9 +387,11 @@ export function getBikeTagFromImgurImageSet(
 ): Tag {
   const foundImageLink = foundImage?.link
   const foundImageDescription = foundImage?.description
+  const foundTime = foundImage?.datetime
   const mysteryImageLink = mysteryImage?.link
   const mysteryImageDescription = mysteryImage?.description
   const mysteryImageTitle = mysteryImage?.title
+  const mysteryTime = mysteryImage?.datetime
 
   const game = opts?.game || ''
   const tagnumber = getTagNumbersFromText(mysteryImageDescription)[0] as number
@@ -351,6 +411,8 @@ export function getBikeTagFromImgurImageSet(
     foundLocation,
     mysteryPlayer,
     foundPlayer,
+    foundTime,
+    mysteryTime,
     hint,
     mysteryImageUrl: mysteryImageLink,
     foundImageUrl: foundImageLink,

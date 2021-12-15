@@ -21,7 +21,7 @@ export type Player = {
   name: string
   bicon: string
   games: string[]
-  tags: string[]
+  tags: Tag[]
 }
 
 export type Ambassador = {
@@ -43,6 +43,7 @@ export interface Tag {
   tagnumber: number
   mysteryImage?: string
   mysteryImageUrl: string
+  mysteryTime: number
   game: string
   mysteryPlayer: string
   foundPlayer: string
@@ -50,20 +51,27 @@ export interface Tag {
   discussionUrl?: string
   mentionUrl?: string
   shareUrl?: string
+  foundTime: number
   foundLocation: string
   gps: geopoint
   foundImage?: string
   foundImageUrl: string
 }
 
+export interface settingsArray {
+  [key: string]: string
+}
+
 export interface Game {
   slug: string
   name: string
   ambassadors: Ambassador[]
+  settings: settingsArray
   boundary: boundary
-  mainhash: string
-  queuehash: string
-  subreddit: string
+  mainhash?: string
+  queuehash?: string
+  subreddit?: string
+  twitter?: string
   logo: string
   region: Region
 }

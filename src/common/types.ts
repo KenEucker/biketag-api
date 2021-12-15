@@ -1,6 +1,5 @@
-import { ImageData } from 'imgur/lib/common/types'
-import { IGunChainReference } from 'gun/types/chain'
-export { Payload } from 'imgur/lib/common/types'
+import { ImageData } from 'imanagur/lib/common/types'
+export { Payload } from 'imanagur/lib/common/types'
 import { AvailableApis, Errors } from '../common/enums'
 import { Tag, Game, Player, Setting } from './schema'
 
@@ -19,7 +18,7 @@ export interface ImgurClientId {
 
 export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
   hash?: string
-  queueHash?: string
+  queuehash?: string
   clientSecret: string
 }
 /// ****************************  Twitter Credential Objects   ************************* ///
@@ -116,14 +115,14 @@ export interface BikeTagApiResponse<
   status: number
   success: boolean
   source: AvailableApis | string
-  error?: Errors
+  error?: Errors | string
 }
 
 export type ApiOptions = RequireAtLeastOne<{
   game: string
   source: AvailableApis | string
   hash?: string
-  queueHash?: string
+  queuehash?: string
   slugs?: string[]
   fields?: string[]
   slug?: string
@@ -193,8 +192,6 @@ export type BikeTagGame = {
 export interface BikeTagGameState {
   [key: string]: BikeTagGame
 }
-
-export type BikeTagGunClient = IGunChainReference<BikeTagGameState>
 
 export type BikeTagServerConfiguration = BikeTagConfiguration & {
   host: string

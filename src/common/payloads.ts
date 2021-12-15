@@ -1,6 +1,8 @@
 import { Tag } from './schema'
 import { CommonData, RequireAtLeastOne } from './types'
 
+export type SortOptions = 'new' | 'relevance' | 'hot' | 'top' | 'comments'
+
 export type getTagsPayload = {
   fields?: string[]
   slugs?: string[]
@@ -8,7 +10,7 @@ export type getTagsPayload = {
   account?: string
   subreddit?: string
   time?: 'year' | 'hour' | 'day' | 'week' | 'month' | 'all'
-  sort?: 'new' | 'relevance' | 'hot' | 'top' | 'comments'
+  sort?: SortOptions
   limit?: number
   tagnumbers: number[]
 } & CommonData
@@ -59,14 +61,16 @@ export type ImgurUploadPayload = {
 export type getGamePayload = {
   slug: string
   name: string
+  hash?: string
   fields?: string[]
 } & CommonData
 
 export type getPlayersPayload = {
   fields?: string[]
   slugs?: string[]
-  sort?: 'new' | 'relevance' | 'hot' | 'top' | 'comments'
+  sort?: SortOptions
   hash?: string
+  limit?: number
   account?: string
   subreddit?: string
 } & CommonData
@@ -86,11 +90,15 @@ export type getSettingPayload = {
 
 export type getSettingsPayload = {
   fields?: string[]
+  sort?: SortOptions
+  limit?: number
   slugs?: string[]
 } & CommonData
 
 export type getAmbassadorsPayload = {
   fields?: string[]
+  limit?: number
+  sort?: SortOptions
   slugs?: string[]
 } & CommonData
 export type getAmbassadorPayload = {
@@ -106,11 +114,7 @@ export type importTagPayload = Pick<
 
 export type getQueuePayload = CommonData
 
-export type queueTagImagePayload = {
-  tagnumber: number
-  type: 'found' | 'mystery'
-  mysteryPlayer: string
-  foundPlayer: string
-  stream: ReadableStream
-  queueHash?: string
+export type queueTagPayload = {
+  tag: Tag
+  queuehash?: string
 } & Partial<Tag>

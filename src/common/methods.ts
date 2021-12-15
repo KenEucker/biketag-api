@@ -23,6 +23,7 @@ import FormData from 'form-data'
 import TinyCache from 'tinycache'
 import { USERAGENT } from '../client'
 import { Tag, Game, Player, Ambassador, Setting } from './schema'
+import { ApiAvailability } from './enums'
 
 export const putCacheIfExists = (
   key: string,
@@ -124,8 +125,18 @@ export const isImgurCredentials = (credentials: ImgurCredentials): boolean => {
   )
 }
 
-export const isImgurApiReady = (credentials: ImgurCredentials): boolean => {
-  return credentials?.clientId !== undefined
+export const isImgurApiReady = (
+  credentials: ImgurCredentials
+): ApiAvailability => {
+  if (!(credentials.clientId || credentials.hash)) {
+    return 0
+  } else if (credentials.accessToken) {
+    return 3
+  } else if (credentials.clientId && credentials.clientSecret) {
+    return 2
+  }
+
+  return 1
 }
 
 export const hasRedditClientId = (arg: unknown): arg is RedditClientId => {
@@ -147,15 +158,27 @@ export const isRedditCredentials = (
   )
 }
 
-export const isRedditApiReady = (credentials: RedditCredentials): boolean => {
-  return (
+export const isRedditApiReady = (
+  credentials: RedditCredentials
+): ApiAvailability => {
+  if (
     credentials?.userAgent !== undefined &&
-    credentials?.clientId !== undefined &&
-    ((credentials?.clientSecret !== undefined &&
-      credentials?.refreshToken !== undefined) ||
-      (credentials?.username !== undefined &&
-        credentials?.password !== undefined))
-  )
+    credentials?.clientId !== undefined
+  ) {
+    if (
+      credentials?.clientSecret !== undefined &&
+      credentials?.refreshToken !== undefined
+    ) {
+      return 3
+    } else if (
+      credentials?.username !== undefined &&
+      credentials?.password !== undefined
+    ) {
+      return 2
+    }
+    return 1
+  }
+  return 0
 }
 
 export const isSanityCredentials = (
@@ -164,13 +187,18 @@ export const isSanityCredentials = (
   return credentials?.projectId !== undefined
 }
 
-export const isSanityApiReady = (credentials: SanityCredentials): boolean => {
-  return (
+export const isSanityApiReady = (
+  credentials: SanityCredentials
+): ApiAvailability => {
+  if (
     credentials.projectId !== undefined &&
     credentials.dataset !== undefined &&
-    credentials.token !== undefined &&
     credentials.apiVersion !== undefined
-  )
+  ) {
+    return credentials.token !== undefined ? 3 : 1
+  }
+
+  return 0
 }
 
 export const isBikeTagCredentials = (
@@ -186,11 +214,8 @@ export const isBikeTagCredentials = (
 
 export const isBikeTagApiReady = (
   credentials: BikeTagCredentials | Credentials
-): boolean => {
-  return (
-    (credentials as ClientKey).clientToken !== undefined &&
-    (credentials as ClientKey).clientKey !== undefined
-  )
+): ApiAvailability => {
+  return credentials ? 1 : 0
 }
 
 export const isBikeTagConfiguration = (
@@ -219,14 +244,21 @@ export const isTwitterCredentials = (
 
 export const isTwitterApiReady = (
   credentials: TwitterCredentials | Credentials
-): boolean => {
-  return (
-    credentials?.bearer_token !== undefined ||
-    (credentials.consumer_secret !== undefined &&
-      credentials.consumer_key !== undefined) ||
-    (credentials?.access_token_key !== undefined &&
-      credentials?.access_token_secret !== undefined)
-  )
+): ApiAvailability => {
+  if (credentials?.bearer_token !== undefined) {
+    return 3
+  } else if (
+    credentials.consumer_secret !== undefined &&
+    credentials.consumer_key !== undefined
+  ) {
+    return 2
+  } else if (
+    credentials?.access_token_key !== undefined &&
+    credentials?.access_token_secret !== undefined
+  ) {
+    return 2
+  }
+  return 0
 }
 
 export const isTwitterConfiguration = (
@@ -455,41 +487,89 @@ export const isSettingData = (setting: RequireAtLeastOne<Setting>): boolean => {
   return !!setting.name && !!setting.key && !!setting.description
 }
 
-export const sortTags = (tags: Tag[], sort = 'new'): Tag[] => {
-  let sorter = (a, b) => b.tagnumber - a.tagnumber
-
-  switch (sort) {
-    case 'new':
-      sorter = (a, b) => b.tagnumber - a.tagnumber
-      break
-    case 'relevance':
-    default:
-      sorter = (a, b) => a.tagnumber - b.tagnumber
-      break
-  }
-  return tags.sort(sorter)
-}
-
-export const sortPlayers = (players: Player[], sort = 'new'): Player[] => {
-  let sorter = (a, b) => b.name.localeCompare(a.name)
+export const sortTags = (tags: Tag[], sort = 'new', limit = 0): Tag[] => {
+  let sorted = tags
 
   switch (sort) {
     case 'top':
-      sorter = (a, b) => b.tags.length - a.tags.length
+      sorted = tags.sort((a, b) => b.tagnumber - a.tagnumber)
+      break
+    case 'new':
+      sorted = tags.sort((a, b) => b.tagnumber - a.tagnumber)
+      break
+    case 'relevance':
+    default:
+      sorted = tags.sort((a, b) => a.tagnumber - b.tagnumber)
+      break
+  }
+
+  return limit !== 0 ? sorted.slice(0, limit) : sorted
+}
+
+export const sortPlayers = (
+  players: Player[],
+  sort = 'new',
+  limit = 0
+): Player[] => {
+  let sorted = players
+
+  switch (sort) {
+    case 'top':
+      sorted = players.sort((a, b) => b.tags.length - a.tags.length)
       break
     case 'comments':
-      sorter = (a, b) => a.name.localeCompare(b.name)
+      sorted = players.sort((a, b) => a.name.localeCompare(b.name))
       break
     case 'new':
       /// Since the players should already be sorted by first to last played, reverse the list
-      return players.reverse()
+      sorted = players.reverse()
       break
     /// Don't sort
     case 'relevance':
     default:
-      return players
       break
   }
 
-  return players.sort(sorter)
+  return limit !== 0 ? sorted.slice(0, limit) : sorted
+}
+
+export const sortAmbassadors = (
+  ambassadors: Ambassador[],
+  sort = 'new',
+  limit = 0
+): Ambassador[] => {
+  const sorter = (a, b) => b.name.localeCompare(a.name)
+  let sorted = ambassadors
+
+  switch (sort) {
+    case 'top':
+      sorted = ambassadors.sort(sorter)
+      break
+    case 'new':
+      /// Since the players should already be sorted by first to last played, reverse the list
+      sorted = ambassadors.reverse()
+      break
+  }
+
+  return limit !== 0 ? sorted.slice(0, limit) : sorted
+}
+
+export const sortSettings = (
+  settings: Setting[],
+  sort = 'new',
+  limit = 0
+): Setting[] => {
+  let sorted = settings
+
+  switch (sort) {
+    case 'comments':
+      sorted = settings.sort((a, b) => a.name.localeCompare(b.name))
+      break
+    case 'new':
+      /// Since the players should already be sorted by first to last played, reverse the list
+      sorted = settings.reverse()
+      break
+  }
+
+  return limit !== 0 ? sorted.slice(0, limit) : sorted
 }

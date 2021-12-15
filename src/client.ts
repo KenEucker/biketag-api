@@ -1,4 +1,4 @@
-import { BIKETAG_API_PREFIX } from './common/endpoints'
+import { BIKETAG_API_HOST } from './common/endpoints'
 import { Game, Tag, Player, Ambassador, Setting } from './common/schema'
 import {
   Credentials,
@@ -11,8 +11,6 @@ import {
   BikeTagConfiguration,
   PartialBikeTagConfiguration,
   TwitterCredentials,
-  BikeTagGunClient,
-  BikeTagGameState,
   ApiOptions,
 } from './common/types'
 import {
@@ -37,7 +35,7 @@ import {
   getAmbassadorsPayload,
   getSettingsPayload,
   getQueuePayload,
-  queueTagImagePayload,
+  queueTagPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -68,10 +66,9 @@ import * as redditApi from './reddit'
 import * as twitterApi from './twitter'
 
 import RedditClient from 'snoowrap'
-import ImgurClient from 'imgur'
+import ImgurClient from 'imanagur'
 import sanityClient, { SanityClient } from '@sanity/client'
 import TwitterClient from 'twitter-v2'
-import Gun from 'gun/gun'
 
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
 import { EventEmitter } from 'events'
@@ -88,8 +85,6 @@ export class BikeTagClient extends EventEmitter {
   protected plainFetcher: AxiosInstance
   protected cachedFetcher: AxiosInstance
 
-  protected mostAvailableApi: AvailableApis
-  protected biketagClient?: BikeTagGunClient
   protected imgurClient?: ImgurClient
   protected sanityClient?: SanityClient
   protected redditClient?: RedditClient
@@ -103,8 +98,6 @@ export class BikeTagClient extends EventEmitter {
   constructor(readonly configuration: Credentials | BikeTagConfiguration) {
     super()
 
-    this.mostAvailableApi = undefined
-
     const initConfig = this.config(configuration ?? {}, true, true)
     this.initializeClients(initConfig)
 
@@ -117,7 +110,7 @@ export class BikeTagClient extends EventEmitter {
     })
 
     this.fetcher = axios.create({
-      baseURL: BIKETAG_API_PREFIX,
+      baseURL: BIKETAG_API_HOST,
       headers: {
         'user-agent': USERAGENT,
       },
@@ -125,7 +118,7 @@ export class BikeTagClient extends EventEmitter {
     })
 
     this.cachedFetcher = setup({
-      baseURL: BIKETAG_API_PREFIX,
+      baseURL: BIKETAG_API_HOST,
       cache: {
         maxAge: 15 * 60 * 1000,
         exclude: {
@@ -205,10 +198,12 @@ export class BikeTagClient extends EventEmitter {
       case DataTypes.game:
         options.game = options.game ?? options.slug ?? this.biketagConfig?.game
         options.slug = options.slug ?? options.game?.toLowerCase() ?? undefined
+        // options.slugs = options.slug ? [options.slug] : []
         break
 
       case DataTypes.player:
         options.game = options.game ? options.game : this.biketagConfig?.game
+        // options.slugs = options.slug ? [options.slug] : []
         break
 
       case DataTypes.tag:
@@ -225,6 +220,9 @@ export class BikeTagClient extends EventEmitter {
             options.slug = 'current'
           }
         }
+        // } else if (options.slug) {
+        //   options.slugs = [options.slug]
+        // }
 
         if (!options.tagnumber) {
           if (options.tagnumbers?.length === 1) {
@@ -235,19 +233,21 @@ export class BikeTagClient extends EventEmitter {
             )
           }
         }
+        // } else if (!options.tagnumbers?.length) {
+        //   options.tagnumbers = [options.tagnumber]
+        // }
         break
       case DataTypes.queue:
         options.hash =
-          options.queueHash ??
+          options.queuehash ??
           options.hash ??
-          this.imgurConfig.queueHash ??
+          this.imgurConfig.queuehash ??
           this.imgurConfig.hash
         break
     }
 
-    if (overrides.source) {
-      options.source = AvailableApis[overrides.source]
-      delete overrides.source
+    if (typeof overrides.source !== 'undefined') {
+      options.source = overrides.source
     }
 
     /// Source defaults
@@ -271,12 +271,12 @@ export class BikeTagClient extends EventEmitter {
   }
 
   protected getClientAdapter(
-    opts: any,
+    payload: any,
     overrides: any = {},
     dataType: DataTypes = DataTypes.tag,
     method?: string
-  ) {
-    const options = this.options(opts, dataType, overrides, method)
+  ): any {
+    const options = this.options(payload, dataType, overrides, method)
 
     let client: any = null
     let api: any = null
@@ -300,7 +300,7 @@ export class BikeTagClient extends EventEmitter {
         break
       default:
       case AvailableApis.biketag:
-        client = this.biketagClient
+        client = this
         api = biketagApi
         break
     }
@@ -314,45 +314,29 @@ export class BikeTagClient extends EventEmitter {
   }
 
   protected getMostAvailableClient(method?: string): AvailableApis {
-    if (this.mostAvailableApi && !method) {
-      return this.mostAvailableApi
-    }
-
     if (
       this.imgurConfig &&
       this.imgurClient &&
       (!method || !!imgurApi[method])
     ) {
-      if (!method) {
-        this.mostAvailableApi = AvailableApis.imgur
-      }
       return AvailableApis.imgur
     } else if (
       this.sanityConfig &&
       this.sanityClient &&
       (!method || !!sanityApi[method])
     ) {
-      if (!method) {
-        this.mostAvailableApi = AvailableApis.sanity
-      }
       return AvailableApis.sanity
     } else if (
       this.redditConfig &&
       this.redditClient &&
       (!method || !!redditApi[method])
     ) {
-      if (!method) {
-        this.mostAvailableApi = AvailableApis.reddit
-      }
       return AvailableApis.reddit
     } else if (
       this.twitterConfig &&
       this.twitterClient &&
       (!method || !!twitterApi[method])
     ) {
-      if (!method) {
-        this.mostAvailableApi = AvailableApis.twitter
-      }
       return AvailableApis.twitter
     } else if (
       this.biketagConfig &&
@@ -360,11 +344,33 @@ export class BikeTagClient extends EventEmitter {
       isBikeTagApiReady(this.biketagConfig) &&
       (!method || !!biketagApi[method])
     ) {
-      if (!method) {
-        this.mostAvailableApi = AvailableApis.biketag
-      }
       return AvailableApis.biketag
     }
+    // const sanityApiAvailability =
+    //   this.sanityConfig && this.sanityClient && (!method || !!sanityApi[method])
+    //     ? isSanityApiReady(this.sanityConfig)
+    //     : 0
+    // const imgurApiAvailability =
+    //   this.imgurConfig && this.imgurClient && (!method || !!imgurApi[method])
+    //     ? isImgurApiReady(this.imgurConfig)
+    //     : 0
+    // const redditApiAvailability =
+    //   this.redditConfig && this.redditClient && (!method || !!redditApi[method])
+    //     ? isRedditApiReady(this.redditConfig)
+    //     : 0
+    // const twitterApiAvailability =
+    //   this.twitterConfig &&
+    //   this.twitterClient &&
+    //   (!method || !!twitterApi[method])
+    //     ? isTwitterApiReady(this.twitterConfig)
+    //     : 0
+    // const bikeTagApiAvilability =
+    //   this.biketagConfig &&
+    //   isBikeTagCredentials(this.biketagConfig) &&
+    //   isBikeTagApiReady(this.biketagConfig) &&
+    //   (!method || !!biketagApi[method])
+    //     ? isBikeTagApiReady(this.biketagConfig)
+    //     : 0
 
     return null
   }
@@ -401,9 +407,6 @@ export class BikeTagClient extends EventEmitter {
   ): BikeTagConfiguration {
     config = config ?? this.config()
 
-    if (config.biketag && isBikeTagCredentials(config.biketag)) {
-      this.biketagClient = new Gun<BikeTagGameState>(config.biketag)
-    }
     if (
       config.imgur &&
       isImgurCredentials(config.imgur) &&
@@ -551,6 +554,11 @@ export class BikeTagClient extends EventEmitter {
     return this.getConfig()
   }
 
+  // TODO: remove
+  toRemove(): string {
+    return 'remove'
+  }
+
   plainRequest(options: AxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
     return this.plainFetcher(options)
   }
@@ -570,9 +578,9 @@ export class BikeTagClient extends EventEmitter {
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Game> | Game> {
     const options = this.options(payload, DataTypes.game, opts, 'getGame')
-    return this.getGame(options as getGamePayload, opts).then((r) =>
-      options.concise ? r.data : r
-    )
+    return this.getGame(options as getGamePayload, opts).then((r) => {
+      return options.concise ? r.data : r
+    })
   }
 
   getGame(
@@ -588,15 +596,35 @@ export class BikeTagClient extends EventEmitter {
     const clientMethod = api.getGame
 
     if (clientMethod) {
-      return clientMethod(client, options).catch((e) => {
-        return {
-          status: HttpStatusCode.InternalServerError,
-          data: null,
-          error: e,
-          success: false,
-          source,
-        }
-      })
+      return clientMethod(client, options)
+        .then((retrievedGameResponse) => {
+          if (retrievedGameResponse.success && retrievedGameResponse.data) {
+            /// Set the most important game data (hash, subreddit, etc)
+            this.config({
+              game: retrievedGameResponse.data.name,
+              imgur: {
+                hash: retrievedGameResponse.data.mainhash,
+                queuehash: retrievedGameResponse.data.queuehash,
+              },
+              reddit: {
+                subreddit: retrievedGameResponse.data.subreddit,
+              },
+              twitter: {
+                account: retrievedGameResponse.data.twitter,
+              },
+            })
+          }
+          return retrievedGameResponse
+        })
+        .catch((e) => {
+          return {
+            status: HttpStatusCode.InternalServerError,
+            data: null,
+            error: e,
+            success: false,
+            source,
+          }
+        })
     } else {
       return Promise.reject(`getGame ${Errors.NotImplemented} ${source}`)
     }
@@ -641,8 +669,8 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  queueTagImage(
-    payload?: RequireAtLeastOne<queueTagImagePayload>,
+  queueTag(
+    payload?: RequireAtLeastOne<queueTagPayload>,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag>> {
     /// take player information and a tag image (either found or mystery) and add it to the queue
@@ -651,7 +679,7 @@ export class BikeTagClient extends EventEmitter {
       opts,
       DataTypes.queue
     )
-    const clientMethod = api.queueTagImage
+    const clientMethod = api.queueTag
 
     /// If the client adapter implements the method
     if (clientMethod) {
@@ -665,12 +693,12 @@ export class BikeTagClient extends EventEmitter {
         }
       })
     } else {
-      throw `queueTagImage ${Errors.NotImplemented} ${source}`
+      throw `queueTag ${Errors.NotImplemented} ${source}`
     }
   }
 
   submitQueuedTag(
-    payload?: RequireAtLeastOne<queueTagImagePayload>,
+    payload?: RequireAtLeastOne<queueTagPayload>,
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Tag>> {
     /// using the player information and the tag number, send the submit tag request to the biketag server
@@ -1209,22 +1237,22 @@ export class BikeTagClient extends EventEmitter {
   /// ****************************  Client Instance Methods   ****************************** ///
 
   /// Data provided by Gun Client
-  data(opts: any = {}): BikeTagGunClient {
-    const options = opts ?? this.biketagConfig
+  // data(opts: any = {}): BikeTagGunClient {
+  //   const options = opts ?? this.biketagConfig
 
-    if (isBikeTagCredentials(options)) {
-      if (options.game) {
-        return this.biketagClient.get(
-          options.game
-        ) as unknown as BikeTagGunClient
-      } else {
-        return new Gun<BikeTagGameState>(options)
-      }
-    }
+  //   if (isBikeTagCredentials(options)) {
+  //     if (options.game) {
+  //       return this.biketagClient.get(
+  //         options.game
+  //       ) as unknown as BikeTagGunClient
+  //     } else {
+  //       return new Gun<BikeTagGameState>(options)
+  //     }
+  //   }
 
-    /// Always return a valid gun client, because we can
-    return new Gun<BikeTagGameState>(options)
-  }
+  //   /// Always return a valid gun client, because we can
+  //   return new Gun<BikeTagGameState>(options)
+  // }
 
   /// Content powered by Sanity IO Client
   content(opts: any = {}): SanityClient {

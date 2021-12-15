@@ -10,6 +10,7 @@ import {
   gameDataArrayFields,
   tagDataAssetFields,
   gameDataObjectFields,
+  gameDataCustomFields,
   playerDataFields,
   playerDataReferenceFields,
   playerDataObjectFields,
@@ -137,6 +138,8 @@ export function constructGameFromSanityObject(
       }, {})
     : data
 
+  const settings = data.settings ?? []
+
   gameDataReferenceFields.forEach((f) => {
     if (gameData[f] && typeof gameData[f] !== 'undefined') {
       gameData[f] = gameData[f].name
@@ -155,7 +158,10 @@ export function constructGameFromSanityObject(
   })
 
   gameData.slug = gameData.slug?.current ?? gameData.slug
-
+  gameData.settings = settings.reduce((o, s) => {
+    o[s.key] = s.value
+    return o
+  }, {})
   return createGameObject(gameData)
 }
 
@@ -227,7 +233,7 @@ export function constructSanityDocumentQuery(
   fields: string[] = []
 ): any {
   const gameQuery = game
-    ? ` && game._ref in *[_type=="game" && lower(name)=="${game.toLowerCase()}"]._id`
+    ? ` && ((game._ref in *[_type=="game" && lower(name)=="${game.toLowerCase()}"]._id) || (count(*[ _type == "game" && lower(name) =="${game.toLowerCase()}" && ^._id in ${docType}s[]._ref ]) > 0))`
     : ''
   const slugsQuery = slugs.length
     ? ` && slug.current in ${JSON.stringify(slugs)}`
@@ -244,13 +250,15 @@ export function constructSanityFieldsQuery(
   type: DataTypes = DataTypes.tag
 ): any {
   let referenceFields = [],
-    arrayFields = []
+    arrayFields = [],
+    customFields = {}
 
   switch (type) {
     case DataTypes.game:
       referenceFields = gameDataReferenceFields
       fields = fields.length ? fields : gameDataFields
       arrayFields = gameDataArrayFields
+      customFields = gameDataCustomFields
       break
 
     default:
@@ -272,19 +280,31 @@ export function constructSanityFieldsQuery(
       break
   }
 
+  const customFieldsKeys = Object.keys(customFields)
+
   return fields
     .reduce((o: any, f: any) => {
       const isRefrerenceField = referenceFields.indexOf(f) !== -1
       const isArrayField = arrayFields.indexOf(f) !== -1
-      o += `${
-        isArrayField && isRefrerenceField
-          ? `"${f}": ${f}[]->{name}`
-          : isArrayField
-          ? `"${f}": ${f}[]->name`
-          : isRefrerenceField
-          ? `${f}->{name}`
-          : f
-      },`
+      const isCustomField = customFieldsKeys.indexOf(f) !== -1
+      let fieldQuery = `${f}`
+
+      if (isArrayField && isRefrerenceField) {
+        if (isCustomField) {
+          fieldQuery = `"${f}": ${f}${customFields[f]}`
+        } else {
+          fieldQuery = `"${f}": ${f}[]->{name}`
+        }
+      } else if (isArrayField) {
+        fieldQuery = `"${f}": ${f}[]->name`
+      } else if (isRefrerenceField) {
+        if (isCustomField) {
+          fieldQuery = `${f}->{${customFields[f]}}`
+        } else {
+          fieldQuery = `${f}->{name}`
+        }
+      }
+      o += `${fieldQuery},`
       return o
     }, '')
     .slice(0, -1)

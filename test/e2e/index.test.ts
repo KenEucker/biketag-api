@@ -1,7 +1,7 @@
 import {
   getGameAsync,
   getCurrentTagAsync,
-  getTagsAsync,
+  get10TagsAsync,
   getTag1Async,
   bikeTagSanityInstance,
   bikeTagImgurInstance,
@@ -33,7 +33,7 @@ if (bikeTagSanityInstance) {
   })
 
   test('BikeTagClient sanity instance can retrieve all tags data', async () => {
-    const testTagsData = await getTagsAsync(bikeTagSanityInstance)
+    const testTagsData = await get10TagsAsync(bikeTagSanityInstance)
 
     expect(testTagsData).toMatchSnapshot()
   })
@@ -53,7 +53,7 @@ if (bikeTagImgurInstance) {
   })
 
   test('BikeTagClient imgur instance can retrieve all tags data', async () => {
-    const testTagsData = await getTagsAsync(bikeTagImgurInstance)
+    const testTagsData = await get10TagsAsync(bikeTagImgurInstance)
 
     expect(testTagsData).toMatchSnapshot()
   })
@@ -78,7 +78,7 @@ if (bikeTagRedditInstance) {
 
   /// Test takes too long
   // test('BikeTagClient reddit instance can retrieve all tags data', async () => {
-  //   const testTagsData = await getTagsAsync(bikeTagRedditInstance, false, { source: 'reddit', limit: 100 })
+  //   const testTagsData = await get10TagsAsync(bikeTagRedditInstance, false, { source: 'reddit', limit: 100 })
 
   //   expect(testTagsData).toMatchSnapshot()
   // })
@@ -98,7 +98,7 @@ if (bikeTagTwitterInstance) {
   })
 
   test('BikeTagClient twitter instance can retrieve all tags data', async () => {
-    const testTagsData = await getTagsAsync(bikeTagTwitterInstance)
+    const testTagsData = await get10TagsAsync(bikeTagTwitterInstance)
 
     expect(testTagsData).toMatchSnapshot()
   })

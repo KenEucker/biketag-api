@@ -1,10 +1,17 @@
 /// ****************************  BikeTag Enums   ************************************** ///
 export enum AvailableApis {
-  biketag,
-  imgur,
-  sanity,
-  reddit,
-  twitter,
+  biketag = 'biketag',
+  imgur = 'imgur',
+  sanity = 'sanity',
+  reddit = 'reddit',
+  twitter = 'twitter',
+}
+
+export enum ApiAvailability {
+  noConfig,
+  read,
+  write,
+  all,
 }
 
 export enum DataTypes {

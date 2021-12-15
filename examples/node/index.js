@@ -1,24 +1,26 @@
 // @ts-ignore
-const { BikeTagClient } = require('../../biketag.node.js')
+const {
+  BikeTagClient
+} = require('../../biketag.node.js')
 require('dotenv').config()
 
 const biketagDefaultInstanceOpts = {
-  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME :'test',
+  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
 }
 const biketagDefaultInstance = null //new BikeTagClient(biketagDefaultInstanceOpts)
 
 const imgurInstanceOpts = {
-  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME :'test',
+  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
   imgur: {
     hash: process.env.IMGUR_HASH,
     clientId: process.env.IMGUR_CLIENT_ID,
     clientSecret: process.env.IMGUR_CLIENT_SECRET,
   }
 }
-const bikeTagImgurInstance = imgurInstanceOpts.imgur && imgurInstanceOpts.imgur.hash ? new BikeTagClient(imgurInstanceOpts) : null
+const bikeTagImgurInstance = imgurInstanceOpts.imgur && imgurInstanceOpts.imgur.clientId ? new BikeTagClient(imgurInstanceOpts) : null
 
 const twitterInstanceOpts = {
-  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME :'test',
+  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
   twitter: {
     account: process.env.TWITTER_ACCOUNT,
     bearer_token: process.env.TWITTER_BEARER_TOKEN,
@@ -53,55 +55,71 @@ const bikeTagRedditInstance = redditInstanceOpts.reddit && redditInstanceOpts.re
 const pretty = m => `\x1b[44m${m}\x1b[0m`
 const log = (message, response, toLog = false) => {
   if (toLog) {
-    console.log(pretty(response.success ? message : 'error', response.success ? response.data : response.error), {data: response.data ?? response})
+    if (response && response.status) {
+      console.log(pretty(response.success ? message : 'error'), response.success ? response.data : response.error)
+    } else if (!response) {
+      console.log(pretty('Error!'), {
+        response
+      })
+
+    } else {
+      console.log(pretty(message), {
+        response
+      })
+    }
   }
 }
 
-const getTag1Async = async (client, out = false, opts = {}) => {
+const getTag1Async = async (pre, client, out = false, opts = {}) => {
   const tag1 = await client.tags(1, opts)
-  log('successfully retrieved tag 1 data by number', tag1, out)
+  log(`${pre} :: successfully retrieved tag 1 data by number`, tag1, out)
 
   return tag1
 }
 
-const getTagsAsync = async (client, out = false, opts = {}) => {
+const get10TagsAsync = async (pre, client, out = false, opts = {}) => {
+  opts.limit = opts.limit ? opts.limit : 10
   const tags = await client.tags(undefined, opts)
-  log('successfully retrieved tags data', tags, out)
+  log(`${pre} :: successfully retrieved tags data`, tags, out)
+  console.log(tags[0])
 
   return tags
 }
 
-const getCurrentTagAsync = async (client, out = false, opts = {}) => {
+const getCurrentTagAsync = async (pre, client, out = false, opts = {}) => {
   const current = await client.getTag(undefined, opts)
-  log('successfully retrieved current tag data', current, out)
+  log(`${pre} :: successfully retrieved current tag data`, current, out)
 
   return current
 }
 
-const getGameAsync = async (client, out = false, opts = {}) => {
+const getGameAsync = async (pre, client, out = false, opts = {}) => {
   const testGameData = await client.game(undefined, opts)
-  log('success fully retrieved game data', testGameData, out)
+  log(`${pre} :: success fully retrieved game data`, testGameData, out)
 
   return testGameData
 }
 
-const getPlayersAsync = async (client, out = false, opts = {}) => {
+const get10PlayersAsync = async (pre, client, out = false, opts = {}) => {
+  opts.limit = opts.limit ? opts.limit : 10
   const testPlayerData = await client.players(undefined, opts)
-  log('success fully retrieved player data', testPlayerData, out)
+  log(`${pre} :: success fully retrieved player data`, testPlayerData, out)
 
   return testPlayerData
 }
 
-const getAmbassadorsAsync = async (client, out = false, opts = {}) => {
+const get10AmbassadorsAsync = async (pre, client, out = false, opts = {}) => {
+  opts.limit = opts.limit ? opts.limit : 10
   const testAmbassadorData = await client.ambassadors(undefined, opts)
-  log('success fully retrieved ambassador data', testAmbassadorData, out)
+  log(`${pre} :: success fully retrieved ambassador data`, testAmbassadorData, out)
 
   return testAmbassadorData
 }
 
-const getSettingsAsync = async (client, out = false, opts = {}) => {
+const get10SettingsAsync = async (pre, client, out = false, opts = {}) => {
+  opts.limit = opts.limit ? opts.limit : 10
   const testSettingData = await client.settings(undefined, opts)
-  log('success fully retrieved game settings', testSettingData, out)
+  log(`${pre} :: success fully retrieved game settings`, testSettingData, out)
 
   return testSettingData
 }
@@ -109,63 +127,46 @@ const getSettingsAsync = async (client, out = false, opts = {}) => {
 const runTests = async (out = false) => {
   if (biketagDefaultInstance) {
     console.log(pretty("Default BikeTag Client Instantiated"), biketagDefaultInstanceOpts)
-    console.log(pretty("Tag #1 from BikeTag"))
-    await getTagsAsync(biketagDefaultInstance, out)
-    console.log(pretty("Current Tag from BikeTag"))
-    // await getCurrentTagAsync(biketagDefaultInstance, out)
+    // await getGameAsync("BikeTag", biketagDefaultInstance, out)
+    await getTag1Async("BikeTag", biketagDefaultInstance, out)
+    await getCurrentTagAsync("BikeTag", biketagDefaultInstance, out)
+    await get10TagsAsync("BikeTag", biketagDefaultInstance, out)
+    // await get10PlayersAsync("BikeTag", biketagDefaultInstance, out)
   }
 
   if (bikeTagImgurInstance) {
     console.log(pretty("Imgur BikeTag Client Instantiated"), imgurInstanceOpts)
-    console.log(pretty("Tag #1 from Imgur"))
-    await getTag1Async(bikeTagImgurInstance, out)
-    console.log(pretty("Current Tag from Imgur"))
-    await getCurrentTagAsync(bikeTagImgurInstance, out)
-    console.log(pretty("All Tags from Imgur"))
-    await getTagsAsync(bikeTagImgurInstance, out)
-    console.log(pretty("All Players from Imgur"))
-    await getPlayersAsync(bikeTagImgurInstance, out)
-    console.log("Game from Imgur")
-    // await getGameAsync(bikeTagImgurInstance, out)
+    await getGameAsync("Imgur", bikeTagImgurInstance, out)
+    await getTag1Async("Imgur", bikeTagImgurInstance, out)
+    await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
+    await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
+    await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
   }
 
   if (bikeTagSanityInstance) {
     console.log(pretty("Sanity BikeTag Client Instantiated"), sanityInstanceOpts)
-    console.log(pretty("Tag #1 from Sanity"))
-    await getTag1Async(bikeTagSanityInstance, out)
-    console.log(pretty("All Tags from Sanity"))
-    await getTagsAsync(bikeTagSanityInstance, out)
-
-    console.log("Game from Sanity")
-    await getGameAsync(bikeTagSanityInstance, out)
-    console.log(pretty("All Players from Sanity"))
-    await getPlayersAsync(bikeTagSanityInstance, out)
-    console.log(pretty("All Ambassadors from Sanity"))
-    await getAmbassadorsAsync(bikeTagSanityInstance, out)
-
-    console.log("Game Settings from Sanity")
-    await getSettingsAsync(bikeTagSanityInstance, out)
+    await getTag1Async("Sanity", bikeTagSanityInstance, out)
+    await get10TagsAsync("Sanity", bikeTagSanityInstance, out)
+    await getGameAsync("Sanity", bikeTagSanityInstance, out)
+    await get10PlayersAsync("Sanity", bikeTagSanityInstance, out)
+    await get10AmbassadorsAsync("Sanity", bikeTagSanityInstance, out)
+    await get10SettingsAsync("Sanity", bikeTagSanityInstance, out)
   }
 
   if (bikeTagTwitterInstance) {
     console.log(pretty("Twitter BikeTag Client Instantiated"), twitterInstanceOpts)
-    console.log(pretty("Current Tag from Twitter"))
-    await getCurrentTagAsync(bikeTagTwitterInstance)
-    console.log(pretty("All Tags from Twitter"))
-    await getTagsAsync(bikeTagTwitterInstance, out)
+    await getCurrentTagAsync("Twitter", bikeTagTwitterInstance)
+    await get10TagsAsync("Twitter", bikeTagTwitterInstance, out)
   }
 
   if (bikeTagRedditInstance) {
     console.log(pretty("Reddit BikeTag Client Instantiated"), redditInstanceOpts)
-    console.log(pretty("Current Tag from Reddit"))
-    await getCurrentTagAsync(bikeTagRedditInstance, out, {source: 'reddit'})
-    console.log(pretty("All Tags from Reddit"))
-    await getTagsAsync(bikeTagRedditInstance, out, {source: 'reddit', time: 'all'})
+    await getCurrentTagAsync("Reddit", bikeTagRedditInstance, out)
+    await get10TagsAsync("Reddit", bikeTagRedditInstance, out)
   }
 }
 
 if (require.main === module) {
-  if (bikeTagSanityInstance) getGameAsync(bikeTagSanityInstance, true)
   runTests(true)
 }
 
@@ -178,7 +179,7 @@ module.exports = {
   getGameAsync,
   getCurrentTagAsync,
   getTag1Async,
-  getTagsAsync,
+  get10TagsAsync,
   imgurInstanceOpts,
   redditInstanceOpts,
   sanityInstanceOpts,

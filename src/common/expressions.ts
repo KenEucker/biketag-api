@@ -7,12 +7,18 @@ export const getCreditFromTextRegex = new RegExp(
 )
 
 export const getFoundLocationFromTextRegex = new RegExp(
-  /(?:is\s*(at|the)?\s*\(?)(.+?)(?:\)|]|$)|(?:found\s*(at)?\s*\(?)(.+?)(?:\)|])|(?:found\s*at\s*\()(.+?)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/gim
+  /(?:is\s*(at|the)?\s*\(?)(.+?)(?:\)|]|$)|(?:found\s*(at)?\s*\(?)(.+?)(?:\)|])|(?:found\s*at\s*\()(.+?)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/im
 )
 
 export const getPlayerFromInfoFromTextRegex = new RegExp(
   /(?:\[Player\s*)(.*)(?:]\s*\+\()(.*)(?=\))/i
 )
+
+export const getGameFromInfoFromTextRegex = new RegExp(
+  /(((?:{\s*)(.*)(?:}))((?:\s*\[)(.*)(?=\])\])?((?:\s*@\()(.*)(?=\))\))?)\s*::\s*(((?:\[BikeTag\s*Game\s*)(.*)(?:]))((?:\s*#\()(.*)(?=\))\))?((?:\s*\|)(.*)(?=\|)\|)?)/i
+)
+
+export const getGameSlugFromTextRegex = new RegExp(/((\w*)\s*bike\s*tag!?)/i)
 
 export const getHintFromTextRegex = new RegExp(/(?:hint:\s*?)([^)]*)/i)
 

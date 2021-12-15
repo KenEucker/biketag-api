@@ -504,21 +504,21 @@
 
           for (var i = offset; i < offset + perPage; i++) {
             if (window.biketags[i]) {
-              const biketag = window.biketags[i]
-              const imageTitle = biketag.imageTitle
-                ? biketag.imageTitle
-                : biketagAPI.getters.getImgurMysteryTitleFromBikeTagData(
-                    biketag
+              const tag = window.biketags[i]
+              const imageTitle = tag.imageTitle
+                ? tag.imageTitle
+                : biketag.getters.getImgurMysteryTitleFromBikeTagData(
+                    tag
                   )
-              const imageDescription = biketag.imageDescription
-                ? biketag.imageDescription
-                : biketagAPI.getters.getImgurMysteryDescriptionFromBikeTagData(
-                    biketag
+              const imageDescription = tag.imageDescription
+                ? tag.imageDescription
+                : biketag.getters.getImgurMysteryDescriptionFromBikeTagData(
+                    tag
                   )
-              const imageHash = biketagAPI.getters.getImageHashFromText(
-                biketag.mysteryImageUrl
+              const imageHash = biketag.getters.getImageHashFromText(
+                tag.mysteryImageUrl
               )
-              const imageUrlFull = biketag.mysteryImageUrl
+              const imageUrlFull = tag.mysteryImageUrl
               const imageUrlMedium = imageUrlFull.replace(
                 imageHash,
                 `${imageHash}m`
@@ -527,10 +527,10 @@
                 imageHash,
                 `${imageHash}s`
               )
-              const imageTagNumber = biketag.tagnumber
-              const redditLink = biketag.discussionLink
+              const imageTagNumber = tag.tagnumber
+              const redditLink = tag.discussionLink
               const bikeTagLink = `/${imageTagNumber}`
-              const bikeTagSlug = biketag.slug
+              const bikeTagSlug = tag.slug
 
               const template = document.createElement('div')
               const tagnumber = document.createElement('span')

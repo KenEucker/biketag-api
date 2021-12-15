@@ -93,10 +93,12 @@ export function getBikeTagFromTwitterPost(
     game,
     discussionUrl: getDiscussionUrlFromText(text),
     foundLocation: getFoundLocationFromText(text, ''),
+    foundTime: 0,
     mysteryPlayer: mysteryPlayer,
     foundPlayer: '',
     hint: getHintFromText(text, '') as string,
     mysteryImageUrl,
+    mysteryTime: 0,
     mentionUrl,
     foundImageUrl: '',
     gps: {
