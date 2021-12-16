@@ -81,6 +81,7 @@ export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
 /// ****************************  BikeTag Credential Objects   ************************* ///
 export interface CommonData {
   game: string
+  host?: string
   source?: AvailableApis | string
   concise?: boolean
 }
@@ -92,14 +93,7 @@ export interface ClientKey {
   clientToken: string
 }
 
-export interface ClientPeers {
-  peers: string[]
-}
-
-export type BikeTagCredentials = ClientPeers &
-  ClientKey &
-  AccessToken &
-  CommonData
+export type BikeTagCredentials = ClientKey & AccessToken & CommonData
 
 export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
@@ -122,6 +116,7 @@ export type ApiOptions = RequireAtLeastOne<{
   game: string
   source: AvailableApis | string
   hash?: string
+  host?: string
   queuehash?: string
   slugs?: string[]
   fields?: string[]

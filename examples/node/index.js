@@ -4,13 +4,17 @@ const {
 } = require('../../biketag.node.js')
 require('dotenv').config()
 
+const host = process.env.BIKETAG_API_HOST
+
 const biketagDefaultInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
+  host,
 }
-const biketagDefaultInstance = null //new BikeTagClient(biketagDefaultInstanceOpts)
+const biketagDefaultInstance = new BikeTagClient(biketagDefaultInstanceOpts)
 
 const imgurInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
+  host,
   imgur: {
     hash: process.env.IMGUR_HASH,
     clientId: process.env.IMGUR_CLIENT_ID,
@@ -21,6 +25,7 @@ const bikeTagImgurInstance = imgurInstanceOpts.imgur && imgurInstanceOpts.imgur.
 
 const twitterInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
+  host,
   twitter: {
     account: process.env.TWITTER_ACCOUNT,
     bearer_token: process.env.TWITTER_BEARER_TOKEN,
@@ -31,6 +36,7 @@ const bikeTagTwitterInstance = twitterInstanceOpts.twitter && twitterInstanceOpt
 
 const sanityInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
+  host,
   sanity: {
     projectId: process.env.SANITY_PROJECT_ID,
     accessToken: process.env.SANITY_ACCESS_TOKEN,
@@ -42,6 +48,7 @@ const bikeTagSanityInstance = sanityInstanceOpts.sanity && sanityInstanceOpts.sa
 
 const redditInstanceOpts = {
   ...imgurInstanceOpts,
+  host,
   reddit: {
     subreddit: process.env.REDDIT_SUBREDDIT ? process.env.REDDIT_SUBREDDIT : 'cyclepdx',
     clientId: process.env.REDDIT_CLIENT_ID,
@@ -127,11 +134,11 @@ const get10SettingsAsync = async (pre, client, out = false, opts = {}) => {
 const runTests = async (out = false) => {
   if (biketagDefaultInstance) {
     console.log(pretty("Default BikeTag Client Instantiated"), biketagDefaultInstanceOpts)
-    // await getGameAsync("BikeTag", biketagDefaultInstance, out)
+    await getGameAsync("BikeTag", biketagDefaultInstance, out)
     await getTag1Async("BikeTag", biketagDefaultInstance, out)
-    await getCurrentTagAsync("BikeTag", biketagDefaultInstance, out)
     await get10TagsAsync("BikeTag", biketagDefaultInstance, out)
-    // await get10PlayersAsync("BikeTag", biketagDefaultInstance, out)
+    await getCurrentTagAsync("BikeTag", biketagDefaultInstance, out)
+    await get10PlayersAsync("BikeTag", biketagDefaultInstance, out)
   }
 
   if (bikeTagImgurInstance) {

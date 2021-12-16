@@ -110,9 +110,10 @@ export class BikeTagClient extends EventEmitter {
     })
 
     this.fetcher = axios.create({
-      baseURL: BIKETAG_API_HOST,
+      // baseURL: BIKETAG_API_HOST,
       headers: {
         'user-agent': USERAGENT,
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       responseType: 'json',
     })
@@ -262,6 +263,9 @@ export class BikeTagClient extends EventEmitter {
         options.account = options.account ?? this.twitterConfig.account
         break
     }
+
+    /// Host defaults
+    options.host = options.host ?? this.biketagConfig.host
 
     /// default option for interfaces is to return the data from the response
     options.concise =
@@ -568,6 +572,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   request(options: AxiosRequestConfig = {}): Promise<AxiosResponse<string>> {
+    console.log({ options })
     return this.fetcher(options)
   }
 
@@ -600,19 +605,22 @@ export class BikeTagClient extends EventEmitter {
         .then((retrievedGameResponse) => {
           if (retrievedGameResponse.success && retrievedGameResponse.data) {
             /// Set the most important game data (hash, subreddit, etc)
-            this.config({
-              game: retrievedGameResponse.data.name,
-              imgur: {
-                hash: retrievedGameResponse.data.mainhash,
-                queuehash: retrievedGameResponse.data.queuehash,
+            this.config(
+              {
+                game: retrievedGameResponse.data.name,
+                imgur: {
+                  hash: retrievedGameResponse.data.mainhash,
+                  queuehash: retrievedGameResponse.data.queuehash,
+                },
+                reddit: {
+                  subreddit: retrievedGameResponse.data.subreddit,
+                },
+                twitter: {
+                  account: retrievedGameResponse.data.twitter,
+                },
               },
-              reddit: {
-                subreddit: retrievedGameResponse.data.subreddit,
-              },
-              twitter: {
-                account: retrievedGameResponse.data.twitter,
-              },
-            })
+              false
+            )
           }
           return retrievedGameResponse
         })
@@ -808,7 +816,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code,
           success: false,
           source,
         }
@@ -836,7 +844,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code,
           success: false,
           source,
         })
@@ -921,7 +929,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code,
           success: false,
           source,
         })

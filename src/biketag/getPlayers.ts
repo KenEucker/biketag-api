@@ -1,29 +1,26 @@
 import { BikeTagClient } from '../client'
-import {
-  PLAYERS_ENDPOINT,
-  BIKETAG_API_HOST,
-  API_VERSION,
-} from '../common/endpoints'
+import { PLAYERS_ENDPOINT } from '../common/endpoints'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { getPlayersPayload } from '../common/payloads'
-import { Tag } from '../common/schema'
+import { Player } from '../common/schema'
 import { BikeTagApiResponse } from '../common/types'
+import { getApiUrl } from './helpers'
 
 export async function getPlayers(
   client: BikeTagClient,
   payload: getPlayersPayload
-): Promise<BikeTagApiResponse<Tag[]>> {
+): Promise<BikeTagApiResponse<Player[]>> {
   delete payload.source
 
-  const response = await client.cachedRequest({
-    url: `https://${payload.game}.${BIKETAG_API_HOST}/${API_VERSION}/${PLAYERS_ENDPOINT}`,
+  const response = await client.request({
+    url: getApiUrl(payload.host, PLAYERS_ENDPOINT, payload.game),
     data: payload,
   })
 
   const success = response.status === 200
 
   return {
-    data: response.data,
+    data: response.data as unknown as Player[],
     success,
     error: !success ? response.statusText : undefined,
     source: AvailableApis[AvailableApis.biketag],
