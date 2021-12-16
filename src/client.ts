@@ -265,7 +265,7 @@ export class BikeTagClient extends EventEmitter {
     }
 
     /// Host defaults
-    options.host = options.host ?? this.biketagConfig.host
+    options.host = options.host ?? this.biketagConfig?.host
 
     /// default option for interfaces is to return the data from the response
     options.concise =
@@ -572,7 +572,6 @@ export class BikeTagClient extends EventEmitter {
   }
 
   request(options: AxiosRequestConfig = {}): Promise<AxiosResponse<string>> {
-    console.log({ options })
     return this.fetcher(options)
   }
 

@@ -49,7 +49,7 @@
     "lint:write": "prettier . --write && eslint . --fix",
     "lint:staged": "npx --no-install lint-staged",
     "commit": "cz",
-    "convert": "tsoa"
+    "convert": "tsoa spec-and-routes"
   },
   "dependencies": {
     "@sanity/client": "^2.8.0",
