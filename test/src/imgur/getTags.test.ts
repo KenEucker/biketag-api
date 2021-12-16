@@ -1,31 +1,28 @@
-import { ImgurClient } from 'imgur'
+import type { ImgurClient } from 'imanagur'
 import * as getTagsModule from '../../../src/imgur'
-import * as credentials from '../../assets/credentials'
-import { Tag } from '../../../lib/common/schema'
+import { isTag } from '../../../src/common/schema'
 import { HttpStatusCode } from '../../../lib/common/enums'
+import {
+  mockTagGame,
+  mockTagHashes,
+  mockTagNumbers,
+  mockTagSlugs,
+} from '../../assets/tags'
 
-/// ****************************  Config   *************************** ///
+/// ****************************  Config  *************************** ///
 
 const imgurGetTagsMethod = 'biketag.images.getTags'
 
-// TODO - Make sure these are valid
-const tagNumbers = [431, 430]
-const slugs = ['portland-tag-431', 'portland-tag-430']
-const game = 'portland'
-const hash = 'Y9PKtpI'
-
-/// ****************************  Helpers   *************************** ///
-
-// TODO - Could be more complete - should also move this to main src or a shared
-//  helper file in test dir
-/** TypeGuard for Tag */
-const isTag = (v: any): v is Tag =>
-  typeof v.slug === 'string' && typeof v.tagnumber === 'number'
-
-/// ****************************  Tests   *************************** ///
+/// ****************************  Tests  *************************** ///
 
 describe(imgurGetTagsMethod, () => {
-  const client = new ImgurClient(credentials.imgur)
+  const client = {
+    // TODO - Ron - Add valid return types to go with mockTags
+    getAlbum: jest.fn(() => {}),
+    // TODO - Ron - Add valid return types to go with mockTags
+    getImage: jest.fn(() => {}),
+  } as unknown as ImgurClient
+
   const getTags = getTagsModule.getTags.bind(undefined, client)
 
   test(`${imgurGetTagsMethod} method requires ImgurHash from payload`, () => {
@@ -34,14 +31,34 @@ describe(imgurGetTagsMethod, () => {
 
   describe(`${imgurGetTagsMethod} method resolves data of type Tag[]`, () => {
     test(`Input: tagnumbers`, async () => {
-      const res = await getTags({ tagnumbers: tagNumbers, game, hash })
+      // TODO - Is hash required here?
+      const res = await getTags({
+        tagnumbers: mockTagNumbers,
+        game: mockTagGame,
+        hash: mockTagHashes[0],
+      })
 
       expect(Array.isArray(res.data))
       res.data.forEach((tag) => expect(isTag(tag)).toBeTruthy())
     })
 
     test(`Input: slugs`, async () => {
-      const res = await getTags({ slugs, game, tagnumbers: [] })
+      // TODO - Fix input type & remove any cast
+      const res = await getTags(<any>{
+        slugs: mockTagSlugs,
+        game: mockTagGame,
+      })
+
+      expect(Array.isArray(res.data))
+      res.data.forEach((tag) => expect(isTag(tag)).toBeTruthy())
+    })
+
+    test(`Input: hash`, async () => {
+      // TODO - Fix input type & remove any cast
+      const res = await getTags(<any>{
+        game: mockTagGame,
+        hash: mockTagHashes[0],
+      })
 
       expect(Array.isArray(res.data))
       res.data.forEach((tag) => expect(isTag(tag)).toBeTruthy())
@@ -50,10 +67,11 @@ describe(imgurGetTagsMethod, () => {
 
   test(`${imgurGetTagsMethod} method resolves status of HttpStatusCode.Ok`, () => {
     return expect(
+      // TODO - After fixing types, ensure this input is correct
       getTags({
-        tagnumbers: tagNumbers,
-        game,
-        hash,
+        tagnumbers: mockTagNumbers,
+        game: mockTagGame,
+        hash: mockTagHashes[0],
       })
     ).resolves.toMatchObject({ status: HttpStatusCode.Ok })
   })
