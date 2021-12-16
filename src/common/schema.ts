@@ -77,3 +77,9 @@ export interface Game {
 }
 
 export type Documents = Tag | Player | Game | Region | Ambassador | Setting
+
+/// ****************************  TypeGuards  *************************** ///
+
+/** TypeGuard for Tag */
+export const isTag = (v: any): v is Tag =>
+  typeof v.slug === 'string' && typeof v.tagnumber === 'number'

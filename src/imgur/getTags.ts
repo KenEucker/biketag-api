@@ -81,4 +81,3 @@ export async function getTags(
     status: HttpStatusCode.Ok,
   }
 }
-
