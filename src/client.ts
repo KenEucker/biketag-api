@@ -1137,7 +1137,7 @@ export class BikeTagClient extends EventEmitter {
       switch (options.source) {
         case AvailableApis.imgur:
           clientMethod = clientMethod.bind({
-            getTags: this.getPassthroughApiMethod(api.getTags, client),
+            getGame: this.getPassthroughApiMethod(api.getGame, client),
           })
           break
       }
