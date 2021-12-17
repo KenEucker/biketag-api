@@ -1,4 +1,3 @@
-// @ts-ignore
 const {
   BikeTagClient
 } = require('../../biketag.node.js')
@@ -39,9 +38,9 @@ const sanityInstanceOpts = {
   host,
   sanity: {
     projectId: process.env.SANITY_PROJECT_ID,
-    accessToken: process.env.SANITY_ACCESS_TOKEN,
     dataset: process.env.SANITY_DATASET,
-    useCdn: !!process.env.SANITY_PROJECT_ID ? false : true,
+    accessToken: process.env.SANITY_ACCESS_TOKEN,
+    useCdn: !!process.env.USE_CDN ? false : true,
   }
 }
 const bikeTagSanityInstance = sanityInstanceOpts.sanity && sanityInstanceOpts.sanity.projectId ? new BikeTagClient(sanityInstanceOpts) : null
