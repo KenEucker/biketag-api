@@ -114,6 +114,7 @@ export class BikeTagClient extends EventEmitter {
       headers: {
         'user-agent': USERAGENT,
         'Content-Type': 'application/x-www-form-urlencoded',
+        'Access-Control-Allow-Credentials': true,
       },
       responseType: 'json',
     })
