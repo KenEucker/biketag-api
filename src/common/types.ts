@@ -127,6 +127,7 @@ export type ApiOptions = RequireAtLeastOne<{
   subreddit?: string
   account?: string
   concise?: boolean
+  cached?: boolean
 }>
 
 /// ****************************  Imgur API Objects   ********************************** ///
