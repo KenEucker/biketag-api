@@ -11,8 +11,9 @@ export async function getSettings(
   payload: getSettingsPayload
 ): Promise<BikeTagApiResponse<Setting[]>> {
   delete payload.source
+  const requestMethod = payload.cached ? client.cachedRequest : client.request
 
-  const response = await client.request({
+  const response = await requestMethod({
     url: getApiUrl(payload.host, SETTINGS_ENDPOINT, payload.game),
     data: payload,
   })

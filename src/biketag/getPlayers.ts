@@ -11,8 +11,9 @@ export async function getPlayers(
   payload: getPlayersPayload
 ): Promise<BikeTagApiResponse<Player[]>> {
   delete payload.source
+  const requestMethod = payload.cached ? client.cachedRequest : client.request
 
-  const response = await client.request({
+  const response = await requestMethod({
     url: getApiUrl(payload.host, PLAYERS_ENDPOINT, payload.game),
     data: payload,
   })

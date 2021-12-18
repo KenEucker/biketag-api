@@ -100,27 +100,27 @@ export class BikeTagClient extends EventEmitter {
 
     const initConfig = this.config(configuration ?? {}, true, true)
     this.initializeClients(initConfig)
+    const headers = {
+      'user-agent': USERAGENT,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Access-Control-Allow-Credentials': true,
+    }
+
+    headers['user-agent'] =
+      typeof window !== 'undefined' ? undefined : USERAGENT
+    const responseType = 'json'
 
     /// Configure separate fetching strategies: plain, authed (default), cached (authed)
     this.plainFetcher = axios.create({
-      headers: {
-        'user-agent': USERAGENT,
-      },
-      responseType: 'json',
+      responseType,
     })
 
     this.fetcher = axios.create({
-      // baseURL: BIKETAG_API_HOST,
-      headers: {
-        'user-agent': USERAGENT,
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Access-Control-Allow-Credentials': true,
-      },
-      responseType: 'json',
+      headers,
+      responseType,
     })
 
     this.cachedFetcher = setup({
-      baseURL: BIKETAG_API_HOST,
       cache: {
         maxAge: 15 * 60 * 1000,
         exclude: {
@@ -128,10 +128,8 @@ export class BikeTagClient extends EventEmitter {
           methods: ['put', 'patch', 'delete'],
         },
       },
-      headers: {
-        'user-agent': USERAGENT,
-      },
-      responseType: 'json',
+      headers,
+      responseType,
     })
   }
 
