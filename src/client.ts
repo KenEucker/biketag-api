@@ -1,4 +1,3 @@
-import { BIKETAG_API_HOST } from './common/endpoints'
 import { Game, Tag, Player, Ambassador, Setting } from './common/schema'
 import {
   Credentials,
@@ -265,6 +264,7 @@ export class BikeTagClient extends EventEmitter {
 
     /// Host defaults
     options.host = options.host ?? this.biketagConfig?.host
+    options.cached = options.cached ?? this.biketagConfig?.cached
 
     /// default option for interfaces is to return the data from the response
     options.concise =
