@@ -84,6 +84,7 @@ export interface CommonData {
   host?: string
   source?: AvailableApis | string
   concise?: boolean
+  cached?: boolean
 }
 export interface AccessToken {
   accessToken: string
