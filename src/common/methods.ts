@@ -406,6 +406,7 @@ export const createBikeTagCredentials = (
   return {
     game: credentials.game ?? defaults.game,
     host: credentials.host ?? defaults.host,
+    cached: credentials.cached ?? defaults.cached,
     source: credentials.source ?? defaults.source,
     clientKey: credentials.clientKey?.length
       ? credentials.clientKey
