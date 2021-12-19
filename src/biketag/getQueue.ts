@@ -1,25 +1,30 @@
-// import { getQueuePayload } from '../common/payloads'
-// import { BikeTagApiResponse } from '../common/types'
-// import { Tag } from '../common/schema'
-// import { BikeTagGunClient } from '../common/types'
-// import { AvailableApis, HttpStatusCode } from '../common/enums'
+import { BikeTagClient } from '../client'
+import { QUEUE_ENDPOINT } from '../common/endpoints'
+import { AvailableApis, HttpStatusCode } from '../common/enums'
+import { getQueuePayload } from '../common/payloads'
+import { Tag } from '../common/schema'
+import { BikeTagApiResponse } from '../common/types'
+import { getApiUrl } from './helpers'
 
-// export async function getQueue(
-//   client: BikeTagGunClient,
-//   payload: getQueuePayload
-// ): Promise<BikeTagApiResponse<Tag[]>> {
-//   const tags: Tag[] = await new Promise((r) => {
-//     return client
-//       .get(payload.game)
-//       .get('queue')
-//       .map()
-//       .once((t) => r(Object.values(t) as unknown as Tag[]))
-//   })
+export async function getQueue(
+  client: BikeTagClient,
+  payload: getQueuePayload
+): Promise<BikeTagApiResponse<Tag[]>> {
+  delete payload.source
+  const requestMethod = payload.cached ? client.cachedRequest : client.request
 
-//   return {
-//     data: tags,
-//     status: HttpStatusCode.Ok,
-//     success: true,
-//     source: AvailableApis[AvailableApis.biketag],
-//   }
-// }
+  const response = await requestMethod({
+    url: getApiUrl(payload.host, QUEUE_ENDPOINT, payload.game),
+    data: payload,
+  })
+
+  const success = response.status === 200
+
+  return {
+    data: response.data as unknown as Tag[],
+    success,
+    error: !success ? response.statusText : undefined,
+    source: AvailableApis[AvailableApis.biketag],
+    status: success ? HttpStatusCode.Ok : response.status,
+  }
+}

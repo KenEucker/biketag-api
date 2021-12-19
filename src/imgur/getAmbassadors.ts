@@ -1,5 +1,4 @@
 import type { ImgurClient } from 'imanagur'
-import { createPlayerObject, createTagObject } from '../common/data'
 import { sortAmbassadors } from '../common/methods'
 import { getAmbassadorsPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
@@ -10,7 +9,7 @@ export async function getAmbassadors(
   client: ImgurClient,
   payload: getAmbassadorsPayload
 ): Promise<BikeTagApiResponse<Ambassador[]>> {
-  const gameResponse = await this.getGame({ sort: 'relevance' }, payload)
+  const gameResponse = await this.getGame(payload.game)
 
   return {
     data: sortAmbassadors(

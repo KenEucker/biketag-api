@@ -237,11 +237,8 @@ export class BikeTagClient extends EventEmitter {
         // }
         break
       case DataTypes.queue:
-        options.hash =
-          options.queuehash ??
-          options.hash ??
-          this.imgurConfig.queuehash ??
-          this.imgurConfig.hash
+        options.game = options.game ? options.game : this.biketagConfig?.game
+        options.queuehash = options.queuehash ?? this.imgurConfig?.queuehash
         break
     }
 
@@ -385,12 +382,13 @@ export class BikeTagClient extends EventEmitter {
       | ImgurClient
       | BikeTagClient
       | SanityClient
-      | TwitterClient
+      | TwitterClient,
+    dataType: DataTypes = DataTypes.tag
   ): any {
     return (opts) => {
       return method(
         client,
-        this.getDefaultOptions(this.getInitialPayload(opts))
+        this.getDefaultOptions(this.getInitialPayload(opts), dataType)
       )
     }
   }
@@ -626,7 +624,7 @@ export class BikeTagClient extends EventEmitter {
           return {
             status: HttpStatusCode.InternalServerError,
             data: null,
-            error: e,
+            error: e.code ?? e,
             success: false,
             source,
           }
@@ -657,15 +655,31 @@ export class BikeTagClient extends EventEmitter {
       opts,
       DataTypes.queue
     )
-    const clientMethod = api.getQueue
+    let clientMethod = api.getQueue
 
-    /// If the client adapter implements the method
     if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.imgur:
+          clientMethod = clientMethod.bind({
+            getGame: this.getPassthroughApiMethod(
+              api.getGame,
+              client,
+              DataTypes.game
+            ),
+            getTags: this.getPassthroughApiMethod(
+              api.getTags,
+              client,
+              DataTypes.queue
+            ),
+          })
+          break
+      }
+
       return clientMethod(client, options).catch((e) => {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -693,7 +707,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -721,7 +735,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -771,7 +785,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -882,7 +896,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         })
@@ -963,7 +977,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         })
@@ -1005,7 +1019,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -1051,7 +1065,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         })
@@ -1099,7 +1113,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -1136,7 +1150,11 @@ export class BikeTagClient extends EventEmitter {
       switch (options.source) {
         case AvailableApis.imgur:
           clientMethod = clientMethod.bind({
-            getGame: this.getPassthroughApiMethod(api.getGame, client),
+            getGame: this.getPassthroughApiMethod(
+              api.getGame,
+              client,
+              DataTypes.game
+            ),
           })
           break
       }
@@ -1145,7 +1163,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         })
@@ -1188,7 +1206,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source: AvailableApis[options.source],
         }
@@ -1230,7 +1248,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         })
