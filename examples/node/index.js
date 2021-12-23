@@ -1,4 +1,10 @@
 const {
+  createReadStream
+} = require('fs')
+const {
+  join
+} = require('path')
+const {
   BikeTagClient
 } = require('../../biketag.node.js')
 require('dotenv').config()
@@ -17,6 +23,7 @@ const imgurInstanceOpts = {
   imgur: {
     hash: process.env.IMGUR_HASH,
     clientId: process.env.IMGUR_CLIENT_ID,
+    accessToken: process.env.IMGUR_ACCESS_TOKEN,
     clientSecret: process.env.IMGUR_CLIENT_SECRET,
   }
 }
@@ -91,6 +98,21 @@ const getQueueAsync = async (pre, client, out = false, opts = {}) => {
   return tags
 }
 
+const queueTagAsync = async (pre, client, out = false, opts = {}) => {
+  const foundImage = createReadStream(join(__dirname, 'ken.png'))
+  const foundTag = {
+    playerId: 'special-player-id',
+    foundImage,
+    tagnumber: 720,
+    foundPlayer: 'Ken',
+    foundLocation: 'here'
+  }
+  const queueTagResponse = await client.queueTag(foundTag, opts)
+  log(`${pre} :: successfully queued tag`, queueTagResponse, out)
+
+  return queueTagResponse
+}
+
 const get10TagsAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
   const tags = await client.getTags(undefined, opts)
@@ -153,6 +175,7 @@ const runTests = async (out = false) => {
     console.log(pretty("Imgur BikeTag Client Instantiated"), imgurInstanceOpts)
     await getGameAsync("Imgur", bikeTagImgurInstance, out)
     await getTag1Async("Imgur", bikeTagImgurInstance, out)
+    // await queueTagAsync("Imgur", bikeTagImgurInstance, out)
     await getQueueAsync("Imgur", bikeTagImgurInstance, out)
     await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
     await get10TagsAsync("Imgur", bikeTagImgurInstance, out)

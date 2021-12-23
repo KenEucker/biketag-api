@@ -120,4 +120,5 @@ export type getQueuePayload = {
 export type queueTagPayload = {
   tag: Tag
   queuehash?: string
+  playerId?: string
 } & Partial<Tag>
