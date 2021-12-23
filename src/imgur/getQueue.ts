@@ -1,4 +1,4 @@
-import type { ImgurClient } from 'imanagur'
+import type { ImgurClient } from 'imgur'
 import { getQueuePayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'

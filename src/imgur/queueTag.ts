@@ -1,5 +1,5 @@
-import type { ImgurClient } from 'imanagur'
-import { ImgurApiResponse, Payload } from 'imanagur/lib/common/types'
+import type { ImgurClient } from 'imgur'
+import { ImgurApiResponse, Payload } from 'imgur/lib/common/types'
 import { createTagObject } from '../common/data'
 import {
   getQueueTagImagePayloadFromTagData,
@@ -31,21 +31,23 @@ export async function queueTag(
     !!uploadMysteryImageUrl
   let success = false
   let status = HttpStatusCode.Ok
+  let data
+  let error
 
   if (isCompleteQueuedTag) {
     return this.updateTag(payload)
   } else if (isFoundQueuedTag || isMysteryQueuedTag) {
-    return new Promise(async (resolve) => {
-      const queuedTagUploadPayload = getQueueTagImagePayloadFromTagData(
-        payload as queueTagImagePayload,
-        isCompleteQueuedTag
-      )
+    const queuedTagUploadPayload = await getQueueTagImagePayloadFromTagData(
+      payload as queueTagImagePayload,
+      isCompleteQueuedTag
+    )
 
-      if (isValidUploadTagImagePayload(queuedTagUploadPayload)) {
-        const queuedTagImageUpload = (await client.upload(
-          queuedTagUploadPayload as Payload
-        )) as ImgurApiResponse<ImgurImage>
+    if (isValidUploadTagImagePayload(queuedTagUploadPayload)) {
+      const queuedTagImageUpload = (await client.upload(
+        queuedTagUploadPayload as Payload
+      )) as ImgurApiResponse<ImgurImage>
 
+      if (queuedTagImageUpload.success) {
         if (isFoundQueuedTag) {
           payload.foundImage = undefined
           payload.foundImageUrl = queuedTagImageUpload.data?.link
@@ -54,25 +56,28 @@ export async function queueTag(
           payload.mysteryImageUrl = queuedTagImageUpload.data?.link
         }
 
-        success = queuedTagImageUpload.success
+        data = createTagObject(payload)
       } else {
-        success = false
-        status = HttpStatusCode.BadRequest
+        error = queuedTagImageUpload.data
       }
 
-      resolve({
-        data: createTagObject(payload),
-        success,
-        source: AvailableApis[AvailableApis.imgur],
-        status,
-      })
-    })
+      status = queuedTagImageUpload.status
+      success = queuedTagImageUpload.success
+    } else {
+      success = false
+      status = HttpStatusCode.BadRequest
+    }
   } else {
-    return Promise.resolve({
-      data: createTagObject(payload),
-      success: false,
-      source: AvailableApis[AvailableApis.imgur],
-      status: HttpStatusCode.NoContent,
-    })
+    data = createTagObject(payload)
+    success = false
+    status = HttpStatusCode.NoContent
+  }
+
+  return {
+    data,
+    success,
+    error,
+    source: AvailableApis[AvailableApis.imgur],
+    status,
   }
 }
