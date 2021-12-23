@@ -438,7 +438,7 @@ export const getImgurFoundDescriptionFromBikeTagData = (
 ): string =>
   `#${tag.tagnumber} proof${
     tag.foundLocation ? ` found at (${tag.foundLocation})` : ''
-  }${includeCredit ? `by ${tag.foundPlayer}` : ''}`
+  }${includeCredit ? ` by ${tag.foundPlayer}` : ''}`
 export const getImgurFoundTitleFromBikeTagData = (
   tag: Tag,
   cache?: typeof TinyCache
@@ -447,7 +447,7 @@ export const getImgurFoundTitleFromBikeTagData = (
     !tag.gps || (tag.gps.lat === 0 && tag.gps.long === 0)
       ? ''
       : `(${tag.gps.lat ?? 0}, ${tag.gps.long ?? 0}, ${tag.gps.alt ?? 0})`
-  }`
+  } ${tag.playerId?.length ? `[${tag.playerId}]` : ''}`
 
 export const getImgurMysteryImageHashFromBikeTagData = (
   tag: Tag,

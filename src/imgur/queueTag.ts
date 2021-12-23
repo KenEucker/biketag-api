@@ -2,8 +2,9 @@ import type { ImgurClient } from 'imanagur'
 import { ImgurApiResponse, Payload } from 'imanagur/lib/common/types'
 import { createTagObject } from '../common/data'
 import {
-  getUploadTagImagePayloadFromTagData,
+  getQueueTagImagePayloadFromTagData,
   isValidUploadTagImagePayload,
+  queueTagImagePayload,
 } from './helpers'
 import { BikeTagApiResponse, ImgurImage } from '../common/types'
 import { Tag } from '../common/schema'
@@ -13,7 +14,7 @@ import { AvailableApis, HttpStatusCode } from '../common/enums'
 export async function queueTag(
   client: ImgurClient,
   payload: queueTagPayload
-): Promise<BikeTagApiResponse<Tag> | BikeTagApiResponse<Tag>[]> {
+): Promise<BikeTagApiResponse<Tag>> {
   const uploadFoundImage = payload.foundImage && !payload.foundImageUrl
   const uploadFoundImageUrl = !payload.foundImage && payload.foundImageUrl
   const isFoundQueuedTag =
@@ -27,16 +28,18 @@ export async function queueTag(
     (uploadMysteryImage || uploadMysteryImageUrl)
   const isCompleteQueuedTag =
     (!isFoundQueuedTag && !isMysteryQueuedTag && uploadMysteryImage) ||
-    uploadMysteryImageUrl
+    !!uploadMysteryImageUrl
   let success = false
+  let status = HttpStatusCode.Ok
 
   if (isCompleteQueuedTag) {
     return this.updateTag(payload)
   } else if (isFoundQueuedTag || isMysteryQueuedTag) {
     return new Promise(async (resolve) => {
-      const queuedTagUploadPayload = isCompleteQueuedTag
-        ? getUploadTagImagePayloadFromTagData(payload)
-        : null
+      const queuedTagUploadPayload = getQueueTagImagePayloadFromTagData(
+        payload as queueTagImagePayload,
+        isCompleteQueuedTag
+      )
 
       if (isValidUploadTagImagePayload(queuedTagUploadPayload)) {
         const queuedTagImageUpload = (await client.upload(
@@ -52,13 +55,16 @@ export async function queueTag(
         }
 
         success = queuedTagImageUpload.success
+      } else {
+        success = false
+        status = HttpStatusCode.BadRequest
       }
 
       resolve({
         data: createTagObject(payload),
         success,
         source: AvailableApis[AvailableApis.imgur],
-        status: HttpStatusCode.Ok,
+        status,
       })
     })
   } else {

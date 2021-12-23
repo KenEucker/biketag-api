@@ -34,6 +34,7 @@ export const getAlbumIdFromTextRegex = new RegExp(
   /((?:imgur.com\/)(?:(a|album|gallery)\/)(\w+))/i
 )
 
+export const getPlayerIdFromTextRegex = RegExp(/\[(.*)\]/i)
 export const getDiscussionUrlFromTextRegex = RegExp(/{(.*)}/i)
 export const getGPSCoordinatesValueFromTextRegex = RegExp(/\((.*)\)/i)
 export const getTagnumberFromSlugRegex = RegExp(/([^-]*)([^-]*)(\d)/)

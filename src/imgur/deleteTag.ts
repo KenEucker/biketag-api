@@ -26,7 +26,7 @@ export async function deleteTag(
   }
 
   if (!hashes.length) {
-    throw new Error('Imgur delete hashes not set')
+    throw new Error('imgur delete hashes not set')
   }
 
   for (const hash of hashes) {
