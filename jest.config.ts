@@ -1,7 +1,7 @@
 import { pathsToModuleNameMapper } from 'ts-jest/utils'
 import type { Config } from '@jest/types'
 import * as ts from 'typescript'
-import * as path from "path";
+import * as path from 'path'
 
 const tsConfig = ts.readConfigFile(
   path.resolve(__dirname, 'test/tsconfig.json'),
@@ -26,7 +26,7 @@ const config: Config.InitialOptions = {
     { prefix: '<rootDir>/test' }
   ),
   modulePaths: ['<rootDir>'],
-  roots: ['<rootDir>/test/tests']
+  roots: ['<rootDir>/test/tests'],
 }
 
 export default config

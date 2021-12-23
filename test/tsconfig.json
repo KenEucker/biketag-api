@@ -1,9 +1,9 @@
 {
-  "include": [ "tests", "assets", "src" ],
+  "include": ["tests", "assets", "src"],
 
   "compilerOptions": {
     "noEmit": true,
-    "lib": [ "esnext" ],
+    "lib": ["esnext"],
     "target": "es2015",
     "module": "CommonJS",
     "moduleResolution": "node",
@@ -15,10 +15,8 @@
     "baseUrl": "./",
     "paths": {
       "#src/*": ["../src/*"],
-      "#test-src": ["./src"],
+      "#test-src": ["./src"]
     },
-    "plugins": [
-      { "transform": "typescript-transform-paths" }
-    ]
+    "plugins": [{ "transform": "typescript-transform-paths" }]
   }
 }

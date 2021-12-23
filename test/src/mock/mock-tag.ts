@@ -16,7 +16,7 @@ export namespace MockTag {
       foundImageUrl: 'https://i.imgur.com/2MRzCPk.jpg',
       gps: { lat: 0, long: 0, alt: 0 },
       mysteryTime: 0,
-      foundTime: 0
+      foundTime: 0,
     },
     {
       tagnumber: 430,
@@ -32,12 +32,12 @@ export namespace MockTag {
       foundImageUrl: 'https://i.imgur.com/5DEAidN.jpg',
       gps: { lat: 0, long: 0, alt: 0 },
       mysteryTime: 0,
-      foundTime: 0
+      foundTime: 0,
     },
   ]
 
   export const tagNumbers = tags.map((t) => t.tagnumber)
   export const slugs = tags.map((t) => t.slug)
   export const game = 'portland'
-  export const hashes = [ 'Y9PKtpI', 'K3lPZew' ]
+  export const hashes = ['Y9PKtpI', 'K3lPZew']
 }
