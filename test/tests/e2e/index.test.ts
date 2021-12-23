@@ -7,7 +7,7 @@ import {
   bikeTagImgurInstance,
   bikeTagRedditInstance,
   bikeTagTwitterInstance,
-} from '../../examples/node/index'
+} from '../../../examples/node'
 
 test('BikeTagClient integration tests run when they can', async () => {
   expect(true).toBeTruthy()

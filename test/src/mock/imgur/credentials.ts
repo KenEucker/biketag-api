@@ -1,6 +1,7 @@
-import { ImgurCredentials } from '../../lib/common/types'
+import { ImgurCredentials } from "imanagur";
 
-export const imgur: ImgurCredentials = {
+// TODO - Fix type
+export const imgur: ImgurCredentials = <any>{
   clientId: '47da78be7590eaa',
   hash: 'Y9PKtpI',
   clientSecret: <any>undefined,
