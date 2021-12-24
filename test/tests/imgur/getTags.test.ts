@@ -44,8 +44,8 @@ describe(imgurGetTagsMethod, () => {
     test(`Input: hash`, async () => {
       // TODO - Fix input type & remove any cast
       const res = await getTags(<any>{
-        game: MockTag.game,
         hash: MockTag.hashes[0],
+        game: MockTag.game,
       })
 
       expect(Array.isArray(res.data))
@@ -55,11 +55,9 @@ describe(imgurGetTagsMethod, () => {
 
   test(`${imgurGetTagsMethod} method resolves status of HttpStatusCode.Ok`, () => {
     return expect(
-      // TODO - After fixing types, ensure this input is correct
       getTags({
-        tagnumbers: MockTag.tagNumbers,
-        game: MockTag.game,
         hash: MockTag.hashes[0],
+        game: MockTag.game,
       })
     ).resolves.toMatchObject({ status: HttpStatusCode.Ok })
   })
