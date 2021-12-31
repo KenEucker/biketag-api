@@ -6,7 +6,7 @@ const {
 } = require('path')
 const {
   BikeTagClient
-} = require('../../biketag.node.js')
+} = require('../../dist/biketag.node.js')
 require('dotenv').config()
 
 const host = process.env.BIKETAG_API_HOST
@@ -101,7 +101,7 @@ const getQueueAsync = async (pre, client, out = false, opts = {}) => {
 const queueTagAsync = async (pre, client, out = false, opts = {}) => {
   const foundImage = createReadStream(join(__dirname, 'ken.png'))
   const foundTag = {
-    playerId: 'special-player-id',
+    playerId: 'player-id-' + Date.now(),
     foundImage,
     tagnumber: 720,
     foundPlayer: 'Ken',

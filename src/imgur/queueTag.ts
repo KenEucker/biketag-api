@@ -45,24 +45,30 @@ export async function queueTag(
     if (isValidUploadTagImagePayload(queuedTagUploadPayload)) {
       const queuedTagImageUpload = (await client.upload(
         queuedTagUploadPayload as Payload
-      )) as ImgurApiResponse<ImgurImage>
+      )) as ImgurApiResponse<ImgurImage>[]
 
-      if (queuedTagImageUpload.success) {
-        if (isFoundQueuedTag) {
-          payload.foundImage = undefined
-          payload.foundImageUrl = queuedTagImageUpload.data?.link
-        } else if (isMysteryQueuedTag) {
-          payload.mysteryImage = undefined
-          payload.mysteryImageUrl = queuedTagImageUpload.data?.link
+      const queuedTagImageUploadResponse: ImgurApiResponse<ImgurImage> =
+        queuedTagImageUpload.length
+          ? queuedTagImageUpload[0]
+          : (queuedTagImageUpload as unknown as ImgurApiResponse<ImgurImage>)
+      if (queuedTagImageUploadResponse.success) {
+        const queuedTagImage = queuedTagImageUploadResponse.data
+        if (queuedTagImage) {
+          if (isFoundQueuedTag) {
+            payload.foundImage = undefined
+            payload.foundImageUrl = queuedTagImage.link
+          } else if (isMysteryQueuedTag) {
+            payload.mysteryImage = undefined
+            payload.mysteryImageUrl = queuedTagImage.link
+          }
         }
-
         data = createTagObject(payload)
       } else {
-        error = queuedTagImageUpload.data
+        error = queuedTagImageUploadResponse.data
       }
 
-      status = queuedTagImageUpload.status
-      success = queuedTagImageUpload.success
+      status = queuedTagImageUploadResponse.status
+      success = queuedTagImageUploadResponse.success
     } else {
       success = false
       status = HttpStatusCode.BadRequest
