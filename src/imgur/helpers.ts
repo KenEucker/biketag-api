@@ -227,6 +227,9 @@ export function getPlayerIdFromText(
   if (existingParsed) return existingParsed
 
   const playerIdText = expressions.getPlayerIdFromTextRegex.exec(inputText)
+  if (!playerIdText) {
+    return fallback
+  }
 
   const playerId = (playerIdText[1] || '').trim()
   putCacheIfExists(cacheKey, playerId, cache)

@@ -828,7 +828,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e.code,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -856,7 +856,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e.code,
+          error: e.code ?? e,
           success: false,
           source,
         })
@@ -941,7 +941,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e.code,
+          error: e.code ?? e,
           success: false,
           source,
         })
