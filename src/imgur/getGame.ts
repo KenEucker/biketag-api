@@ -15,10 +15,12 @@ export async function getGame(
   if (client) {
     if (!payload.hash) {
       const albumsInfo = await client.getAlbums('biketag')
-      for (const album of albumsInfo?.data) {
-        const gameAlbumData = getGameSlugFromText(album.title)
-        if (gameAlbumData) {
-          payload.hash = album.id
+      if (albumsInfo?.data) {
+        for (const album of albumsInfo.data) {
+          const gameAlbumData = getGameSlugFromText(album.title)
+          if (gameAlbumData) {
+            payload.hash = album.id
+          }
         }
       }
     }
