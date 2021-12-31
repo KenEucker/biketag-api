@@ -14,6 +14,9 @@
   "bugs": {
     "url": "https://github.com/keneucker/biketag-api/issues"
   },
+  "engines": {
+    "node": ">=16"
+  },
   "funding": {
     "type": "patreon",
     "url": "https://www.patreon.com/biketag"
@@ -56,7 +59,7 @@
     "axios": "^0.21.1",
     "axios-cache-adapter": "^2.7.3",
     "form-data": "^4.0.0",
-    "imanagur": "^1.0.2",
+    "imgur": "^2.0.0",
     "lodash": "^4.17.21",
     "snoowrap": "^1.23.0",
     "tinycache": "^1.1.2",

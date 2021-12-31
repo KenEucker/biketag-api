@@ -1,4 +1,4 @@
-import type { ImgurClient, ImgurApiResponse } from 'imanagur'
+import type { ImgurClient, ImgurApiResponse } from 'imgur'
 import { updateTagPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { getImageHashFromText } from '../common/getters'

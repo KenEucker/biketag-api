@@ -1,4 +1,4 @@
-import type { ImgurClient } from 'imanagur'
+import type { ImgurClient } from 'imgur'
 import { createPlayerObject, createTagObject } from '../common/data'
 import { sortPlayers } from '../common/methods'
 import { getPlayersPayload } from '../common/payloads'
