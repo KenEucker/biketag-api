@@ -174,12 +174,12 @@ const runTests = async (out = false) => {
   if (bikeTagImgurInstance) {
     console.log(pretty("Imgur BikeTag Client Instantiated"), imgurInstanceOpts)
     await getGameAsync("Imgur", bikeTagImgurInstance, out)
-    // await getTag1Async("Imgur", bikeTagImgurInstance, out)
-    await queueTagAsync("Imgur", bikeTagImgurInstance, out)
+    await getTag1Async("Imgur", bikeTagImgurInstance, out)
+    // await queueTagAsync("Imgur", bikeTagImgurInstance, out)
     await getQueueAsync("Imgur", bikeTagImgurInstance, out)
-    // await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
-    // await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
-    // await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
+    await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
+    await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
+    await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
   }
 
   if (bikeTagSanityInstance) {
