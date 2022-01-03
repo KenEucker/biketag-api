@@ -41,28 +41,12 @@ export const getCacheIfExists = (
   return null
 }
 
-export const isBase64 = (payload: string | Payload): boolean => {
-  if (typeof payload === 'string') {
-    return false
-  }
-
-  return typeof payload.base64 !== 'undefined'
-}
-
 export const isImageUrl = (payload: string | Payload): boolean => {
   if (typeof payload === 'string') {
     return true
   }
 
   return typeof payload.image !== 'undefined' && typeof payload === 'string'
-}
-
-export const isStream = (payload: string | Payload): boolean => {
-  if (typeof payload === 'string') {
-    return false
-  }
-
-  return typeof payload.stream !== 'undefined'
 }
 
 export const createForm = (payload: string | Payload): FormData => {
@@ -315,6 +299,9 @@ export const createImgurCredentials = (
     accessToken: credentials.accessToken?.length
       ? credentials.accessToken
       : defaults.accessToken,
+    refreshToken: credentials.refreshToken?.length
+      ? credentials.refreshToken
+      : defaults.refreshToken,
   }
 }
 
