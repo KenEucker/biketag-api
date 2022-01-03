@@ -1296,7 +1296,7 @@ export class BikeTagClient extends EventEmitter {
       return new ImgurClient(options)
     }
 
-    throw new Error('options are invalid for creating an imgur client')
+    throw new Error('options are invalid for creating an Imgur client')
   }
 
   /// Discussions powered by RedditClient
@@ -1307,7 +1307,7 @@ export class BikeTagClient extends EventEmitter {
       return new RedditClient(options)
     }
 
-    throw new Error('options are invalid for creating an imgur client')
+    throw new Error('options are invalid for creating a Reddit client')
   }
 
   /// Mentions powered by TwitterClient

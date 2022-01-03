@@ -10,16 +10,17 @@ export type RequireAtLeastOne<T> = {
 /// ****************************  Imgur Credential Objects   *************************** ///
 export interface ImgurAccessToken {
   accessToken: string
+  refreshToken?: string
 }
 
 export interface ImgurClientId {
   clientId: string
+  clientSecret?: string
 }
 
 export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
   hash?: string
   queuehash?: string
-  clientSecret: string
 }
 /// ****************************  Twitter Credential Objects   ************************* ///
 export interface TwitterAccessToken {
