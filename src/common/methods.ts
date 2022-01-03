@@ -1,15 +1,11 @@
 import {
   AccessToken,
   ClientKey,
-  SanityAccessToken,
-  ImgurAccessToken,
-  ImgurClientId,
   ImgurCredentials,
   RedditCredentials,
   RedditClientId,
   RedditRefreshToken,
   SanityCredentials,
-  SanityProjectId,
   Credentials,
   BikeTagCredentials,
   Payload,
@@ -76,24 +72,6 @@ export const hasAccessToken = (arg: unknown): arg is AccessToken => {
 
 export const hasClientKey = (arg: unknown): arg is ClientKey => {
   return (arg as ClientKey).clientKey !== undefined
-}
-
-export const hasSanityAccessToken = (
-  arg: unknown
-): arg is SanityAccessToken => {
-  return (arg as SanityAccessToken).token !== undefined
-}
-
-export const hasSanityProjectId = (arg: unknown): arg is SanityProjectId => {
-  return (arg as SanityProjectId).projectId !== undefined
-}
-
-export const hasImgurAccessToken = (arg: unknown): arg is ImgurAccessToken => {
-  return (arg as ImgurAccessToken).accessToken !== undefined
-}
-
-export const hasImgurClientId = (arg: unknown): arg is ImgurClientId => {
-  return (arg as ImgurClientId).clientId !== undefined
 }
 
 export const constructTagNumberSlug = (number: number, game = ''): string => {
@@ -302,6 +280,12 @@ export const createImgurCredentials = (
     refreshToken: credentials.refreshToken?.length
       ? credentials.refreshToken
       : defaults.refreshToken,
+    rapidApiHost: credentials.rapidApiHost?.length
+      ? credentials.rapidApiHost
+      : defaults.rapidApiHost,
+    rapidApiKey: credentials.rapidApiKey?.length
+      ? credentials.rapidApiKey
+      : defaults.rapidApiKey,
   }
 }
 
