@@ -198,3 +198,50 @@ export const getImageResponse = {
   success: true,
   status: 200,
 }
+
+export const updateImageResponse = {
+  data: true,
+  success: true,
+  status: 200,
+}
+
+export const uploadResponse = {
+  data: {
+    id: '60vmGqR',
+    title: null,
+    description:
+      '#431 proof found at ( 32nd between main and salmon ) by Ken & Doll',
+    datetime: 1622517814,
+    type: 'image/jpeg',
+    animated: false,
+    width: 4032,
+    height: 3024,
+    size: 4344954,
+    views: 453,
+    bandwidth: 1968264162,
+    vote: null,
+    favorite: false,
+    nsfw: false,
+    section: null,
+    account_url: null,
+    account_id: null,
+    is_ad: false,
+    in_most_viral: false,
+    has_sound: false,
+    tags: [],
+    ad_type: 0,
+    ad_url: '',
+    edited: '0',
+    in_gallery: false,
+    link: 'https://i.imgur.com/60vmGqR.jpg',
+    ad_config: {
+      safeFlags: ['not_in_gallery', 'share'],
+      highRiskFlags: [],
+      unsafeFlags: ['sixth_mod_unsafe'],
+      wallUnsafeFlags: [],
+      showsAds: false,
+    },
+  },
+  success: true,
+  status: 200,
+}
