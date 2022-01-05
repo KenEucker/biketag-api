@@ -58,7 +58,7 @@ describe(imgurDeleteTagsMethod, () => {
   test(`${imgurDeleteTagsMethod} method resolves status of HttpStatusCode.Ok`, () => {
     return expect(
       deleteTags({
-        tagnumbers: MockTag.tags,
+        tagnumbers: MockTag.tags.map((t) => t.tagnumber),
         game: MockTag.game,
       })
     ).resolves.toMatchObject({ status: HttpStatusCode.Ok })

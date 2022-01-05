@@ -5,14 +5,14 @@ const imgurGetPlayersMethod = 'biketag.images.getPlayers'
 /// ***************************  Config  *************************** ///
 
 import { MockImgur, MockTag } from '#test-src'
-import * as getTagsModule from '#src/imgur'
+import * as imgurModule from '#src/imgur'
 import { HttpStatusCode } from '#src/common/enums'
 
 /// ***************************  Test  *************************** ///
 
 describe(imgurGetPlayersMethod, () => {
   const client = MockImgur.createMockClient()
-  const getPlayers = getTagsModule.getPlayers.bind(undefined, client)
+  const getPlayers = imgurModule.getPlayers.bind(undefined, client)
 
   test(`${imgurGetPlayersMethod} method requires ImgurHash from payload`, () => {
     return expect(getPlayers(<any>{})).rejects.toThrow()

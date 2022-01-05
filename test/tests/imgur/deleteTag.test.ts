@@ -1,5 +1,5 @@
 import { MockImgur, MockTag } from '#test-src'
-import * as getTagsModule from '#src/imgur'
+import * as imgurModule from '#src/imgur'
 import { HttpStatusCode } from '#src/common/enums'
 
 /// ***************************  Config  *************************** ///
@@ -10,7 +10,7 @@ const imgurDeleteTagMethod = 'biketag.images.deleteTag'
 
 describe(imgurDeleteTagMethod, () => {
   const client = MockImgur.createMockClient()
-  const deleteTag = getTagsModule.deleteTag.bind(undefined, client)
+  const deleteTag = imgurModule.deleteTag.bind(undefined, client)
 
   test(`${imgurDeleteTagMethod} method requires ImgurHash from payload`, () => {
     return expect(deleteTag(<any>{})).rejects.toThrow()
@@ -24,7 +24,7 @@ describe(imgurDeleteTagMethod, () => {
   describe(`${imgurDeleteTagMethod} method resolves data of type boolean[]`, () => {
     test(`Input: tagnumber`, async () => {
       const res = await deleteTag({
-        tagnumber: MockTag.tagNumbers[0],
+        tagnumber: MockTag.tagNumbers[0].toString(),
         game: MockTag.game,
       })
 
@@ -57,7 +57,7 @@ describe(imgurDeleteTagMethod, () => {
   test(`${imgurDeleteTagMethod} method resolves status of HttpStatusCode.Ok`, () => {
     return expect(
       deleteTag({
-        tagnumber: MockTag.tags[0],
+        tagnumber: MockTag.tags[0].toString(),
         game: MockTag.game,
       })
     ).resolves.toMatchObject({ status: HttpStatusCode.Ok })

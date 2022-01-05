@@ -1,7 +1,8 @@
 import { MockImgur, MockTag } from '#test-src'
-import * as getTagsModule from '#src/imgur'
+import * as imgurModule from '#src/imgur'
 import { isTag, Tag } from '#src/common/schema'
 import { HttpStatusCode } from '#src/common/enums'
+import { BikeTagApiResponse } from "#src/common/types";
 
 /// ***************************  Config  *************************** ///
 
@@ -11,7 +12,7 @@ const imgurQueueTagMethod = 'biketag.images.queueTag'
 
 describe(imgurQueueTagMethod, () => {
   const client = MockImgur.createMockClient()
-  const queueTag = getTagsModule.queueTag.bind(undefined, client)
+  const queueTag = imgurModule.queueTag.bind(undefined, client)
 
   test(`${imgurQueueTagMethod} method requires ImgurHash from payload`, () => {
     return expect(queueTag(<any>{})).rejects.toThrow()
@@ -43,13 +44,13 @@ describe(imgurQueueTagMethod, () => {
       const responses = await queueTag([
         { ...tag1, tag: tag1 },
         { ...tag2, tag: tag2 },
-      ])
+      ]) as BikeTagApiResponse<Tag>[]
 
       expect(Array.isArray(responses))
       expect(responses.length).toBe(2)
 
       // TODO - Might want to improve this by ensuring the actual results are
-      //   correct and/or in the right order. Maybe better as a seaprate test
+      //   correct and/or in the right order. Maybe better as a separate test
       responses.forEach((res) => expect(isTag(res.data)).toBeTruthy())
     })
 
@@ -73,7 +74,7 @@ describe(imgurQueueTagMethod, () => {
       const responses = await queueTag([
         { ...tag1, tag: tag1 },
         { ...tag2, tag: tag2 },
-      ])
+      ]) as BikeTagApiResponse<Tag>[]
 
       expect(Array.isArray(responses))
       expect(responses.length).toBe(2)
@@ -92,12 +93,13 @@ describe(imgurQueueTagMethod, () => {
   test(`${imgurQueueTagMethod} method resolves status of HttpStatusCode.Ok`, () => {
     return expect(
       queueTag({
+        tag: MockTag.tags[0],
         ...MockTag.tags[0],
         foundImage: 'test',
         foundImageUrl: undefined,
         mysteryImageUrl: undefined,
         mysteryImage: undefined,
-      })
+      }) as Promise<BikeTagApiResponse<Tag>>
     ).resolves.toMatchObject({ status: HttpStatusCode.Ok })
   })
 })
