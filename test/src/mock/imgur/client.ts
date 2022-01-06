@@ -25,24 +25,26 @@ export interface MockImgurClient extends ImgurClient {
  * Note: Alter mock responses using the `mockResponses` property
  */
 export function createMockClient(): MockImgurClient {
-  return {
+  const client = {} as MockImgurClient
+
+  return Object.assign(client, {
     mockResponses: {
       getAlbum: getAlbumResponse,
       getImage: getImageResponse,
       updateImage: updateImageResponse,
-      upload: uploadResponse
+      upload: uploadResponse,
     },
     getAlbum: jest.fn(function () {
-      return this.mockResponses.getAlbum
+      return client.mockResponses.getAlbum
     }),
     getImage: jest.fn(function () {
-      return this.mockResponses.getImage
+      return client.mockResponses.getImage
     }),
     updateImage: jest.fn(function () {
-      return this.mockResponses.updateImage
+      return client.mockResponses.updateImage
     }),
     upload: jest.fn(function () {
-      return this.mockResponses.upload
+      return client.mockResponses.upload
     }),
-  } as unknown as MockImgurClient
+  })
 }
