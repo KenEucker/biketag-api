@@ -3,7 +3,7 @@
 
   "compilerOptions": {
     "noEmit": true,
-    "lib": ["esnext"],
+    "lib": ["esnext", "dom"],
     "target": "es2015",
     "module": "CommonJS",
     "moduleResolution": "node",

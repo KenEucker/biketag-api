@@ -1,6 +1,6 @@
 import * as deleteTagsModule from '#src/imgur'
 import { HttpStatusCode } from '#src/common/enums'
-import { MockImgur, MockTag } from '#test-src'
+import { MockBikeTag, MockImgur, MockTag } from '#test-src'
 
 /// ***************************  Config  *************************** ///
 
@@ -10,7 +10,11 @@ const imgurDeleteTagsMethod = 'biketag.images.deleteTags'
 
 describe(imgurDeleteTagsMethod, () => {
   const client = MockImgur.createMockClient()
-  const deleteTags = deleteTagsModule.getTags.bind(undefined, client)
+  const bikeTagClientMock = MockBikeTag.createMockClient()
+  const deleteTags = deleteTagsModule.getTags.bind(
+    { getTags: bikeTagClientMock.getTags },
+    client
+  )
 
   test(`${imgurDeleteTagsMethod} method requires ImgurHash from payload`, () => {
     return expect(deleteTags(<any>{})).rejects.toThrow()

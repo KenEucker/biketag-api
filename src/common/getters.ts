@@ -378,7 +378,7 @@ export const getDiscussionUrlFromText = (
 }
 
 export const getImageHashFromText = (
-  inputText: string,
+  inputText = '',
   cache?: typeof TinyCache
 ): string => {
   if (!inputText.length) return ''

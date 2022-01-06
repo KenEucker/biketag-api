@@ -12,16 +12,20 @@ export async function deleteTag(
   const hashes = []
 
   if (payload.tagnumber || payload.slug) {
-    const tag = await this.getTags(payload.tagnumber ?? payload.slug)
-    if (tag.foundImageUrl) {
-      hashes.push(
-        getImageHashFromImgurImage({ link: tag.foundImageUrl } as ImgurImage)
-      )
-    }
-    if (tag.mysteryImageUrl) {
-      hashes.push(
-        getImageHashFromImgurImage({ link: tag.mysteryImageUrl } as ImgurImage)
-      )
+    const { success, data: tag } = await this.getTags(
+      payload.tagnumber ?? payload.slug
+    )
+    if (success) {
+      if (tag.foundImageUrl) {
+        hashes.push(getImageHashFromImgurImage({ link: tag.foundImageUrl }))
+      }
+      if (tag.mysteryImageUrl) {
+        hashes.push(
+          getImageHashFromImgurImage({
+            link: tag.mysteryImageUrl,
+          })
+        )
+      }
     }
   }
 
@@ -35,7 +39,7 @@ export async function deleteTag(
 
   return {
     data: responses,
-    success: true,
+    success: hashes.length !== 0,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,
   }

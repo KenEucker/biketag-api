@@ -1,4 +1,4 @@
-import { ImgurCredentials } from 'imanagur'
+import { ImgurCredentials } from 'imgur'
 
 // TODO - Fix type
 export const imgur: ImgurCredentials = <any>{

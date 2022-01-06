@@ -30,7 +30,12 @@ export async function deleteTags(
   }
 
   if (!deleteHashes.length) {
-    throw new Error('imgur delete hashes not set')
+    return {
+      data: [],
+      success: false,
+      source: AvailableApis[AvailableApis.imgur],
+      status: HttpStatusCode.Ok,
+    }
   }
 
   for (const hash of deleteHashes) {

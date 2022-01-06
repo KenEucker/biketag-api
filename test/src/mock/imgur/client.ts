@@ -1,11 +1,12 @@
-import { ImgurApiResponse, ImgurClient } from 'imanagur'
+import { ImgurApiResponse, ImgurClient } from 'imgur'
 import {
   getAlbumResponse,
   getImageResponse,
   updateImageResponse,
   uploadResponse,
+  getTagsResponse,
 } from './mock-data'
-import { AlbumData, ImageData } from 'imanagur/lib/common/types'
+import { AlbumData, ImageData } from 'imgur/lib/common/types'
 
 /// ***************************  Types  *************************** ///
 
@@ -30,7 +31,7 @@ export function createMockClient(): MockImgurClient {
       getAlbum: getAlbumResponse,
       getImage: getImageResponse,
       updateImage: updateImageResponse,
-      upload: uploadResponse
+      upload: uploadResponse,
     },
     getAlbum: jest.fn(function () {
       return this.mockResponses.getAlbum
