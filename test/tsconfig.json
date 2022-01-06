@@ -1,15 +1,24 @@
 {
-  "include": ["src"],
+  "include": ["tests", "assets", "src"],
+
   "compilerOptions": {
     "noEmit": true,
     "lib": ["esnext"],
     "target": "es2015",
     "module": "CommonJS",
     "moduleResolution": "node",
+    "strictBindCallApply": true,
 
-    "strict": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
-    "skipDefaultLibCheck": true
+    "skipDefaultLibCheck": true,
+
+    "baseUrl": "./",
+    "paths": {
+      "#src/*": ["../src/*"],
+      "#test-src": ["./src"]
+    },
+
+    "plugins": [{ "transform": "typescript-transform-paths" }]
   }
 }

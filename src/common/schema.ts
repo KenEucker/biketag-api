@@ -78,3 +78,16 @@ export interface Game {
 }
 
 export type Documents = Tag | Player | Game | Region | Ambassador | Setting
+
+/// ****************************  TypeGuards  *************************** ///
+
+/** TypeGuard for Tag */
+// TODO - Confirm and/or update logic
+export const isTag = (v: any): v is Tag =>
+  typeof v.slug === 'string' && typeof v.tagnumber === 'number'
+
+/** TypeGuard for Player */
+// TODO - Confirm and/or update logic
+export const isPlayer = (v: any): v is Player =>
+  // eslint-disable-next-line no-prototype-builtins
+  typeof v.slug === 'string' && v.hasOwnProperty('bicon')

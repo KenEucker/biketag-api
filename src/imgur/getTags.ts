@@ -40,6 +40,7 @@ export async function getTags(
   } else if (payload.slugs?.length) {
     const imagesData: Tag[] = []
     const imagePromises: Promise<Tag>[] = []
+    // TempComment
     let success = true
     const addToArray = (image: any) => {
       if (image?.data) imagesData.push(image.data)

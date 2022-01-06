@@ -11,6 +11,7 @@
     "rootDir": "./src",
     "outDir": "lib",
     "esModuleInterop": true,
-    "declaration": true
+    "declaration": true,
+    "strictBindCallApply": true
   }
 }

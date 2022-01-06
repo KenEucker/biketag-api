@@ -43,7 +43,7 @@
     "expose": "cp -v dist/* ./",
     "watch": "webpack --mode=development --watch --progress",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf lib dist _site biketag.js* biketag.node* test/src/**/*.js test/src/**/*.d.ts",
+    "clean": "rm -rf lib dist _site biketag.js* biketag.node*",
     "prepare": "husky install && cd test && npm install",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "format:check": "prettier . --check ",

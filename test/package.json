@@ -2,5 +2,8 @@
   "private": true,
   "dependencies": {
     "biketag": "file:.."
+  },
+  "devDependencies": {
+    "typescript-transform-paths": "^3.3.1"
   }
 }
