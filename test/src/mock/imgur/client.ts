@@ -35,16 +35,16 @@ export function createMockClient(): MockImgurClient {
       updateImage: updateImageResponse,
       upload: uploadResponse,
     },
-    getAlbum: jest.fn(function () {
+    getAlbum: jest.fn(async function () {
       return client.mockResponses.getAlbum
     }),
-    getImage: jest.fn(function () {
+    getImage: jest.fn(async function () {
       return client.mockResponses.getImage
     }),
-    updateImage: jest.fn(function () {
+    updateImage: jest.fn(async function () {
       return client.mockResponses.updateImage
     }),
-    upload: jest.fn(function () {
+    upload: jest.fn(async function () {
       return client.mockResponses.upload
     }),
   })
