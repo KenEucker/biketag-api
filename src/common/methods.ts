@@ -1,16 +1,11 @@
 import {
   AccessToken,
   ClientKey,
-  ClientPeers,
-  SanityAccessToken,
-  ImgurAccessToken,
-  ImgurClientId,
   ImgurCredentials,
   RedditCredentials,
   RedditClientId,
   RedditRefreshToken,
   SanityCredentials,
-  SanityProjectId,
   Credentials,
   BikeTagCredentials,
   Payload,
@@ -42,28 +37,12 @@ export const getCacheIfExists = (
   return null
 }
 
-export const isBase64 = (payload: string | Payload): boolean => {
-  if (typeof payload === 'string') {
-    return false
-  }
-
-  return typeof payload.base64 !== 'undefined'
-}
-
 export const isImageUrl = (payload: string | Payload): boolean => {
   if (typeof payload === 'string') {
     return true
   }
 
   return typeof payload.image !== 'undefined' && typeof payload === 'string'
-}
-
-export const isStream = (payload: string | Payload): boolean => {
-  if (typeof payload === 'string') {
-    return false
-  }
-
-  return typeof payload.stream !== 'undefined'
 }
 
 export const createForm = (payload: string | Payload): FormData => {
@@ -93,24 +72,6 @@ export const hasAccessToken = (arg: unknown): arg is AccessToken => {
 
 export const hasClientKey = (arg: unknown): arg is ClientKey => {
   return (arg as ClientKey).clientKey !== undefined
-}
-
-export const hasSanityAccessToken = (
-  arg: unknown
-): arg is SanityAccessToken => {
-  return (arg as SanityAccessToken).token !== undefined
-}
-
-export const hasSanityProjectId = (arg: unknown): arg is SanityProjectId => {
-  return (arg as SanityProjectId).projectId !== undefined
-}
-
-export const hasImgurAccessToken = (arg: unknown): arg is ImgurAccessToken => {
-  return (arg as ImgurAccessToken).accessToken !== undefined
-}
-
-export const hasImgurClientId = (arg: unknown): arg is ImgurClientId => {
-  return (arg as ImgurClientId).clientId !== undefined
 }
 
 export const constructTagNumberSlug = (number: number, game = ''): string => {
@@ -206,7 +167,6 @@ export const isBikeTagCredentials = (
 ): boolean => {
   return (
     (credentials as CommonData)?.game !== undefined ||
-    (credentials as ClientPeers)?.peers !== undefined ||
     ((credentials as ClientKey)?.clientToken !== undefined &&
       (credentials as ClientKey)?.clientKey !== undefined)
   )
@@ -307,6 +267,7 @@ export const createImgurCredentials = (
 ): ImgurCredentials => {
   return {
     hash: credentials.hash ?? defaults.hash,
+    queuehash: credentials.queuehash ?? defaults.queuehash,
     clientId: credentials.clientId?.length
       ? credentials.clientId
       : defaults.clientId,
@@ -316,6 +277,15 @@ export const createImgurCredentials = (
     accessToken: credentials.accessToken?.length
       ? credentials.accessToken
       : defaults.accessToken,
+    refreshToken: credentials.refreshToken?.length
+      ? credentials.refreshToken
+      : defaults.refreshToken,
+    rapidApiHost: credentials.rapidApiHost?.length
+      ? credentials.rapidApiHost
+      : defaults.rapidApiHost,
+    rapidApiKey: credentials.rapidApiKey?.length
+      ? credentials.rapidApiKey
+      : defaults.rapidApiKey,
   }
 }
 
@@ -406,8 +376,9 @@ export const createBikeTagCredentials = (
   defaults: Partial<BikeTagCredentials> = {}
 ): BikeTagCredentials => {
   return {
-    peers: credentials.peers ?? defaults.peers,
     game: credentials.game ?? defaults.game,
+    host: credentials.host ?? defaults.host,
+    cached: credentials.cached ?? defaults.cached,
     source: credentials.source ?? defaults.source,
     clientKey: credentials.clientKey?.length
       ? credentials.clientKey

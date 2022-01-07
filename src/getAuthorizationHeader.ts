@@ -28,7 +28,7 @@ export async function getAuthorizationHeader(
     },
   }
 
-  let response = await client.plainRequest(options)
+  let response = await client.request(options)
 
   const cookies = Array.isArray(response.headers['set-cookie'])
     ? response.headers['set-cookie'][0]
@@ -58,7 +58,7 @@ export async function getAuthorizationHeader(
     cookie: `authorize_token=${authorizeToken}`,
   }
 
-  response = await client.plainRequest(options)
+  response = await client.request(options)
   const location = response.headers.location
   if (!location) {
     throw new Error('Unable to parse location')

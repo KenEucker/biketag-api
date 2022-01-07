@@ -10,7 +10,7 @@ import {
   getImgurAlbumIdFromText,
   getTagNumbersFromText,
 } from '../common/getters'
-import { ImgurClient } from 'imanagur'
+import { ImgurClient } from 'imgur'
 
 export async function getBikeTagsFromRedditPosts(
   posts: Submission[],

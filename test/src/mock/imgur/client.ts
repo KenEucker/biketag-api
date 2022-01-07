@@ -1,11 +1,12 @@
-import { ImgurApiResponse, ImgurClient } from 'imanagur'
+import { ImgurApiResponse, ImgurClient } from 'imgur'
 import {
   getAlbumResponse,
   getImageResponse,
   updateImageResponse,
   uploadResponse,
+  getTagsResponse,
 } from './mock-data'
-import { AlbumData, ImageData } from 'imanagur/lib/common/types'
+import { AlbumData, ImageData } from 'imgur/lib/common/types'
 
 /// ***************************  Types  *************************** ///
 

@@ -56,6 +56,7 @@ export interface Tag {
   gps: geopoint
   foundImage?: string
   foundImageUrl: string
+  playerId?: string
 }
 
 export interface settingsArray {

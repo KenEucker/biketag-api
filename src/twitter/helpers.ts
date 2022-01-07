@@ -70,8 +70,8 @@ export function getBikeTagFromTwitterPost(
     ? post.attachments.media_keys[0]
     : ''
 
-  if (media.length) {
-    for (const mediaKey of post.attachments?.media_keys) {
+  if (media.length && post.attachments) {
+    for (const mediaKey of post.attachments.media_keys) {
       const mediaAttachment = media.filter((m) => m.media_key === mediaKey)
       if (mediaAttachment.length) {
         mysteryImageUrl = mediaAttachment[0].url

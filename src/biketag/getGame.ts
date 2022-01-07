@@ -1,33 +1,39 @@
 import { BikeTagClient } from '../client'
-import {
-  GAMES_ENDPOINT,
-  BIKETAG_API_HOST,
-  API_VERSION,
-} from '../common/endpoints'
+import { GAMES_ENDPOINT } from '../common/endpoints'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { getGamePayload } from '../common/payloads'
 import { Game } from '../common/schema'
 import { BikeTagApiResponse } from '../common/types'
+import { getApiUrl } from './helpers'
 
 export async function getGame(
   client: BikeTagClient,
   payload: getGamePayload
 ): Promise<BikeTagApiResponse<Game[]>> {
   delete payload.source
+  const requestMethod = payload.cached ? client.cachedRequest : client.request
 
-  const response = await client.cachedRequest({
-    // "https://toronto.biketag.io/api/api/game"
-    url: `https://${payload.game}.${BIKETAG_API_HOST}/${API_VERSION}/${GAMES_ENDPOINT}`,
+  return requestMethod({
+    url: getApiUrl(payload.host, GAMES_ENDPOINT, payload.game),
     data: payload,
   })
-
-  const success = response.status === 200
-
-  return {
-    data: response.data,
-    success,
-    error: !success ? response.statusText : undefined,
-    source: AvailableApis[AvailableApis.biketag],
-    status: success ? HttpStatusCode.Ok : response.status,
-  }
+    .then((response) => {
+      const success = response?.status !== 200
+      return {
+        data: response.data as unknown as Game[],
+        success,
+        error: success ? response.statusText : undefined,
+        source: AvailableApis[AvailableApis.biketag],
+        status: success ? HttpStatusCode.Ok : response.status,
+      }
+    })
+    .catch((error) => {
+      return {
+        data: null,
+        success: false,
+        error: error.message,
+        source: AvailableApis[AvailableApis.biketag],
+        status: HttpStatusCode.InternalServerError,
+      }
+    })
 }

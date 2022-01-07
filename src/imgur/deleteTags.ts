@@ -1,4 +1,4 @@
-import ImgurClient from 'imanagur'
+import ImgurClient from 'imgur'
 import { deleteTagsPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { getImageHashFromImgurImage } from './helpers'
@@ -30,7 +30,12 @@ export async function deleteTags(
   }
 
   if (!deleteHashes.length) {
-    throw new Error('Imgur delete hashes not set')
+    return {
+      data: [],
+      success: false,
+      source: AvailableApis[AvailableApis.imgur],
+      status: HttpStatusCode.Ok,
+    }
   }
 
   for (const hash of deleteHashes) {

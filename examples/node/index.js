@@ -1,19 +1,29 @@
-// @ts-ignore
+const {
+  createReadStream
+} = require('fs')
+const {
+  join
+} = require('path')
 const {
   BikeTagClient
-} = require('../../biketag.node.js')
+} = require('../../dist/biketag.node.js')
 require('dotenv').config()
+
+const host = process.env.BIKETAG_API_HOST
 
 const biketagDefaultInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
+  host,
 }
-const biketagDefaultInstance = null //new BikeTagClient(biketagDefaultInstanceOpts)
+const biketagDefaultInstance = null // new BikeTagClient(biketagDefaultInstanceOpts)
 
 const imgurInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
+  host,
   imgur: {
     hash: process.env.IMGUR_HASH,
     clientId: process.env.IMGUR_CLIENT_ID,
+    accessToken: process.env.IMGUR_ACCESS_TOKEN,
     clientSecret: process.env.IMGUR_CLIENT_SECRET,
   }
 }
@@ -21,6 +31,7 @@ const bikeTagImgurInstance = imgurInstanceOpts.imgur && imgurInstanceOpts.imgur.
 
 const twitterInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
+  host,
   twitter: {
     account: process.env.TWITTER_ACCOUNT,
     bearer_token: process.env.TWITTER_BEARER_TOKEN,
@@ -31,17 +42,19 @@ const bikeTagTwitterInstance = twitterInstanceOpts.twitter && twitterInstanceOpt
 
 const sanityInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
+  host,
   sanity: {
     projectId: process.env.SANITY_PROJECT_ID,
-    accessToken: process.env.SANITY_ACCESS_TOKEN,
     dataset: process.env.SANITY_DATASET,
-    useCdn: !!process.env.SANITY_PROJECT_ID ? false : true,
+    accessToken: process.env.SANITY_ACCESS_TOKEN,
+    useCdn: !!process.env.USE_CDN ? false : true,
   }
 }
 const bikeTagSanityInstance = sanityInstanceOpts.sanity && sanityInstanceOpts.sanity.projectId ? new BikeTagClient(sanityInstanceOpts) : null
 
 const redditInstanceOpts = {
   ...imgurInstanceOpts,
+  host,
   reddit: {
     subreddit: process.env.REDDIT_SUBREDDIT ? process.env.REDDIT_SUBREDDIT : 'cyclepdx',
     clientId: process.env.REDDIT_CLIENT_ID,
@@ -77,9 +90,32 @@ const getTag1Async = async (pre, client, out = false, opts = {}) => {
   return tag1
 }
 
+const getQueueAsync = async (pre, client, out = false, opts = {}) => {
+  const tags = await client.getQueue(undefined, opts)
+  log(`${pre} :: successfully retrieved queued tag data`, tags, out)
+  console.log(tags[0])
+
+  return tags
+}
+
+const queueTagAsync = async (pre, client, out = false, opts = {}) => {
+  const foundImage = createReadStream(join(__dirname, 'ken.png'))
+  const foundTag = {
+    playerId: 'player-id-' + Date.now(),
+    foundImage,
+    tagnumber: 720,
+    foundPlayer: 'Ken',
+    foundLocation: 'here'
+  }
+  const queueTagResponse = await client.queueTag(foundTag, opts)
+  log(`${pre} :: successfully queued tag`, queueTagResponse, out)
+
+  return queueTagResponse
+}
+
 const get10TagsAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
-  const tags = await client.tags(undefined, opts)
+  const tags = await client.getTags(undefined, opts)
   log(`${pre} :: successfully retrieved tags data`, tags, out)
   console.log(tags[0])
 
@@ -94,7 +130,7 @@ const getCurrentTagAsync = async (pre, client, out = false, opts = {}) => {
 }
 
 const getGameAsync = async (pre, client, out = false, opts = {}) => {
-  const testGameData = await client.game(undefined, opts)
+  const testGameData = await client.getGame(undefined, opts)
   log(`${pre} :: success fully retrieved game data`, testGameData, out)
 
   return testGameData
@@ -102,7 +138,7 @@ const getGameAsync = async (pre, client, out = false, opts = {}) => {
 
 const get10PlayersAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
-  const testPlayerData = await client.players(undefined, opts)
+  const testPlayerData = await client.getPlayers(undefined, opts)
   log(`${pre} :: success fully retrieved player data`, testPlayerData, out)
 
   return testPlayerData
@@ -110,7 +146,7 @@ const get10PlayersAsync = async (pre, client, out = false, opts = {}) => {
 
 const get10AmbassadorsAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
-  const testAmbassadorData = await client.ambassadors(undefined, opts)
+  const testAmbassadorData = await client.getAmbassadors(undefined, opts)
   log(`${pre} :: success fully retrieved ambassador data`, testAmbassadorData, out)
 
   return testAmbassadorData
@@ -118,7 +154,7 @@ const get10AmbassadorsAsync = async (pre, client, out = false, opts = {}) => {
 
 const get10SettingsAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
-  const testSettingData = await client.settings(undefined, opts)
+  const testSettingData = await client.getSettings(undefined, opts)
   log(`${pre} :: success fully retrieved game settings`, testSettingData, out)
 
   return testSettingData
@@ -127,17 +163,20 @@ const get10SettingsAsync = async (pre, client, out = false, opts = {}) => {
 const runTests = async (out = false) => {
   if (biketagDefaultInstance) {
     console.log(pretty("Default BikeTag Client Instantiated"), biketagDefaultInstanceOpts)
-    // await getGameAsync("BikeTag", biketagDefaultInstance, out)
+    await getGameAsync("BikeTag", biketagDefaultInstance, out)
     await getTag1Async("BikeTag", biketagDefaultInstance, out)
-    await getCurrentTagAsync("BikeTag", biketagDefaultInstance, out)
+    await getQueueAsync("BikeTag", biketagDefaultInstance, out)
     await get10TagsAsync("BikeTag", biketagDefaultInstance, out)
-    // await get10PlayersAsync("BikeTag", biketagDefaultInstance, out)
+    await getCurrentTagAsync("BikeTag", biketagDefaultInstance, out)
+    await get10PlayersAsync("BikeTag", biketagDefaultInstance, out)
   }
 
   if (bikeTagImgurInstance) {
     console.log(pretty("Imgur BikeTag Client Instantiated"), imgurInstanceOpts)
     await getGameAsync("Imgur", bikeTagImgurInstance, out)
     await getTag1Async("Imgur", bikeTagImgurInstance, out)
+    // await queueTagAsync("Imgur", bikeTagImgurInstance, out)
+    await getQueueAsync("Imgur", bikeTagImgurInstance, out)
     await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
     await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
     await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)

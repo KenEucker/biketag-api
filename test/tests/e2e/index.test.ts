@@ -15,25 +15,25 @@ test('BikeTagClient integration tests run when they can', async () => {
 
 if (bikeTagSanityInstance) {
   test('BikeTagClient sanity instance can retrieve game data', async () => {
-    const testGameData = await getGameAsync(bikeTagSanityInstance)
+    const testGameData = await getGameAsync('test', bikeTagSanityInstance)
 
     expect(testGameData).toMatchSnapshot()
   })
 
   test('BikeTagClient sanity instance can retrieve tag 1 data', async () => {
-    const testTagData = await getTag1Async(bikeTagSanityInstance)
+    const testTagData = await getTag1Async('test', bikeTagSanityInstance)
 
     expect(testTagData).toMatchSnapshot()
   })
 
   test('BikeTagClient sanity instance can retrieve latest tag data', async () => {
-    const testTagData = await getCurrentTagAsync(bikeTagSanityInstance)
+    const testTagData = await getCurrentTagAsync('test', bikeTagSanityInstance)
 
     expect(testTagData).toMatchSnapshot()
   })
 
   test('BikeTagClient sanity instance can retrieve all tags data', async () => {
-    const testTagsData = await get10TagsAsync(bikeTagSanityInstance)
+    const testTagsData = await get10TagsAsync('test', bikeTagSanityInstance)
 
     expect(testTagsData).toMatchSnapshot()
   })
@@ -41,19 +41,19 @@ if (bikeTagSanityInstance) {
 
 if (bikeTagImgurInstance) {
   test('BikeTagClient imgur instance can retrieve tag 1 data', async () => {
-    const testTagData = await getTag1Async(bikeTagImgurInstance)
+    const testTagData = await getTag1Async('test', bikeTagImgurInstance)
 
     expect(testTagData).toMatchSnapshot()
   })
 
   test('BikeTagClient imgur instance can retrieve latest tag data', async () => {
-    const testTagData = await getCurrentTagAsync(bikeTagImgurInstance)
+    const testTagData = await getCurrentTagAsync('test', bikeTagImgurInstance)
 
     expect(testTagData).toMatchSnapshot()
   })
 
   test('BikeTagClient imgur instance can retrieve all tags data', async () => {
-    const testTagsData = await get10TagsAsync(bikeTagImgurInstance)
+    const testTagsData = await get10TagsAsync('test', bikeTagImgurInstance)
 
     expect(testTagsData).toMatchSnapshot()
   })
@@ -61,24 +61,34 @@ if (bikeTagImgurInstance) {
 
 if (bikeTagRedditInstance) {
   test('BikeTagClient reddit instance can retrieve tag 1 data', async () => {
-    const testTagData = await getTag1Async(bikeTagRedditInstance, false, {
-      source: 'reddit',
-    })
+    const testTagData = await getTag1Async(
+      'test',
+      bikeTagRedditInstance,
+      false,
+      {
+        source: 'reddit',
+      }
+    )
 
     expect(testTagData).toMatchSnapshot()
   })
 
   test('BikeTagClient reddit instance can retrieve latest tag data', async () => {
-    const testTagData = await getCurrentTagAsync(bikeTagRedditInstance, false, {
-      source: 'reddit',
-    })
+    const testTagData = await getCurrentTagAsync(
+      'test',
+      bikeTagRedditInstance,
+      false,
+      {
+        source: 'reddit',
+      }
+    )
 
     expect(testTagData).toMatchSnapshot()
   })
 
   /// Test takes too long
   // test('BikeTagClient reddit instance can retrieve all tags data', async () => {
-  //   const testTagsData = await get10TagsAsync(bikeTagRedditInstance, false, { source: 'reddit', limit: 100 })
+  //   const testTagsData = await get10TagsAsync('test', bikeTagRedditInstance, false, { source: 'reddit', limit: 100 })
 
   //   expect(testTagsData).toMatchSnapshot()
   // })
@@ -86,19 +96,19 @@ if (bikeTagRedditInstance) {
 
 if (bikeTagTwitterInstance) {
   test('BikeTagClient twitter instance can retrieve tag 1 data', async () => {
-    const testTagData = await getTag1Async(bikeTagTwitterInstance)
+    const testTagData = await getTag1Async('test', bikeTagTwitterInstance)
 
     expect(testTagData).toMatchSnapshot()
   })
 
   test('BikeTagClient twitter instance can retrieve latest tag data', async () => {
-    const testTagData = await getCurrentTagAsync(bikeTagTwitterInstance)
+    const testTagData = await getCurrentTagAsync('test', bikeTagTwitterInstance)
 
     expect(testTagData).toMatchSnapshot()
   })
 
   test('BikeTagClient twitter instance can retrieve all tags data', async () => {
-    const testTagsData = await get10TagsAsync(bikeTagTwitterInstance)
+    const testTagsData = await get10TagsAsync('test', bikeTagTwitterInstance)
 
     expect(testTagsData).toMatchSnapshot()
   })

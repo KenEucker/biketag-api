@@ -1,4 +1,3 @@
-import { BIKETAG_API_HOST } from './common/endpoints'
 import { Game, Tag, Player, Ambassador, Setting } from './common/schema'
 import {
   Credentials,
@@ -66,7 +65,7 @@ import * as redditApi from './reddit'
 import * as twitterApi from './twitter'
 
 import RedditClient from 'snoowrap'
-import ImgurClient from 'imanagur'
+import ImgurClient from 'imgur'
 import sanityClient, { SanityClient } from '@sanity/client'
 import TwitterClient from 'twitter-v2'
 
@@ -100,25 +99,27 @@ export class BikeTagClient extends EventEmitter {
 
     const initConfig = this.config(configuration ?? {}, true, true)
     this.initializeClients(initConfig)
+    const headers = {
+      'user-agent': USERAGENT,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Access-Control-Allow-Credentials': true,
+    }
+
+    headers['user-agent'] =
+      typeof window !== 'undefined' ? undefined : USERAGENT
+    const responseType = 'json'
 
     /// Configure separate fetching strategies: plain, authed (default), cached (authed)
     this.plainFetcher = axios.create({
-      headers: {
-        'user-agent': USERAGENT,
-      },
-      responseType: 'json',
+      responseType,
     })
 
     this.fetcher = axios.create({
-      baseURL: BIKETAG_API_HOST,
-      headers: {
-        'user-agent': USERAGENT,
-      },
-      responseType: 'json',
+      headers,
+      responseType,
     })
 
     this.cachedFetcher = setup({
-      baseURL: BIKETAG_API_HOST,
       cache: {
         maxAge: 15 * 60 * 1000,
         exclude: {
@@ -126,10 +127,8 @@ export class BikeTagClient extends EventEmitter {
           methods: ['put', 'patch', 'delete'],
         },
       },
-      headers: {
-        'user-agent': USERAGENT,
-      },
-      responseType: 'json',
+      headers,
+      responseType,
     })
   }
 
@@ -238,11 +237,8 @@ export class BikeTagClient extends EventEmitter {
         // }
         break
       case DataTypes.queue:
-        options.hash =
-          options.queuehash ??
-          options.hash ??
-          this.imgurConfig.queuehash ??
-          this.imgurConfig.hash
+        options.game = options.game ? options.game : this.biketagConfig?.game
+        options.queuehash = options.queuehash ?? this.imgurConfig?.queuehash
         break
     }
 
@@ -262,6 +258,10 @@ export class BikeTagClient extends EventEmitter {
         options.account = options.account ?? this.twitterConfig.account
         break
     }
+
+    /// Host defaults
+    options.host = options.host ?? this.biketagConfig?.host
+    options.cached = options.cached ?? this.biketagConfig?.cached
 
     /// default option for interfaces is to return the data from the response
     options.concise =
@@ -382,12 +382,13 @@ export class BikeTagClient extends EventEmitter {
       | ImgurClient
       | BikeTagClient
       | SanityClient
-      | TwitterClient
+      | TwitterClient,
+    dataType: DataTypes = DataTypes.tag
   ): any {
     return (opts) => {
       return method(
         client,
-        this.getDefaultOptions(this.getInitialPayload(opts))
+        this.getDefaultOptions(this.getInitialPayload(opts), dataType)
       )
     }
   }
@@ -600,19 +601,22 @@ export class BikeTagClient extends EventEmitter {
         .then((retrievedGameResponse) => {
           if (retrievedGameResponse.success && retrievedGameResponse.data) {
             /// Set the most important game data (hash, subreddit, etc)
-            this.config({
-              game: retrievedGameResponse.data.name,
-              imgur: {
-                hash: retrievedGameResponse.data.mainhash,
-                queuehash: retrievedGameResponse.data.queuehash,
+            this.config(
+              {
+                game: retrievedGameResponse.data.name,
+                imgur: {
+                  hash: retrievedGameResponse.data.mainhash,
+                  queuehash: retrievedGameResponse.data.queuehash,
+                },
+                reddit: {
+                  subreddit: retrievedGameResponse.data.subreddit,
+                },
+                twitter: {
+                  account: retrievedGameResponse.data.twitter,
+                },
               },
-              reddit: {
-                subreddit: retrievedGameResponse.data.subreddit,
-              },
-              twitter: {
-                account: retrievedGameResponse.data.twitter,
-              },
-            })
+              false
+            )
           }
           return retrievedGameResponse
         })
@@ -620,7 +624,7 @@ export class BikeTagClient extends EventEmitter {
           return {
             status: HttpStatusCode.InternalServerError,
             data: null,
-            error: e,
+            error: e.code ?? e,
             success: false,
             source,
           }
@@ -651,15 +655,31 @@ export class BikeTagClient extends EventEmitter {
       opts,
       DataTypes.queue
     )
-    const clientMethod = api.getQueue
+    let clientMethod = api.getQueue
 
-    /// If the client adapter implements the method
     if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.imgur:
+          clientMethod = clientMethod.bind({
+            getGame: this.getPassthroughApiMethod(
+              api.getGame,
+              client,
+              DataTypes.game
+            ),
+            getTags: this.getPassthroughApiMethod(
+              api.getTags,
+              client,
+              DataTypes.queue
+            ),
+          })
+          break
+      }
+
       return clientMethod(client, options).catch((e) => {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -687,7 +707,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -715,7 +735,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -765,7 +785,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -808,7 +828,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -836,7 +856,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         })
@@ -876,7 +896,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         })
@@ -921,7 +941,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         })
@@ -957,7 +977,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         })
@@ -999,7 +1019,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -1045,7 +1065,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         })
@@ -1093,7 +1113,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         }
@@ -1130,7 +1150,11 @@ export class BikeTagClient extends EventEmitter {
       switch (options.source) {
         case AvailableApis.imgur:
           clientMethod = clientMethod.bind({
-            getTags: this.getPassthroughApiMethod(api.getTags, client),
+            getGame: this.getPassthroughApiMethod(
+              api.getGame,
+              client,
+              DataTypes.game
+            ),
           })
           break
       }
@@ -1139,7 +1163,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         })
@@ -1182,7 +1206,7 @@ export class BikeTagClient extends EventEmitter {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source: AvailableApis[options.source],
         }
@@ -1224,7 +1248,7 @@ export class BikeTagClient extends EventEmitter {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
-          error: e,
+          error: e.code ?? e,
           success: false,
           source,
         })
@@ -1272,7 +1296,7 @@ export class BikeTagClient extends EventEmitter {
       return new ImgurClient(options)
     }
 
-    throw new Error('options are invalid for creating an imgur client')
+    throw new Error('options are invalid for creating an Imgur client')
   }
 
   /// Discussions powered by RedditClient
@@ -1283,7 +1307,7 @@ export class BikeTagClient extends EventEmitter {
       return new RedditClient(options)
     }
 
-    throw new Error('options are invalid for creating an imgur client')
+    throw new Error('options are invalid for creating a Reddit client')
   }
 
   /// Mentions powered by TwitterClient

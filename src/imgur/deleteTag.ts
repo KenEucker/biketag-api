@@ -1,4 +1,4 @@
-import ImgurClient from 'imanagur'
+import ImgurClient from 'imgur'
 import { deleteTagPayload } from '../common/payloads'
 import { BikeTagApiResponse, ImgurImage } from '../common/types'
 import { getImageHashFromImgurImage } from './helpers'
@@ -12,21 +12,25 @@ export async function deleteTag(
   const hashes = []
 
   if (payload.tagnumber || payload.slug) {
-    const tag = await this.getTags(payload.tagnumber ?? payload.slug)
-    if (tag.foundImageUrl) {
-      hashes.push(
-        getImageHashFromImgurImage({ link: tag.foundImageUrl } as ImgurImage)
-      )
-    }
-    if (tag.mysteryImageUrl) {
-      hashes.push(
-        getImageHashFromImgurImage({ link: tag.mysteryImageUrl } as ImgurImage)
-      )
+    const { success, data: tag } = await this.getTags(
+      payload.tagnumber ?? payload.slug
+    )
+    if (success) {
+      if (tag.foundImageUrl) {
+        hashes.push(getImageHashFromImgurImage({ link: tag.foundImageUrl }))
+      }
+      if (tag.mysteryImageUrl) {
+        hashes.push(
+          getImageHashFromImgurImage({
+            link: tag.mysteryImageUrl,
+          })
+        )
+      }
     }
   }
 
   if (!hashes.length) {
-    throw new Error('Imgur delete hashes not set')
+    throw new Error('imgur delete hashes not set')
   }
 
   for (const hash of hashes) {
@@ -35,7 +39,7 @@ export async function deleteTag(
 
   return {
     data: responses,
-    success: true,
+    success: hashes.length !== 0,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,
   }

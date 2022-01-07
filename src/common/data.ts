@@ -10,6 +10,7 @@ export const cacheKeys = {
   hintText: `hint::`,
   creditText: `credit::`,
   playerText: `player::`,
+  playerIdText: `playerId::`,
   gameSlugText: `slug::`,
   gameText: `game::`,
   locationText: `gps::`,
@@ -33,6 +34,7 @@ export const createTagObject = (
     game: tagData.game ?? '',
     slug: tagData.slug ?? '',
     name: tagData.name ?? '',
+    playerId: tagData.playerId ?? '',
     tagnumber: tagData.tagnumber ?? 0,
     /// Mystery Tag Data
     mysteryPlayer: tagData.mysteryPlayer ?? '',

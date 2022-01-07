@@ -112,9 +112,13 @@ export type importTagPayload = Pick<
 > &
   CommonData
 
-export type getQueuePayload = CommonData
+export type getQueuePayload = {
+  hash?: string
+  queuehash?: string
+} & CommonData
 
 export type queueTagPayload = {
   tag: Tag
   queuehash?: string
+  playerId?: string
 } & Partial<Tag>

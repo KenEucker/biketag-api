@@ -30,6 +30,8 @@ export interface ImgurUploadPayload {
   album?: string
 }
 export type UploadTagImagePayload = Partial<Tag> & Partial<ImgurUploadPayload>
+export type queueTagImagePayload = Partial<Tag> &
+  Partial<ImgurUploadPayload> & { queuehash: string }
 
 export function sortImgurImagesByUploadDate(
   images: ImgurImage[] = [],
@@ -211,6 +213,30 @@ export function getPlayerFromText(
   return credit
 }
 
+export function getPlayerIdFromText(
+  inputText: string,
+  fallback?: string,
+  cache?: typeof TinyCache
+): string {
+  if (!inputText || !inputText.length) {
+    return fallback
+  }
+
+  const cacheKey = `${cacheKeys.playerIdText}${inputText}`
+  const existingParsed = getCacheIfExists(cacheKey)
+  if (existingParsed) return existingParsed
+
+  const playerIdText = expressions.getPlayerIdFromTextRegex.exec(inputText)
+  if (!playerIdText) {
+    return fallback
+  }
+
+  const playerId = (playerIdText[1] || '').trim()
+  putCacheIfExists(cacheKey, playerId, cache)
+
+  return playerId
+}
+
 export function getDiscussionUrlFromText(
   inputText: string,
   fallback?: string,
@@ -220,19 +246,18 @@ export function getDiscussionUrlFromText(
     return fallback
   }
 
-  const cacheKey = `${cacheKeys.locationText}${inputText}`
+  const cacheKey = `${cacheKeys.discussionText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
   /// TODO: build out testers for all current games of BikeTag on Reddit
-  inputText.match(expressions.getDiscussionUrlFromTextRegex)
   const discussionUrlText =
     expressions.getDiscussionUrlFromTextRegex.exec(inputText)
 
-  if (!discussionUrlText) {
-    putCacheIfExists(cacheKey, fallback, cache)
-    return fallback as string
-  }
+  // if (!discussionUrlText) {
+  //   putCacheIfExists(cacheKey, fallback, cache)
+  //   return fallback as string
+  // }
 
   const discussionUrl = (discussionUrlText[1] || '').trim()
   putCacheIfExists(cacheKey, discussionUrl, cache)
@@ -387,6 +412,7 @@ export function getBikeTagFromImgurImageSet(
 ): Tag {
   const foundImageLink = foundImage?.link
   const foundImageDescription = foundImage?.description
+  const foundImageTitle = foundImage?.title
   const foundTime = foundImage?.datetime
   const mysteryImageLink = mysteryImage?.link
   const mysteryImageDescription = mysteryImage?.description
@@ -394,8 +420,13 @@ export function getBikeTagFromImgurImageSet(
   const mysteryTime = mysteryImage?.datetime
 
   const game = opts?.game || ''
-  const tagnumber = getTagNumbersFromText(mysteryImageDescription)[0] as number
+  const tagnumber = mysteryImageDescription
+    ? (getTagNumbersFromText(mysteryImageDescription)[0] as number)
+    : (getTagNumbersFromText(foundImageDescription)[0] as number)
   const name = constructTagNumberSlug(tagnumber, game)
+  const playerId =
+    getPlayerIdFromText(foundImageTitle) ??
+    getPlayerIdFromText(mysteryImageTitle)
   const discussionUrl = getDiscussionUrlFromText(mysteryImageTitle)
   const foundLocation = getFoundLocationFromText(foundImageDescription)
   const mysteryPlayer = getPlayerFromText(mysteryImageDescription)
@@ -414,6 +445,7 @@ export function getBikeTagFromImgurImageSet(
     foundTime,
     mysteryTime,
     hint,
+    playerId,
     mysteryImageUrl: mysteryImageLink,
     foundImageUrl: foundImageLink,
     /// TODO: get found location gps from found tag
@@ -547,6 +579,27 @@ export const getUpdateTagPayloadFromTagData = (
     description: mystery
       ? getImgurMysteryDescriptionFromBikeTagData(payload as Tag)
       : getImgurFoundDescriptionFromBikeTagData(payload as Tag),
+  }
+}
+
+export function getQueueTagImagePayloadFromTagData(
+  tagData: queueTagImagePayload,
+  mystery = false
+): UploadTagImagePayload {
+  return {
+    album: tagData.queuehash ?? tagData.hash,
+    type: tagData.type ?? 'stream',
+    image: mystery ? tagData.mysteryImage : tagData.foundImage,
+    title:
+      tagData.title ??
+      (mystery
+        ? getImgurMysteryTitleFromBikeTagData(tagData as Tag)
+        : getImgurFoundTitleFromBikeTagData(tagData as Tag)),
+    description:
+      tagData.description ??
+      (mystery
+        ? getImgurMysteryDescriptionFromBikeTagData(tagData as Tag)
+        : getImgurFoundDescriptionFromBikeTagData(tagData as Tag)),
   }
 }
 
