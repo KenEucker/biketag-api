@@ -1,4 +1,4 @@
-import * as deleteTagsModule from '#src/imgur'
+import * as imgurModule from '#src/imgur'
 import { HttpStatusCode } from '#src/common/enums'
 import { MockBikeTag, MockImgur, MockTag } from '#test-src'
 
@@ -9,11 +9,11 @@ const imgurDeleteTagsMethod = 'biketag.images.deleteTags'
 /// ***************************  Tests  *************************** ///
 
 describe(imgurDeleteTagsMethod, () => {
-  const client = MockImgur.createMockClient()
-  const bikeTagClientMock = MockBikeTag.createMockClient()
-  const deleteTags = deleteTagsModule.getTags.bind(
-    { getTags: bikeTagClientMock.getTags },
-    client
+  const mockClient = MockImgur.createMockClient()
+  const mockBikeTagClient = MockBikeTag.createMockClient()
+  const deleteTags = imgurModule.deleteTags.bind(
+    mockBikeTagClient,
+    <any>mockClient
   )
 
   test(`${imgurDeleteTagsMethod} method requires ImgurHash from payload`, () => {

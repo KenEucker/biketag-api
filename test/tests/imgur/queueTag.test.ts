@@ -12,20 +12,15 @@ const imgurQueueTagMethod = 'biketag.images.queueTag'
 /// ***************************  Test  *************************** ///
 
 describe(imgurQueueTagMethod, () => {
-  const client = MockImgur.createMockClient()
-  const queueTag = imgurModule.queueTag.bind(undefined, client)
+  const mockClient = MockImgur.createMockClient()
+  const mockBikeTagClient = MockBikeTag.createMockClient()
+  const queueTag = imgurModule.queueTag.bind(mockBikeTagClient, <any>mockClient)
 
   test(`${imgurQueueTagMethod} method requires ImgurHash from payload`, () => {
     return expect(queueTag(<any>{})).rejects.toThrow()
   })
 
   test(`${imgurQueueTagMethod} method requires one of [hashes, tagnumbers, slugs] from payload`, () => {
-    const client = MockImgur.createMockClient()
-    const bikeTagClientMock = MockBikeTag.createMockClient()
-    const queueTag = imgurModule.queueTag.bind(
-      { getTags: bikeTagClientMock.getTags },
-      client
-    )
     const queuedTag = queueTag({} as queueTagPayload)
 
     expect(isTag(queuedTag)).toBeTruthy()
