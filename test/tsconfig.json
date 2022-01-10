@@ -4,7 +4,7 @@
   "compilerOptions": {
     "noEmit": true,
     "lib": ["esnext", "dom"],
-    "target": "es2015",
+    "target": "ES2019",
     "module": "CommonJS",
     "moduleResolution": "node",
     "strictBindCallApply": true,

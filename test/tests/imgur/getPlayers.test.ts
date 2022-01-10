@@ -11,11 +11,11 @@ import { HttpStatusCode } from '#src/common/enums'
 /// ***************************  Test  *************************** ///
 
 describe(imgurGetPlayersMethod, () => {
-  const client = MockImgur.createMockClient()
-  const bikeTagClientMock = MockBikeTag.createMockClient()
+  const mockClient = MockImgur.createMockClient()
+  const mockBikeTagClient = MockBikeTag.createMockClient()
   const getPlayers = imgurModule.getPlayers.bind(
-    { getTags: bikeTagClientMock.getTags },
-    client
+    mockBikeTagClient,
+    <any>mockClient
   )
 
   test(`${imgurGetPlayersMethod} method requires ImgurHash from payload`, () => {

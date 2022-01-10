@@ -1,7 +1,7 @@
 import * as imgurModule from '#src/imgur'
 import { isTag } from '#src/common/schema'
 import { HttpStatusCode } from '#src/common/enums'
-import { MockImgur, MockTag } from '#test-src'
+import { MockBikeTag, MockImgur, MockTag } from '#test-src'
 
 /// ***************************  Config  *************************** ///
 
@@ -10,8 +10,9 @@ const imgurGetTagsMethod = 'biketag.images.getTags'
 /// ***************************  Tests  *************************** ///
 
 describe(imgurGetTagsMethod, () => {
-  const client = MockImgur.createMockClient()
-  const getTags = imgurModule.getTags.bind(undefined, client)
+  const mockClient = MockImgur.createMockClient()
+  const mockBikeTagClient = MockBikeTag.createMockClient()
+  const getTags = imgurModule.getTags.bind(mockBikeTagClient, <any>mockClient)
 
   test(`${imgurGetTagsMethod} method requires ImgurHash from payload`, () => {
     return expect(getTags(<any>{})).rejects.toThrow()

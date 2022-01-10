@@ -21,11 +21,11 @@ const img2 = {
 /// ***************************  Tests  *************************** ///
 
 describe(imgurUploadTagImageMethod, () => {
-  const client = MockImgur.createMockClient()
-  const bikeTagClientMock = MockBikeTag.createMockClient()
+  const mockClient = MockImgur.createMockClient()
+  const mockBikeTagClient = MockBikeTag.createMockClient()
   const uploadTagImage = imgurModule.uploadTagImage.bind(
-    { getTags: bikeTagClientMock.getTags },
-    client
+    mockBikeTagClient,
+    <any>mockClient
   )
 
   test(`${imgurUploadTagImageMethod} method requires ImgurHash from payload`, () => {

@@ -11,14 +11,11 @@ const imgurUpdateTagsMethod = 'biketag.images.updateTags'
 /// ***************************  Tests  *************************** ///
 
 describe(imgurUpdateTagsMethod, () => {
-  const client = MockImgur.createMockClient()
-  const bikeTagClientMock = MockBikeTag.createMockClient()
+  const mockClient = MockImgur.createMockClient()
+  const mockBikeTagClient = MockBikeTag.createMockClient()
   const updateTag = imgurModule.updateTag.bind(
-    {
-      getTags: bikeTagClientMock.getTags,
-      uploadTagImage: bikeTagClientMock.uploadTagImage,
-    },
-    client
+    mockBikeTagClient,
+    <any>mockClient
   )
 
   test(`${imgurUpdateTagsMethod} method requires ImgurHash from payload`, () => {
