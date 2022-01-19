@@ -15,14 +15,18 @@ export async function queueTag(
   client: ImgurClient,
   payload: queueTagPayload
 ): Promise<BikeTagApiResponse<Tag>> {
-  const uploadFoundImage = payload.foundImage && !payload.foundImageUrl
-  const uploadFoundImageUrl = !payload.foundImage && payload.foundImageUrl
+  const uploadFoundImage =
+    payload?.foundImage && !(payload?.foundImageUrl?.length > 0)
+  const uploadFoundImageUrl =
+    !payload?.foundImage && payload?.foundImageUrl?.length > 0
   const isFoundQueuedTag =
     (uploadFoundImage || uploadFoundImageUrl) &&
-    !payload.mysteryImageUrl &&
-    !payload.mysteryImage
-  const uploadMysteryImage = payload.mysteryImage && !payload.mysteryImageUrl
-  const uploadMysteryImageUrl = !payload.mysteryImage && payload.mysteryImageUrl
+    !(payload?.mysteryImageUrl?.length > 0) &&
+    !payload?.mysteryImage
+  const uploadMysteryImage =
+    payload?.mysteryImage && !(payload?.mysteryImageUrl?.length > 0)
+  const uploadMysteryImageUrl =
+    !payload?.mysteryImage && payload?.mysteryImageUrl?.length > 0
   const isMysteryQueuedTag =
     !(uploadFoundImage || uploadFoundImageUrl) &&
     (uploadMysteryImage || uploadMysteryImageUrl)
@@ -39,7 +43,7 @@ export async function queueTag(
   } else if (isFoundQueuedTag || isMysteryQueuedTag) {
     const queuedTagUploadPayload = await getQueueTagImagePayloadFromTagData(
       payload as queueTagImagePayload,
-      isCompleteQueuedTag
+      isMysteryQueuedTag
     )
 
     if (isValidUploadTagImagePayload(queuedTagUploadPayload)) {

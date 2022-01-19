@@ -2,23 +2,14 @@ import { ImageData } from 'imgur/lib/common/types'
 export { Payload } from 'imgur/lib/common/types'
 import { AvailableApis, Errors } from '../common/enums'
 import { Tag, Game, Player, Setting } from './schema'
+import { ImgurCredentials as ImgurApiCredentials } from 'imgur'
 
 export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>
 }[keyof T]
 
 /// ****************************  Imgur Credential Objects   *************************** ///
-export interface ImgurAccessToken {
-  accessToken: string
-  refreshToken?: string
-}
-
-export interface ImgurClientId {
-  clientId: string
-  clientSecret?: string
-}
-
-export interface ImgurCredentials extends ImgurAccessToken, ImgurClientId {
+export interface ImgurCredentials extends ImgurApiCredentials {
   hash?: string
   queuehash?: string
 }

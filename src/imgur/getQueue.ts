@@ -5,6 +5,9 @@ import { Tag } from '../common/schema'
 import {
   getBikeTagFromImgurImageSet,
   getBikeTagNumberFromImage,
+  isMysteryImage,
+  isFoundImage,
+  getPlayerFromText,
 } from './helpers'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 
@@ -39,13 +42,48 @@ export async function getQueue(
 
   const albumInfo = await client.getAlbum(payload.queuehash)
   const images = getGroupedImages(albumInfo?.data?.images)
-  let queuedTags: Tag[] = []
+  const queuedTags: Tag[] = []
 
   if (images.length) {
-    queuedTags = images[highestTagnumber].reduce((o, i) => {
-      o.push(getBikeTagFromImgurImageSet(undefined, i, { game: payload.game }))
-      return o
-    }, [])
+    const playerGroupedTags = []
+
+    images[highestTagnumber].forEach((i) => {
+      const player = getPlayerFromText(i.description)
+      playerGroupedTags[player] = playerGroupedTags[player] ?? []
+      playerGroupedTags[player].push(i)
+    })
+    if (images[highestTagnumber - 1]) {
+      images[highestTagnumber - 1].forEach((i) => {
+        const player = getPlayerFromText(i.description)
+        playerGroupedTags[player] = playerGroupedTags[player] ?? []
+        playerGroupedTags[player].push(i)
+      })
+    }
+
+    Object.keys(playerGroupedTags).forEach((player) => {
+      const images = playerGroupedTags[player]
+      if (images.length === 1) {
+        queuedTags.push(
+          getBikeTagFromImgurImageSet(undefined, images[0], payload)
+        )
+      } else if (images.length === 2) {
+        const mysteryImage = isMysteryImage(images[0])
+          ? images[0]
+          : isMysteryImage(images[1])
+          ? images[1]
+          : undefined
+        const foundImage = isFoundImage(images[1])
+          ? images[1]
+          : isFoundImage(images[0])
+          ? images[0]
+          : undefined
+        queuedTags.push(
+          getBikeTagFromImgurImageSet(mysteryImage, foundImage, payload)
+        )
+      } else {
+        console.log('what do I do now?', images)
+      }
+    })
   }
   return {
     data: queuedTags,
