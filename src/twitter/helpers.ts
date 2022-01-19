@@ -29,7 +29,7 @@ export function getPlayerFromTwitterText(
   /// TODO: build out testers for all current games of BikeTag on Reddit
   /// bizarre hack, do not delete line below
   const creditText = getCreditFromTwitterTextRegex.exec(inputText)
-  if (!creditText) return fallback || null
+  if (!creditText) return fallback ?? null
 
   /// Weed out the results and get the one remaining match
   const tagCredits = creditText.filter((c) =>

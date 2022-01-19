@@ -177,7 +177,7 @@ export function getPlayerFromText(
   fallback?: string,
   cache?: typeof TinyCache
 ): string | null {
-  if (!inputText) return fallback || null
+  if (!inputText) return fallback ?? null
 
   const cacheKey = `${cacheKeys.creditText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey)
@@ -187,7 +187,7 @@ export function getPlayerFromText(
   /// bizarre hack, do not delete line below
   // inputText.match(expressions.getCreditFromTextRegex)
   const creditText = expressions.getCreditFromTextRegex.exec(inputText)
-  if (!creditText) return fallback || null
+  if (!creditText) return fallback ?? null
 
   /// Weed out the results and get the one remaining match
   const tagCredits = creditText.filter((c) =>
@@ -254,10 +254,10 @@ export function getDiscussionUrlFromText(
   const discussionUrlText =
     expressions.getDiscussionUrlFromTextRegex.exec(inputText)
 
-  // if (!discussionUrlText) {
-  //   putCacheIfExists(cacheKey, fallback, cache)
-  //   return fallback as string
-  // }
+  if (!discussionUrlText) {
+    putCacheIfExists(cacheKey, fallback, cache)
+    return fallback as string
+  }
 
   const discussionUrl = (discussionUrlText[1] || '').trim()
   putCacheIfExists(cacheKey, discussionUrl, cache)
@@ -306,7 +306,7 @@ export function getHintFromText(
   const hintMatch = expressions.getHintFromTextRegex.exec(inputText)
 
   if (!hintMatch) {
-    fallback = fallback || null
+    fallback = fallback ?? null
     putCacheIfExists(cacheKey, fallback, cache)
     return fallback
   }
@@ -339,7 +339,7 @@ export function getGPSLocationFromText(
     expressions.getGPSLocationFromTextRegex.exec(inputText)
 
   if (!gpsLocationText) {
-    fallback = fallback || null
+    fallback = fallback ?? null
     putCacheIfExists(cacheKey, fallback, cache)
 
     return fallback
@@ -356,6 +356,23 @@ export function getBikeTagNumberFromImage(image: ImgurImage): number {
 
 export function isPlayerImage(image: ImgurImage): boolean {
   return !!getTagNumbersFromText(image.description)
+}
+
+export function isMysteryImage(image: ImgurImage): boolean {
+  const hint = getHintFromText(image.description, '')
+  const discussionUrl = getDiscussionUrlFromText(image.title, '')
+  const mysteryPlayer = getPlayerFromText(image.description, '')
+
+  return (
+    mysteryPlayer.length > 0 && (hint.length > 0 || discussionUrl.length > 0)
+  )
+}
+
+export function isFoundImage(image: ImgurImage): boolean {
+  const foundPlayer = getPlayerFromText(image.description, '')
+  const foundLocation = getFoundLocationFromText(image.description, '')
+
+  return foundPlayer.length > 0 && foundLocation.length > 0
 }
 
 export function sortImgurImagesByTagNumber(

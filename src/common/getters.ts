@@ -93,7 +93,7 @@ export const getCreditFromText = (
   /// HACK
   // inputText.match(getCreditFromTextRegex)
   const creditText = getCreditFromTextRegex.exec(inputText)
-  if (!creditText) return fallback || null
+  if (!creditText) return fallback ?? null
 
   /// Weed out the results and get the one remaining match
   const tagCredits = creditText.filter(
@@ -133,7 +133,7 @@ export const getFoundLocationFromText = (
   const foundLocationText = getFoundLocationFromTextRegex.exec(inputText)
 
   if (!foundLocationText) {
-    fallback = fallback || null
+    fallback = fallback ?? null
     putCacheIfExists(cacheKey, fallback, cache)
     return fallback
   }
@@ -156,7 +156,7 @@ export const getHintFromText = (
   if (existingParsed) return existingParsed
 
   const tagNumberText = inputText.match(getHintFromTextRegex)
-  if (!tagNumberText) return fallback || null
+  if (!tagNumberText) return fallback ?? null
 
   const tagNumbers = tagNumberText.reduce((numbers, text) => {
     const tagNumberMatches = text.match(/\d+/)
@@ -197,7 +197,7 @@ export const getGPSLocationFromText = (
   const gpsLocationText = getGPSLocationFromTextRegex.exec(inputText)
 
   if (!gpsLocationText) {
-    fallback = fallback || null
+    fallback = fallback ?? null
     putCacheIfExists(cacheKey, fallback, cache)
 
     return fallback
