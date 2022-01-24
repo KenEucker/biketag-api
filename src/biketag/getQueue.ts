@@ -11,12 +11,14 @@ export async function getQueue(
   payload: getQueuePayload
 ): Promise<BikeTagApiResponse<Tag[]>> {
   delete payload.source
-  const requestMethod = payload.cached ? client.cachedRequest : client.request
-
-  const response = await requestMethod({
+  const opts = {
     url: getApiUrl(payload.host, QUEUE_ENDPOINT, payload.game),
     data: payload,
-  })
+  }
+
+  const response = await (payload.cached
+    ? client.cachedRequest(opts)
+    : client.request(opts))
 
   const success = response.status === 200
 

@@ -1279,7 +1279,7 @@ export class BikeTagClient extends EventEmitter {
   // }
 
   /// Content powered by Sanity IO Client
-  content(opts: any = {}): SanityClient {
+  content(opts: any): SanityClient {
     const options = opts ?? this.sanityConfig
 
     if (isSanityCredentials(options)) {
@@ -1290,7 +1290,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   /// Images powered by Imgur Client
-  images(opts: any = {}): ImgurClient {
+  images(opts: any): ImgurClient {
     const options = opts ?? this.imgurConfig
     if (isImgurCredentials(options)) {
       return new ImgurClient(options)
@@ -1300,7 +1300,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   /// Discussions powered by RedditClient
-  discussions(opts: any = {}): RedditClient {
+  discussions(opts: any): RedditClient {
     const options = opts ?? this.redditConfig
     if (isRedditCredentials(options)) {
       /// TODO: Always return the context of a given game subreddit?
@@ -1311,7 +1311,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   /// Mentions powered by TwitterClient
-  mentions(opts: any = {}): TwitterClient {
+  mentions(opts: any): TwitterClient {
     const options = opts ?? this.twitterConfig
     if (isTwitterCredentials(options)) {
       return new TwitterClient(options)
