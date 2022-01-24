@@ -15,6 +15,8 @@ export async function getTags(
 ): Promise<BikeTagApiResponse<Tag[]>> {
   const tagsData: Tag[] = []
   let images: any[] = []
+  let error
+  let success = true
 
   const getGroupedImages = (ungroupedImages) => {
     const groupedImages: any[] = []
@@ -54,9 +56,13 @@ export async function getTags(
     })
   } else if (payload.hash) {
     const albumInfo = await client.getAlbum(payload.hash)
-    const albumImages = albumInfo?.data?.images || []
-
-    images = getGroupedImages(albumImages)
+    if (albumInfo.success) {
+      const albumImages = albumInfo.data.images ?? []
+      images = getGroupedImages(albumImages)
+    } else {
+      success = false
+      error = albumInfo.data
+    }
   }
 
   images.forEach((images) => {
@@ -75,7 +81,8 @@ export async function getTags(
 
   return {
     data: sortTags(tagsData, payload.sort, payload.limit),
-    success: true,
+    success,
+    error,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,
   }

@@ -72,7 +72,7 @@ export async function getPlayers(
       const playerTagsByNumberIndexes = player.tags.reduce((o, t, i) => {
         const correctedTagNumber =
           t.mysteryPlayer === player.name ? t.tagnumber : t.tagnumber + 1
-        o[correctedTagNumber] = o[correctedTagNumber] || []
+        o[correctedTagNumber] = o[correctedTagNumber] ?? []
         o[correctedTagNumber].push(i)
         return o
       }, [])
