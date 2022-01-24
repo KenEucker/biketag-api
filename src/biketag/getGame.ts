@@ -11,12 +11,16 @@ export async function getGame(
   payload: getGamePayload
 ): Promise<BikeTagApiResponse<Game[]>> {
   delete payload.source
-  const requestMethod = payload.cached ? client.cachedRequest : client.request
-
-  return requestMethod({
+  const opts = {
     url: getApiUrl(payload.host, GAMES_ENDPOINT, payload.game),
     data: payload,
-  })
+  }
+
+  const response = payload.cached
+    ? client.cachedRequest(opts)
+    : client.request(opts)
+
+  return response
     .then((response) => {
       const success = response?.status !== 200
       return {

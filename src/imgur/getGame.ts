@@ -13,35 +13,49 @@ export async function getGame(
   let game
 
   if (client) {
-    if (!payload.hash) {
+    const hashes = payload.hash ? [payload.hash] : []
+    if (!hashes.length) {
       const albumsInfo = await client.getAlbums('biketag')
       if (albumsInfo?.data) {
         for (const album of albumsInfo.data) {
-          const gameAlbumData = getGameSlugFromText(album.title)
-          if (gameAlbumData) {
-            payload.hash = album.id
+          const gameSlug = getGameSlugFromText(album.title) ?? ''
+          if (
+            gameSlug
+              .toLocaleLowerCase()
+              .indexOf(payload.slug.toLocaleLowerCase()) !== -1
+          ) {
+            hashes.push(album.id)
           }
         }
       }
     }
-    const albumInfo = await client.getAlbum(payload.hash)
-    /// TODO: save all game settings into the title of the image (serialized)
-    const games = albumInfo.data?.images?.reduce((o, i) => {
-      const gameData = getGameDataFromText(`${i.title}::${i.description}`)
-      if (gameData && gameData.name === payload.slug) {
-        gameData.mainhash = albumInfo.data.id
-        gameData.logo = i.link
-        o.push(gameData)
-      }
-      return o
-    }, [])
 
-    game = createGameObject(games.length ? games[0] : undefined)
+    for (const hash of hashes) {
+      const albumInfo = await client.getAlbum(hash)
+
+      if (albumInfo.data?.images?.length > 0) {
+        /// TODO: save all game settings into the title of the image (serialized)
+        const games = albumInfo.data.images.reduce((o, i) => {
+          const gameData = getGameDataFromText(`${i.title}::${i.description}`)
+          if (gameData && gameData.name === payload.slug) {
+            gameData.mainhash = albumInfo.data.id
+            gameData.logo = i.link
+            o.push(gameData)
+          }
+          return o
+        }, [])
+
+        if (games.length) {
+          game = createGameObject(games[0])
+          break
+        }
+      }
+    }
   }
 
   return {
     data: game,
-    success: true,
+    success: !!game,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,
   }

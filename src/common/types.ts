@@ -86,7 +86,10 @@ export interface ClientKey {
   clientToken: string
 }
 
-export type BikeTagCredentials = ClientKey & AccessToken & CommonData
+export interface BikeTagCredentials
+  extends ClientKey,
+    AccessToken,
+    CommonData {}
 
 export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
@@ -181,7 +184,6 @@ export type BikeTagGame = {
 export interface BikeTagGameState {
   [key: string]: BikeTagGame
 }
-
-export type BikeTagServerConfiguration = BikeTagConfiguration & {
+export interface BikeTagServerConfiguration extends BikeTagConfiguration {
   host: string
 }
