@@ -61,7 +61,7 @@ export function getTagNumbersFromText(
 
   /// TODO: build out testers for all current games of BikeTag on Reddit
   const tagNumberText = inputText.match(expressions.getTagNumbersFromTextRegex)
-  if (!tagNumberText) return fallback || []
+  if (!tagNumberText) return fallback ?? []
 
   const tagNumbers = tagNumberText.reduce((numbers, text) => {
     let tagNumber: any = text.match(/\d+/)
@@ -404,7 +404,7 @@ export function getImgurLinksFromText(
   const validImageURLs = ['imgur']
 
   const selfTextURLs =
-    inputText.match(expressions.getImageURLsFromTextRegex) || []
+    inputText.match(expressions.getImageURLsFromTextRegex) ?? []
   const tagImageURLs = selfTextURLs.reduce((urls, url) => {
     if (!url || !new RegExp(validImageURLs.join('|')).test(url)) return urls
 

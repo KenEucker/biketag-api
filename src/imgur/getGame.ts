@@ -11,21 +11,32 @@ export async function getGame(
   payload: getGamePayload
 ): Promise<BikeTagApiResponse<Game>> {
   let game
+  let error
+  let success = true
 
   if (client) {
     const hashes = payload.hash ? [payload.hash] : []
     if (!hashes.length) {
-      const albumsInfo = await client.getAlbums('biketag')
-      if (albumsInfo?.data) {
-        for (const album of albumsInfo.data) {
-          const gameSlug = getGameSlugFromText(album.title) ?? ''
-          if (
-            gameSlug
-              .toLocaleLowerCase()
-              .indexOf(payload.slug.toLocaleLowerCase()) !== -1
-          ) {
-            hashes.push(album.id)
+      let stillSearching = true
+      let albumPage = 0
+      while (stillSearching) {
+        const albumsInfo = await client.getAlbums('biketag', albumPage)
+        if (albumsInfo?.data) {
+          for (const album of albumsInfo.data) {
+            const gameSlug = getGameSlugFromText(album.title) ?? ''
+            if (
+              gameSlug
+                .toLocaleLowerCase()
+                .indexOf(payload.slug.toLocaleLowerCase()) !== -1
+            ) {
+              hashes.push(album.id)
+            }
           }
+        }
+        if (!hashes.length && albumsInfo.data?.length === 50) {
+          ++albumPage
+        } else {
+          stillSearching = false
         }
       }
     }
@@ -49,13 +60,17 @@ export async function getGame(
           game = createGameObject(games[0])
           break
         }
+      } else if (!albumInfo.success) {
+        error = albumInfo.data
+        success = false
       }
     }
   }
 
   return {
     data: game,
-    success: !!game,
+    success,
+    error,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,
   }
