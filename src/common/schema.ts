@@ -41,21 +41,21 @@ export interface Tag {
   slug: string
   name: string
   tagnumber: number
+  mysteryPlayer: string
   mysteryImage?: string
   mysteryImageUrl: string
   mysteryTime: number
-  game: string
-  mysteryPlayer: string
   foundPlayer: string
+  foundImage?: string
+  foundImageUrl: string
+  foundTime: number
+  foundLocation: string
+  game: string
   hint: string
   discussionUrl?: string
   mentionUrl?: string
   shareUrl?: string
-  foundTime: number
-  foundLocation: string
   gps: geopoint
-  foundImage?: string
-  foundImageUrl: string
   playerId?: string
 }
 

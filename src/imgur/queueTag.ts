@@ -1,15 +1,17 @@
 import type { ImgurClient } from 'imgur'
-import { ImgurApiResponse, Payload } from 'imgur/lib/common/types'
+import { Payload } from 'imgur/lib/common/types'
 import { createTagObject } from '../common/data'
 import {
   getQueueTagImagePayloadFromTagData,
   isValidUploadTagImagePayload,
   queueTagImagePayload,
+  getUpdateTagPayloadFromTagData,
 } from './helpers'
-import { BikeTagApiResponse, ImgurImage } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
 import { queueTagPayload } from '../common/payloads'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
+import { UpdateImagePayload } from 'imgur/lib/image'
 
 export async function queueTag(
   client: ImgurClient,
@@ -30,16 +32,32 @@ export async function queueTag(
   const isMysteryQueuedTag =
     !(uploadFoundImage || uploadFoundImageUrl) &&
     (uploadMysteryImage || uploadMysteryImageUrl)
-  const isCompleteQueuedTag =
-    (!isFoundQueuedTag && !isMysteryQueuedTag && uploadMysteryImage) ||
-    !!uploadMysteryImageUrl
+  const isCompleteQueuedTag = uploadFoundImageUrl && uploadMysteryImageUrl
   let success = false
   let status = HttpStatusCode.Ok
   let data
   let error
 
   if (isCompleteQueuedTag) {
-    return this.updateTag(payload)
+    /// Update the current tag with the new found location
+    const foundTagUpdatePayload = getUpdateTagPayloadFromTagData(payload)
+    const foundTagUpdateResponse = await client.updateImage(
+      foundTagUpdatePayload as UpdateImagePayload
+    )
+    const mysteryTagUpdatePayload = getUpdateTagPayloadFromTagData(
+      payload,
+      true
+    )
+    const mysteryTagUpdateResponse = await client.updateImage(
+      mysteryTagUpdatePayload as UpdateImagePayload
+    )
+    if (foundTagUpdateResponse.success && mysteryTagUpdateResponse.success) {
+      data = payload
+      success = true
+    } else {
+      success = false
+      error = `found: ${foundTagUpdateResponse.data}, mystery: ${mysteryTagUpdateResponse.data}`
+    }
   } else if (isFoundQueuedTag || isMysteryQueuedTag) {
     const queuedTagUploadPayload = await getQueueTagImagePayloadFromTagData(
       payload as queueTagImagePayload,
@@ -47,14 +65,9 @@ export async function queueTag(
     )
 
     if (isValidUploadTagImagePayload(queuedTagUploadPayload)) {
-      const queuedTagImageUpload = (await client.upload(
+      const queuedTagImageUploadResponse = await client.upload(
         queuedTagUploadPayload as Payload
-      )) as ImgurApiResponse<ImgurImage>[]
-
-      const queuedTagImageUploadResponse: ImgurApiResponse<ImgurImage> =
-        queuedTagImageUpload.length
-          ? queuedTagImageUpload[0]
-          : (queuedTagImageUpload as unknown as ImgurApiResponse<ImgurImage>)
+      )
       if (queuedTagImageUploadResponse.success) {
         const queuedTagImage = queuedTagImageUploadResponse.data
         if (queuedTagImage) {

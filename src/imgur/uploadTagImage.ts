@@ -12,62 +12,41 @@ import { HttpStatusCode, AvailableApis } from '../common/enums'
 
 export async function uploadTagImage(
   client: ImgurClient,
-  payload: UploadTagImagePayload | UploadTagImagePayload[]
-): Promise<BikeTagApiResponse<Tag> | BikeTagApiResponse<Tag>[]> {
-  const promises: Promise<BikeTagApiResponse<Tag>>[] = []
-  const payloads = Array.isArray(payload) ? payload : [payload]
+  payload: UploadTagImagePayload
+): Promise<BikeTagApiResponse<Tag>> {
+  let success = true
+  const mysteryImageUploadPayload =
+    !payload.mysteryImageUrl && payload.mysteryImage
+      ? getUploadTagImagePayloadFromTagData(payload, true)
+      : null
+  const foundImageUrlUploadPayload =
+    !payload.foundImageUrl && payload.foundImage
+      ? getUploadTagImagePayloadFromTagData(payload)
+      : null
 
-  const createUploadPromise = (
-    utp: UploadTagImagePayload
-  ): Promise<BikeTagApiResponse<Tag>> => {
-    let success = true
-    const mysteryImageUploadPayload =
-      !utp.mysteryImageUrl && utp.mysteryImage
-        ? getUploadTagImagePayloadFromTagData(utp, true)
-        : null
-    const foundImageUrlUploadPayload =
-      !utp.foundImageUrl && utp.foundImage
-        ? getUploadTagImagePayloadFromTagData(utp)
-        : null
+  return new Promise(async (resolve) => {
+    if (isValidUploadTagImagePayload(foundImageUrlUploadPayload)) {
+      const foundImageUpload = (await client.upload(
+        foundImageUrlUploadPayload as Payload
+      )) as ImgurApiResponse<ImgurImage>
+      payload.foundImageUrl = foundImageUpload.data?.link
+      console.log({ foundImageUpload, success })
+      success = success && foundImageUpload.success
+    }
+    if (isValidUploadTagImagePayload(mysteryImageUploadPayload)) {
+      const mysteryImageUpload = (await client.upload(
+        mysteryImageUploadPayload as Payload
+      )) as ImgurApiResponse<ImgurImage>
+      payload.mysteryImageUrl = mysteryImageUpload.data?.link
+      console.log({ mysteryImageUpload, success })
+      success = success && mysteryImageUpload.success
+    }
 
-    return new Promise(async (resolve) => {
-      if (isValidUploadTagImagePayload(mysteryImageUploadPayload)) {
-        const mysteryImageUpload = (await client.upload(
-          mysteryImageUploadPayload as Payload
-        )) as ImgurApiResponse<ImgurImage>
-        utp.mysteryImageUrl = mysteryImageUpload.data?.link
-        success = success && mysteryImageUpload.success
-      }
-
-      if (isValidUploadTagImagePayload(foundImageUrlUploadPayload)) {
-        const foundImageUpload = (await client.upload(
-          foundImageUrlUploadPayload as Payload
-        )) as ImgurApiResponse<ImgurImage>
-        utp.foundImageUrl = foundImageUpload.data?.link
-        success = success && foundImageUpload.success
-      }
-
-      resolve({
-        data: createTagObject(utp),
-        success,
-        source: AvailableApis[AvailableApis.imgur],
-        status: HttpStatusCode.Ok,
-      })
+    resolve({
+      data: createTagObject(payload),
+      success,
+      source: AvailableApis[AvailableApis.imgur],
+      status: HttpStatusCode.Ok,
     })
-  }
-
-  payloads.map((p) => promises.push(createUploadPromise(p)))
-
-  return Promise.all(promises)
-    .then((results) => {
-      return results
-    })
-    .catch((e) => {
-      return {
-        data: e.message,
-        success: false,
-        source: AvailableApis[AvailableApis.imgur],
-        status: HttpStatusCode.Ok,
-      }
-    })
+  })
 }

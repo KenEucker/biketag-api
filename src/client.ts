@@ -197,12 +197,10 @@ export class BikeTagClient extends EventEmitter {
       case DataTypes.game:
         options.game = options.game ?? options.slug ?? this.biketagConfig?.game
         options.slug = options.slug ?? options.game?.toLowerCase() ?? undefined
-        // options.slugs = options.slug ? [options.slug] : []
         break
 
       case DataTypes.player:
         options.game = options.game ? options.game : this.biketagConfig?.game
-        // options.slugs = options.slug ? [options.slug] : []
         break
 
       case DataTypes.tag:
@@ -219,9 +217,6 @@ export class BikeTagClient extends EventEmitter {
             options.slug = 'current'
           }
         }
-        // } else if (options.slug) {
-        //   options.slugs = [options.slug]
-        // }
 
         if (!options.tagnumber) {
           if (options.tagnumbers?.length === 1) {
@@ -232,9 +227,6 @@ export class BikeTagClient extends EventEmitter {
             )
           }
         }
-        // } else if (!options.tagnumbers?.length) {
-        //   options.tagnumbers = [options.tagnumber]
-        // }
         break
       case DataTypes.queue:
         options.game = options.game ? options.game : this.biketagConfig?.game
@@ -383,12 +375,16 @@ export class BikeTagClient extends EventEmitter {
       | BikeTagClient
       | SanityClient
       | TwitterClient,
-    dataType: DataTypes = DataTypes.tag
+    dataType: DataTypes = DataTypes.tag,
+    binding?: any
   ): any {
-    return (opts) => {
-      return method(
+    const getPayload = this.getInitialPayload.bind(this)
+    const getOptions = this.getDefaultOptions.bind(this)
+
+    return function (opts) {
+      return method.bind(binding)(
         client,
-        this.getDefaultOptions(this.getInitialPayload(opts), dataType)
+        getOptions(getPayload(opts), dataType)
       )
     }
   }
@@ -702,6 +698,7 @@ export class BikeTagClient extends EventEmitter {
     const clientMethod = api.queueTag
 
     /// If the client adapter implements the method
+
     if (clientMethod) {
       return clientMethod(client, options).catch((e) => {
         return {
@@ -868,11 +865,9 @@ export class BikeTagClient extends EventEmitter {
 
   /// TODO: change to generic update that accepts any data type
   updateTag(
-    payload:
-      | RequireAtLeastOne<updateTagPayload>
-      | RequireAtLeastOne<updateTagPayload>[],
+    payload: RequireAtLeastOne<updateTagPayload>,
     opts?: RequireAtLeastOne<Credentials>
-  ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
+  ): Promise<BikeTagApiResponse<boolean>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
       opts
@@ -908,11 +903,9 @@ export class BikeTagClient extends EventEmitter {
 
   /// TODO: change to generic import that accepts any data type
   importTag(
-    payload:
-      | RequireAtLeastOne<importTagPayload>
-      | RequireAtLeastOne<importTagPayload>[],
+    payload: RequireAtLeastOne<importTagPayload>,
     opts?: RequireAtLeastOne<Credentials>
-  ): Promise<BikeTagApiResponse<Tag[]>> {
+  ): Promise<BikeTagApiResponse<Tag>> {
     const { source } = this.getClientAdapter(payload, opts)
     return Promise.reject(`updateTag ${Errors.NotImplemented} ${source}`)
   }
