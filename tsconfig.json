@@ -1,6 +1,6 @@
 {
   "include": ["src"],
-  "exclude": ["src/coverage/", "test/"],
+  "exclude": ["src/coverage/", "test/", "src/server.ts"],
 
   "compilerOptions": {
     "experimentalDecorators": true,
