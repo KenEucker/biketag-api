@@ -180,12 +180,12 @@ export class BikeTagServer extends BikeTagClient {
     // @ts-ignore
     @Path('game') game?: string,
     opts?: Credentials
-  ): Promise<BikeTagApiResponse<Tag[]>> {
+  ): Promise<BikeTagApiResponse<Tag>> {
     payload.game = game ?? payload.game
     return this.importTag(
       payload,
       opts as unknown as RequireAtLeastOne<Credentials>
-    ) as Promise<BikeTagApiResponse<Tag[]>>
+    ) as Promise<BikeTagApiResponse<Tag>>
   }
 
   @Delete('tags/{game}')
