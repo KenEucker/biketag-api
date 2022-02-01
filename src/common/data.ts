@@ -113,6 +113,7 @@ export const createAmbassadorObject = (
   ambassadorData: any = {}
 ): Ambassador => {
   return {
+    id: ambassadorData._id ?? ambassadorData.id ?? '',
     address1: ambassadorData.address1 ?? '',
     address2: ambassadorData.address2 ?? '',
     city: ambassadorData.city ?? '',
@@ -126,7 +127,7 @@ export const createAmbassadorObject = (
   } as Ambassador
 }
 
-export const ambassadorDataFields = Object.keys(createPlayerObject())
+export const ambassadorDataFields = Object.keys(createAmbassadorObject())
 export const ambassadorDataReferenceFields = ['player']
 
 export const createSettingObject = (settingData: any = {}): Setting => {

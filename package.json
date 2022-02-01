@@ -17,6 +17,10 @@
   "engines": {
     "node": ">=16"
   },
+  "exports": {
+    "browser": "./biketag.js",
+    "node": "./biketag.node.js"
+  },
   "funding": {
     "type": "patreon",
     "url": "https://www.patreon.com/biketag"
