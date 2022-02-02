@@ -71,6 +71,7 @@ export const createGameObject = (gameData: any = {}): Game => {
     settings: gameData.settings ?? [],
     boundary: gameData.boundary ?? {},
     mainhash: gameData.mainhash ?? '',
+    archivehash: gameData.archivehash ?? '',
     queuehash: gameData.queuehash ?? '',
     subreddit: gameData.subreddit ?? '',
     twitter: gameData.twitter ?? '',

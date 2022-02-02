@@ -71,6 +71,7 @@ export interface Game {
   settings: settingsArray
   boundary: boundary
   mainhash?: string
+  archivehash?: string
   queuehash?: string
   subreddit?: string
   twitter?: string

@@ -15,11 +15,6 @@ export type getTagsPayload = {
   tagnumbers: number[]
 } & CommonData
 
-export type deleteTagPayload = {
-  slug?: string
-  tagnumber?: string
-} & CommonData
-
 export type deleteTagsPayload = {
   slugs?: string[]
   tagnumbers: number[]
@@ -39,8 +34,17 @@ export type getTagPayload = {
 } & CommonData
 
 export type updateTagPayload = {
-  tag: RequireAtLeastOne<Tag>
-} & CommonData
+  hash?: string
+} & Partial<Tag>
+
+export type deleteTagPayload = {
+  hash?: string
+} & Partial<Tag>
+
+export type archiveTagPayload = {
+  archivehash?: string
+  playerId?: string
+} & Partial<Tag>
 
 export type uploadTagImagePayload = {
   tagnumber: number
@@ -118,7 +122,6 @@ export type getQueuePayload = {
 } & CommonData
 
 export type queueTagPayload = {
-  tag: Tag
   queuehash?: string
   playerId?: string
 } & Partial<Tag>

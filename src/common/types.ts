@@ -12,6 +12,7 @@ export type RequireAtLeastOne<T> = {
 export interface ImgurCredentials extends ImgurApiCredentials {
   hash?: string
   queuehash?: string
+  archivehash?: string
 }
 /// ****************************  Twitter Credential Objects   ************************* ///
 export interface TwitterAccessToken {
@@ -114,6 +115,7 @@ export type ApiOptions = RequireAtLeastOne<{
   hash?: string
   host?: string
   queuehash?: string
+  archivehash?: string
   slugs?: string[]
   fields?: string[]
   slug?: string

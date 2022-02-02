@@ -11,11 +11,8 @@ export async function updateTag(
   client: ImgurClient,
   payload: updateTagPayload
 ): Promise<BikeTagApiResponse<Tag>> {
-  const imgurMysteryImagePayload = getUpdateTagPayloadFromTagData(
-    payload.tag,
-    true
-  )
-  const imgurFoundImagePayload = getUpdateTagPayloadFromTagData(payload.tag)
+  const imgurMysteryImagePayload = getUpdateTagPayloadFromTagData(payload, true)
+  const imgurFoundImagePayload = getUpdateTagPayloadFromTagData(payload)
 
   return new Promise(async (resolve) => {
     let success = true
@@ -24,7 +21,7 @@ export async function updateTag(
       isValidUpdatePayload(imgurMysteryImagePayload) &&
       isValidUpdatePayload(imgurFoundImagePayload)
     ) {
-      const tagExistsForBikeTagAlbum = await this.getTags(payload.tag.tagnumber)
+      const tagExistsForBikeTagAlbum = await this.getTags(payload.tagnumber)
       const tagExists =
         tagExistsForBikeTagAlbum.success && tagExistsForBikeTagAlbum.data.length
       const existingTag = tagExists ? tagExistsForBikeTagAlbum.data[0] : null
@@ -34,16 +31,16 @@ export async function updateTag(
           imageHash: getImageHashFromText(existingTag.mysteryImageUrl),
         })) as ImgurApiResponse<boolean>
 
-        success = mysteryImageUpdated.data
+        success = mysteryImageUpdated.success
       } else {
         const mysteryImageUploaded = await this.uploadTagImage({
           ...imgurMysteryImagePayload,
-          mysteryImage: payload.tag.mysteryImageUrl,
+          mysteryImage: payload.mysteryImageUrl,
           mysteryImageUrl: undefined,
+          hash: imgurMysteryImagePayload.hash ?? (payload as any).hash,
         })
-        if (mysteryImageUploaded?.length && mysteryImageUploaded[0].success) {
-          payload.tag.mysteryImageUrl =
-            mysteryImageUploaded[0].data.mysteryImageUrl
+        if (mysteryImageUploaded.success) {
+          payload.mysteryImageUrl = mysteryImageUploaded.data.mysteryImageUrl
         } else {
           success = false
         }
@@ -54,15 +51,16 @@ export async function updateTag(
           ...imgurFoundImagePayload,
           imageHash: getImageHashFromText(existingTag.foundImageUrl),
         })) as ImgurApiResponse<boolean>
-        success = success && foundImageUpdated.data
+        success = success && foundImageUpdated.success
       } else {
         const foundImageUploaded = await this.uploadTagImage({
           ...imgurFoundImagePayload,
-          foundImage: payload.tag.foundImageUrl,
+          foundImage: payload.foundImageUrl,
           foundImageUrl: undefined,
+          hash: imgurFoundImagePayload.hash ?? (payload as any).hash,
         })
-        if (foundImageUploaded?.length && foundImageUploaded[0].success) {
-          payload.tag.foundImageUrl = foundImageUploaded[0].data.foundImageUrl
+        if (foundImageUploaded.success) {
+          payload.foundImageUrl = foundImageUploaded.data.foundImageUrl
         } else {
           success = false
         }
