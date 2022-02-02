@@ -268,6 +268,7 @@ export const createImgurCredentials = (
   return {
     hash: credentials.hash ?? defaults.hash,
     queuehash: credentials.queuehash ?? defaults.queuehash,
+    archivehash: credentials.archivehash ?? defaults.archivehash,
     clientId: credentials.clientId?.length
       ? credentials.clientId
       : defaults.clientId,

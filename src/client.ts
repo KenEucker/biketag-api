@@ -35,6 +35,7 @@ import {
   getSettingsPayload,
   getQueuePayload,
   queueTagPayload,
+  archiveTagPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -231,6 +232,8 @@ export class BikeTagClient extends EventEmitter {
       case DataTypes.queue:
         options.game = options.game ? options.game : this.biketagConfig?.game
         options.queuehash = options.queuehash ?? this.imgurConfig?.queuehash
+        options.archivehash =
+          options.archivehash ?? this.imgurConfig?.archivehash
         break
     }
 
@@ -242,6 +245,9 @@ export class BikeTagClient extends EventEmitter {
     switch (options.source) {
       case AvailableApis.imgur:
         options.hash = options.hash ?? this.imgurConfig.hash
+        options.queuehash = options.queuehash ?? this.imgurConfig.queuehash
+        options.archivehash =
+          options.archivehash ?? this.imgurConfig.archivehash
         break
       case AvailableApis.reddit:
         options.subreddit = options.subreddit ?? this.redditConfig.subreddit
@@ -603,6 +609,7 @@ export class BikeTagClient extends EventEmitter {
                 imgur: {
                   hash: retrievedGameResponse.data.mainhash,
                   queuehash: retrievedGameResponse.data.queuehash,
+                  archivehash: retrievedGameResponse.data.archivehash,
                 },
                 reddit: {
                   subreddit: retrievedGameResponse.data.subreddit,
@@ -863,7 +870,6 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  /// TODO: change to generic update that accepts any data type
   updateTag(
     payload: RequireAtLeastOne<updateTagPayload>,
     opts?: RequireAtLeastOne<Credentials>
@@ -901,7 +907,31 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  /// TODO: change to generic import that accepts any data type
+  archiveTag(
+    payload: RequireAtLeastOne<archiveTagPayload>,
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<boolean>> {
+    const { client, options, api, source } = this.getClientAdapter(
+      payload,
+      opts
+    )
+    const clientMethod = api.archiveTag
+
+    if (clientMethod) {
+      return clientMethod(client, options).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e.code ?? e,
+          success: false,
+          source,
+        })
+      })
+    } else {
+      return Promise.reject(`archiveTag ${Errors.NotImplemented} ${source}`)
+    }
+  }
+
   importTag(
     payload: RequireAtLeastOne<importTagPayload>,
     opts?: RequireAtLeastOne<Credentials>
@@ -910,7 +940,6 @@ export class BikeTagClient extends EventEmitter {
     return Promise.reject(`updateTag ${Errors.NotImplemented} ${source}`)
   }
 
-  /// TODO: change to generic delete that accepts any data type
   deleteTag(
     payload: RequireAtLeastOne<deleteTagPayload> | number,
     opts?: RequireAtLeastOne<Credentials>
@@ -924,9 +953,9 @@ export class BikeTagClient extends EventEmitter {
     if (clientMethod) {
       switch (options.source) {
         case AvailableApis.imgur:
-          clientMethod = {
+          clientMethod = clientMethod.bind({
             getTags: this.getPassthroughApiMethod(api.getTags, client),
-          }
+          })
           break
       }
 
@@ -944,7 +973,6 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
-  /// TODO: change to generic delete that accepts any data type
   deleteTags(
     payload: RequireAtLeastOne<deleteTagsPayload> | number[],
     opts?: RequireAtLeastOne<Credentials>

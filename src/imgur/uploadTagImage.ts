@@ -30,7 +30,6 @@ export async function uploadTagImage(
         foundImageUrlUploadPayload as Payload
       )) as ImgurApiResponse<ImgurImage>
       payload.foundImageUrl = foundImageUpload.data?.link
-      console.log({ foundImageUpload, success })
       success = success && foundImageUpload.success
     }
     if (isValidUploadTagImagePayload(mysteryImageUploadPayload)) {
@@ -38,7 +37,6 @@ export async function uploadTagImage(
         mysteryImageUploadPayload as Payload
       )) as ImgurApiResponse<ImgurImage>
       payload.mysteryImageUrl = mysteryImageUpload.data?.link
-      console.log({ mysteryImageUpload, success })
       success = success && mysteryImageUpload.success
     }
 

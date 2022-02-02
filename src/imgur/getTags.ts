@@ -32,7 +32,7 @@ export async function getTags(
     return groupedImages
   }
 
-  if (payload.tagnumbers?.length && payload.hash) {
+  if (payload.tagnumbers?.length) {
     const albumInfo = await (client.getAlbum(payload.hash) as any)
     const imagesData: Tag[] = albumInfo.data?.images?.filter(
       (image: any) =>
@@ -54,7 +54,7 @@ export async function getTags(
     await Promise.all(imagePromises).then((allImages: any[]) => {
       images = getGroupedImages(allImages)
     })
-  } else if (payload.hash) {
+  } else {
     const albumInfo = await client.getAlbum(payload.hash)
     if (albumInfo.success) {
       const albumImages = albumInfo.data.images ?? []

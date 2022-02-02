@@ -19,6 +19,7 @@ import {
   ambassadorDataReferenceFields,
   createAmbassadorObject,
   settingDataFields,
+  ambassadorDataFields,
 } from '../common/data'
 import { DataTypes } from '../common/enums'
 
@@ -271,6 +272,12 @@ export function constructSanityFieldsQuery(
       referenceFields = playerDataReferenceFields
       fields = fields.length ? fields : playerDataFields
       arrayFields = playerDataArrayFields
+      break
+
+    case DataTypes.ambassador:
+      referenceFields = ambassadorDataReferenceFields
+      fields = fields.length ? fields : ambassadorDataFields
+      fields.push('_id')
       break
 
     case DataTypes.setting:

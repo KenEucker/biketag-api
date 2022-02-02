@@ -13,7 +13,7 @@ import {
   getSanityImageUrlHashFromTextRegex,
 } from '../common/expressions'
 import { getCacheIfExists, putCacheIfExists } from '../common/methods'
-import { cacheKeys } from '../common/data'
+import { cacheKeys, createTagObject } from '../common/data'
 import TinyCache from 'tinycache'
 import { Tag } from './schema'
 
@@ -378,10 +378,10 @@ export const getDiscussionUrlFromText = (
 }
 
 export const getImageHashFromText = (
-  inputText: string,
+  inputText?: string,
   cache?: typeof TinyCache
 ): string => {
-  if (!inputText.length) return ''
+  if (!inputText?.length) return ''
 
   const cacheKey = `${cacheKeys.imageHashText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)
@@ -472,8 +472,8 @@ export const getImgurMysteryDescriptionFromBikeTagData = (
   cache?: typeof TinyCache
 ): string =>
   `#${tag.tagnumber} tag ${
-    includeHint && tag.hint ? `(hint: ${tag.hint}` : ''
-  }${includeCredit ? `) by ${tag.mysteryPlayer}` : ''}`
+    includeHint && tag.hint ? `(hint: ${tag.hint})` : ''
+  }${includeCredit ? ` by ${tag.mysteryPlayer}` : ''}`
 
 export const getBikeTagDescriptionFromData = (data: any): string => {
   return `#${data.currentTagNumber} tag ${
@@ -495,4 +495,38 @@ export const getBikeTagProofDescriptionFromData = (data: any): string => {
 
 export const getBikeTagProofTitleFromData = (data: any): string => {
   return `(${data.gps ? data.gps : ''})`
+}
+
+export const getOnlyMysteryTagFromTagData = (tagData: Tag): Tag => {
+  return createTagObject({
+    mysteryImageUrl: tagData.mysteryImageUrl,
+    mysteryImage: tagData.mysteryImage,
+    mysteryPlayer: tagData.mysteryPlayer,
+    playerId: tagData.mysteryImageUrl,
+    mysteryTime: tagData.mysteryTime,
+    hint: tagData.hint,
+    game: tagData.game,
+    gps: tagData.gps,
+    tagnumber: tagData.tagnumber,
+    name: tagData.name,
+    slug: tagData.slug,
+  })
+}
+
+export const getOnlyFoundTagFromTagData = (tagData: Tag): Tag => {
+  return createTagObject({
+    foundImageUrl: tagData.foundImageUrl,
+    foundImage: tagData.foundImage,
+    foundPlayer: tagData.foundPlayer,
+    foundTime: tagData.foundTime,
+    hint: tagData.hint,
+    game: tagData.game,
+    gps: tagData.gps,
+    tagnumber: tagData.tagnumber,
+    name: tagData.name,
+    slug: tagData.slug,
+    discussionUrl: tagData.discussionUrl,
+    mentionUrl: tagData.mentionUrl,
+    shareUrl: tagData.shareUrl,
+  })
 }

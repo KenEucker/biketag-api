@@ -25,6 +25,7 @@ export type Player = {
 }
 
 export type Ambassador = {
+  id: string
   slug: string
   name: string
   address1: string
@@ -66,10 +67,11 @@ export interface settingsArray {
 export interface Game {
   slug: string
   name: string
-  ambassadors: Ambassador[]
+  ambassadors: string[]
   settings: settingsArray
   boundary: boundary
   mainhash?: string
+  archivehash?: string
   queuehash?: string
   subreddit?: string
   twitter?: string
