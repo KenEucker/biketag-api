@@ -56,6 +56,11 @@ import {
   isTwitterCredentials,
   isTwitterApiReady,
 } from './common/methods'
+import {
+  createGameObject,
+  createTagObject,
+  createPlayerObject,
+} from './common/data'
 
 import * as BikeTagExpressions from './common/expressions'
 import * as BikeTagGetters from './common/getters'
@@ -80,6 +85,9 @@ export const USERAGENT =
 export class BikeTagClient extends EventEmitter {
   static expressions = BikeTagExpressions
   static getters = BikeTagGetters
+  static createGameObject = createGameObject
+  static createTagObject = createTagObject
+  static createPlayerObject = createPlayerObject
 
   protected fetcher: AxiosInstance
   protected plainFetcher: AxiosInstance

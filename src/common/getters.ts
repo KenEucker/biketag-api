@@ -498,35 +498,39 @@ export const getBikeTagProofTitleFromData = (data: any): string => {
 }
 
 export const getOnlyMysteryTagFromTagData = (tagData: Tag): Tag => {
-  return createTagObject({
+  const onlyMysteryTagFields = {
+    playerId: tagData.playerId,
+    game: tagData.game,
+    tagnumber: tagData.tagnumber,
+    name: tagData.name,
+    slug: tagData.slug,
     mysteryImageUrl: tagData.mysteryImageUrl,
     mysteryImage: tagData.mysteryImage,
     mysteryPlayer: tagData.mysteryPlayer,
-    playerId: tagData.mysteryImageUrl,
     mysteryTime: tagData.mysteryTime,
     hint: tagData.hint,
-    game: tagData.game,
     gps: tagData.gps,
-    tagnumber: tagData.tagnumber,
-    name: tagData.name,
-    slug: tagData.slug,
-  })
-}
-
-export const getOnlyFoundTagFromTagData = (tagData: Tag): Tag => {
-  return createTagObject({
-    foundImageUrl: tagData.foundImageUrl,
-    foundImage: tagData.foundImage,
-    foundPlayer: tagData.foundPlayer,
-    foundTime: tagData.foundTime,
-    hint: tagData.hint,
-    game: tagData.game,
-    gps: tagData.gps,
-    tagnumber: tagData.tagnumber,
-    name: tagData.name,
-    slug: tagData.slug,
     discussionUrl: tagData.discussionUrl,
     mentionUrl: tagData.mentionUrl,
     shareUrl: tagData.shareUrl,
-  })
+  }
+
+  return createTagObject(onlyMysteryTagFields)
+}
+
+export const getOnlyFoundTagFromTagData = (tagData: Tag): Tag => {
+  const onlyFoundTagFields = {
+    playerId: tagData.playerId,
+    game: tagData.game,
+    tagnumber: tagData.tagnumber,
+    name: tagData.name,
+    slug: tagData.slug,
+    foundImageUrl: tagData.foundImageUrl,
+    foundImage: tagData.foundImage,
+    foundPlayer: tagData.foundPlayer,
+    foundLocation: tagData.foundLocation,
+    foundTime: tagData.foundTime,
+  }
+
+  return createTagObject(onlyFoundTagFields)
 }
