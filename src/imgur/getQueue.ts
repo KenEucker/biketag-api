@@ -61,27 +61,27 @@ export async function getQueue(
     }
 
     Object.keys(playerGroupedTags).forEach((player) => {
-      const images = playerGroupedTags[player]
-      if (images.length === 1) {
+      const groupedImages = playerGroupedTags[player]
+      if (groupedImages.length === 1) {
         queuedTags.push(
-          getBikeTagFromImgurImageSet(undefined, images[0], payload)
+          getBikeTagFromImgurImageSet(undefined, groupedImages[0], payload)
         )
-      } else if (images.length === 2) {
-        const mysteryImage = isMysteryImage(images[0])
-          ? images[0]
-          : isMysteryImage(images[1])
-          ? images[1]
+      } else if (groupedImages.length === 2) {
+        const mysteryImage = isMysteryImage(groupedImages[0])
+          ? groupedImages[0]
+          : isMysteryImage(groupedImages[1])
+          ? groupedImages[1]
           : undefined
-        const foundImage = isFoundImage(images[1])
-          ? images[1]
-          : isFoundImage(images[0])
-          ? images[0]
+        const foundImage = isFoundImage(groupedImages[1])
+          ? groupedImages[1]
+          : isFoundImage(groupedImages[0])
+          ? groupedImages[0]
           : undefined
         queuedTags.push(
           getBikeTagFromImgurImageSet(mysteryImage, foundImage, payload)
         )
       } else {
-        console.log('what do I do now?', images)
+        console.log('what do I do now?', groupedImages)
       }
     })
   }

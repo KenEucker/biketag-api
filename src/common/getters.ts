@@ -514,7 +514,6 @@ export const getOnlyMysteryTagFromTagData = (tagData: Tag): Tag => {
     mentionUrl: tagData.mentionUrl,
     shareUrl: tagData.shareUrl,
   }
-  console.log({ onlyMysteryTagFields })
 
   return createTagObject(onlyMysteryTagFields)
 }
@@ -532,7 +531,6 @@ export const getOnlyFoundTagFromTagData = (tagData: Tag): Tag => {
     foundLocation: tagData.foundLocation,
     foundTime: tagData.foundTime,
   }
-  console.log({ onlyFoundTagFields })
 
   return createTagObject(onlyFoundTagFields)
 }

@@ -442,8 +442,8 @@ export function getBikeTagFromImgurImageSet(
     : (getTagNumbersFromText(foundImageDescription)[0] as number)
   const name = constructTagNumberSlug(tagnumber, game)
   const playerId =
-    getPlayerIdFromText(foundImageTitle) ??
-    getPlayerIdFromText(mysteryImageTitle)
+    getPlayerIdFromText(mysteryImageTitle) ??
+    getPlayerIdFromText(foundImageTitle)
   const discussionUrl = getDiscussionUrlFromText(mysteryImageTitle)
   const foundLocation = getFoundLocationFromText(foundImageDescription)
   const mysteryPlayer = getPlayerFromText(mysteryImageDescription)
