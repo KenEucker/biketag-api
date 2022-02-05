@@ -2,7 +2,6 @@ import * as expressions from '../common/expressions'
 import { ImgurImage } from '../common/types'
 import { Game, Player, Tag } from '../common/schema'
 import {
-  getPlayerFromText,
   getImageHashFromText,
   getImgurFoundDescriptionFromBikeTagData,
   getImgurFoundImageHashFromBikeTagData,
