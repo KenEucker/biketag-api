@@ -2,7 +2,7 @@ import { createTagObject } from '../common/data'
 import { Tag } from '../common/schema'
 import { Submission } from 'snoowrap/dist/snoowrap.d'
 import {
-  getCreditFromText,
+  getPlayerFromText,
   getFoundLocationFromText,
   getGPSLocationFromText,
   getHintFromText,
@@ -70,7 +70,7 @@ export async function getBikeTagsFromRedditPosts(
         let hint = getHintFromText(postBody, '')
         let foundAt = getFoundLocationFromText(postBody, '')
         let gps = getGPSLocationFromText(postBody, undefined)
-        let credit = getCreditFromText(postBody, `u/${p.author.name}`)
+        let player = getPlayerFromText(postBody, `u/${p.author.name}`)
         let timestamp = p.created_utc
 
         let directImageLinksNumbers = tagNumbers
@@ -117,7 +117,7 @@ export async function getBikeTagsFromRedditPosts(
                   //   timestamp,
                   //   hint,
                   //   foundAt,
-                  //   credit,
+                  //   player,
                   //   gps,
                   // })
 
@@ -125,9 +125,9 @@ export async function getBikeTagsFromRedditPosts(
                   timestamp = image.datetime ?? timestamp
                   hint = hint ?? getHintFromText(imageText, '')
                   foundAt = foundAt ?? getFoundLocationFromText(postBody, '')
-                  credit = credit ?? getCreditFromText(postBody, '')
+                  player = player ?? getPlayerFromText(postBody, '')
                   gps = gps ?? getGPSLocationFromText(postBody, undefined)
-                  credit = credit ?? image.account_url
+                  player = player ?? image.account_url
                 }
               }
             } else if (imageUrlIsRedditGallery) {
@@ -162,8 +162,8 @@ export async function getBikeTagsFromRedditPosts(
               removeStringFromFoundAt(`#${s}`)
             )
 
-            if (credit) {
-              removeStringFromFoundAt(`(@|#|u/)?${credit}`)
+            if (player) {
+              removeStringFromFoundAt(`(@|#|u/)?${player}`)
             }
             if (gps) {
               removeStringFromFoundAt(
@@ -208,7 +208,7 @@ export async function getBikeTagsFromRedditPosts(
             timestamp,
             tagNumbers: directImageLinksNumbers,
             tagImageURLs: directImageLinks,
-            credit,
+            player,
             gps,
             foundAt,
             hint,
@@ -245,7 +245,7 @@ export async function getBikeTagInformationFromRedditData(
   const proofTagUrlIndex = redditPostData.tagNumbers.indexOf(
     previousMysteryTagNumber
   )
-  const proofTagURL =
+  const foundImageUrl =
     proofTagUrlIndex !== -1
       ? redditPostData.tagImageURLs[proofTagUrlIndex]
       : null
@@ -253,14 +253,14 @@ export async function getBikeTagInformationFromRedditData(
 
   const tagData: Partial<Tag> = {
     foundLocation: redditPostData.foundAt,
-    mysteryPlayer: redditPostData.credit,
+    mysteryPlayer: redditPostData.player,
     hint: redditPostData.hint,
     game: redditPostData.game ?? game,
     gps,
     discussionUrl: `https://redd.it/${redditPostData.id}`,
     tagnumber: mysteryTagNumber,
     mysteryImageUrl: currentTagURL,
-    foundImageUrl: proofTagURL,
+    foundImageUrl: foundImageUrl,
   }
 
   return createTagObject(tagData)

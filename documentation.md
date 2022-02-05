@@ -231,7 +231,7 @@ const biketagPortland = await client.getGame('portland')
 | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `getTagnumberFromSlug`                        | parses a slug for a tag number based on existing BikeTag slugs. (uses `getTagnumberFromSlugRegex`)                         |
 | `getTagNumbersFromText`                       | parses text for tag numbers on existing BikeTag posts. (uses `getTagNumbersFromTextRegex`)                                 |
-| `getCreditFromText`                           | parses text for a player credit based on existing BikeTag posts. (uses `getCreditFromTextRegex`)                           |
+| `getPlayerFromText`                           | parses text for a player name based on existing BikeTag posts. (uses `getPlayerFromTextRegex`)                           |
 | `getFoundLocationFromText`                    | parses text for a found location based on existing BikeTag posts. (uses `getFoundLocationFromTextRegex`)                   |
 | `getHintFromText`                             | parses text for a hint based on existing BikeTag posts. (uses `getHintFromTextRegex`)                                      |
 | `getGPSLocationFromText`                      | parses text for GPS coordinates. (uses `getGPSLocationFromTextRegex`)                                                      |
@@ -253,7 +253,7 @@ const biketagPortland = await client.getGame('portland')
 |   expression                          | Description                                                                                                                         |
 | --------------------------------------| ----------------------------------------------------------------------------------------------------------------------------------- |
 | `getTagNumbersFromTextRegex`          | Searches a string for numbers associated with BikeTag posts.                                                                        |
-| `getCreditFromTextRegex`              | Searches a string for player credits associated with BikeTag posts.                                                                 |
+| `getPlayerFromTextRegex`              | Searches a string for player names associated with BikeTag posts.                                                                 |
 | `getFoundLocationFromTextRegex`       | Searches a string for "found at ()" and parses out the innards of that substring.                                                   |
 | `getHintFromTextRegex`                | Searches a string for "(hint: )" and parses out the innards of that substring.                                                      |
 | `getGPSLocationFromTextRegex`         | Searches a string for GPS coordinates in the format (lat,long,alt)                                                                  |

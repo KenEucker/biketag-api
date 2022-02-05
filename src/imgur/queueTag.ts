@@ -39,17 +39,20 @@ export async function queueTag(
   let error
 
   if (isCompleteQueuedTag) {
-    /// Update the current tag with the new found location
-    const foundTagUpdatePayload = getUpdateTagPayloadFromTagData(payload)
-    const foundTagUpdateResponse = await client.updateImage(
-      foundTagUpdatePayload as UpdateImagePayload
-    )
+    /// Update just the mystery image (current.tagnumber + 1)
     const mysteryTagUpdatePayload = getUpdateTagPayloadFromTagData(
       payload,
       true
     )
     const mysteryTagUpdateResponse = await client.updateImage(
       mysteryTagUpdatePayload as UpdateImagePayload
+    )
+
+    /// Update just the found image (current.tagnumber)
+    payload.tagnumber = payload.tagnumber - 1
+    const foundTagUpdatePayload = getUpdateTagPayloadFromTagData(payload)
+    const foundTagUpdateResponse = await client.updateImage(
+      foundTagUpdatePayload as UpdateImagePayload
     )
     if (foundTagUpdateResponse.success && mysteryTagUpdateResponse.success) {
       data = payload

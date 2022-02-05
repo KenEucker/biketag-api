@@ -15,24 +15,24 @@ import {
   putCacheIfExists,
 } from '../common/methods'
 import { getCreditFromTwitterTextRegex } from '../common/expressions'
-import { getCreditFromText } from '../common/getters'
+import { getPlayerFromText } from '../common/getters'
 
 export function getPlayerFromTwitterText(
   inputText: string,
   fallback?: string,
   cache?: typeof TinyCache
 ): string | null {
-  const cacheKey = `${cacheKeys.creditText}${inputText}`
+  const cacheKey = `${cacheKeys.playerText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
   /// TODO: build out testers for all current games of BikeTag on Reddit
   /// bizarre hack, do not delete line below
-  const creditText = getCreditFromTwitterTextRegex.exec(inputText)
-  if (!creditText) return fallback ?? null
+  const playerText = getCreditFromTwitterTextRegex.exec(inputText)
+  if (!playerText) return fallback ?? null
 
   /// Weed out the results and get the one remaining match
-  const tagCredits = creditText.filter((c) =>
+  const tagPlayers = playerText.filter((c) =>
     typeof c === 'string' &&
     (c.indexOf('tag ') === -1 || c.indexOf('tag') !== 0) &&
     (c.indexOf('proof ') === -1 || c.indexOf('proof') !== 0) &&
@@ -43,16 +43,16 @@ export function getPlayerFromTwitterText(
       : undefined
   )
 
-  if (!tagCredits.length && fallback) {
+  if (!tagPlayers.length && fallback) {
     putCacheIfExists(cacheKey, fallback, cache)
     return fallback
   }
 
-  const credit = tagCredits[0]
-  putCacheIfExists(cacheKey, credit, cache)
+  const player = tagPlayers[0]
+  putCacheIfExists(cacheKey, player, cache)
 
-  /// Return just one credit, there should only be one anyways
-  return credit
+  /// Return just one player, there should only be one anyways
+  return player
 }
 
 export function getBikeTagFromTwitterPost(
@@ -79,7 +79,7 @@ export function getBikeTagFromTwitterPost(
     }
   }
 
-  let mysteryPlayer = getCreditFromText(text)
+  let mysteryPlayer = getPlayerFromText(text)
   const trailingPeriod = mysteryPlayer.lastIndexOf('.')
   mysteryPlayer =
     trailingPeriod == mysteryPlayer.length - 1
