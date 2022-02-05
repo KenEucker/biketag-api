@@ -3,7 +3,7 @@ export const getTagNumbersFromTextRegex = new RegExp(
 )
 
 export const getCreditFromTextRegex = new RegExp(
-  /((?:proof\s*(?:found\s*at\s*)?(?:\(.*\))?\s*by\s*)(.*?(?=]|$)))|((?:tag\s*(?:\((?:hint:)?.*\))?\s*by\s*)(.+?(?=]|\r|\n|$))?)|((?:tag\s*(?:\((?:hint:)?.*\))?\s*by\s*)(.+?(?=]|\r|\n))?)|((?:credit goes to:\s*)(.*)(?:\sfor finding))|(?:tag\s*)(?:number\s*)?(\d*)?(?:\s*by\s*)(.+?(?=$|\n))/i
+  /((?:proof\s*(?:found\s*at\s*)?(?:\(.*\))?\s*by\s*)(.*?(?=]|$)))|((?:tag\s*(?:(?:\(\s*hint:\s*)?.*\))?\s*by\s*)(.+?(?=]|\r|\n|$))?)|((?:tag\s*(?:(?:\(\s*hint:\s*)?.*\))?\s*by\s*)(.+?(?=]|\r|\n))?)|((?:credit goes to:\s*)(.*)(?:\sfor finding))|(?:tag\s*)(?:number\s*)?(\d*)?(?:\s*by\s*)(.+?(?=$|\n))/i
 )
 
 export const getFoundLocationFromTextRegex = new RegExp(

@@ -359,13 +359,11 @@ export function isPlayerImage(image: ImgurImage): boolean {
 }
 
 export function isMysteryImage(image: ImgurImage): boolean {
-  const hint = getHintFromText(image.description, '')
-  const discussionUrl = getDiscussionUrlFromText(image.title, '')
+  // const hint = getHintFromText(image.description, '')
+  // const discussionUrl = getDiscussionUrlFromText(image.title, '')
   const mysteryPlayer = getPlayerFromText(image.description, '')
 
-  return (
-    mysteryPlayer.length > 0 && (hint.length > 0 || discussionUrl.length > 0)
-  )
+  return mysteryPlayer.length > 0
 }
 
 export function isFoundImage(image: ImgurImage): boolean {
