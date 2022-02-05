@@ -2,7 +2,7 @@ import * as expressions from '../common/expressions'
 import { ImgurImage } from '../common/types'
 import { Game, Player, Tag } from '../common/schema'
 import {
-  getCreditFromText,
+  getPlayerFromText,
   getImageHashFromText,
   getImgurFoundDescriptionFromBikeTagData,
   getImgurFoundImageHashFromBikeTagData,
@@ -90,7 +90,7 @@ export function getPlayerDataFromText(
 ): Partial<Player> | undefined {
   if (!inputText) return undefined
 
-  const cacheKey = `${cacheKeys.playerText}${inputText}`
+  const cacheKey = `${cacheKeys.playerData}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
@@ -179,18 +179,18 @@ export function getPlayerFromText(
 ): string | null {
   if (!inputText) return fallback ?? null
 
-  const cacheKey = `${cacheKeys.creditText}${inputText}`
+  const cacheKey = `${cacheKeys.playerText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
   /// TODO: build out testers for all current games of BikeTag on Reddit
   /// bizarre hack, do not delete line below
-  // inputText.match(expressions.getCreditFromTextRegex)
-  const creditText = expressions.getCreditFromTextRegex.exec(inputText)
-  if (!creditText) return fallback ?? null
+  // inputText.match(expressions.getPlayerFromTextRegex)
+  const playerText = expressions.getPlayerFromTextRegex.exec(inputText)
+  if (!playerText) return fallback ?? null
 
   /// Weed out the results and get the one remaining match
-  const tagCredits = creditText.filter((c) =>
+  const tagPlayers = playerText.filter((c) =>
     typeof c === 'string' &&
     (c.indexOf('tag ') === -1 || c.indexOf('tag') !== 0) &&
     (c.indexOf('proof ') === -1 || c.indexOf('proof') !== 0) &&
@@ -201,16 +201,16 @@ export function getPlayerFromText(
       : undefined
   )
 
-  if (!tagCredits.length && fallback) {
+  if (!tagPlayers.length && fallback) {
     putCacheIfExists(cacheKey, fallback, cache)
     return fallback
   }
 
-  const credit = tagCredits[0]
-  putCacheIfExists(cacheKey, credit, cache)
+  const player = tagPlayers[0]
+  putCacheIfExists(cacheKey, player, cache)
 
-  /// Return just one credit, there should only be one anyways
-  return credit
+  /// Return just one player, there should only be one anyways
+  return player
 }
 
 export function getPlayerIdFromText(
@@ -478,7 +478,7 @@ export const getBikeTagUsernameFromImgurImage = (
   image: ImgurImage,
   cache?: typeof TinyCache
 ): string => {
-  return getCreditFromText(image.description, undefined, cache)
+  return getPlayerFromText(image.description, undefined, cache)
 }
 
 export const getBikeTagDiscussionLinkFromImgurImage = (
@@ -511,7 +511,7 @@ export const getBikeTagNumberFromImgurImage = (
 export const getBikeTagNumberIndexFromImgurImages = (
   images: ImgurImage[] = [],
   tagNumber = 1,
-  proof = false
+  found = false
 ): number => {
   const tagNumberIndex =
     images.length + 1 - (tagNumber - (tagNumber % 2) + 1) * 2
@@ -522,8 +522,8 @@ export const getBikeTagNumberIndexFromImgurImages = (
     }
 
     let compare = `#${tagNumber} tag`
-    if (proof) {
-      compare = `#${tagNumber} proof`
+    if (found) {
+      compare = `#${tagNumber}`
     }
 
     return index > -1 && !!images[index]

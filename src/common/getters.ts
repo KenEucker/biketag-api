@@ -6,7 +6,7 @@ import {
   getFoundLocationFromTextRegex,
   getImageURLsFromTextRegex,
   getHintFromTextRegex,
-  getCreditFromTextRegex,
+  getPlayerFromTextRegex,
   getDiscussionUrlFromTextRegex,
   getGPSLocationFromTextRegex,
   getAlbumIdFromTextRegex,
@@ -79,24 +79,24 @@ export const getTagNumbersFromText = (
   return tagNumbers
 }
 
-export const getCreditFromText = (
+export const getPlayerFromText = (
   inputText: string,
   fallback?: string,
   cache?: typeof TinyCache
 ): string => {
   if (!inputText.length) return fallback
 
-  const cacheKey = `${cacheKeys.creditText}${inputText}`
+  const cacheKey = `${cacheKeys.playerText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   /// HACK
-  // inputText.match(getCreditFromTextRegex)
-  const creditText = getCreditFromTextRegex.exec(inputText)
-  if (!creditText) return fallback ?? null
+  // inputText.match(getPlayerFromTextRegex)
+  const playerText = getPlayerFromTextRegex.exec(inputText)
+  if (!playerText) return fallback ?? null
 
   /// Weed out the results and get the one remaining match
-  const tagCredits = creditText.filter(
+  const tagPlayers = playerText.filter(
     (c) =>
       typeof c === 'string' &&
       (c.indexOf('tag ') === -1 || c.indexOf('tag') !== 0) &&
@@ -107,16 +107,16 @@ export const getCreditFromText = (
       (c.indexOf('by') === -1 || c.indexOf('by') !== 0)
   )
 
-  if (!tagCredits.length && fallback) {
+  if (!tagPlayers.length && fallback) {
     putCacheIfExists(cacheKey, fallback, cache)
     return fallback
   }
 
-  const credit = tagCredits[0]
-  putCacheIfExists(cacheKey, credit, cache)
+  const player = tagPlayers[0]
+  putCacheIfExists(cacheKey, player, cache)
 
-  /// Return just one credit, there should only be one anyways
-  return credit
+  /// Return just one player, there should only be one anyways
+  return player
 }
 
 export const getFoundLocationFromText = (
@@ -474,28 +474,6 @@ export const getImgurMysteryDescriptionFromBikeTagData = (
   `#${tag.tagnumber} tag ${
     includeHint && tag.hint ? `(hint: ${tag.hint})` : ''
   }${includeCredit ? ` by ${tag.mysteryPlayer}` : ''}`
-
-export const getBikeTagDescriptionFromData = (data: any): string => {
-  return `#${data.currentTagNumber} tag ${
-    data.hint ? `(hint: ${data.hint})` : ''
-  } by ${data.credit}`
-}
-
-export const getBikeTagTitleFromData = (data: any): string => {
-  return `${data.gps ? `(${data.gps})` : ''} {${
-    data.discussionLink ? data.discussionLink : ''
-  }}`
-}
-
-export const getBikeTagProofDescriptionFromData = (data: any): string => {
-  return `#${data.proofTagNumber} proof${
-    data.foundAt ? ` found at (${data.foundAt})` : ''
-  } by ${data.credit}`
-}
-
-export const getBikeTagProofTitleFromData = (data: any): string => {
-  return `(${data.gps ? data.gps : ''})`
-}
 
 export const getOnlyMysteryTagFromTagData = (tagData: Tag): Tag => {
   const onlyMysteryTagFields = {
