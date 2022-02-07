@@ -39,6 +39,7 @@ export async function queueTag(
   let error
 
   if (isCompleteQueuedTag) {
+    /// Remove the playerId so that it can't be mimicked
     /// Update just the mystery image (current.tagnumber + 1)
     const mysteryTagUpdatePayload = getUpdateTagPayloadFromTagData(
       payload,

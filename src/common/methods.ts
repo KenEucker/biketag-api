@@ -463,13 +463,50 @@ export const sortTags = (tags: Tag[], sort = 'new', limit = 0): Tag[] => {
   let sorted = tags
 
   switch (sort) {
+    /// Leaderboard?
     case 'top':
       sorted = tags.sort((a, b) => b.tagnumber - a.tagnumber)
       break
+    /// Queue
+    case 'relevance':
+      sorted = tags.sort((a, b) => {
+        const aHasFoundImage = a.foundImageUrl?.length
+        const aHasMysteryImage = a.mysteryImageUrl?.length
+        const bHasFoundImage = b.foundImageUrl?.length
+        const bHasMysteryImage = b.mysteryImageUrl?.length
+        const aHasBothImages = aHasFoundImage && aHasMysteryImage
+        const bHasBothImages = bHasFoundImage && bHasMysteryImage
+        const bIsBeforeA = 1
+        const aIsBeforeB = -1
+
+        if (!aHasBothImages && !bHasBothImages) {
+          /// compare individual images
+          if (aHasFoundImage && bHasFoundImage) {
+            return b.foundTime - a.foundTime
+          } else if (aHasFoundImage) {
+            return aIsBeforeB
+          } else if (bHasFoundImage) {
+            return aIsBeforeB
+          }
+          /// should be unreachable code
+        } else if (aHasBothImages && bHasBothImages) {
+          /// compare all images upload timestamps
+          const firstToComplete = b.mysteryTime - a.mysteryTime
+          return firstToComplete
+        } else if (aHasBothImages && !bHasBothImages) {
+          return bIsBeforeA
+        } else if (!aHasBothImages && bHasBothImages) {
+          return aIsBeforeB
+        }
+
+        /// should be unreachable code
+        return 0
+      })
+      break
+    /// BikeTags
     case 'new':
       sorted = tags.sort((a, b) => b.tagnumber - a.tagnumber)
       break
-    case 'relevance':
     default:
       sorted = tags.sort((a, b) => a.tagnumber - b.tagnumber)
       break

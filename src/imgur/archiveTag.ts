@@ -15,46 +15,69 @@ export async function archiveTag(
 ): Promise<BikeTagApiResponse<Tag>> {
   let data
   let error
-  let success = false
+  let success = true
+  let mysteryTagDeleteResponse
+  let archiveFoundImageResponse
+  let deleteFoundImageResponse
+  let existingFoundImageResponse
 
-  const foundImageHash = getImgurFoundImageHashFromBikeTagData(payload as Tag)
-  const existingFoundImageResponse: any = await client.getImage(foundImageHash)
-  if (existingFoundImageResponse.success) {
-    const archiveFoundImageResponse = await client.upload({
-      image: payload.foundImageUrl,
-      description: existingFoundImageResponse.data.description,
-      title: existingFoundImageResponse.data.title,
-      type: 'url',
-      album: payload.archivehash,
-    })
-    if (archiveFoundImageResponse.success) {
-      payload.foundImageUrl = archiveFoundImageResponse.data.link
-      const deleteFoundImageResponse = await client.deleteImage(
-        existingFoundImageResponse.data.deletehash
-      )
+  if (payload.mysteryImageUrl?.length) {
+    const foundImageHash = getImgurFoundImageHashFromBikeTagData(payload as Tag)
+    existingFoundImageResponse = await client.getImage(foundImageHash)
+    if (existingFoundImageResponse.success) {
+      archiveFoundImageResponse = await client.upload({
+        image: payload.foundImageUrl,
+        description: existingFoundImageResponse.data.description,
+        title: existingFoundImageResponse.data.title,
+        type: 'url',
+        album: payload.archivehash,
+      })
+      if (archiveFoundImageResponse.success) {
+        payload.foundImageUrl = archiveFoundImageResponse.data.link
+        deleteFoundImageResponse = await client.deleteImage(
+          existingFoundImageResponse.data.deletehash
+        )
 
-      if (!deleteFoundImageResponse.success) {
-        existingFoundImageResponse.data =
-          'archive of image succeeded but delete of existing found image failed'
-        existingFoundImageResponse.success = false
+        if (!deleteFoundImageResponse.success) {
+          existingFoundImageResponse.data =
+            'archive of image succeeded but delete of existing found image failed'
+          existingFoundImageResponse.success = false
+        }
       }
     }
   }
 
-  const mysteryImageHash = getImgurMysteryImageHashFromBikeTagData(
-    payload as Tag
-  )
-  const existingMysteryImageResponse = await client.getImage(mysteryImageHash)
-  const mysteryTagDeleteResponse = existingMysteryImageResponse.success
-    ? await client.deleteImage(existingMysteryImageResponse.data.deletehash)
-    : { success: false, data: 'delete of existing mystery image failed' }
-
-  if (existingFoundImageResponse.success && mysteryTagDeleteResponse.success) {
+  if (payload.mysteryImageUrl?.length) {
+    const mysteryImageHash = getImgurMysteryImageHashFromBikeTagData(
+      payload as Tag
+    )
+    const existingMysteryImageResponse = await client.getImage(mysteryImageHash)
+    mysteryTagDeleteResponse = existingMysteryImageResponse.success
+      ? await client.deleteImage(existingMysteryImageResponse.data.deletehash)
+      : { success: false, data: 'delete of existing mystery image failed' }
+  }
+  if (
+    archiveFoundImageResponse?.success &&
+    deleteFoundImageResponse.success &&
+    mysteryTagDeleteResponse?.success
+  ) {
     data = getOnlyFoundTagFromTagData(payload as Tag)
-    success = true
-  } else {
+  } else if (archiveFoundImageResponse.success) {
+    data = getOnlyFoundTagFromTagData(payload as Tag)
     success = false
-    error = `found: ${existingFoundImageResponse.data}, mystery: ${mysteryTagDeleteResponse.data}`
+    error = `error deleting images [${
+      existingFoundImageResponse
+        ? `found: ${existingFoundImageResponse.data}, `
+        : ''
+    }${
+      deleteFoundImageResponse
+        ? `msytery: ${deleteFoundImageResponse.data}`
+        : ''
+    }]`
+  } else {
+    data = archiveFoundImageResponse?.data
+    success = false
+    error = `found: ${deleteFoundImageResponse.data}, mystery: ${mysteryTagDeleteResponse.data}`
   }
 
   return {

@@ -10,6 +10,7 @@ import {
   getPlayerFromText,
 } from './helpers'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
+import { sortTags } from '../common/methods'
 
 export async function getQueue(
   client: ImgurClient,
@@ -86,7 +87,7 @@ export async function getQueue(
     })
   }
   return {
-    data: queuedTags,
+    data: sortTags(queuedTags, 'relevance'),
     success: true,
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,
