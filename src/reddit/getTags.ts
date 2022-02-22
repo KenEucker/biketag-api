@@ -12,7 +12,9 @@ export async function getTags(
   client: RedditClient,
   payload: getTagsPayload
 ): Promise<BikeTagApiResponse<Tag[]>> {
-  const query = `subreddit:${payload.subreddit} title:Bike Tag`
+  const query = `subreddit:${payload.subreddit} title:Bike Tag ${
+    payload.tagnumbers?.length ? payload.tagnumbers.join(' ') : ''
+  }`
   const maxPerRequest = 500
 
   payload.sort = payload.sort ?? 'new'
@@ -41,13 +43,11 @@ export async function getTags(
         )
       }
 
-      const response = {
+      return {
         data: bikeTags,
         status: HttpStatusCode.Ok,
         success: true,
         source: AvailableApis[AvailableApis.reddit],
       }
-
-      return response as BikeTagApiResponse<Tag[]>
     })
 }

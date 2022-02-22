@@ -2,6 +2,7 @@ export const getTagNumbersFromTextRegex = new RegExp(
   /((?:(?:bike\s*)?(?:\s*tag)?)(#|num|number)(\d+)(?:(?:\s*tag)?|(?:\s*proof)?))|((?:bike\s*)?(?:tag\s*)(#|num|number)?\s*(\d+))|((?:(?:found\s*#?)|(?:here'?i?s?\s*))\[?(\d+)\]?)/gi
 )
 
+/// Too many ORs here, TEST: tag 1 found at (hint: ) by byers
 export const getPlayerFromTextRegex = new RegExp(
   /((?:proof\s*(?:found\s*at\s*)?(?:\(.*\))?\s*by\s*)(.*?(?=]|$)))|((?:tag\s*(?:(?:\(\s*hint:\s*)?.*\))?\s*by\s*)(.+?(?=]|\r|\n|$))?)|((?:tag\s*(?:(?:\(\s*hint:\s*)?.*\))?\s*by\s*)(.+?(?=]|\r|\n))?)|((?:credit goes to:\s*)(.*)(?:\sfor finding))|(?:tag\s*)(?:number\s*)?(\d*)?(?:\s*by\s*)(.+?(?=$|\n))/i
 )

@@ -200,7 +200,7 @@ export function getPlayerFromText(
       : undefined
   )
 
-  if (!tagPlayers.length && fallback) {
+  if (!tagPlayers?.length && fallback) {
     putCacheIfExists(cacheKey, fallback, cache)
     return fallback
   }
@@ -636,4 +636,115 @@ export function getUploadTagImagePayloadFromTagData(
         ? getImgurMysteryDescriptionFromBikeTagData(tagData as Tag)
         : getImgurFoundDescriptionFromBikeTagData(tagData as Tag)),
   }
+}
+
+export const getGroupedImagesByTagnumber = (ungroupedImages = []) => {
+  const groupedImages: any[] = []
+
+  ungroupedImages.forEach((image: any) => {
+    const tagnumber = getBikeTagNumberFromImage(image)
+
+    groupedImages[tagnumber] = groupedImages[tagnumber]
+      ? groupedImages[tagnumber]
+      : []
+    groupedImages[tagnumber].push(image)
+  })
+
+  return groupedImages
+}
+
+export const getGroupedTagsByTagnumber = (
+  groupedImages: ImgurImage[][] = [],
+  appendToTagData = {}
+) => {
+  const tagsData = []
+  groupedImages.forEach((images: ImgurImage[]) => {
+    const image1IsMysteryImage = isMysteryImage(images[0])
+    const moreThanOneImage = images.length > 1
+    const mysteryImage = image1IsMysteryImage
+      ? images[0]
+      : moreThanOneImage
+      ? images[1]
+      : undefined
+    let foundImage =
+      moreThanOneImage && image1IsMysteryImage ? images[1] : undefined
+
+    if (!foundImage && moreThanOneImage) {
+      const image2IsFoundImage = isFoundImage(images[1])
+      foundImage = image2IsFoundImage
+        ? images[1]
+        : !image1IsMysteryImage
+        ? images[0]
+        : undefined
+    }
+    const tagData = getBikeTagFromImgurImageSet(
+      mysteryImage,
+      foundImage,
+      appendToTagData
+    )
+
+    tagsData.push(tagData)
+  })
+
+  return tagsData
+}
+
+export const getGroupedTagsByPlayer = (
+  groupedImages: ImgurImage[][] = [],
+  appendToTagData = {}
+) => {
+  if (!groupedImages.length) {
+    return []
+  }
+  const playerGroupedImages = []
+  const playerGroupedTags = []
+  /// TODO: change this as it assumes the tags are ordered by tagnumber
+  const highestTagnumber = groupedImages.reduce((o, i, n) => {
+    o = o > n ? o : n
+    return o
+  }, 0)
+
+  groupedImages[highestTagnumber].forEach((i: ImgurImage) => {
+    const player = getPlayerFromText(i.description)
+    playerGroupedImages[player] = playerGroupedImages[player] ?? []
+    playerGroupedImages[player].push(i)
+  })
+  if (groupedImages[highestTagnumber - 1]) {
+    groupedImages[highestTagnumber - 1].forEach((i: ImgurImage) => {
+      const player = getPlayerFromText(i.description)
+      playerGroupedImages[player] = playerGroupedImages[player] ?? []
+      playerGroupedImages[player].push(i)
+    })
+  }
+
+  Object.keys(playerGroupedImages).forEach((player) => {
+    const groupedImages = playerGroupedImages[player]
+    if (groupedImages.length === 1) {
+      playerGroupedTags.push(
+        getBikeTagFromImgurImageSet(
+          undefined,
+          groupedImages[0],
+          appendToTagData
+        )
+      )
+    } else if (groupedImages.length === 2) {
+      const mysteryImage = isMysteryImage(groupedImages[0])
+        ? groupedImages[0]
+        : isMysteryImage(groupedImages[1])
+        ? groupedImages[1]
+        : undefined
+      const foundImage = isFoundImage(groupedImages[1])
+        ? groupedImages[1]
+        : isFoundImage(groupedImages[0])
+        ? groupedImages[0]
+        : undefined
+      playerGroupedTags.push(
+        getBikeTagFromImgurImageSet(mysteryImage, foundImage, appendToTagData)
+      )
+    } else {
+      console.log('what do I do now?', groupedImages)
+    }
+  })
+
+  return playerGroupedTags
 }

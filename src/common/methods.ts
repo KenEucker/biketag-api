@@ -12,7 +12,6 @@ import {
   BikeTagConfiguration,
   CommonData,
   TwitterCredentials,
-  RequireAtLeastOne,
 } from './types'
 import FormData from 'form-data'
 import TinyCache from 'tinycache'
@@ -437,25 +436,23 @@ export const assignBikeTagConfiguration = (
   return configuration
 }
 
-export const isBikeTagData = (biketag: RequireAtLeastOne<Tag>): boolean => {
+export const isBikeTagData = (biketag: Partial<Tag>): boolean => {
   return !!biketag.tagnumber && !!biketag.game
 }
 
-export const isGameData = (ambassador: RequireAtLeastOne<Game>): boolean => {
+export const isGameData = (ambassador: Partial<Game>): boolean => {
   return !!ambassador.name && !!ambassador.logo
 }
 
-export const isPlayerData = (player: RequireAtLeastOne<Player>): boolean => {
+export const isPlayerData = (player: Partial<Player>): boolean => {
   return !!player.name && !!player.bicon
 }
 
-export const isAmbassadorData = (
-  ambassador: RequireAtLeastOne<Ambassador>
-): boolean => {
+export const isAmbassadorData = (ambassador: Partial<Ambassador>): boolean => {
   return !!ambassador.name && !!ambassador.email
 }
 
-export const isSettingData = (setting: RequireAtLeastOne<Setting>): boolean => {
+export const isSettingData = (setting: Partial<Setting>): boolean => {
   return !!setting.name && !!setting.key && !!setting.description
 }
 

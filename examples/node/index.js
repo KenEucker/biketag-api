@@ -22,6 +22,7 @@ const imgurInstanceOpts = {
   host,
   imgur: {
     hash: process.env.IMGUR_HASH,
+    queuehash: process.env.IMGUR_QUEUEHASH,
     clientId: process.env.IMGUR_CLIENT_ID,
     accessToken: process.env.IMGUR_ACCESS_TOKEN,
     clientSecret: process.env.IMGUR_CLIENT_SECRET,
