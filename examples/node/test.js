@@ -102,6 +102,7 @@ const biketag = new BikeTagClient({
     host: process.env.BIKETAG_API_HOST ? process.env.BIKETAG_API_HOST : 'biketag.io',
     imgur: {
         hash: process.env.IMGUR_HASH,
+        queuehash: process.env.IMGUR_QUEUEHASH,
         clientId: process.env.IMGUR_CLIENT_ID,
     },
     sanity: {

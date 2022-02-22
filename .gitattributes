@@ -4,3 +4,6 @@ webpack.config.js export-ignore
 .husky/**/* export-ignore
 tests/assets/**/* export-ignore
 examples/**/* export-ignore
+
+*.ts linguist-detectable=true
+*.* linguist-detectable=false

@@ -512,3 +512,29 @@ export const getOnlyFoundTagFromTagData = (tagData: Tag): Tag => {
 
   return createTagObject(onlyFoundTagFields)
 }
+
+export const getRedditPostTextFromTagData = (
+  tagData: Tag,
+  gameData: any = {},
+  wrapInPreTag = true
+): string => {
+  const host = gameData.host ?? `${tagData.game}.biketag.io`
+  const selfPostText = `
+  [#${tagData.tagnumber} tag by ${tagData.mysteryPlayer}](${
+    tagData.mysteryImageUrl
+  })
+  
+  Credit goes to: ${tagData.mysteryPlayer} for finding tag #${
+    tagData.tagnumber - 1
+  }!
+  
+  Found at: ${tagData.foundLocation}](https://${host}/#/${tagData.tagnumber})
+  
+  See all BikeTags and more, for ${tagData.game}:
+  
+  [${host}](https://${host}) | [Top 10](https://${host}/#/leaderboard) | [Rules](https://${host}/#/how-to)
+  
+  ${gameData.mapLink}`
+
+  return wrapInPreTag ? `<pre>${selfPostText}</pre>` : selfPostText
+}

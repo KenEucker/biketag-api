@@ -59,6 +59,7 @@
     "convert": "tsoa spec-and-routes"
   },
   "dependencies": {
+    "@croquet/croquet": "^1.0.5",
     "@sanity/client": "^2.23.2",
     "axios": "^0.21.1",
     "axios-cache-adapter": "^2.7.3",

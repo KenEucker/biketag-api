@@ -1,5 +1,5 @@
 import { Tag } from './schema'
-import { CommonData, RequireAtLeastOne } from './types'
+import { CommonData } from './types'
 
 export type SortOptions = 'new' | 'relevance' | 'hot' | 'top' | 'comments'
 
@@ -35,6 +35,7 @@ export type getTagPayload = {
 
 export type updateTagPayload = {
   hash?: string
+  subreddit?: string
 } & Partial<Tag>
 
 export type deleteTagPayload = {
