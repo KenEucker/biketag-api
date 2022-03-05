@@ -362,7 +362,7 @@ export function isMysteryImage(image: ImgurImage): boolean {
   // const discussionUrl = getDiscussionUrlFromText(image.title, '')
   const mysteryPlayer = getPlayerFromText(image.description, '')
 
-  return mysteryPlayer.length > 0
+  return mysteryPlayer.length > 0 && image.description.indexOf('tag') !== -1
 }
 
 export function isFoundImage(image: ImgurImage): boolean {
