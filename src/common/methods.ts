@@ -238,24 +238,36 @@ export const createTwitterCredentials = (
   defaults: Partial<TwitterCredentials> = {}
 ): TwitterCredentials => {
   return {
-    account: credentials.account ?? defaults.account,
-    bearer_token: credentials.bearer_token ?? defaults.bearer_token,
-    consumer_key: credentials.consumer_key ?? defaults.consumer_key,
-    consumer_secret: credentials.consumer_secret ?? defaults.consumer_secret,
-    access_token_key: credentials.access_token_key ?? defaults.access_token_key,
-    access_token_secret:
-      credentials.access_token_secret ?? defaults.access_token_secret,
+    account: credentials.account?.length
+      ? credentials.account
+      : defaults.account,
+    bearer_token: credentials.bearer_token?.length
+      ? credentials.bearer_token
+      : defaults.bearer_token,
+    consumer_key: credentials.consumer_key?.length
+      ? credentials.consumer_key
+      : defaults.consumer_key,
+    consumer_secret: credentials.consumer_secret?.length
+      ? credentials.consumer_secret
+      : defaults.consumer_secret,
+    access_token_key: credentials.access_token_key?.length
+      ? credentials.access_token_key
+      : defaults.access_token_key,
+    access_token_secret: credentials.access_token_secret?.length
+      ? credentials.access_token_secret
+      : defaults.access_token_secret,
   }
 }
 
 export const assignTwitterCredentials = (
-  credentials: TwitterCredentials
+  credentials: TwitterCredentials,
+  defaults?: Partial<TwitterCredentials>
 ): TwitterCredentials => {
   const twitterCredentials = isTwitterCredentials(
     credentials as TwitterCredentials
   )
-    ? createTwitterCredentials(credentials)
-    : undefined
+    ? createTwitterCredentials(credentials, defaults)
+    : defaults
 
   return twitterCredentials as TwitterCredentials
 }
@@ -265,9 +277,13 @@ export const createImgurCredentials = (
   defaults: Partial<ImgurCredentials> = {}
 ): ImgurCredentials => {
   return {
-    hash: credentials.hash ?? defaults.hash,
-    queuehash: credentials.queuehash ?? defaults.queuehash,
-    archivehash: credentials.archivehash ?? defaults.archivehash,
+    hash: credentials.hash?.length ? credentials.hash : defaults.hash,
+    queuehash: credentials.queuehash?.length
+      ? credentials.queuehash
+      : defaults.queuehash,
+    archivehash: credentials.archivehash?.length
+      ? credentials.archivehash
+      : defaults.archivehash,
     clientId: credentials.clientId?.length
       ? credentials.clientId
       : defaults.clientId,
@@ -290,11 +306,12 @@ export const createImgurCredentials = (
 }
 
 export const assignImgurCredentials = (
-  credentials: ImgurCredentials
+  credentials: ImgurCredentials,
+  defaults: Partial<ImgurCredentials> = {}
 ): ImgurCredentials => {
   const imgurCredentials = isImgurCredentials(credentials as ImgurCredentials)
-    ? createImgurCredentials(credentials)
-    : undefined
+    ? createImgurCredentials(credentials, defaults)
+    : defaults
 
   return imgurCredentials as ImgurCredentials
 }
@@ -306,9 +323,17 @@ export const createSanityCredentials = (
   return {
     useCdn: credentials.token?.length
       ? false
-      : credentials.useCdn ?? defaults.useCdn ?? true,
-    projectId: credentials.projectId ?? defaults.projectId,
-    dataset: credentials.dataset ?? defaults.dataset ?? 'development',
+      : typeof credentials.useCdn !== 'undefined'
+      ? credentials.useCdn
+      : typeof defaults.useCdn !== 'undefined'
+      ? defaults.useCdn
+      : true,
+    projectId: credentials.projectId?.length
+      ? credentials.projectId
+      : defaults.projectId,
+    dataset: credentials.dataset?.length
+      ? credentials.dataset
+      : defaults.dataset ?? 'development',
     token: credentials.token?.length ? credentials.token : defaults.token ?? '',
     password: credentials.password?.length
       ? credentials.password
@@ -323,13 +348,14 @@ export const createSanityCredentials = (
 }
 
 export const assignSanityCredentials = (
-  credentials: SanityCredentials
+  credentials: SanityCredentials,
+  defaults?: Partial<SanityCredentials>
 ): SanityCredentials => {
   const sanityCredentials = isSanityCredentials(
     credentials as SanityCredentials
   )
-    ? createSanityCredentials(credentials)
-    : undefined
+    ? createSanityCredentials(credentials, defaults)
+    : defaults
 
   return sanityCredentials as SanityCredentials
 }
@@ -339,8 +365,12 @@ export const createRedditCredentials = (
   defaults: Partial<RedditCredentials> = {}
 ): RedditCredentials => {
   return {
-    subreddit: credentials.subreddit ?? defaults.subreddit,
-    clientId: credentials.clientId ?? defaults.clientId,
+    subreddit: credentials.subreddit?.length
+      ? credentials.subreddit
+      : defaults.subreddit,
+    clientId: credentials.clientId?.length
+      ? credentials.clientId
+      : defaults.clientId,
     clientSecret: credentials.clientSecret?.length
       ? credentials.clientSecret
       : defaults.clientSecret,
@@ -360,13 +390,14 @@ export const createRedditCredentials = (
 }
 
 export const assignRedditCredentials = (
-  credentials: RedditCredentials
+  credentials: RedditCredentials,
+  defaults: Partial<RedditCredentials> = {}
 ): RedditCredentials => {
   const RedditCredentials = isRedditCredentials(
     credentials as RedditCredentials
   )
-    ? createRedditCredentials(credentials)
-    : undefined
+    ? createRedditCredentials(credentials, defaults)
+    : defaults
 
   return RedditCredentials as RedditCredentials
 }
@@ -376,10 +407,13 @@ export const createBikeTagCredentials = (
   defaults: Partial<BikeTagCredentials> = {}
 ): BikeTagCredentials => {
   return {
-    game: credentials.game ?? defaults.game,
-    host: credentials.host ?? defaults.host,
-    cached: credentials.cached ?? defaults.cached,
-    source: credentials.source ?? defaults.source,
+    game: credentials.game?.length ? credentials.game : defaults.game,
+    host: credentials.host?.length ? credentials.host : defaults.host,
+    cached:
+      typeof credentials.cached !== 'undefined'
+        ? credentials.cached
+        : defaults.cached,
+    source: credentials.source?.length ? credentials.source : defaults.source,
     clientKey: credentials.clientKey?.length
       ? credentials.clientKey
       : defaults.clientKey,
@@ -393,27 +427,44 @@ export const createBikeTagCredentials = (
 }
 
 export const assignBikeTagCredentials = (
-  credentials: Credentials
+  credentials: Credentials,
+  defaults?: Partial<Credentials>
 ): BikeTagCredentials => {
   const biketagCredentials = isBikeTagCredentials(credentials as Credentials)
-    ? createBikeTagCredentials(credentials)
-    : undefined
+    ? createBikeTagCredentials(credentials, defaults)
+    : defaults
 
   return biketagCredentials as BikeTagCredentials
 }
 
 export const assignBikeTagConfiguration = (
-  config: BikeTagConfiguration
+  config: BikeTagConfiguration,
+  defaults?: Partial<BikeTagConfiguration>
 ): BikeTagConfiguration => {
   const configuration: BikeTagConfiguration = {} as BikeTagConfiguration
 
   /// Parse individual configurations from the entire config object
   const parsedConfig = {
-    biketag: assignBikeTagCredentials(config as unknown as BikeTagCredentials),
-    sanity: assignSanityCredentials(config as unknown as SanityCredentials),
-    imgur: assignImgurCredentials(config as unknown as ImgurCredentials),
-    reddit: assignRedditCredentials(config as unknown as RedditCredentials),
-    twitter: assignTwitterCredentials(config as unknown as TwitterCredentials),
+    biketag: assignBikeTagCredentials(
+      config as unknown as BikeTagCredentials,
+      defaults?.biketag
+    ),
+    sanity: assignSanityCredentials(
+      config as unknown as SanityCredentials,
+      defaults?.sanity
+    ),
+    imgur: assignImgurCredentials(
+      config as unknown as ImgurCredentials,
+      defaults?.imgur
+    ),
+    reddit: assignRedditCredentials(
+      config as unknown as RedditCredentials,
+      defaults?.reddit
+    ),
+    twitter: assignTwitterCredentials(
+      config as unknown as TwitterCredentials,
+      defaults?.twitter
+    ),
   }
 
   /// Assign the individual configs with the parsed object plus overrides from individual configs in the passed in object

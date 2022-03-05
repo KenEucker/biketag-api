@@ -2,7 +2,9 @@ export const BIKETAG_API_HOST = 'biketag.io'
 
 export const API_VERSION = 'api'
 
-export const AUTHORIZE_ENDPOINT = 'oauth2/authorize'
+export const AUTHORIZE_ENDPOINT = 'authorize'
+
+export const TOKEN_ENDPOINT = 'token'
 
 export const GAMES_ENDPOINT = `game`
 

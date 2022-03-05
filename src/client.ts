@@ -79,6 +79,7 @@ import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
 import { EventEmitter } from 'events'
 import { setup } from 'axios-cache-adapter'
 import { isEqual } from 'lodash'
+import { getAuthorizationHeader, getClaims } from './common/auth'
 
 export const USERAGENT =
   'biketag-api (https://github.com/keneucker/biketag-api)'
@@ -127,6 +128,14 @@ export class BikeTagClient extends EventEmitter {
       headers,
       responseType,
     })
+    this.fetcher.interceptors.request.use(
+      async (config: AxiosRequestConfig) => {
+        config.headers = config.headers ? config.headers : {}
+        config.headers.authorization = await getAuthorizationHeader(this)
+        return config
+      },
+      (e: Error) => Promise.reject(e)
+    )
 
     this.cachedFetcher = setup({
       cache: {
@@ -580,6 +589,10 @@ export class BikeTagClient extends EventEmitter {
 
   request(options: AxiosRequestConfig = {}): Promise<AxiosResponse<string>> {
     return this.fetcher(options)
+  }
+
+  fetchCredentials(authorization?: string) {
+    return getClaims(this, authorization)
   }
 
   /// ****************************  Game Data Methods   ************************************ ///
