@@ -1,6 +1,15 @@
 import { geopoint, boundary } from './types'
 
 /// ****************************  Schema Data Types   ********************************** ///
+export type UserMetadata = {
+  social: {
+    reddit: string
+    imgur: string
+    discord: string
+    twitter: string
+  }
+}
+
 export type Setting = {
   slug: string
   name: string
@@ -22,6 +31,7 @@ export type Player = {
   bicon: string
   games: string[]
   tags: Tag[]
+  metadata: UserMetadata
 }
 
 export type Ambassador = {
@@ -36,6 +46,7 @@ export type Ambassador = {
   email: string
   phone: string
   player: Player
+  metadata: UserMetadata
 }
 
 export interface Tag {

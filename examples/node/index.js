@@ -48,7 +48,7 @@ const sanityInstanceOpts = {
   sanity: {
     projectId: process.env.SANITY_PROJECT_ID,
     dataset: process.env.SANITY_DATASET,
-    accessToken: process.env.SANITY_ACCESS_TOKEN,
+    token: process.env.SANITY_TOKEN,
     useCdn: !!process.env.USE_CDN ? false : true,
   }
 }

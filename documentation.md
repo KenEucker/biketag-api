@@ -178,7 +178,7 @@ The acceptable fields for a BikeTagConfiguration object are outlined below:
 | `consumer_secret`    | [Twitter] The twitter consumer secret used for authentication                             |
 | `access_token_key`   | [Twitter] The twitter access token key used for authentication                            |
 | `access_token_secret`| [Twitter] The twitter access token secret used for authentication                         | 
-| `account`            | [Twitter] The twitter account to search when using the Twitter API                         |   
+| `account`            | [Twitter] The twitter account to search when using the Twitter API                        |   
 
 </div>
 
