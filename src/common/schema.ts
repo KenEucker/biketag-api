@@ -1,4 +1,4 @@
-import { geopoint, boundary } from './types'
+import { geopoint } from './types'
 
 /// ****************************  Schema Data Types   ********************************** ///
 export type UserMetadata = {
@@ -80,7 +80,7 @@ export interface Game {
   name: string
   ambassadors: string[]
   settings: settingsArray
-  boundary: boundary
+  boundary: geopoint
   mainhash?: string
   archivehash?: string
   queuehash?: string

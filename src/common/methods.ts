@@ -524,13 +524,13 @@ export const sortTags = (tags: Tag[], sort = 'new', limit = 0): Tag[] => {
         const bHasMysteryImage = b.mysteryImageUrl?.length
         const aHasBothImages = aHasFoundImage && aHasMysteryImage
         const bHasBothImages = bHasFoundImage && bHasMysteryImage
-        const bIsBeforeA = 1
-        const aIsBeforeB = -1
+        const bIsBeforeA = -1
+        const aIsBeforeB = 1
 
         if (!aHasBothImages && !bHasBothImages) {
           /// compare individual images
           if (aHasFoundImage && bHasFoundImage) {
-            return b.foundTime - a.foundTime
+            return a.foundTime - b.foundTime
           } else if (aHasFoundImage) {
             return aIsBeforeB
           } else if (bHasFoundImage) {
@@ -539,7 +539,7 @@ export const sortTags = (tags: Tag[], sort = 'new', limit = 0): Tag[] => {
           /// should be unreachable code
         } else if (aHasBothImages && bHasBothImages) {
           /// compare all images upload timestamps
-          const firstToComplete = b.mysteryTime - a.mysteryTime
+          const firstToComplete = a.mysteryTime - b.mysteryTime
           return firstToComplete
         } else if (aHasBothImages && !bHasBothImages) {
           return bIsBeforeA
