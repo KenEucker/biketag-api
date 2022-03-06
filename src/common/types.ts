@@ -140,10 +140,6 @@ export type geopoint = {
   alt: number
 }
 
-export type boundary = {
-  geo: geopoint
-}
-
 /// ****************************  BikeTag Configurations   ***************************** ///
 export type BikeTagConfiguration = {
   biketag: BikeTagCredentials
