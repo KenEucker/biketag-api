@@ -144,6 +144,12 @@ export class BikeTagClient extends EventEmitter {
           // Only exclude PUT, PATCH and DELETE methods from cache
           methods: ['put', 'patch', 'delete'],
         },
+        // Attempt reading stale cache data when response status is either 4xx or 5xx
+        readOnError: (error) => {
+          return error.response.status >= 400 && error.response.status < 600
+        },
+        // Deactivate `clearOnStale` option so that we can actually read stale cache data
+        clearOnStale: false,
       },
       headers,
       responseType,

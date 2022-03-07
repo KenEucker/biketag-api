@@ -1,5 +1,5 @@
 import { Tag } from './schema'
-import { CommonData } from './types'
+import { CommonPayloadData } from './types'
 
 export type SortOptions = 'new' | 'relevance' | 'hot' | 'top' | 'comments'
 
@@ -13,13 +13,13 @@ export type getTagsPayload = {
   sort?: SortOptions
   limit?: number
   tagnumbers: number[]
-} & CommonData
+} & CommonPayloadData
 
 export type deleteTagsPayload = {
   slugs?: string[]
   tagnumbers: number[]
   tags?: Partial<Tag>[]
-} & CommonData
+} & CommonPayloadData
 
 export type getTagPayload = {
   tagnumber: number
@@ -31,7 +31,7 @@ export type getTagPayload = {
   account?: string
   slug: string
   fields?: string[]
-} & CommonData
+} & CommonPayloadData
 
 export type updateTagPayload = {
   hash?: string
@@ -52,7 +52,7 @@ export type uploadTagImagePayload = {
   type: 'found' | 'mystery'
   slug?: string
   stream: ReadableStream
-} & CommonData
+} & CommonPayloadData
 
 export type ImgurUploadPayload = {
   image: string
@@ -68,7 +68,7 @@ export type getGamePayload = {
   name: string
   hash?: string
   fields?: string[]
-} & CommonData
+} & CommonPayloadData
 
 export type getPlayersPayload = {
   fields?: string[]
@@ -78,7 +78,7 @@ export type getPlayersPayload = {
   limit?: number
   account?: string
   subreddit?: string
-} & CommonData
+} & CommonPayloadData
 
 export type getPlayerPayload = {
   fields?: string[]
@@ -86,41 +86,41 @@ export type getPlayerPayload = {
   hash?: string
   account?: string
   subreddit?: string
-} & CommonData
+} & CommonPayloadData
 
 export type getSettingPayload = {
   fields?: string[]
   slug?: string
-} & CommonData
+} & CommonPayloadData
 
 export type getSettingsPayload = {
   fields?: string[]
   sort?: SortOptions
   limit?: number
   slugs?: string[]
-} & CommonData
+} & CommonPayloadData
 
 export type getAmbassadorsPayload = {
   fields?: string[]
   limit?: number
   sort?: SortOptions
   slugs?: string[]
-} & CommonData
+} & CommonPayloadData
 export type getAmbassadorPayload = {
   fields?: string[]
   slug?: string
-} & CommonData
+} & CommonPayloadData
 
 export type importTagPayload = Pick<
   Tag,
   'discussionUrl' | 'mysteryImageUrl' | 'foundImageUrl' | 'mentionUrl'
 > &
-  CommonData
+  CommonPayloadData
 
 export type getQueuePayload = {
   hash?: string
   queuehash?: string
-} & CommonData
+} & CommonPayloadData
 
 export type queueTagPayload = {
   queuehash?: string

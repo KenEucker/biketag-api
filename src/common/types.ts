@@ -79,6 +79,8 @@ export interface CommonData {
   concise?: boolean
   cached?: boolean
 }
+
+export type CommonPayloadData = CommonData
 export interface AccessToken {
   accessToken: string
 }
