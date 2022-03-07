@@ -1,11 +1,8 @@
 import { AccessToken, BikeTagCredentials } from './types'
 import { hasClientKey, hasAccessToken } from './methods'
 import { BikeTagClient } from '../client'
-import {
-  BIKETAG_API_HOST,
-  AUTHORIZE_ENDPOINT,
-  TOKEN_ENDPOINT,
-} from './endpoints'
+import { AUTHORIZE_ENDPOINT, TOKEN_ENDPOINT } from './endpoints'
+import { getApiUrl } from '../biketag/helpers'
 
 export async function getAuthorizationHeader(
   client: BikeTagClient
@@ -24,8 +21,7 @@ export async function getAuthorizationHeader(
   const { clientKey, clientToken } = client.config.biketag
 
   const options: Record<string, unknown> = {
-    url: AUTHORIZE_ENDPOINT,
-    baseURL: BIKETAG_API_HOST,
+    url: getApiUrl(config.biketag.host, AUTHORIZE_ENDPOINT),
     params: {
       client_id: clientKey,
       access_token: clientToken,
@@ -88,22 +84,18 @@ export async function getClaims(
   client: BikeTagClient,
   authorization?: string
 ): Promise<Partial<BikeTagCredentials>> {
-  // @ts-ignore
-  // const { clientKey, clientToken } = client.config.biketag
+  const config = client.config()
 
   try {
     if (!authorization) {
-      const options: Record<string, unknown> = {
-        url: TOKEN_ENDPOINT,
-        baseURL: BIKETAG_API_HOST,
-      }
-      const response = await client.request(options)
+      const response = await client.request({
+        url: getApiUrl(config.biketag.host, TOKEN_ENDPOINT),
+      })
       return response.data as unknown as BikeTagCredentials
     }
   } catch (e) {
     /// swallow self whole
   }
-  const config = client.config()
 
   if (config.biketag.accessToken === authorization) {
     /// TODO: get all claims
