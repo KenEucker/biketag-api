@@ -1,10 +1,7 @@
 import { AccessToken, BikeTagCredentials } from './types'
 import { hasClientKey, hasAccessToken } from './methods'
 import { BikeTagClient } from '../client'
-import {
-  AUTHORIZE_ENDPOINT,
-  TOKEN_ENDPOINT,
-} from './endpoints'
+import { AUTHORIZE_ENDPOINT, TOKEN_ENDPOINT } from './endpoints'
 import { getApiUrl } from '../biketag/helpers'
 
 export async function getAuthorizationHeader(
@@ -91,7 +88,9 @@ export async function getClaims(
 
   try {
     if (!authorization) {
-      const response = await client.request({url: getApiUrl(config.biketag.host, TOKEN_ENDPOINT)})
+      const response = await client.request({
+        url: getApiUrl(config.biketag.host, TOKEN_ENDPOINT),
+      })
       return response.data as unknown as BikeTagCredentials
     }
   } catch (e) {
