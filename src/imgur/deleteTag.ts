@@ -12,6 +12,7 @@ export async function deleteTag(
   const hashes = []
   const hasImageUrls = payload.foundImageUrl || payload.mysteryImageUrl
   let tag = payload
+
   if (!hasImageUrls && (payload.tagnumber || payload.slug)) {
     tag = await this.getTags(payload.tagnumber ?? payload.slug)
   }
@@ -37,7 +38,9 @@ export async function deleteTag(
 
   return {
     data: responses,
-    success: true,
+    success: responses.reduce((o, r) => {
+      return o && typeof r === 'boolean' && !!r
+    }, true),
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,
   }
