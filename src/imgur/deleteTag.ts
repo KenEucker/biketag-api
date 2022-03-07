@@ -39,7 +39,7 @@ export async function deleteTag(
   return {
     data: responses,
     success: responses.reduce((o, r) => {
-      return o && (typeof r === 'boolean') && !!r
+      return o && typeof r === 'boolean' && !!r
     }, true),
     source: AvailableApis[AvailableApis.imgur],
     status: HttpStatusCode.Ok,
