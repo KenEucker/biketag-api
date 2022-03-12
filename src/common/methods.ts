@@ -518,10 +518,10 @@ export const sortTags = (tags: Tag[], sort = 'new', limit = 0): Tag[] => {
     /// Queue
     case 'relevance':
       sorted = tags.sort((a, b) => {
-        const aHasFoundImage = a.foundImageUrl?.length
-        const aHasMysteryImage = a.mysteryImageUrl?.length
-        const bHasFoundImage = b.foundImageUrl?.length
-        const bHasMysteryImage = b.mysteryImageUrl?.length
+        const aHasFoundImage = a?.foundImageUrl?.length
+        const aHasMysteryImage = a?.mysteryImageUrl?.length
+        const bHasFoundImage = b?.foundImageUrl?.length
+        const bHasMysteryImage = b?.mysteryImageUrl?.length
         const aHasBothImages = aHasFoundImage && aHasMysteryImage
         const bHasBothImages = bHasFoundImage && bHasMysteryImage
         const bIsBeforeA = -1
@@ -530,7 +530,7 @@ export const sortTags = (tags: Tag[], sort = 'new', limit = 0): Tag[] => {
         if (!aHasBothImages && !bHasBothImages) {
           /// compare individual images
           if (aHasFoundImage && bHasFoundImage) {
-            return a.foundTime - b.foundTime
+            return a?.foundTime - b?.foundTime
           } else if (aHasFoundImage) {
             return aIsBeforeB
           } else if (bHasFoundImage) {
@@ -539,7 +539,7 @@ export const sortTags = (tags: Tag[], sort = 'new', limit = 0): Tag[] => {
           /// should be unreachable code
         } else if (aHasBothImages && bHasBothImages) {
           /// compare all images upload timestamps
-          const firstToComplete = a.mysteryTime - b.mysteryTime
+          const firstToComplete = a?.mysteryTime - b?.mysteryTime
           return firstToComplete
         } else if (aHasBothImages && !bHasBothImages) {
           return bIsBeforeA
@@ -553,10 +553,10 @@ export const sortTags = (tags: Tag[], sort = 'new', limit = 0): Tag[] => {
       break
     /// BikeTags
     case 'new':
-      sorted = tags.sort((a, b) => b.tagnumber - a.tagnumber)
+      sorted = tags.sort((a, b) => b?.tagnumber - a?.tagnumber)
       break
     default:
-      sorted = tags.sort((a, b) => a.tagnumber - b.tagnumber)
+      sorted = tags.sort((a, b) => a?.tagnumber - b?.tagnumber)
       break
   }
 

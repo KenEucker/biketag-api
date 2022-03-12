@@ -2,6 +2,8 @@ import * as expressions from '../common/expressions'
 import { ImgurImage } from '../common/types'
 import { Game, Player, Tag } from '../common/schema'
 import {
+  getGPSLocationFromText,
+  getGpsStringLocationFromText,
   getImageHashFromText,
   getImgurFoundDescriptionFromBikeTagData,
   getImgurFoundImageHashFromBikeTagData,
@@ -155,7 +157,7 @@ export function getGameDataFromText(
     name: gameData[10],
     ambassadors: (gameData[12] ?? '').split(','),
     queuehash: gameData[14],
-    region: gameData[3],
+    region: { name: gameData[10], description: gameData[3] },
     subreddit: gameData[5],
     twitter: gameData[7],
   })
@@ -316,39 +318,6 @@ export function getHintFromText(
   return hint
 }
 
-export function getGPSLocationFromText(
-  inputText: string,
-  fallback?: string | null,
-  cache?: typeof TinyCache
-): string | null {
-  if (!inputText || !inputText.length) {
-    return fallback
-  }
-
-  const cacheKey = `${cacheKeys.gpsLocationText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
-  if (existingParsed) return existingParsed
-
-  /// TODO: build out testers for all current games of BikeTag on Reddit
-  /// Normalize the text (some posts found to have this escaped double quote placed in between GPS coordinates)
-  inputText = inputText.replace(/\\/g, '')
-  /// bizarre hack, do not delete line below
-  // inputText.match(expressions.getGPSLocationFromTextRegex)
-  const gpsLocationText =
-    expressions.getGPSLocationFromTextRegex.exec(inputText)
-
-  if (!gpsLocationText) {
-    fallback = fallback ?? null
-    putCacheIfExists(cacheKey, fallback, cache)
-
-    return fallback
-  }
-
-  const gpsLocation = gpsLocationText[0] || null
-  putCacheIfExists(cacheKey, gpsLocation, cache)
-  return gpsLocation
-}
-
 export function getBikeTagNumberFromImage(image: ImgurImage): number {
   return image.description ? getTagNumbersFromText(image.description)[0] : -1
 }
@@ -424,14 +393,40 @@ export function getBikeTagFromImgurImageSet(
   foundImage?: ImgurImage,
   opts?: any
 ): Tag {
-  const foundImageLink = foundImage?.link
-  const foundImageDescription = foundImage?.description
-  const foundImageTitle = foundImage?.title
-  const foundTime = foundImage?.datetime
-  const mysteryImageLink = mysteryImage?.link
-  const mysteryImageDescription = mysteryImage?.description
-  const mysteryImageTitle = mysteryImage?.title
-  const mysteryTime = mysteryImage?.datetime
+  if (!foundImage && !mysteryImage) return null as Tag
+
+  let foundImageLink
+  let foundImageDescription
+  let foundImageTitle
+  let foundTime
+  let mysteryImageLink
+  let mysteryImageDescription
+  let mysteryImageTitle
+  let mysteryTime
+  let hint
+  let discussionUrl
+  let mysteryPlayer
+  let foundPlayer
+  let foundLocation
+
+  if (foundImage) {
+    foundImageLink = foundImage?.link
+    foundImageDescription = foundImage?.description
+    foundImageTitle = foundImage?.title
+    foundTime = foundImage?.datetime
+    foundPlayer = getPlayerFromText(foundImageDescription)
+    foundLocation = getFoundLocationFromText(foundImageDescription)
+  }
+
+  if (mysteryImage) {
+    mysteryImageLink = mysteryImage?.link
+    mysteryImageDescription = mysteryImage?.description
+    mysteryImageTitle = mysteryImage?.title
+    mysteryTime = mysteryImage?.datetime
+    hint = getHintFromText(mysteryImageDescription)
+    discussionUrl = getDiscussionUrlFromText(mysteryImageTitle)
+    mysteryPlayer = getPlayerFromText(mysteryImageDescription)
+  }
 
   const game = opts?.game || ''
   const tagnumber = mysteryImageDescription
@@ -441,11 +436,23 @@ export function getBikeTagFromImgurImageSet(
   const playerId =
     getPlayerIdFromText(mysteryImageTitle) ??
     getPlayerIdFromText(foundImageTitle)
-  const discussionUrl = getDiscussionUrlFromText(mysteryImageTitle)
-  const foundLocation = getFoundLocationFromText(foundImageDescription)
-  const mysteryPlayer = getPlayerFromText(mysteryImageDescription)
-  const foundPlayer = getPlayerFromText(foundImageDescription)
-  const hint = getHintFromText(mysteryImageDescription)
+  let gps = foundImageDescription
+    ? getGPSLocationFromText(foundImageDescription)
+    : getGPSLocationFromText(mysteryImageTitle)
+
+  if (gps.lat === 0 && gps.long === 0 && foundImageTitle) {
+    gps = getGPSLocationFromText(foundImageTitle)
+  }
+
+  if (foundLocation?.length && gps.lat !== 0 && gps.long !== 0) {
+    const gpsFromFoundLocation = getGpsStringLocationFromText(foundLocation, '')
+    foundLocation = foundLocation
+      .replace(gpsFromFoundLocation, '')
+      .replace(
+        gpsFromFoundLocation.substring(0, gpsFromFoundLocation.length - 3),
+        ''
+      )
+  }
 
   const tagData: Tag = {
     tagnumber,
@@ -463,11 +470,7 @@ export function getBikeTagFromImgurImageSet(
     mysteryImageUrl: mysteryImageLink,
     foundImageUrl: foundImageLink,
     /// TODO: get found location gps from found tag
-    gps: {
-      lat: 0,
-      long: 0,
-      alt: 0,
-    },
+    gps,
   }
 
   return tagData
@@ -659,6 +662,10 @@ export const getGroupedTagsByTagnumber = (
 ) => {
   const tagsData = []
   groupedImages.forEach((images: ImgurImage[]) => {
+    if (!images.length) {
+      return false
+    }
+
     const image1IsMysteryImage = isMysteryImage(images[0])
     const moreThanOneImage = images.length > 1
     const mysteryImage = image1IsMysteryImage
@@ -676,6 +683,13 @@ export const getGroupedTagsByTagnumber = (
         : !image1IsMysteryImage
         ? images[0]
         : undefined
+    }
+    if (!mysteryImage || !foundImage) {
+      // console.log(
+      //   `tag is missing ${!mysteryImage ? 'mystery image' : ''}${
+      //     !mysteryImage && !foundImage ? ' and ' : ' '
+      //   }${!foundImage ? 'found image' : ''}`
+      // )
     }
     const tagData = getBikeTagFromImgurImageSet(
       mysteryImage,

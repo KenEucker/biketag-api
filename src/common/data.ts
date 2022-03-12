@@ -13,13 +13,14 @@ export const cacheKeys = {
   playerIdText: `playerId::`,
   gameSlugText: `slug::`,
   gameText: `game::`,
-  locationText: `gps::`,
+  locationText: `location::`,
   discussionText: `discussion::`,
   mentionText: `mention::`,
   tagNumberText: `tag::`,
   imagesText: `images::`,
   imageUrlText: `images::`,
-  gpsLocationText: `gps::`,
+  gpsText: `gps::`,
+  gpsStringText: `gpstring::`,
   slugText: `slug::`,
 }
 
@@ -77,14 +78,17 @@ export const createGameObject = (gameData: any = {}): Game => {
     subreddit: gameData.subreddit ?? '',
     twitter: gameData.twitter ?? '',
     logo: gameData.logo,
-    region: gameData.region ?? '',
+    region: gameData.region ?? { name: gameData.name },
     slug: gameData.slug ?? gameData.name ?? '',
   } as Game
 }
 
 export const gameDataReferenceFields = ['region', 'settings']
 export const gameDataArrayFields = ['ambassadors', 'tags', 'settings']
-export const gameDataCustomFields = { settings: '[]->{key,value}' }
+export const gameDataCustomFields = {
+  settings: '[]->{key,value}',
+  region: 'name,description,zipcode',
+}
 
 export const gameDataFields = Object.keys(createGameObject())
 

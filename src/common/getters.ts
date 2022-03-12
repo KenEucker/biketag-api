@@ -180,42 +180,61 @@ export const getHintFromText = (
   return tagNumbers
 }
 
-export const getGPSLocationFromText = (
+export const getGpsStringLocationFromText = (
   inputText: string,
-  fallback: geopoint,
+  fallback: string,
   cache?: typeof TinyCache
-): geopoint => {
-  if (!inputText.length) return fallback
+): string => {
+  if (!inputText?.length) return fallback
 
-  const cacheKey = `${cacheKeys.gpsLocationText}${inputText}`
+  const cacheKey = `${cacheKeys.gpsStringText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   /// Normalize the text (some posts found to have this escaped double quote placed in between GPS coordinates)
   inputText = inputText.replace(/\\/g, '')
   inputText.match(getGPSLocationFromTextRegex)
-  const gpsLocationText = getGPSLocationFromTextRegex.exec(inputText)
+  const gpsText = getGPSLocationFromTextRegex.exec(inputText)
 
-  if (!gpsLocationText) {
+  if (!gpsText) {
     fallback = fallback ?? null
     putCacheIfExists(cacheKey, fallback, cache)
 
     return fallback
   }
 
-  if (gpsLocationText.length) {
-    const gpsPair = gpsLocationText[0].split(',')
+  const gpsString =
+    gpsText[0].split(',').length > 2 ? gpsText[0] : `${gpsText[0]}, 0`
+  putCacheIfExists(cacheKey, gpsString, cache)
+
+  return gpsString
+}
+
+export const getGPSLocationFromText = (
+  inputText: string,
+  fallback?: geopoint,
+  cache?: typeof TinyCache
+): geopoint => {
+  const gpsString = getGpsStringLocationFromText(inputText, '', cache)
+
+  if (gpsString.length) {
+    const gpsPair = gpsString.split(',')
     const gpsLocation = {
       lat: parseFloat(gpsPair[0]),
       long: parseFloat(gpsPair[1]),
-      alt: 0,
+      alt: parseFloat(gpsPair[2]),
     }
-    putCacheIfExists(cacheKey, gpsLocation, cache)
 
     return gpsLocation
   }
 
-  return {} as geopoint
+  return (
+    fallback ?? {
+      lat: 0,
+      long: 0,
+      alt: 0,
+    }
+  )
 }
 
 export const getImgurAlbumIdFromText = (
