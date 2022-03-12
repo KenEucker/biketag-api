@@ -139,11 +139,35 @@ export function constructGameFromSanityObject(
       }, {})
     : data
 
-  const settings = data.settings ?? []
-
   gameDataReferenceFields.forEach((f) => {
     if (gameData[f] && typeof gameData[f] !== 'undefined') {
-      gameData[f] = gameData[f].name
+      const fieldMap = gameDataCustomFields[f]
+      if (fieldMap) {
+        if (gameDataArrayFields.indexOf(f) !== -1) {
+          const customFieldProperties = fieldMap
+            .replace('[]->{', '')
+            .replace('}', '')
+          const arrayFieldKeys = customFieldProperties.split(',')
+          const key = arrayFieldKeys[0]
+          const value = arrayFieldKeys[1]
+          gameData[f] = gameData[f].reduce((o: any, kv: any) => {
+            o[kv[key]] = kv[value]
+            return o
+          }, [])
+        } else {
+          const customFieldNames = fieldMap.split(',')
+
+          const customField = customFieldNames.reduce((o, s) => {
+            if (customFieldNames.indexOf(s) !== -1) {
+              o[s] = gameData[f][s]
+            }
+            return o
+          }, {})
+          gameData[f] = customField
+        }
+      } else {
+        gameData[f] = gameData[f].name
+      }
     }
   })
 
@@ -159,10 +183,6 @@ export function constructGameFromSanityObject(
   })
 
   gameData.slug = gameData.slug?.current ?? gameData.slug
-  gameData.settings = settings.reduce((o, s) => {
-    o[s.key] = s.value
-    return o
-  }, {})
   return createGameObject(gameData)
 }
 

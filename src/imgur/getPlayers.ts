@@ -43,6 +43,8 @@ export async function getPlayers(
     }
 
     for (const tag of tags) {
+      if (!tag) continue
+
       const mysteryPlayerIncludedIndex = playerNames.indexOf(tag.mysteryPlayer)
       const mysteryPlayerNotYetIncluded = mysteryPlayerIncludedIndex === -1
       const includeMysteryPlayerInList = payload.slugs?.length
