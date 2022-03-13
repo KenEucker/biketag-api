@@ -197,7 +197,7 @@ export function getPlayerFromText(
     (c.indexOf('proof ') === -1 || c.indexOf('proof') !== 0) &&
     c.indexOf('to:') === -1 &&
     c.indexOf('hint:') === -1 &&
-    (c.indexOf('by') === -1 || c.indexOf('by') !== 0)
+    (c.indexOf(' by ') === -1 || c.indexOf(' by ') !== 0)
       ? c
       : undefined
   )

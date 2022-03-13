@@ -104,7 +104,7 @@ export const getPlayerFromText = (
       c.indexOf('to:') === -1 &&
       c.indexOf('hint:') === -1 &&
       Number.isInteger(Number.parseInt(c)) === false &&
-      (c.indexOf('by') === -1 || c.indexOf('by') !== 0)
+      (c.indexOf(' by ') === -1 || c.indexOf(' by ') !== 0)
   )
 
   if (!tagPlayers.length && fallback) {
