@@ -178,10 +178,10 @@ const runTests = async (out = false) => {
     await getGameAsync("Imgur", bikeTagImgurInstance, out)
     await getTag1Async("Imgur", bikeTagImgurInstance, out)
     // await queueTagAsync("Imgur", bikeTagImgurInstance, out)
-    await getQueueAsync("Imgur", bikeTagImgurInstance, out)
-    await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
+    // await getQueueAsync("Imgur", bikeTagImgurInstance, out)
+    // await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
     await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
-    await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
+    // await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
   }
 
   if (bikeTagSanityInstance) {
