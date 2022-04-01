@@ -16,6 +16,7 @@ export async function updateTag(
 
   return new Promise(async (resolve) => {
     let success = true
+    let error
 
     if (
       isValidUpdatePayload(imgurMysteryImagePayload) &&
@@ -43,6 +44,7 @@ export async function updateTag(
           payload.mysteryImageUrl = mysteryImageUploaded.data.mysteryImageUrl
         } else {
           success = false
+          error = mysteryImageUploaded.data
         }
       }
 
@@ -63,17 +65,21 @@ export async function updateTag(
           payload.foundImageUrl = foundImageUploaded.data.foundImageUrl
         } else {
           success = false
+          error = foundImageUploaded.data
         }
       }
     } else {
-      console.error('one update payload is invalid', payload)
+      const errorMessage = 'at least one update payload is invalid'
+      console.error(errorMessage, payload)
+      error = errorMessage
     }
 
     resolve({
       data: createTagObject(payload),
       success,
+      error,
       source: AvailableApis[AvailableApis.imgur],
-      status: HttpStatusCode.Ok,
+      status: success ? HttpStatusCode.Ok : HttpStatusCode.BadRequest,
     })
   })
 }

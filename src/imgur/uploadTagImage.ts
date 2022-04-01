@@ -15,6 +15,7 @@ export async function uploadTagImage(
   payload: UploadTagImagePayload
 ): Promise<BikeTagApiResponse<Tag>> {
   let success = true
+  let error
   const mysteryImageUploadPayload =
     !payload.mysteryImageUrl && payload.mysteryImage
       ? getUploadTagImagePayloadFromTagData(payload, true)
@@ -31,6 +32,10 @@ export async function uploadTagImage(
       )) as ImgurApiResponse<ImgurImage>
       payload.foundImageUrl = foundImageUpload.data?.link
       success = success && foundImageUpload.success
+
+      if (!foundImageUpload.success) {
+        error = foundImageUpload.data
+      }
     }
     if (isValidUploadTagImagePayload(mysteryImageUploadPayload)) {
       const mysteryImageUpload = (await client.upload(
@@ -38,11 +43,16 @@ export async function uploadTagImage(
       )) as ImgurApiResponse<ImgurImage>
       payload.mysteryImageUrl = mysteryImageUpload.data?.link
       success = success && mysteryImageUpload.success
+
+      if (!mysteryImageUpload.success) {
+        error = mysteryImageUpload.data
+      }
     }
 
     resolve({
       data: createTagObject(payload),
       success,
+      error,
       source: AvailableApis[AvailableApis.imgur],
       status: HttpStatusCode.Ok,
     })
