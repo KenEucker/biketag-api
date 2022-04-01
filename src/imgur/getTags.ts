@@ -55,6 +55,6 @@ export async function getTags(
     success,
     error,
     source: AvailableApis[AvailableApis.imgur],
-    status: HttpStatusCode.Ok,
+    status: success ? HttpStatusCode.Ok : HttpStatusCode.BadRequest,
   }
 }

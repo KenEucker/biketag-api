@@ -38,7 +38,7 @@ export async function archiveTag(
           existingFoundImageResponse.data.deletehash
         )
 
-        if (!deleteFoundImageResponse.success) {
+        if (!deleteFoundImageResponse?.success) {
           existingFoundImageResponse.data =
             'archive of image succeeded but delete of existing found image failed'
           existingFoundImageResponse.success = false

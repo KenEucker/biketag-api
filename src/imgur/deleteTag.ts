@@ -12,6 +12,8 @@ export async function deleteTag(
   const hashes = []
   const hasImageUrls = payload.foundImageUrl || payload.mysteryImageUrl
   let tag = payload
+  let error
+  let success = true
 
   if (!hasImageUrls && (payload.tagnumber || payload.slug)) {
     tag = await this.getTags(payload.tagnumber ?? payload.slug)
@@ -29,19 +31,25 @@ export async function deleteTag(
   }
 
   if (!hashes.length) {
-    throw new Error('imgur delete hashes not set')
+    success = false
+    error = 'imgur delete hashes not set'
   }
 
   for (const hash of hashes) {
     responses.push((await client.deleteImage(hash)).data)
   }
 
+  success = success
+    ? responses.reduce((o, r) => {
+        return o && typeof r === 'boolean' && !!r
+      }, true)
+    : false
+
   return {
     data: responses,
-    success: responses.reduce((o, r) => {
-      return o && typeof r === 'boolean' && !!r
-    }, true),
+    success,
+    error,
     source: AvailableApis[AvailableApis.imgur],
-    status: HttpStatusCode.Ok,
+    status: success ? HttpStatusCode.Ok : HttpStatusCode.BadRequest,
   }
 }
