@@ -21,7 +21,7 @@ export async function archiveTag(
   let deleteFoundImageResponse
   let existingFoundImageResponse
 
-  if (payload.mysteryImageUrl?.length) {
+  if (payload.foundImageUrl?.length) {
     const foundImageHash = getImgurFoundImageHashFromBikeTagData(payload as Tag)
     existingFoundImageResponse = await client.getImage(foundImageHash)
     if (existingFoundImageResponse.success) {
