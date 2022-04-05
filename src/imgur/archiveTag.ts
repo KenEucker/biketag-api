@@ -21,7 +21,7 @@ export async function archiveTag(
   let deleteFoundImageResponse
   let existingFoundImageResponse
 
-  if (payload.mysteryImageUrl?.length) {
+  if (payload.foundImageUrl?.length) {
     const foundImageHash = getImgurFoundImageHashFromBikeTagData(payload as Tag)
     existingFoundImageResponse = await client.getImage(foundImageHash)
     if (existingFoundImageResponse.success) {
@@ -56,28 +56,23 @@ export async function archiveTag(
       ? await client.deleteImage(existingMysteryImageResponse.data.deletehash)
       : { success: false, data: 'delete of existing mystery image failed' }
   }
-  if (
-    archiveFoundImageResponse?.success &&
-    deleteFoundImageResponse.success &&
-    mysteryTagDeleteResponse?.success
-  ) {
+
+  if (archiveFoundImageResponse?.success && deleteFoundImageResponse?.success) {
     data = getOnlyFoundTagFromTagData(payload as Tag)
   } else if (archiveFoundImageResponse.success) {
     data = getOnlyFoundTagFromTagData(payload as Tag)
     success = false
     error = `error deleting images [${
       existingFoundImageResponse
-        ? `found: ${existingFoundImageResponse.data}, `
+        ? `archive: ${existingFoundImageResponse.data}, `
         : ''
     }${
-      deleteFoundImageResponse
-        ? `msytery: ${deleteFoundImageResponse.data}`
-        : ''
+      deleteFoundImageResponse ? `delete: ${deleteFoundImageResponse.data}` : ''
     }]`
   } else {
     data = archiveFoundImageResponse?.data
     success = false
-    error = `found: ${deleteFoundImageResponse.data}, mystery: ${mysteryTagDeleteResponse.data}`
+    error = `delete: ${deleteFoundImageResponse.data}, archive: ${existingFoundImageResponse.data}`
   }
 
   return {
