@@ -20,6 +20,7 @@ import {
   createAmbassadorObject,
   settingDataFields,
   ambassadorDataFields,
+  gameDataAssetFields,
 } from '../common/data'
 import { DataTypes } from '../common/enums'
 
@@ -97,10 +98,7 @@ export async function constructSanityObjectFromTag(
         referenceId = newReferenceObject._id
       }
 
-      tagData[field] = {
-        _type: 'reference',
-        _ref: referenceId,
-      }
+      tagData[field] = { _type: 'reference', _ref: referenceId }
     }
   }
 
@@ -110,10 +108,7 @@ export async function constructSanityObjectFromTag(
     if (fieldValue) {
       tagData[field] = {
         _type: 'image',
-        asset: {
-          _type: 'reference',
-          _ref: fieldValue,
-        },
+        asset: { _type: 'reference', _ref: fieldValue },
       }
     }
   }
@@ -121,11 +116,65 @@ export async function constructSanityObjectFromTag(
   tagData._type = 'tag'
   tagData._id = tagData._id ?? tagData.slug
 
-  tagData.slug = {
-    current: tagData.slug?.current ?? tagData.slug,
-  }
+  tagData.slug = { current: tagData.slug?.current ?? tagData.slug }
 
   return createTagObject(tagData)
+}
+
+export async function constructSanityObjectFromGame(
+  client: SanityClient,
+  data: any,
+  fields: string[] = []
+): Promise<any> {
+  const gameData = fields.length
+    ? fields.reduce((o: any, f: any) => {
+        o[f] = data[f]
+        return o
+      }, {})
+    : data
+
+  for (const field of gameDataReferenceFields) {
+    const fieldValue = gameData[field]
+
+    if (fieldValue) {
+      /// get the reference values from cache
+      const refQuery = `*[_type == "${field}" && slug.current == "${fieldValue}"]{_id}`
+      const referenceObject = await client.fetch(refQuery, {})
+      let referenceId = ''
+
+      if (referenceObject.length) {
+        referenceId = referenceObject[0]._id
+      } else {
+        // Create new reference
+        const newReferenceObject = await client.createIfNotExists({
+          _id: constructObjectIdFromSlug(fieldValue),
+          _type: field,
+          name: fieldValue,
+        })
+        referenceId = newReferenceObject._id
+      }
+
+      gameData[field] = { _type: 'reference', _ref: referenceId }
+    }
+  }
+
+  for (const field of gameDataAssetFields) {
+    const fieldValue = gameData[field]
+
+    if (fieldValue) {
+      gameData[field] = {
+        _type: 'image',
+        asset: { _type: 'reference', _ref: fieldValue },
+      }
+    }
+  }
+
+  gameData._type = 'game'
+  gameData._id = gameData._id ?? gameData.slug
+
+  gameData.slug = { current: gameData.slug?.current ?? gameData.slug }
+
+  return createGameObject(gameData)
 }
 
 export function constructGameFromSanityObject(
@@ -139,51 +188,53 @@ export function constructGameFromSanityObject(
       }, {})
     : data
 
-  gameDataReferenceFields.forEach((f) => {
-    if (gameData[f] && typeof gameData[f] !== 'undefined') {
-      const fieldMap = gameDataCustomFields[f]
-      if (fieldMap) {
-        if (gameDataArrayFields.indexOf(f) !== -1) {
-          const customFieldProperties = fieldMap
-            .replace('[]->{', '')
-            .replace('}', '')
-          const arrayFieldKeys = customFieldProperties.split(',')
-          const key = arrayFieldKeys[0]
-          const value = arrayFieldKeys[1]
-          gameData[f] = gameData[f].reduce((o: any, kv: any) => {
-            o[kv[key]] = kv[value]
-            return o
-          }, [])
+  if (gameData) {
+    gameDataReferenceFields.forEach((f) => {
+      if (gameData[f] && typeof gameData[f] !== 'undefined') {
+        const fieldMap = gameDataCustomFields[f]
+        if (fieldMap) {
+          if (gameDataArrayFields.indexOf(f) !== -1) {
+            const customFieldProperties = fieldMap
+              .replace('[]->{', '')
+              .replace('}', '')
+            const arrayFieldKeys = customFieldProperties.split(',')
+            const key = arrayFieldKeys[0]
+            const value = arrayFieldKeys[1]
+            gameData[f] = gameData[f].reduce((o: any, kv: any) => {
+              o[kv[key]] = kv[value]
+              return o
+            }, [])
+          } else {
+            const customFieldNames = fieldMap.split(',')
+
+            const customField = customFieldNames.reduce((o, s) => {
+              if (customFieldNames.indexOf(s) !== -1) {
+                o[s] = gameData[f][s]
+              }
+              return o
+            }, {})
+            gameData[f] = customField
+          }
         } else {
-          const customFieldNames = fieldMap.split(',')
-
-          const customField = customFieldNames.reduce((o, s) => {
-            if (customFieldNames.indexOf(s) !== -1) {
-              o[s] = gameData[f][s]
-            }
-            return o
-          }, {})
-          gameData[f] = customField
+          gameData[f] = gameData[f].name
         }
-      } else {
-        gameData[f] = gameData[f].name
       }
-    }
-  })
+    })
 
-  Object.keys(gameDataObjectFields).forEach((f) => {
-    if (gameData[f] && typeof gameData[f] !== 'undefined') {
-      const objectTree = gameDataObjectFields[f].split('->')
-      let targetObj: any = gameData[f]
-      objectTree.forEach((o) => {
-        targetObj = targetObj[o] ?? undefined
-      })
-      gameData[f] = targetObj
-    }
-  })
+    Object.keys(gameDataObjectFields).forEach((f) => {
+      if (gameData[f] && typeof gameData[f] !== 'undefined') {
+        const objectTree = gameDataObjectFields[f].split('->')
+        let targetObj: any = gameData[f]
+        objectTree.forEach((o) => {
+          targetObj = targetObj[o] ?? undefined
+        })
+        gameData[f] = targetObj
+      }
+    })
 
-  gameData.slug = gameData.slug?.current ?? gameData.slug
-  return createGameObject(gameData)
+    gameData.slug = gameData.slug?.current ?? gameData.slug
+  }
+  return createGameObject(gameData ?? {})
 }
 
 export function constructPlayerFromSanityObject(

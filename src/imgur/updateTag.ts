@@ -44,7 +44,8 @@ export async function updateTag(
           payload.mysteryImageUrl = mysteryImageUploaded.data.mysteryImageUrl
         } else {
           success = false
-          error = mysteryImageUploaded.data
+          error =
+            mysteryImageUploaded.error ?? mysteryImageUploaded.data ?? true
         }
       }
 
@@ -65,7 +66,7 @@ export async function updateTag(
           payload.foundImageUrl = foundImageUploaded.data.foundImageUrl
         } else {
           success = false
-          error = foundImageUploaded.data
+          error = foundImageUploaded.error ?? foundImageUploaded.data ?? true
         }
       }
     } else {

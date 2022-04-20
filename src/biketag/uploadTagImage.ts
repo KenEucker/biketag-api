@@ -2,21 +2,21 @@
 // import { UPDATE_ENDPOINT } from '../common/endpoints'
 // import { Payload, BikeTagApiResponse } from '../common/types'
 
-// export interface UploadTagImagePayload
+// export interface uploadTagImagePayload
 //   extends Pick<Payload, 'title' | 'description'> {
 //   slug: string
 // }
 
-// // function isValidUpdatePayload(p: UploadTagImagePayload) {
+// // function isValidUpdatePayload(p: uploadTagImagePayload) {
 // //   return typeof p.title === 'string' || typeof p.description === 'string';
 // // }
 
 // export async function uploadTagImage(
 //   client: BikeTagClient,
-//   payload: UploadTagImagePayload
+//   payload: uploadTagImagePayload
 // ): Promise<BikeTagApiResponse<boolean> | BikeTagApiResponse<boolean>[]> {
 //   // if (Array.isArray(payload)) {
-//   //   const promises = payload.map((p: UploadTagImagePayload) => {
+//   //   const promises = payload.map((p: uploadTagImagePayload) => {
 //   //     if (!isValidUpdatePayload(p)) {
 //   //       throw new Error('Update requires a title and/or description');
 //   //     }

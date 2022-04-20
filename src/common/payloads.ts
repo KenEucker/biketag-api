@@ -1,5 +1,6 @@
-import { Tag } from './schema'
+import { Tag, Game } from './schema'
 import { CommonPayloadData } from './types'
+import { SanityUploadPayload } from '../common/data'
 
 export type SortOptions = 'new' | 'relevance' | 'hot' | 'top' | 'comments'
 
@@ -33,11 +34,6 @@ export type getTagPayload = {
   fields?: string[]
 } & CommonPayloadData
 
-export type updateTagPayload = {
-  hash?: string
-  subreddit?: string
-} & Partial<Tag>
-
 export type deleteTagPayload = {
   hash?: string
 } & Partial<Tag>
@@ -46,6 +42,12 @@ export type archiveTagPayload = {
   archivehash?: string
   playerId?: string
 } & Partial<Tag>
+
+export type updateGamePayload = Partial<Game> & SanityUploadPayload
+export type updateTagPayload = {
+  subreddit?: string
+} & Partial<Tag> &
+  SanityUploadPayload
 
 export type uploadTagImagePayload = {
   tagnumber: number
