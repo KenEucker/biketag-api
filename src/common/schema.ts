@@ -76,6 +76,8 @@ export interface settingsArray {
 }
 
 export interface Game {
+  _id?: string
+  _type?: string
   slug: string
   name: string
   ambassadors: string[]

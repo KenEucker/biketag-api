@@ -27,7 +27,7 @@ export async function getGame(
             if (
               gameSlug
                 .toLocaleLowerCase()
-                .indexOf(payload.slug.toLocaleLowerCase()) !== -1
+                .indexOf(payload.slug?.toLocaleLowerCase()) !== -1
             ) {
               hashes.push(album.id)
             }

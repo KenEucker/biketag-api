@@ -2,15 +2,9 @@ import { SanityClient } from '@sanity/client'
 import { constructSanityObjectFromTag } from './helpers'
 import { HttpStatusCode, AvailableApis } from '../common/enums'
 import { BikeTagApiResponse } from '../common/types'
-import { Tag } from '../common/schema'
-export interface SanityUploadPayload {
-  _id: string
-  _type: string
-  slug: string
-}
-export type UpdateTagPayload = Partial<Tag> & SanityUploadPayload
+import { updateTagPayload } from '../common/payloads'
 
-function isValidUpdatePayload(utp: UpdateTagPayload) {
+function isValidUpdatePayload(utp: updateTagPayload) {
   return (
     typeof utp._id === 'string' &&
     typeof utp._type === 'string' &&
@@ -20,7 +14,7 @@ function isValidUpdatePayload(utp: UpdateTagPayload) {
 
 export async function updateTag(
   client: SanityClient,
-  payload: UpdateTagPayload | UpdateTagPayload[]
+  payload: updateTagPayload | updateTagPayload[]
 ): Promise<BikeTagApiResponse<any> | BikeTagApiResponse<any>[]> {
   const updatePayloads = Array.isArray(payload) ? payload : [payload]
   const successPayloads = []

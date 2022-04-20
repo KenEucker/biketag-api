@@ -22,6 +22,7 @@ import {
   getTagPayload,
   getTagsPayload,
   updateTagPayload,
+  updateGamePayload,
   getGamePayload,
   uploadTagImagePayload,
   deleteTagPayload,
@@ -661,6 +662,43 @@ export class BikeTagClient extends EventEmitter {
         })
     } else {
       return Promise.reject(`getGame ${Errors.NotImplemented} ${source}`)
+    }
+  }
+
+  updateGame(
+    payload: RequireAtLeastOne<updateGamePayload>,
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<boolean>> {
+    const { client, options, api, source } = this.getClientAdapter(
+      payload,
+      opts
+    )
+    let clientMethod = api.updateGame
+
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.imgur:
+          clientMethod = clientMethod.bind({
+            getTags: this.getPassthroughApiMethod(api.getTags, client),
+            uploadTagImage: this.getPassthroughApiMethod(
+              api.uploadTagImage,
+              client
+            ),
+          })
+          break
+      }
+
+      return clientMethod(client, options).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e.code ?? e,
+          success: false,
+          source,
+        })
+      })
+    } else {
+      return Promise.reject(`updateGame ${Errors.NotImplemented} ${source}`)
     }
   }
 
@@ -1327,7 +1365,7 @@ export class BikeTagClient extends EventEmitter {
   // }
 
   /// Content powered by Sanity IO Client
-  content(opts: any): SanityClient {
+  content(opts?: any): SanityClient {
     const options = opts ?? this.sanityConfig
 
     if (isSanityCredentials(options)) {
@@ -1338,7 +1376,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   /// Images powered by Imgur Client
-  images(opts: any): ImgurClient {
+  images(opts?: any): ImgurClient {
     const options = opts ?? this.imgurConfig
     if (isImgurCredentials(options)) {
       return new ImgurClient(options)
@@ -1348,7 +1386,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   /// Discussions powered by RedditClient
-  discussions(opts: any): RedditClient {
+  discussions(opts?: any): RedditClient {
     const options = opts ?? this.redditConfig
     if (isRedditCredentials(options)) {
       /// TODO: Always return the context of a given game subreddit?
@@ -1359,7 +1397,7 @@ export class BikeTagClient extends EventEmitter {
   }
 
   /// Mentions powered by TwitterClient
-  mentions(opts: any): TwitterClient {
+  mentions(opts?: any): TwitterClient {
     const options = opts ?? this.twitterConfig
     if (isTwitterCredentials(options)) {
       return new TwitterClient(options)

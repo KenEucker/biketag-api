@@ -2,7 +2,7 @@ import type { ImgurClient } from 'imgur'
 import { ImgurApiResponse, Payload } from 'imgur/lib/common/types'
 import { createTagObject } from '../common/data'
 import {
-  UploadTagImagePayload,
+  uploadTagImagePayload,
   isValidUploadTagImagePayload,
   getUploadTagImagePayloadFromTagData,
 } from './helpers'
@@ -12,7 +12,7 @@ import { HttpStatusCode, AvailableApis } from '../common/enums'
 
 export async function uploadTagImage(
   client: ImgurClient,
-  payload: UploadTagImagePayload
+  payload: uploadTagImagePayload
 ): Promise<BikeTagApiResponse<Tag>> {
   let success = true
   let error

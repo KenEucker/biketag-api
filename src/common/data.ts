@@ -24,6 +24,12 @@ export const cacheKeys = {
   slugText: `slug::`,
 }
 
+export interface SanityUploadPayload {
+  _id: string
+  _type: string
+  slug: string
+}
+
 export const createTagObject = (
   tagData: any = {},
   foundTagData: any = {}
@@ -76,10 +82,12 @@ export const createGameObject = (gameData: any = {}): Game => {
     archivehash: gameData.archivehash ?? '',
     queuehash: gameData.queuehash ?? '',
     subreddit: gameData.subreddit ?? '',
-    twitter: gameData.twitter ?? '',
+    // twitter: gameData.twitter ?? '',
     logo: gameData.logo,
     region: gameData.region ?? { name: gameData.name },
     slug: gameData.slug ?? gameData.name ?? '',
+    _id: gameData._id ?? gameData._id,
+    _type: gameData._type ?? gameData._type,
   } as Game
 }
 

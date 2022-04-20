@@ -30,7 +30,7 @@ export interface ImgurUploadPayload {
   hash?: string
   album?: string
 }
-export type UploadTagImagePayload = Partial<Tag> & Partial<ImgurUploadPayload>
+export type uploadTagImagePayload = Partial<Tag> & Partial<ImgurUploadPayload>
 export type queueTagImagePayload = Partial<Tag> &
   Partial<ImgurUploadPayload> & { queuehash: string }
 
@@ -562,7 +562,7 @@ export const getImageHashFromImgurImage = (
   return getImageHashFromText(image.link, cache)
 }
 
-export const isValidUpdatePayload = (utp: UploadTagImagePayload): boolean => {
+export const isValidUpdatePayload = (utp: uploadTagImagePayload): boolean => {
   return (
     (typeof utp.imageHash === 'string' &&
       (typeof utp.title === 'string' || typeof utp.description === 'string')) ||
@@ -572,7 +572,7 @@ export const isValidUpdatePayload = (utp: UploadTagImagePayload): boolean => {
 }
 
 export const isValidUploadTagImagePayload = (
-  utp: UploadTagImagePayload
+  utp: uploadTagImagePayload
 ): boolean => {
   return (
     /// TODO: do better type checking here
@@ -583,9 +583,9 @@ export const isValidUploadTagImagePayload = (
 }
 
 export const getUpdateTagPayloadFromTagData = (
-  payload: UploadTagImagePayload,
+  payload: uploadTagImagePayload,
   mystery = false
-): UploadTagImagePayload => {
+): uploadTagImagePayload => {
   return {
     imageHash: mystery
       ? getImgurMysteryImageHashFromBikeTagData(payload as Tag)
@@ -602,7 +602,7 @@ export const getUpdateTagPayloadFromTagData = (
 export function getQueueTagImagePayloadFromTagData(
   tagData: queueTagImagePayload,
   mystery = false
-): UploadTagImagePayload {
+): uploadTagImagePayload {
   return {
     album: tagData.queuehash ?? tagData.hash,
     type: tagData.type ?? 'stream',
@@ -621,9 +621,9 @@ export function getQueueTagImagePayloadFromTagData(
 }
 
 export function getUploadTagImagePayloadFromTagData(
-  tagData: UploadTagImagePayload,
+  tagData: uploadTagImagePayload,
   mystery = false
-): UploadTagImagePayload {
+): uploadTagImagePayload {
   return {
     album: tagData.album ?? tagData.hash,
     type: tagData.type ?? 'url',
