@@ -5,5 +5,5 @@ webpack.config.js export-ignore
 tests/assets/**/* export-ignore
 examples/**/* export-ignore
 
-*.ts linguist-detectable=true
 *.* linguist-detectable=false
+*.ts linguist-detectable=true
