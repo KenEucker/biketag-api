@@ -1,5 +1,8 @@
 {
   "private": true,
   "type": "module",
-  "main": "./index.mjs"
+  "main": "./index.mjs",
+  "dependencies": {
+    "biketag": "file:../.."
+  }
 }
