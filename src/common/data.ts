@@ -6,7 +6,7 @@ export const cacheKeys = {
   albumHash: `imgur::`,
   redditPosts: `reddit::`,
   bikeTagImage: `biketag::`,
-  bikeTagsByUser: `usertags::`,
+  bikeTagsByUser: `userTags::`,
   hintText: `hint::`,
   playerText: `player::`,
   playerData: `playerData::`,
@@ -14,13 +14,14 @@ export const cacheKeys = {
   gameSlugText: `slug::`,
   gameText: `game::`,
   locationText: `location::`,
+  confirmedBoundaryText: `confirmedBoundary::`,
   discussionText: `discussion::`,
   mentionText: `mention::`,
   tagNumberText: `tag::`,
   imagesText: `images::`,
-  imageUrlText: `images::`,
+  imageUrlText: `imageUrl::`,
   gpsText: `gps::`,
-  gpsStringText: `gpstring::`,
+  gpsStringText: `gpsString::`,
   slugText: `slug::`,
 }
 
@@ -57,6 +58,8 @@ export const createTagObject = (
     foundImageUrl: foundTagData.foundImageUrl ?? tagData.foundImageUrl ?? '',
     foundTime: foundTagData.foundTime ?? tagData.foundTime ?? 0,
     foundLocation: foundTagData.foundLocation ?? tagData.foundLocation ?? '',
+    confirmedBoundary:
+      foundTagData.confirmedBoundary ?? tagData.confirmedBoundary ?? false,
     gps: foundTagData.gps ?? tagData.gps ?? '',
   } as Tag
 }

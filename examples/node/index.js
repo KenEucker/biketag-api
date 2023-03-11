@@ -43,7 +43,7 @@ const bikeTagTwitterInstance = twitterInstanceOpts.twitter && twitterInstanceOpt
 
 
 const sanityInstanceOpts = {
-  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
+  game: process.env.BIKETAG_GAME,
   host,
   sanity: {
     projectId: process.env.SANITY_PROJECT_ID,
@@ -138,6 +138,13 @@ const getGameAsync = async (pre, client, out = false, opts = {}) => {
   return testGameData
 }
 
+const getAllGamesAsync = async (pre, client, out = false, opts = {}) => {
+  const testGameData = await client.getGame({game: undefined}, opts)
+  log(`${pre} :: success fully retrieved game data`, testGameData, out)
+
+  return testGameData
+}
+
 const get10PlayersAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
   const testPlayerData = await client.getPlayers(undefined, opts)
@@ -187,10 +194,11 @@ const runTests = async (out = false) => {
   if (bikeTagSanityInstance) {
     console.log(pretty("Sanity BikeTag Client Instantiated"), sanityInstanceOpts)
     // await getTag1Async("Sanity", bikeTagSanityInstance, out)
-    // await get10TagsAsync("Sanity", bikeTagSanityInstance, out)
+    await get10TagsAsync("Sanity", bikeTagSanityInstance, out)
     await getGameAsync("Sanity", bikeTagSanityInstance, out)
+    // await getAllGamesAsync("Sanity", bikeTagSanityInstance, out)
     // await get10PlayersAsync("Sanity", bikeTagSanityInstance, out)
-    await get10AmbassadorsAsync("Sanity", bikeTagSanityInstance, out)
+    // await get10AmbassadorsAsync("Sanity", bikeTagSanityInstance, out)
     await get10SettingsAsync("Sanity", bikeTagSanityInstance, out)
   }
 

@@ -62,6 +62,7 @@ export interface Tag {
   foundImageUrl: string
   foundTime: number
   foundLocation: string
+  confirmedBoundary: boolean
   game: string
   hint: string
   discussionUrl?: string
@@ -82,7 +83,7 @@ export interface Game {
   name: string
   ambassadors: string[]
   settings: settingsArray
-  boundary: geopoint
+  boundary: string
   mainhash?: string
   archivehash?: string
   queuehash?: string

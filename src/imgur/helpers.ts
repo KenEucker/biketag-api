@@ -293,6 +293,33 @@ export function getFoundLocationFromText(
   return foundLocation
 }
 
+export function getConfirmedBoundaryFromText(
+  inputText: string,
+  fallback?: string,
+  cache?: typeof TinyCache
+): string {
+  if (!inputText || !inputText.length) {
+    return fallback
+  }
+
+  const cacheKey = `${cacheKeys.locationText}${inputText}`
+  const existingParsed = getCacheIfExists(cacheKey)
+  if (existingParsed) return existingParsed
+
+  const confirmedBoundaryText =
+    expressions.getConfirmedBoundaryFromTextRegex.exec(inputText)
+
+  if (!confirmedBoundaryText) {
+    putCacheIfExists(cacheKey, fallback, cache)
+    return fallback as string
+  }
+
+  const confirmedBoundary = (confirmedBoundaryText[4] || '').trim()
+  putCacheIfExists(cacheKey, confirmedBoundary, cache)
+
+  return confirmedBoundary
+}
+
 export function getHintFromText(
   inputText: string,
   fallback?: string | null,
@@ -371,13 +398,8 @@ export function getImgurLinksFromText(
 
   const selfTextURLs =
     inputText.match(expressions.getImageURLsFromTextRegex) ?? []
-  const tagImageURLs = selfTextURLs.reduce((urls, url) => {
-    if (!url || !new RegExp(validImageURLs.join('|')).test(url)) return urls
-
-    urls.push(url)
-
-    return urls
-  }, [] as string[])
+  const tagImageMatch = new RegExp(validImageURLs.join('|'))
+  const tagImageURLs = selfTextURLs.filter((url) => tagImageMatch.test(url))
 
   if (!tagImageURLs.length && fallback) {
     if (cache) putCacheIfExists(cacheKey, fallback, cache)
@@ -385,6 +407,7 @@ export function getImgurLinksFromText(
   }
 
   if (cache) putCacheIfExists(cacheKey, tagImageURLs, cache)
+
   return tagImageURLs
 }
 
@@ -408,6 +431,7 @@ export function getBikeTagFromImgurImageSet(
   let mysteryPlayer
   let foundPlayer
   let foundLocation
+  let confirmedBoundary
 
   if (foundImage) {
     foundImageLink = foundImage?.link
@@ -416,6 +440,7 @@ export function getBikeTagFromImgurImageSet(
     foundTime = foundImage?.datetime
     foundPlayer = getPlayerFromText(foundImageDescription)
     foundLocation = getFoundLocationFromText(foundImageDescription)
+    confirmedBoundary = getConfirmedBoundaryFromText(foundImageTitle)
   }
 
   if (mysteryImage) {
@@ -467,6 +492,7 @@ export function getBikeTagFromImgurImageSet(
     mysteryTime,
     hint,
     playerId,
+    confirmedBoundary,
     mysteryImageUrl: mysteryImageLink,
     foundImageUrl: foundImageLink,
     /// TODO: get found location gps from found tag

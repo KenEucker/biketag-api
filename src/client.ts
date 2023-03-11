@@ -322,6 +322,7 @@ export class BikeTagClient extends EventEmitter {
         break
       default:
       case AvailableApis.biketag:
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         client = this
         api = biketagApi
         break
