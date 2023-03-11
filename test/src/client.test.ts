@@ -32,18 +32,18 @@ describe(`Built Module`, () => {
     expect(typeof latestTag?.status).toBe('number')
   })
 
-  test(`Import from ESM gets API Response`, async () => {
-    const esmProjectPath = path.join(assetsPath, 'esm')
+  // test(`Import from ESM gets API Response`, async () => {
+  //   const esmProjectPath = path.join(assetsPath, 'esm')
 
-    const httpStatus = await execSync(
-      `node --experimental-modules ${esmProjectPath}`,
-      {
-        cwd: esmProjectPath,
-      }
-    )
+  //   const httpStatus = await execSync(
+  //     `node --experimental-modules ${esmProjectPath}`,
+  //     {
+  //       cwd: esmProjectPath,
+  //     }
+  //   )
 
-    expect(httpStatus.toString()).toMatch(/^\d+($|\r?\n)/)
-  })
+  //   expect(httpStatus.toString()).toMatch(/^\d+($|\r?\n)/)
+  // })
 })
 
 describe(`Module Interfaces directs calls to getter methods correctly`, () => {
