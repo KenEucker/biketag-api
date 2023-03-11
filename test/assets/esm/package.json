@@ -3,6 +3,6 @@
   "type": "module",
   "main": "./index.mjs",
   "dependencies": {
-    "biketag": "file:../.."
+    "biketag": "file:../../.."
   }
 }
