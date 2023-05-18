@@ -38,7 +38,7 @@
     "start": "npm run serve:prod",
     "test": "jest --verbose",
     "test:dev": "jest --silent=false",
-    "test:ci": "jest --ci --coverage --maxWorkers=2",
+    "test:ci": "jest --ci --coverage --maxWorkers=2 --env=node",
     "build": "tsc",
     "build:prod": "echo 'webpack handles the compilation process ✅'",
     "compile": "webpack --mode development",
