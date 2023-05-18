@@ -5,10 +5,10 @@ const config: Config.InitialOptions = {
   preset: 'ts-jest',
   testRegex: '.*(test|spec)\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/test/tsconfig.json',
-    },
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: '<rootDir>/test/tsconfig.json'
+    }],
   },
   modulePaths: ['<rootDir>'],
   roots: ['<rootDir>/test/src'],

@@ -15,7 +15,7 @@ describe(`Built Module`, () => {
     const {
       default: defaultExport,
       BikeTagClient: namedExport,
-    } = require('biketag/biketag.node.js')
+    } = require('biketag')
     expect(namedExport).toBe(defaultExport)
   })
 
