@@ -37,4 +37,4 @@ jobs:
       - name: Listing
         run: ls -a
       - name: Run tests
-        run: npm run test:ci
+        run: node -e "console.log(require.resolve('biketag'))" && npm run test:ci
