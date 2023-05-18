@@ -6,9 +6,12 @@ const config: Config.InitialOptions = {
   testRegex: '.*(test|spec)\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      tsconfig: '<rootDir>/test/tsconfig.json'
-    }],
+    '^.+\\.(ts|tsx)$': [
+      'ts-jest',
+      {
+        tsconfig: '<rootDir>/test/tsconfig.json',
+      },
+    ],
   },
   modulePaths: ['<rootDir>'],
   roots: ['<rootDir>/test/src'],
