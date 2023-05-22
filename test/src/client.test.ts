@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { apiCredentials, assetsPath, rootPath } from './config'
+import { apiCredentials, assetsPath, testPath, packagePath } from './config'
 import { execSync } from 'child_process'
 import * as path from 'path'
 
 describe(`Built Module`, () => {
   test(`Resolves proper node build`, () => {
-    expect(require.resolve('biketag')).toBe(
-      path.join(rootPath, 'biketag.node.js')
+    expect(require.resolve(packagePath)).toBe(
+      path.join(testPath, 'biketag.node.js')
     )
   })
 
@@ -15,12 +15,12 @@ describe(`Built Module`, () => {
     const {
       default: defaultExport,
       BikeTagClient: namedExport,
-    } = require('biketag/biketag.node.js')
+    } = require(packagePath)
     expect(namedExport).toBe(defaultExport)
   })
 
   test(`Import from CommonJS gets API Response`, async () => {
-    const BikeTagClient = require('biketag').default
+    const BikeTagClient = require(packagePath).default
     const client = new BikeTagClient({
       game: 'test',
       hash: 'QjnikOm',
