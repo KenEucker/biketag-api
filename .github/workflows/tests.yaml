@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
       - name: Insalling test dependencies
-        run: cd ./test && npm i --ignore-scripts
+        run: cd ./test && npm ci --ignore-scripts
       - name: Run linters
         run: npm run lint
       - name: Build
