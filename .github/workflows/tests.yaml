@@ -11,15 +11,15 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [18.x]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
       - name: Reconfigure git to use HTTP authentication
@@ -27,12 +27,14 @@ jobs:
           git config --global url."https://github.com/".insteadOf
           ssh://git@github.com/
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
       - name: Run linters
         run: npm run lint
       - name: Build
         run: npm run build --if-present
       - name: Compile
         run: npm run compile:prod
+      - name: Listing
+        run: ls -a
       - name: Run tests
-        run: npm run test:ci
+        run: node -e "console.log(require.resolve('biketag'))" && npm run test:ci

@@ -9,3 +9,4 @@ logs
 coverage
 test/**/*.js
 test/**/*.d.ts
+test/dist

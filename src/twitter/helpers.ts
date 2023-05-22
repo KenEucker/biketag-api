@@ -94,6 +94,7 @@ export function getBikeTagFromTwitterPost(
     discussionUrl: getDiscussionUrlFromText(text),
     foundLocation: getFoundLocationFromText(text, ''),
     foundTime: 0,
+    confirmedBoundary: false,
     mysteryPlayer: mysteryPlayer,
     foundPlayer: '',
     hint: getHintFromText(text, '') as string,

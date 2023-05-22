@@ -7,6 +7,8 @@ export const apiCredentials = {
   },
 }
 
+export const packagePath = '../dist'
+export const testPath = path.resolve(__dirname, '../dist')
 export const assetsPath = path.resolve(__dirname, '../assets')
 export const rootPath = path.resolve(__dirname, '../../')
 export const srcPath = path.resolve(rootPath, 'src')

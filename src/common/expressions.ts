@@ -11,6 +11,10 @@ export const getFoundLocationFromTextRegex = new RegExp(
   /(?:is\s*(at|the)?\s*\(?)(.+?)(?:\)|]|$)|(?:found\s*(at)?\s*\(?)(.+?)(?:\)|])|(?:found\s*at\s*\()(.+?)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/im
 )
 
+export const getConfirmedBoundaryFromTextRegex = new RegExp(
+  /(\s*\[.*\]✓\s*\(.*\)\s*)/im
+)
+
 export const getPlayerFromInfoFromTextRegex = new RegExp(
   /(?:\[Player\s*)(.*)(?:]\s*\+\()(.*)(?=\))/i
 )
