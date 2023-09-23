@@ -78,6 +78,7 @@ export interface CommonData {
   source?: AvailableApis | string
   concise?: boolean
   cached?: boolean
+  verbose?: boolean // TODO: add verbose logging
 }
 
 export type CommonPayloadData = CommonData
@@ -127,6 +128,7 @@ export type ApiOptions = RequireAtLeastOne<{
   account?: string
   concise?: boolean
   cached?: boolean
+  verbose?: boolean
 }>
 
 /// ****************************  Imgur API Objects   ********************************** ///
