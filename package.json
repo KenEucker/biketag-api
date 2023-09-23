@@ -106,7 +106,7 @@
   "lint-staged": {
     "*.ts": [
       "eslint . --fix",
-      "jest --bail --findRelatedTests"
+      "jest --bail --findRelatedTests --passWithNoTests"
     ],
     "*.{js,css,md,yml,yaml,json}": "prettier . --write"
   },

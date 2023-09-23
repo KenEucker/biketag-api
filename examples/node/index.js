@@ -194,12 +194,12 @@ const runTests = async (out = false) => {
   if (bikeTagSanityInstance) {
     console.log(pretty("Sanity BikeTag Client Instantiated"), sanityInstanceOpts)
     // await getTag1Async("Sanity", bikeTagSanityInstance, out)
-    await get10TagsAsync("Sanity", bikeTagSanityInstance, out)
+    // await get10TagsAsync("Sanity", bikeTagSanityInstance, out)
     await getGameAsync("Sanity", bikeTagSanityInstance, out)
     // await getAllGamesAsync("Sanity", bikeTagSanityInstance, out)
     // await get10PlayersAsync("Sanity", bikeTagSanityInstance, out)
     // await get10AmbassadorsAsync("Sanity", bikeTagSanityInstance, out)
-    await get10SettingsAsync("Sanity", bikeTagSanityInstance, out)
+    // await get10SettingsAsync("Sanity", bikeTagSanityInstance, out)
   }
 
   if (bikeTagTwitterInstance) {
