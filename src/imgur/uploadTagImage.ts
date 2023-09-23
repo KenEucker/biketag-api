@@ -15,7 +15,8 @@ export async function uploadTagImage(
   payload: uploadTagImagePayload
 ): Promise<BikeTagApiResponse<Tag>> {
   let success = true
-  let error
+  let error: any = false
+
   const mysteryImageUploadPayload =
     !payload.mysteryImageUrl && payload.mysteryImage
       ? getUploadTagImagePayloadFromTagData(payload, true)

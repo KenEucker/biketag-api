@@ -26,7 +26,7 @@ export async function updateTag(
       const tagExists =
         tagExistsForBikeTagAlbum.success && tagExistsForBikeTagAlbum.data.length
       const existingTag = tagExists ? tagExistsForBikeTagAlbum.data[0] : null
-      if (existingTag && existingTag.mysteryImageUrl?.length) {
+      if (existingTag?.mysteryImageUrl?.length) {
         const mysteryImageUpdated = (await client.updateImage({
           ...imgurMysteryImagePayload,
           imageHash: getImageHashFromText(existingTag.mysteryImageUrl),
@@ -49,7 +49,7 @@ export async function updateTag(
         }
       }
 
-      if (existingTag && existingTag.foundImageUrl?.length) {
+      if (existingTag?.foundImageUrl?.length) {
         const foundImageUpdated = (await client.updateImage({
           ...imgurFoundImagePayload,
           imageHash: getImageHashFromText(existingTag.foundImageUrl),
