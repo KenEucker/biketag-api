@@ -32,9 +32,9 @@ export async function getBikeTagsFromRedditPosts(
       const imageUrlIsRedditGallery = (p as any).is_gallery
       const directImageLinks = []
 
-      if (p.selftext && p.selftext.length) {
+      if (p?.selftext?.length) {
         postBody = selftext = p.selftext
-      } else if (p.media && p.media.oembed) {
+      } else if (p?.media?.oembed) {
         /// Might be a single tag?
         postBody = `${p.media.oembed.title} ${p.media.oembed.description}`
         selftext = p.media.oembed.provider_url
