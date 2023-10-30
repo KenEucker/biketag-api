@@ -340,18 +340,12 @@
                   imgur: {
                       hash: game.mainhash,
                   },
-                  reddit: {
-                      subreddit: game.subreddit,
-                  },
               }, true)
               const config = biketagAPI.config()
 
               const albumTagsData = await biketagAPI.tags(undefined, config.imgur.hash ? {
                   source: 'imgur'
-              } : {
-                  source: 'reddit',
-                  hash: 'n0'
-              })
+              } : {})
               const biketags = albumTagsData ?? []
               window.biketags = biketags
 

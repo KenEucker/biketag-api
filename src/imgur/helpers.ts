@@ -60,7 +60,6 @@ export function getTagNumbersFromText(
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
-  /// TODO: build out testers for all current games of BikeTag on Reddit
   const tagNumberText = inputText.match(expressions.getTagNumbersFromTextRegex)
   if (!tagNumberText) return fallback ?? []
 
@@ -184,7 +183,6 @@ export function getPlayerFromText(
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
-  /// TODO: build out testers for all current games of BikeTag on Reddit
   /// bizarre hack, do not delete line below
   // inputText.match(expressions.getPlayerFromTextRegex)
   const playerText = expressions.getPlayerFromTextRegex.exec(inputText)
@@ -251,7 +249,6 @@ export function getDiscussionUrlFromText(
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
-  /// TODO: build out testers for all current games of BikeTag on Reddit
   const discussionUrlText =
     expressions.getDiscussionUrlFromTextRegex.exec(inputText)
 

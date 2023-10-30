@@ -9,7 +9,6 @@ export type getTagsPayload = {
   slugs?: string[]
   hash?: string
   account?: string
-  subreddit?: string
   time?: 'year' | 'hour' | 'day' | 'week' | 'month' | 'all'
   sort?: SortOptions
   limit?: number
@@ -28,7 +27,6 @@ export type getTagPayload = {
   sort?: 'new'
   limit?: number
   hash?: string
-  subreddit?: string
   account?: string
   slug: string
   fields?: string[]
@@ -44,10 +42,7 @@ export type archiveTagPayload = {
 } & Partial<Tag>
 
 export type updateGamePayload = Partial<Game> & SanityUploadPayload
-export type updateTagPayload = {
-  subreddit?: string
-} & Partial<Tag> &
-  SanityUploadPayload
+export type updateTagPayload = Partial<Tag> & SanityUploadPayload
 
 export type uploadTagImagePayload = {
   tagnumber: number
@@ -79,7 +74,6 @@ export type getPlayersPayload = {
   hash?: string
   limit?: number
   account?: string
-  subreddit?: string
 } & CommonPayloadData
 
 export type getPlayerPayload = {
@@ -87,7 +81,6 @@ export type getPlayerPayload = {
   slug?: string
   hash?: string
   account?: string
-  subreddit?: string
 } & CommonPayloadData
 
 export type getSettingPayload = {
