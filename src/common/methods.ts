@@ -11,7 +11,6 @@ import {
 } from './types'
 import FormData from 'form-data'
 import TinyCache from 'tinycache'
-import { USERAGENT } from '../client'
 import { Tag, Game, Player, Ambassador, Setting } from './schema'
 import { ApiAvailability } from './enums'
 

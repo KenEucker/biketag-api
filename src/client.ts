@@ -70,8 +70,8 @@ import { setup } from 'axios-cache-adapter'
 import { isEqual } from 'lodash'
 import { getAuthorizationHeader, getClaims } from './common/auth'
 
-export const USERAGENT =
-  'biketag-api (https://github.com/keneucker/biketag-api)'
+// export const USERAGENT =
+//   'biketag-api (https://github.com/keneucker/biketag-api)'
 export class BikeTagClient extends EventEmitter {
   static expressions = BikeTagExpressions
   static getters = BikeTagGetters
@@ -95,13 +95,13 @@ export class BikeTagClient extends EventEmitter {
     const initConfig = this.config(configuration ?? {}, true, true)
     this.initializeClients(initConfig)
     const headers = {
-      'user-agent': USERAGENT,
+      // 'user-agent': USERAGENT,
       'Content-Type': 'application/x-www-form-urlencoded',
       'Access-Control-Allow-Credentials': true,
     }
 
-    headers['user-agent'] =
-      typeof window !== 'undefined' ? undefined : USERAGENT
+    // headers['user-agent'] =
+    //   typeof window !== 'undefined' ? undefined : USERAGENT
     const responseType = 'json'
 
     /// Configure separate fetching strategies: plain, authed (default), cached (authed)
