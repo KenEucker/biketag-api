@@ -3,8 +3,6 @@ export enum AvailableApis {
   biketag = 'biketag',
   imgur = 'imgur',
   sanity = 'sanity',
-  reddit = 'reddit',
-  twitter = 'twitter',
 }
 
 export enum ApiAvailability {

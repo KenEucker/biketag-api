@@ -14,45 +14,6 @@ export interface ImgurCredentials extends ImgurApiCredentials {
   queuehash?: string
   archivehash?: string
 }
-/// ****************************  Twitter Credential Objects   ************************* ///
-export interface TwitterAccessToken {
-  access_token_key?: string
-  access_token_secret?: string
-  bearer_token?: string
-}
-
-export interface TwitterClientKey {
-  consumer_key: string
-  consumer_secret: string
-}
-
-export interface TwitterCredentials
-  extends TwitterAccessToken,
-    TwitterClientKey {
-  account?: string
-}
-
-/// ****************************  Reddit Credential Objects   ************************** ///
-export interface RedditRefreshToken {
-  refreshToken: string
-}
-
-export interface RedditClientId {
-  clientId: string
-}
-export interface RedditClientSecret {
-  clientSecret: string
-}
-
-export interface RedditCredentials
-  extends RedditRefreshToken,
-    RedditClientId,
-    RedditClientSecret {
-  userAgent: string
-  username: string
-  password: string
-  subreddit: string
-}
 
 /// ****************************  Sanity Credential Objects   ************************** ///
 export interface SanityAccessToken {
@@ -96,9 +57,7 @@ export interface BikeTagCredentials
 
 export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
-  Partial<RedditCredentials> &
-  Partial<ImgurCredentials> &
-  Partial<TwitterCredentials>
+  Partial<ImgurCredentials>
 
 /// ****************************  BikeTag API Objects   ******************************** ///
 export interface BikeTagApiResponse<
@@ -123,7 +82,6 @@ export type ApiOptions = RequireAtLeastOne<{
   slug?: string
   tagnumbers?: number[]
   tagnumber?: number
-  subreddit?: string
   account?: string
   concise?: boolean
   cached?: boolean
@@ -146,17 +104,13 @@ export type geopoint = {
 export type BikeTagConfiguration = {
   biketag: BikeTagCredentials
   sanity: SanityCredentials
-  reddit: RedditCredentials
   imgur: ImgurCredentials
-  twitter: TwitterCredentials
 }
 
 export type PartialBikeTagConfiguration = RequireAtLeastOne<{
   biketag: Partial<BikeTagCredentials>
   sanity: Partial<SanityCredentials>
-  reddit: Partial<RedditCredentials>
   imgur: Partial<ImgurCredentials>
-  twitter: Partial<TwitterCredentials>
 }>
 
 /// ****************************  Gun Data State   ************************************* ///

@@ -31,17 +31,6 @@ const imgurInstanceOpts = {
 }
 const bikeTagImgurInstance = imgurInstanceOpts.imgur && imgurInstanceOpts.imgur.clientId ? new BikeTagClient(imgurInstanceOpts) : null
 
-const twitterInstanceOpts = {
-  game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
-  host,
-  twitter: {
-    account: process.env.TWITTER_ACCOUNT,
-    bearer_token: process.env.TWITTER_BEARER_TOKEN,
-  }
-}
-const bikeTagTwitterInstance = twitterInstanceOpts.twitter && twitterInstanceOpts.twitter.account ? new BikeTagClient(twitterInstanceOpts) : null
-
-
 const sanityInstanceOpts = {
   game: process.env.BIKETAG_GAME,
   host,
@@ -53,19 +42,6 @@ const sanityInstanceOpts = {
   }
 }
 const bikeTagSanityInstance = sanityInstanceOpts.sanity && sanityInstanceOpts.sanity.projectId ? new BikeTagClient(sanityInstanceOpts) : null
-
-const redditInstanceOpts = {
-  ...imgurInstanceOpts,
-  host,
-  reddit: {
-    subreddit: process.env.REDDIT_SUBREDDIT ? process.env.REDDIT_SUBREDDIT : 'cyclepdx',
-    clientId: process.env.REDDIT_CLIENT_ID,
-    clientSecret: process.env.REDDIT_CLIENT_SECRET,
-    username: process.env.REDDIT_USERNAME,
-    password: process.env.REDDIT_PASSWORD,
-  }
-}
-const bikeTagRedditInstance = redditInstanceOpts.reddit && redditInstanceOpts.reddit.clientId ? new BikeTagClient(redditInstanceOpts) : null
 
 const pretty = m => `\x1b[44m${m}\x1b[0m`
 const log = (message, response, toLog = false) => {
@@ -201,18 +177,6 @@ const runTests = async (out = false) => {
     // await get10AmbassadorsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10SettingsAsync("Sanity", bikeTagSanityInstance, out)
   }
-
-  if (bikeTagTwitterInstance) {
-    console.log(pretty("Twitter BikeTag Client Instantiated"), twitterInstanceOpts)
-    await getCurrentTagAsync("Twitter", bikeTagTwitterInstance)
-    await get10TagsAsync("Twitter", bikeTagTwitterInstance, out)
-  }
-
-  if (bikeTagRedditInstance) {
-    console.log(pretty("Reddit BikeTag Client Instantiated"), redditInstanceOpts)
-    await getCurrentTagAsync("Reddit", bikeTagRedditInstance, out)
-    await get10TagsAsync("Reddit", bikeTagRedditInstance, out)
-  }
 }
 
 if (require.main === module) {
@@ -222,14 +186,11 @@ if (require.main === module) {
 module.exports = {
   BikeTagClient,
   bikeTagImgurInstance,
-  bikeTagRedditInstance,
   bikeTagSanityInstance,
-  bikeTagTwitterInstance,
   getGameAsync,
   getCurrentTagAsync,
   getTag1Async,
   get10TagsAsync,
   imgurInstanceOpts,
-  redditInstanceOpts,
   sanityInstanceOpts,
 }

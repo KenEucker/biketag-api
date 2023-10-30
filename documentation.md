@@ -93,16 +93,6 @@ client = new biketag({
   }
 })
 
-// or Reddit credentials: clientId and clientSecret
-client = new biketag({
-  game: 'portland',
-  reddit: {
-    subreddit: process.env.REDDIT_SUBREDDIT,
-    clientId: process.env.REDDIT_CLIENT_ID,
-    clientSecret: process.env.REDDIT_CLIENT_SECRET,
-  }
-})
-
 // or Sanity credentials: projectId and accessToken
 client = new biketag({
   game: 'portland',
@@ -135,15 +125,6 @@ client = new BikeTagClient({
     clientSecret: process.env.IMGUR_CLIENT_SECRET,
   }
 })
-
-// or your twitter bearer_token
-client = new BikeTagClient({
-  game: 'portland',
-  twitter: {
-    bearer_token: process.env.TWITTER_BEARER_TOKEN,
-    account: "portlandbiketag",
-  }
-})
 ```
 <div align="center">
 
@@ -168,17 +149,6 @@ The acceptable fields for a BikeTagConfiguration object are outlined below:
 | `apiVersion    `     | [Sanity] use current UTC date - see "specifying API version" in Sanity.IO docs            |
 | `useCdn    `         | [Sanity] `false` if you want to ensure fresh data (or are using an access token)          |
 | `token    `          | [Sanity] The sanity Access Token acquired via authorization (externally)                  |
-| `subreddit    `      | [Reddit] The reddit subreddit to target when working with BikeTag posts                   |
-| `username    `       | [Reddit] The reddit username to use for authentication                                    |
-| `password    `       | [Reddit] The reddit user password to use for authenticaiton                               |
-| `userAgent`          | [Reddit] the API user Agent (required)                                                    |
-| `clientId`           | [Reddit] The reddit Client ID to use when pulling data from Imgur as a source             |
-| `clientSecret`       | [Reddit] The reddit Client Secret to use when authenticating using the RedditClient       |
-| `consumer_key`       | [Twitter] The twitter consumer key used for authentication                                |
-| `consumer_secret`    | [Twitter] The twitter consumer secret used for authentication                             |
-| `access_token_key`   | [Twitter] The twitter access token key used for authentication                            |
-| `access_token_secret`| [Twitter] The twitter access token secret used for authentication                         | 
-| `account`            | [Twitter] The twitter account to search when using the Twitter API                        |   
 
 </div>
 
@@ -196,7 +166,7 @@ const biketagPortland = await client.getGame('portland')
 
 ### Get Tags
 
-You can get tags one by one or all at once for a given game using the `getTag` and `getTags` methods. You can also explicitely set the data adapter to any of the configurable sources (biketag, imgur, sanity, reddit, twitter):
+You can get tags one by one or all at once for a given game using the `getTag` and `getTags` methods. You can also explicitely set the data adapter to any of the configurable sources (biketag, imgur, sanity):
 
 ```ts
 // retrieves the BikeTag game data 'portland' game
@@ -211,8 +181,6 @@ const biketagPortland1 = await client.getTag(1, { source: 'imgur' })
 // retrieves the all BikeTags for the 'portland' game from sanity adapter
 const allPortlandTags = await client.getTags(undefined, { source: 'sanity' })
 
-// retrieves the BikeTags for the first five tags for the 'portland' game from the reddit adapter
-const firstFivePortlandTags = await client.getTags([1,2,3,4,5], { source: 'reddit' })
 ```
 
 ### Get Players
@@ -277,13 +245,11 @@ Using the typescript library configured and developed on the node-imgur v2 proje
 
 Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly by going out and playing a round of [BikeTag in your city](https://biketag.org)!
 
-[twitter]: https://developer.twitter.com/en/docs/twitter-api
 [github]: https://github.com/sponsors/KenEucker
 [patreon]: https://patreon.com/BikeTag
 [node-imgur]: https://github.com/kaimallea/node-imgur
 [sanity]: https://www.sanity.io/docs/api-versioning
 [imgur]: https://www.npmjs.com/package/imgur/v/next
-[reddit]: https://www.npmjs.com/package/snoowrap
 
 
 <div align="center">
@@ -298,17 +264,7 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
 
   [![sanity.io][sanity-image]](https://www.sanity.io/docs/http-api)
 
-  Discussions powered by reddit.com
-
-  [![reddit.com][reddit-image]](https://www.reddit.com/dev/api/)
-
-  Mentions powered by twitter.com
-
-  [![twitter.com][twitter-image]](https://developer.twitter.com/en/docs)
-
   [biketag-logo]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/biketag-api-logo.jpg
   [imgur-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/imgur-logo.png
   [sanity-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/sanity-logo.png
-  [reddit-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/reddit-logo.png
-  [twitter-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/twitter-logo.png
 </div>

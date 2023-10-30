@@ -6,7 +6,6 @@ export type UserMetadata = {
     reddit: string
     imgur: string
     discord: string
-    twitter: string
   }
 }
 

@@ -120,31 +120,6 @@ export async function getClaims(
         password: config.sanity.password,
       },
     } as unknown as BikeTagCredentials
-  } else if (config.reddit?.refreshToken === authorization) {
-    /// TODO: get all Reddit claims
-    return {
-      reddit: {
-        userAgent: config.reddit.userAgent,
-        username: config.reddit.username,
-        password: config.reddit.password,
-        subreddit: config.reddit.subreddit,
-        clientId: config.reddit.clientId,
-        clientSecret: config.reddit.clientSecret,
-        refreshToken: config.reddit.refreshToken,
-      },
-    } as unknown as BikeTagCredentials
-  } else if (config.twitter?.bearer_token === authorization) {
-    /// TODO: get all Twitter claims
-    return {
-      twitter: {
-        access_token_key: config.twitter.access_token_key,
-        access_token_secret: config.twitter.access_token_secret,
-        bearer_token: config.twitter.bearer_token,
-        consumer_secret: config.twitter.consumer_secret,
-        consumer_key: config.twitter.consumer_key,
-        account: config.twitter.account,
-      },
-    } as unknown as BikeTagCredentials
   } else {
     /// invalid auth
     return {}

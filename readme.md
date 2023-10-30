@@ -116,7 +116,7 @@ const biketagPortland = await client.game('portland')
 
 ### Get Tags
 
-You can get tags one by one or all at once for a given game using the `getTag` and `getTags` methods. You can also explicitely set the data adapter to any of the configurable sources (biketag, imgur, sanity, reddit, twitter):
+You can get tags one by one or all at once for a given game using the `getTag` and `getTags` methods. You can also explicitely set the data adapter to any of the configurable sources (biketag, imgur, sanity):
 
 ```ts
 // retrieves the BikeTag game data 'portland' game
@@ -131,8 +131,6 @@ const biketagPortland1 = await client.tags(1, { source: 'imgur' })
 // retrieves the all BikeTags for the 'portland' game from sanity adapter
 const allPortlandTags = await client.tags(undefined, { source: 'sanity' })
 
-// retrieves the BikeTags for the first five tags for the 'portland' game from the reddit adapter
-const firstFivePortlandTags = await client.tags([1,2,3,4,5], { source: 'reddit' })
 ```
 
 ### Get Players
@@ -156,13 +154,11 @@ Using the typescript library configured and developed on the node-imgur v2 proje
 
 Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly by going out and playing a round of [BikeTag in your city](https://client.org)!
 
-[twitter]: https://developer.twitter.com/en/docs/twitter-api
 [github]: https://github.com/sponsors/KenEucker
 [patreon]: https://patreon.com/BikeTag
 [node-imgur]: https://github.com/kaimallea/node-imgur
 [sanity]: https://www.sanity.io/docs/api-versioning
 [imgur]: https://www.npmjs.com/package/imgur/v/next
-[reddit]: https://www.npmjs.com/package/snoowrap
 
 
 <div align="center">
@@ -177,17 +173,7 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
 
   [![sanity.io][sanity-image]](https://www.sanity.io/docs/http-api)
 
-  Discussions powered by reddit.com
-
-  [![reddit.com][reddit-image]](https://www.reddit.com/dev/api/)
-
-  Mentions powered by twitter.com
-
-  [![twitter.com][twitter-image]](https://developer.twitter.com/en/docs)
-
   [biketag-logo]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/biketag-api-logo.jpg
   [imgur-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/imgur-logo.png
   [sanity-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/sanity-logo.png
-  [reddit-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/reddit-logo.png
-  [twitter-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/twitter-logo.png
 </div>

@@ -43,8 +43,6 @@ export class BikeTagServer extends BikeTagClient {
       biketag: config?.biketag ?? this.biketagConfig,
       sanity: config?.sanity ?? this.sanityConfig,
       imgur: config?.imgur ?? this.imgurConfig,
-      reddit: config?.reddit ?? this.redditConfig,
-      twitter: config?.twitter ?? this.twitterConfig,
     } as BikeTagServerConfiguration
   }
 

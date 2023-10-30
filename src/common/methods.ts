@@ -2,16 +2,12 @@ import {
   AccessToken,
   ClientKey,
   ImgurCredentials,
-  RedditCredentials,
-  RedditClientId,
-  RedditRefreshToken,
   SanityCredentials,
   Credentials,
   BikeTagCredentials,
   Payload,
   BikeTagConfiguration,
   CommonData,
-  TwitterCredentials,
 } from './types'
 import FormData from 'form-data'
 import TinyCache from 'tinycache'
@@ -99,48 +95,6 @@ export const isImgurApiReady = (
   return 1
 }
 
-export const hasRedditClientId = (arg: unknown): arg is RedditClientId => {
-  return (arg as RedditClientId).clientId !== undefined
-}
-
-export const hasRedditRefreshToken = (
-  arg: unknown
-): arg is RedditRefreshToken => {
-  return (arg as RedditRefreshToken).refreshToken !== undefined
-}
-
-export const isRedditCredentials = (
-  credentials: RedditCredentials
-): boolean => {
-  return (
-    credentials?.clientId !== undefined ||
-    (credentials?.username !== undefined && credentials.password !== undefined)
-  )
-}
-
-export const isRedditApiReady = (
-  credentials: RedditCredentials
-): ApiAvailability => {
-  if (
-    credentials?.userAgent !== undefined &&
-    credentials?.clientId !== undefined
-  ) {
-    if (
-      credentials?.clientSecret !== undefined &&
-      credentials?.refreshToken !== undefined
-    ) {
-      return 3
-    } else if (
-      credentials?.username !== undefined &&
-      credentials?.password !== undefined
-    ) {
-      return 2
-    }
-    return 1
-  }
-  return 0
-}
-
 export const isSanityCredentials = (
   credentials: SanityCredentials
 ): boolean => {
@@ -183,93 +137,8 @@ export const isBikeTagConfiguration = (
   return (
     credentials.biketag !== undefined ||
     credentials.sanity !== undefined ||
-    credentials.reddit !== undefined ||
-    credentials.imgur !== undefined ||
-    credentials.twitter !== undefined
+    credentials.imgur !== undefined
   )
-}
-
-export const isTwitterCredentials = (
-  credentials: TwitterCredentials | Credentials
-): boolean => {
-  return (
-    credentials?.bearer_token !== undefined ||
-    (credentials?.consumer_key !== undefined &&
-      credentials?.consumer_secret !== undefined) ||
-    (credentials?.access_token_key !== undefined &&
-      credentials?.access_token_secret !== undefined)
-  )
-}
-
-export const isTwitterApiReady = (
-  credentials: TwitterCredentials | Credentials
-): ApiAvailability => {
-  if (credentials?.bearer_token !== undefined) {
-    return 3
-  } else if (
-    credentials.consumer_secret !== undefined &&
-    credentials.consumer_key !== undefined
-  ) {
-    return 2
-  } else if (
-    credentials?.access_token_key !== undefined &&
-    credentials?.access_token_secret !== undefined
-  ) {
-    return 2
-  }
-  return 0
-}
-
-export const isTwitterConfiguration = (
-  credentials: TwitterCredentials
-): boolean => {
-  return (
-    credentials?.bearer_token !== undefined ||
-    credentials?.consumer_key !== undefined ||
-    credentials?.access_token_key !== undefined ||
-    (credentials?.account !== undefined &&
-      credentials?.consumer_key !== undefined &&
-      credentials.consumer_secret !== undefined)
-  )
-}
-
-export const createTwitterCredentials = (
-  credentials: Partial<TwitterCredentials>,
-  defaults: Partial<TwitterCredentials> = {}
-): TwitterCredentials => {
-  return {
-    account: credentials.account?.length
-      ? credentials.account
-      : defaults.account,
-    bearer_token: credentials.bearer_token?.length
-      ? credentials.bearer_token
-      : defaults.bearer_token,
-    consumer_key: credentials.consumer_key?.length
-      ? credentials.consumer_key
-      : defaults.consumer_key,
-    consumer_secret: credentials.consumer_secret?.length
-      ? credentials.consumer_secret
-      : defaults.consumer_secret,
-    access_token_key: credentials.access_token_key?.length
-      ? credentials.access_token_key
-      : defaults.access_token_key,
-    access_token_secret: credentials.access_token_secret?.length
-      ? credentials.access_token_secret
-      : defaults.access_token_secret,
-  }
-}
-
-export const assignTwitterCredentials = (
-  credentials: TwitterCredentials,
-  defaults?: Partial<TwitterCredentials>
-): TwitterCredentials => {
-  const twitterCredentials = isTwitterCredentials(
-    credentials as TwitterCredentials
-  )
-    ? createTwitterCredentials(credentials, defaults)
-    : defaults
-
-  return twitterCredentials as TwitterCredentials
 }
 
 export const createImgurCredentials = (
@@ -360,48 +229,6 @@ export const assignSanityCredentials = (
   return sanityCredentials as SanityCredentials
 }
 
-export const createRedditCredentials = (
-  credentials: Partial<RedditCredentials>,
-  defaults: Partial<RedditCredentials> = {}
-): RedditCredentials => {
-  return {
-    subreddit: credentials.subreddit?.length
-      ? credentials.subreddit
-      : defaults.subreddit,
-    clientId: credentials.clientId?.length
-      ? credentials.clientId
-      : defaults.clientId,
-    clientSecret: credentials.clientSecret?.length
-      ? credentials.clientSecret
-      : defaults.clientSecret,
-    password: credentials.password?.length
-      ? credentials.password
-      : defaults.password,
-    username: credentials.username?.length
-      ? credentials.username
-      : defaults.username,
-    refreshToken: credentials.refreshToken?.length
-      ? credentials.refreshToken
-      : defaults.refreshToken,
-    userAgent: credentials.userAgent?.length
-      ? credentials.userAgent
-      : defaults.userAgent ?? USERAGENT,
-  }
-}
-
-export const assignRedditCredentials = (
-  credentials: RedditCredentials,
-  defaults: Partial<RedditCredentials> = {}
-): RedditCredentials => {
-  const RedditCredentials = isRedditCredentials(
-    credentials as RedditCredentials
-  )
-    ? createRedditCredentials(credentials, defaults)
-    : defaults
-
-  return RedditCredentials as RedditCredentials
-}
-
 export const createBikeTagCredentials = (
   credentials: Partial<BikeTagCredentials>,
   defaults: Partial<BikeTagCredentials> = {}
@@ -457,14 +284,6 @@ export const assignBikeTagConfiguration = (
       config as unknown as ImgurCredentials,
       defaults?.imgur
     ),
-    reddit: assignRedditCredentials(
-      config as unknown as RedditCredentials,
-      defaults?.reddit
-    ),
-    twitter: assignTwitterCredentials(
-      config as unknown as TwitterCredentials,
-      defaults?.twitter
-    ),
   }
 
   /// Assign the individual configs with the parsed object plus overrides from individual configs in the passed in object
@@ -477,12 +296,6 @@ export const assignBikeTagConfiguration = (
   configuration.imgur = config.imgur
     ? { ...parsedConfig.imgur, ...createImgurCredentials(config.imgur) }
     : parsedConfig.imgur
-  configuration.reddit = config.reddit
-    ? { ...parsedConfig.reddit, ...createRedditCredentials(config.reddit) }
-    : parsedConfig.reddit
-  configuration.twitter = config.twitter
-    ? { ...parsedConfig.twitter, ...createTwitterCredentials(config.twitter) }
-    : parsedConfig.twitter
 
   return configuration
 }
