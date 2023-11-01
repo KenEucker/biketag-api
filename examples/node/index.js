@@ -146,7 +146,7 @@ const get10SettingsAsync = async (pre, client, out = false, opts = {}) => {
 }
 
 const runTests = async (out = false) => {
-  if (biketagDefaultInstance) {
+  if (false) {
     console.log(pretty("Default BikeTag Client Instantiated"), biketagDefaultInstanceOpts)
     await getGameAsync("BikeTag", biketagDefaultInstance, out)
     await getTag1Async("BikeTag", biketagDefaultInstance, out)
@@ -167,7 +167,7 @@ const runTests = async (out = false) => {
     await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
   }
 
-  if (bikeTagSanityInstance) {
+  if (false) {
     console.log(pretty("Sanity BikeTag Client Instantiated"), sanityInstanceOpts)
     // await getTag1Async("Sanity", bikeTagSanityInstance, out)
     // await get10TagsAsync("Sanity", bikeTagSanityInstance, out)

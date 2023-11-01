@@ -13,6 +13,7 @@ import FormData from 'form-data'
 import TinyCache from 'tinycache'
 import { Tag, Game, Player, Ambassador, Setting } from './schema'
 import { ApiAvailability } from './enums'
+import { cacheKeys } from './data'
 
 export const putCacheIfExists = (
   key: string,
@@ -441,4 +442,23 @@ export const sortSettings = (
   }
 
   return limit !== 0 ? sorted.slice(0, limit) : sorted
+}
+
+export const getGameAlbumFromCache = async (
+  gameAlbumHash: string,
+  cache?: typeof TinyCache,
+  fallback?: any
+) => {
+  const cacheKey = `imgur::${cacheKeys.albumHash}${gameAlbumHash}`
+  const existsInCache = getCacheIfExists(cacheKey, cache)
+  if (existsInCache) {
+    return existsInCache
+  }
+
+  if (fallback) {
+    const putIntoCache = await fallback()
+    putCacheIfExists(cacheKey, putIntoCache, cache)
+
+    return putIntoCache
+  }
 }

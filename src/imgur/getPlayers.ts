@@ -1,23 +1,26 @@
 import type { ImgurClient } from 'imgur'
 import { createPlayerObject, createTagObject } from '../common/data'
-import { sortPlayers } from '../common/methods'
+import { getGameAlbumFromCache, sortPlayers } from '../common/methods'
 import { getPlayersPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { Player } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { getPlayerDataFromText } from './helpers'
+import TinyCache from 'tinycache'
 
 export async function getPlayers(
   client: ImgurClient,
-  payload: getPlayersPayload
+  payload: getPlayersPayload,
+  cache?: typeof TinyCache
 ): Promise<BikeTagApiResponse<Player[]>> {
   const playersData: Player[] = []
   const playerNames: string[] = []
 
   if (client) {
     const { data: tags } = await this.getTags({ sort: 'relevance' })
-    /// TODO: this better be cached because it's being called twice now
-    const albumInfo = await (client.getAlbum(payload.hash) as any)
+    const albumInfo = await getGameAlbumFromCache(payload.hash, cache, () =>
+      client.getAlbum(payload.hash)
+    )
     const playerImages = albumInfo.data?.images?.reduce((o, i) => {
       const player = getPlayerDataFromText(i.description)
       if (player) {

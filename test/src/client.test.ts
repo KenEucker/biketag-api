@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { apiCredentials, assetsPath, testPath, packagePath } from './config'
-import { execSync } from 'child_process'
+import { apiCredentials, testPath, packagePath } from './config'
 import * as path from 'path'
 
 describe(`Built Module`, () => {

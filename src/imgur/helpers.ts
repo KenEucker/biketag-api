@@ -342,8 +342,13 @@ export function getHintFromText(
   return hint
 }
 
-export function getBikeTagNumberFromImage(image: ImgurImage): number {
-  return image.description ? getTagNumbersFromText(image.description)[0] : -1
+export function getBikeTagNumberFromImage(
+  image: ImgurImage,
+  cache?: typeof TinyCache
+): number {
+  return image.description
+    ? getTagNumbersFromText(image.description, undefined, cache)[0]
+    : -1
 }
 
 export function isPlayerImage(image: ImgurImage): boolean {
@@ -366,11 +371,12 @@ export function isFoundImage(image: ImgurImage): boolean {
 }
 
 export function sortImgurImagesByTagNumber(
-  images: ImgurImage[] = []
+  images: ImgurImage[] = [],
+  cache?: typeof TinyCache
 ): ImgurImage[] {
   return images.sort((image1, image2) => {
-    const tagNumber1 = getBikeTagNumberFromImage(image1)
-    const tagNumber2 = getBikeTagNumberFromImage(image2)
+    const tagNumber1 = getBikeTagNumberFromImage(image1, cache)
+    const tagNumber2 = getBikeTagNumberFromImage(image2, cache)
 
     const tagNumber1IsProof = tagNumber1 < 0
     const difference = Math.abs(tagNumber2) - Math.abs(tagNumber1)
@@ -507,8 +513,7 @@ export const getBikeTagUsernameFromImgurImage = (
 }
 
 export const getBikeTagDiscussionLinkFromImgurImage = (
-  image: ImgurImage,
-  cache?: typeof TinyCache
+  image: ImgurImage
 ): string | null => {
   const tagTitle = image.title || ''
   const tagDiscussionLinkIndex = tagTitle.indexOf('{')
@@ -664,11 +669,14 @@ export function getUploadTagImagePayloadFromTagData(
   }
 }
 
-export const getGroupedImagesByTagnumber = (ungroupedImages = []) => {
+export const getGroupedImagesByTagnumber = (
+  ungroupedImages = [],
+  cache?: typeof TinyCache
+) => {
   const groupedImages: any[] = []
 
   ungroupedImages.forEach((image: any) => {
-    const tagnumber = getBikeTagNumberFromImage(image)
+    const tagnumber = getBikeTagNumberFromImage(image, cache)
 
     groupedImages[tagnumber] = groupedImages[tagnumber]
       ? groupedImages[tagnumber]
