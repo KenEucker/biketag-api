@@ -1,5 +1,5 @@
 import type { ImgurClient } from 'imgur'
-import { sortTags } from '../common/methods'
+import { getGameAlbumFromCache, sortTags } from '../common/methods'
 import { getTagsPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
@@ -9,21 +9,26 @@ import {
   getGroupedTagsByTagnumber,
 } from './helpers'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
+import TinyCache from 'tinycache'
 
 export async function getTags(
   client: ImgurClient,
-  payload: getTagsPayload
+  payload: getTagsPayload,
+  cache?: typeof TinyCache
 ): Promise<BikeTagApiResponse<Tag[]>> {
   let albumImages: any[] = []
   let error
   let success = true
 
-  //
+  const albumInfo = await getGameAlbumFromCache(payload.hash, cache, () =>
+    client.getAlbum(payload.hash)
+  )
+
   if (payload.tagnumbers?.length) {
-    const albumInfo = await (client.getAlbum(payload.hash) as any)
     albumImages = albumInfo.data?.images?.filter(
       (image: any) =>
-        payload.tagnumbers.indexOf(getBikeTagNumberFromImage(image)) !== -1
+        payload.tagnumbers.indexOf(getBikeTagNumberFromImage(image, cache)) !==
+        -1
     )
   } else if (payload.slugs?.length) {
     const imagePromises: Promise<Tag>[] = []
@@ -38,16 +43,15 @@ export async function getTags(
 
     albumImages = await Promise.all(imagePromises)
   } else {
-    const albumInfo = await client.getAlbum(payload.hash)
     if (albumInfo.success) {
-      albumImages = albumInfo.data.images ?? []
+      albumImages = albumInfo.data?.images ?? []
     } else {
       success = false
       error = albumInfo.data
     }
   }
 
-  const images = getGroupedImagesByTagnumber(albumImages)
+  const images = getGroupedImagesByTagnumber(albumImages, cache)
   const tags = getGroupedTagsByTagnumber(images, payload)
 
   return {

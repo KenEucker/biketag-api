@@ -69,6 +69,9 @@ import { EventEmitter } from 'events'
 import { setup } from 'axios-cache-adapter'
 import { isEqual } from 'lodash'
 import { getAuthorizationHeader, getClaims } from './common/auth'
+import TinyCache from 'tinycache'
+
+const apiCache = new TinyCache()
 
 // export const USERAGENT =
 //   'biketag-api (https://github.com/keneucker/biketag-api)'
@@ -109,16 +112,18 @@ export class BikeTagClient extends EventEmitter {
       responseType,
     })
 
+    const authenticationInterceptor = async (config) => {
+      config.headers = config.headers ? config.headers : {}
+      config.headers.authorization = await getAuthorizationHeader(this)
+      return config
+    }
+
     this.fetcher = axios.create({
       headers,
       responseType,
     })
     this.fetcher.interceptors.request.use(
-      async (config: AxiosRequestConfig) => {
-        config.headers = config.headers ? config.headers : {}
-        config.headers.authorization = await getAuthorizationHeader(this)
-        return config
-      },
+      authenticationInterceptor,
       (e: Error) => Promise.reject(e)
     )
 
@@ -139,6 +144,10 @@ export class BikeTagClient extends EventEmitter {
       headers,
       responseType,
     })
+    this.cachedFetcher.interceptors.request.use(
+      authenticationInterceptor,
+      (e: Error) => Promise.reject(e)
+    )
   }
 
   /// ****************************  protected Class Methods   ******************************** ///
@@ -232,7 +241,9 @@ export class BikeTagClient extends EventEmitter {
             options.tagnumber = options.tagnumbers[0]
           } else if (options.slug && options.slug !== 'current') {
             options.tagnumber = BikeTagGetters.getTagnumberFromSlug(
-              options.slug
+              options.slug,
+              undefined,
+              apiCache
             )
           }
         }
@@ -529,7 +540,7 @@ export class BikeTagClient extends EventEmitter {
     const clientMethod = api.getGame
 
     if (clientMethod) {
-      return clientMethod(client, options)
+      return clientMethod(client, options, apiCache)
         .then((retrievedGameResponse) => {
           if (retrievedGameResponse.success && retrievedGameResponse.data) {
             /// Set the most important game data (hash, etc)
@@ -585,6 +596,7 @@ export class BikeTagClient extends EventEmitter {
       }
 
       return clientMethod(client, options).catch((e) => {
+        /// TODO: invalidate cache
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
@@ -639,7 +651,7 @@ export class BikeTagClient extends EventEmitter {
           break
       }
 
-      return clientMethod(client, options).catch((e) => {
+      return clientMethod(client, options, apiCache).catch((e) => {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
@@ -742,7 +754,7 @@ export class BikeTagClient extends EventEmitter {
 
       // }
 
-      return clientMethod(client, options).catch((e) => {
+      return clientMethod(client, options, apiCache).catch((e) => {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
@@ -785,7 +797,7 @@ export class BikeTagClient extends EventEmitter {
       //   break
       // }
 
-      return clientMethod(client, options).catch((e) => {
+      return clientMethod(client, options, apiCache).catch((e) => {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
@@ -993,7 +1005,7 @@ export class BikeTagClient extends EventEmitter {
 
     /// If the client adapter implements a direct way to retrieve a single player
     if (clientMethod) {
-      return clientMethod(client, options).catch((e) => {
+      return clientMethod(client, options, apiCache).catch((e) => {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
@@ -1039,7 +1051,7 @@ export class BikeTagClient extends EventEmitter {
           break
       }
 
-      return clientMethod(client, options).catch((e) => {
+      return clientMethod(client, options, apiCache).catch((e) => {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
@@ -1087,7 +1099,7 @@ export class BikeTagClient extends EventEmitter {
 
     /// If the client adapter implements a direct way to retrieve a single ambassador
     if (clientMethod) {
-      return clientMethod(client, options).catch((e) => {
+      return clientMethod(client, options, apiCache).catch((e) => {
         return {
           status: HttpStatusCode.InternalServerError,
           data: null,
@@ -1137,7 +1149,7 @@ export class BikeTagClient extends EventEmitter {
           break
       }
 
-      return clientMethod(client, options).catch((e) => {
+      return clientMethod(client, options, apiCache).catch((e) => {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,

@@ -16,7 +16,7 @@ export async function archiveTag(
   let data
   let error
   let success = true
-  let mysteryTagDeleteResponse
+  // let mysteryTagDeleteResponse
   let archiveFoundImageResponse
   let deleteFoundImageResponse
   let existingFoundImageResponse
@@ -52,9 +52,10 @@ export async function archiveTag(
       payload as Tag
     )
     const existingMysteryImageResponse = await client.getImage(mysteryImageHash)
-    mysteryTagDeleteResponse = existingMysteryImageResponse.success
-      ? await client.deleteImage(existingMysteryImageResponse.data.deletehash)
-      : { success: false, data: 'delete of existing mystery image failed' }
+    if (existingMysteryImageResponse.success) {
+      await client.deleteImage(existingMysteryImageResponse.data.deletehash)
+    }
+    // : { success: false, data: 'delete of existing mystery image failed' }
   }
 
   if (archiveFoundImageResponse?.success && deleteFoundImageResponse?.success) {
