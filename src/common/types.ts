@@ -1,7 +1,6 @@
 import { ImageData } from 'imgur/lib/common/types'
 export { Payload } from 'imgur/lib/common/types'
 import { AvailableApis, Errors } from '../common/enums'
-import { Tag, Game, Player, Setting } from './schema'
 import { ImgurCredentials as ImgurApiCredentials } from 'imgur'
 
 export type RequireAtLeastOne<T> = {
@@ -13,6 +12,19 @@ export interface ImgurCredentials extends ImgurApiCredentials {
   hash?: string
   queuehash?: string
   archivehash?: string
+}
+
+/// ****************************  S3 Credential Objects   ************************** ///
+export interface S3KeyId {
+  accessKeyId: string
+}
+
+export interface S3AccessKey {
+  secretAccessKey: string
+}
+
+export interface S3Credentials extends S3KeyId, S3AccessKey {
+  bucket: string
 }
 
 /// ****************************  Sanity Credential Objects   ************************** ///
@@ -100,44 +112,19 @@ export type geopoint = {
   alt: number
 }
 
+/// ****************************  S3 API Objects   ********************************* ///
+
 /// ****************************  BikeTag Configurations   ***************************** ///
 export type BikeTagConfiguration = {
   biketag: BikeTagCredentials
-  sanity: SanityCredentials
   imgur: ImgurCredentials
+  sanity: SanityCredentials
+  s3: S3Credentials
 }
 
 export type PartialBikeTagConfiguration = RequireAtLeastOne<{
   biketag: Partial<BikeTagCredentials>
-  sanity: Partial<SanityCredentials>
   imgur: Partial<ImgurCredentials>
+  sanity: Partial<SanityCredentials>
+  s3: Partial<S3Credentials>
 }>
-
-/// ****************************  Gun Data State   ************************************* ///
-export interface Tags {
-  [key: string]: Tag
-}
-
-export interface Players {
-  [key: string]: Player
-}
-
-export interface Settings {
-  [key: string]: Setting
-}
-
-export type BikeTagGame = {
-  game: Game
-  currentTagNumber: number
-  players: Players
-  tags: Tags
-  queue: Tags
-  settings: Settings
-}
-
-export interface BikeTagGameState {
-  [key: string]: BikeTagGame
-}
-export interface BikeTagServerConfiguration extends BikeTagConfiguration {
-  host: string
-}

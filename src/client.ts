@@ -3,6 +3,7 @@ import {
   Credentials,
   BikeTagApiResponse,
   ImgurCredentials,
+  S3Credentials,
   SanityCredentials,
   RequireAtLeastOne,
   BikeTagCredentials,
@@ -48,6 +49,7 @@ import {
   createBikeTagCredentials,
   createImgurCredentials,
   createSanityCredentials,
+  createS3Credentials,
 } from './common/methods'
 import {
   createGameObject,
@@ -62,6 +64,7 @@ import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 
 import ImgurClient from 'imgur'
+import AWS from 'aws-sdk'
 import sanityClient, { SanityClient } from '@sanity/client'
 
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
@@ -90,6 +93,7 @@ export class BikeTagClient extends EventEmitter {
   protected sanityClient?: SanityClient
   protected sanityConfig?: SanityCredentials
   protected imgurConfig?: ImgurCredentials
+  protected s3Config?: S3Credentials
   protected biketagConfig?: BikeTagCredentials
 
   constructor(readonly configuration: Credentials | BikeTagConfiguration) {
@@ -338,21 +342,6 @@ export class BikeTagClient extends EventEmitter {
     ) {
       return AvailableApis.biketag
     }
-    // const sanityApiAvailability =
-    //   this.sanityConfig && this.sanityClient && (!method || !!sanityApi[method])
-    //     ? isSanityApiReady(this.sanityConfig)
-    //     : 0
-    // const imgurApiAvailability =
-    //   this.imgurConfig && this.imgurClient && (!method || !!imgurApi[method])
-    //     ? isImgurApiReady(this.imgurConfig)
-    //     : 0
-    // const bikeTagApiAvilability =
-    //   this.biketagConfig &&
-    //   isBikeTagCredentials(this.biketagConfig) &&
-    //   isBikeTagApiReady(this.biketagConfig) &&
-    //   (!method || !!biketagApi[method])
-    //     ? isBikeTagApiReady(this.biketagConfig)
-    //     : 0
 
     return null
   }
@@ -446,6 +435,9 @@ export class BikeTagClient extends EventEmitter {
           case AvailableApis.sanity:
             createCredentialsMethod = createSanityCredentials
             break
+          case AvailableApis.s3:
+            createCredentialsMethod = createS3Credentials
+            break
         }
 
         return !overwrite && this[configName] && config
@@ -468,12 +460,18 @@ export class BikeTagClient extends EventEmitter {
         parsedConfig,
         overwrite
       )
+      const s3Config = initClientConfig(
+        AvailableApis.s3,
+        parsedConfig,
+        overwrite
+      )
 
       if (reInitialize) {
         const initializeConfig: BikeTagConfiguration = {
           biketag: undefined,
           imgur: undefined,
           sanity: undefined,
+          s3: undefined,
         }
 
         if (!isEqual(this.imgurConfig, imgurConfig)) {
@@ -488,6 +486,7 @@ export class BikeTagClient extends EventEmitter {
 
       this.biketagConfig = biketagConfig
       this.imgurConfig = imgurConfig
+      this.s3Config = s3Config
       this.sanityConfig = sanityConfig
     }
 
@@ -1249,24 +1248,6 @@ export class BikeTagClient extends EventEmitter {
   }
 
   /// ****************************  Client Instance Methods   ****************************** ///
-
-  /// Data provided by Gun Client
-  // data(opts: any = {}): BikeTagGunClient {
-  //   const options = opts ?? this.biketagConfig
-
-  //   if (isBikeTagCredentials(options)) {
-  //     if (options.game) {
-  //       return this.biketagClient.get(
-  //         options.game
-  //       ) as unknown as BikeTagGunClient
-  //     } else {
-  //       return new Gun<BikeTagGameState>(options)
-  //     }
-  //   }
-
-  //   /// Always return a valid gun client, because we can
-  //   return new Gun<BikeTagGameState>(options)
-  // }
 
   /// Content powered by Sanity IO Client
   content(opts?: any): SanityClient {

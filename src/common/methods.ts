@@ -8,6 +8,7 @@ import {
   Payload,
   BikeTagConfiguration,
   CommonData,
+  S3Credentials,
 } from './types'
 import FormData from 'form-data'
 import TinyCache from 'tinycache'
@@ -95,6 +96,20 @@ export const isImgurApiReady = (
   return 1
 }
 
+export const isS3Credentials = (credentials: S3Credentials): boolean => {
+  return credentials?.accessKeyId !== undefined
+}
+
+export const isS3ApiReady = (credentials: S3Credentials): ApiAvailability => {
+  if (
+    credentials.accessKeyId !== undefined &&
+    credentials.secretAccessKey !== undefined
+  ) {
+    return 1
+  }
+
+  return 0
+}
 export const isSanityCredentials = (
   credentials: SanityCredentials
 ): boolean => {
@@ -227,6 +242,32 @@ export const assignSanityCredentials = (
     : defaults
 
   return sanityCredentials as SanityCredentials
+}
+
+export const createS3Credentials = (
+  credentials: Partial<S3Credentials>,
+  defaults: Partial<S3Credentials> = {}
+): S3Credentials => {
+  return {
+    bucket: credentials.bucket ?? defaults.bucket,
+    secretAccessKey: credentials.secretAccessKey?.length
+      ? credentials.secretAccessKey
+      : defaults.secretAccessKey,
+    accessKeyId: credentials.accessKeyId?.length
+      ? credentials.accessKeyId
+      : defaults.accessKeyId,
+  }
+}
+
+export const assignS3Credentials = (
+  credentials: S3Credentials,
+  defaults?: Partial<S3Credentials>
+): S3Credentials => {
+  const s3Credentials = isS3Credentials(credentials as S3Credentials)
+    ? createS3Credentials(credentials, defaults)
+    : defaults
+
+  return s3Credentials as S3Credentials
 }
 
 export const createBikeTagCredentials = (
