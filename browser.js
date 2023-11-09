@@ -233,7 +233,7 @@ function biketagExample(options = {}) {
 
     /// Helpers
     const getLogoImageUrl = (game = {}) => game.logo ?
-            `${sanityBaseCDNUrl}${game.logo.replace('image-', '').replace('-png', '.webp').replace('-png', '.webp').replace('-jpg','.jpg')}`
+            `${sanityBaseCDNUrl}${game.logo.replace('image-', '').replace('-png', '.png').replace('-webp', '.webp').replace('-jpg','.jpg')}`
             : `${sanityBaseCDNUrl}dd6d8069fdfc6a4b7f9670977f0959301587534f-1200x600.png`
 
     /// ... Pagination Methods ... ///
