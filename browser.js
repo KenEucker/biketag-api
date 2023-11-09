@@ -48,7 +48,7 @@ function biketagExample(options = {}) {
         const createImage = (url) => {
             const imgEl = document.createElement('img')
             const ext = /[^.]+$/.exec(url)
-            if (['.jpg', '.jpeg', '.png', '.bmp'].indexOf(ext) !== -1) {
+            if (['.jpg', '.jpeg', '.png', '.bmp', '.webp'].indexOf(ext) !== -1) {
                 url = url.replace(ext, `l${ext}`)
             } else if (ext.indexOf('.com/') === 0 && url.indexOf('//imgur.com/')) {
                 url = `${url.replace('//imgur.com', '//i.imgur.com')}l.jpg`
@@ -233,7 +233,7 @@ function biketagExample(options = {}) {
 
     /// Helpers
     const getLogoImageUrl = (game = {}) => game.logo ?
-            `${sanityBaseCDNUrl}${game.logo.replace('image-', '').replace('-png', '.png').replace('-jpg','.jpg')}`
+            `${sanityBaseCDNUrl}${game.logo.replace('image-', '').replace('-png', '.webp').replace('-png', '.webp').replace('-jpg','.jpg')}`
             : `${sanityBaseCDNUrl}dd6d8069fdfc6a4b7f9670977f0959301587534f-1200x600.png`
 
     /// ... Pagination Methods ... ///
