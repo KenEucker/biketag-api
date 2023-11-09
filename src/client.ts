@@ -675,7 +675,16 @@ export class BikeTagClient extends EventEmitter {
       opts,
       DataTypes.queue
     )
-    const clientMethod = api.queueTag
+    let clientMethod = api.queueTag
+
+    switch (options.source) {
+      case AvailableApis.imgur:
+        clientMethod = clientMethod.bind({
+          getQueue: this.getPassthroughApiMethod(api.getQueue, client),
+          getTags: this.getPassthroughApiMethod(api.getTags, client),
+        })
+        break
+    }
 
     /// If the client adapter implements the method
 
