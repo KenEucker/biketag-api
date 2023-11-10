@@ -20,8 +20,10 @@ export async function getTags(
   let error
   let success = true
 
-  const albumInfo = await getGameAlbumFromCache(payload.hash, cache, () =>
-    client.getAlbum(payload.hash)
+  const albumInfo = await getGameAlbumFromCache(
+    payload.hash,
+    payload.cached ? cache : undefined,
+    () => client.getAlbum(payload.hash)
   )
 
   if (payload.tagnumbers?.length) {

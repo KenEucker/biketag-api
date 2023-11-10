@@ -20,7 +20,7 @@ export async function getGame(
   const cacheKey = `imgur::${cacheKeys.gameIdText}${
     payload.slug ?? payload.name ?? 'biketag'
   }`
-  let game = getCacheIfExists(cacheKey, cache)
+  let game = payload.cached ? getCacheIfExists(cacheKey, cache) : null
   let error
   let success = true
 
