@@ -343,7 +343,7 @@ export const getImageURLsFromText = (
 
       const ext = /[^.]+$/.test(url) ? '.' + /[^.]+$/.exec(url) : ''
       if (
-        ['.jpg', '.jpeg', '.png', '.bmp'].indexOf(ext) === -1 &&
+        ['.jpg', '.jpeg', '.png', '.webp', '.bmp'].indexOf(ext) === -1 &&
         ext.indexOf('.com/') === 0 &&
         url.indexOf('//imgur.com/') !== -1 &&
         url.indexOf('3/album') === -1 &&
