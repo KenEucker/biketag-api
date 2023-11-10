@@ -42,9 +42,7 @@ export async function queueTag(
 
   const queuedTags = await this.getQueue(undefined, cache)
   const playerAlreadyQueued = queuedTags.data?.find((t) => {
-    return isCompleteQueuedTag
-      ? t.mysteryPlayer === payload.mysteryPlayer
-      : t.foundPlayer === payload.foundPlayer
+    return !isCompleteQueuedTag && t.foundPlayer === payload.foundPlayer
   })
   const currentTags = await this.getTags(undefined, cache)
   const currentTag = currentTags?.data?.length ? currentTags.data[0] : undefined
