@@ -18,8 +18,10 @@ export async function getQueue(
       payload.queuehash = game.data.queuehash
     }
   }
-  const albumInfo = await getGameAlbumFromCache(payload.queuehash, cache, () =>
-    client.getAlbum(payload.queuehash)
+  const albumInfo = await getGameAlbumFromCache(
+    payload.queuehash,
+    payload.cached ? cache : undefined,
+    () => client.getAlbum(payload.queuehash)
   )
 
   const images = getGroupedImagesByTagnumber(albumInfo?.data?.images, cache)

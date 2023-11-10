@@ -18,8 +18,10 @@ export async function getPlayers(
 
   if (client) {
     const { data: tags } = await this.getTags({ sort: 'relevance' })
-    const albumInfo = await getGameAlbumFromCache(payload.hash, cache, () =>
-      client.getAlbum(payload.hash)
+    const albumInfo = await getGameAlbumFromCache(
+      payload.hash,
+      payload.cached ? cache : undefined,
+      () => client.getAlbum(payload.hash)
     )
     const playerImages = albumInfo.data?.images?.reduce((o, i) => {
       const player = getPlayerDataFromText(i.description)
