@@ -68,6 +68,13 @@ const getTag1Async = async (pre, client, out = false, opts = {}) => {
   return tag1
 }
 
+const getTodaysTagsAsync = async (pre, client, out = false, opts = {}) => {
+  const todaysTags = await client.tags({ time :'day', limit: 10 }, opts)
+  log(`${pre} :: successfully todays tags data`, todaysTags, out)
+
+  return todaysTags
+}
+
 const getQueueAsync = async (pre, client, out = false, opts = {}) => {
   const tags = await client.getQueue(undefined, opts)
   log(`${pre} :: successfully retrieved queued tag data`, tags, out)
@@ -159,12 +166,13 @@ const runTests = async (out = false) => {
   if (bikeTagImgurInstance) {
     console.log(pretty("Imgur BikeTag Client Instantiated"), imgurInstanceOpts)
     await getGameAsync("Imgur", bikeTagImgurInstance, out)
-    await getTag1Async("Imgur", bikeTagImgurInstance, out)
+    // await getTag1Async("Imgur", bikeTagImgurInstance, out)
+    await getTodaysTagsAsync("Imgur", bikeTagImgurInstance, out)
     // await queueTagAsync("Imgur", bikeTagImgurInstance, out)
-    await getQueueAsync("Imgur", bikeTagImgurInstance, out)
-    await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
-    await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
-    await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
+    // await getQueueAsync("Imgur", bikeTagImgurInstance, out)
+    // await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
+    // await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
+    // await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
   }
 
   if (false) {

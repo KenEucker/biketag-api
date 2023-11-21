@@ -57,7 +57,7 @@ export async function getTags(
   const tags = getGroupedTagsByTagnumber(images, payload)
 
   return {
-    data: sortTags(tags, payload.sort, payload.limit),
+    data: sortTags(tags, payload.sort, payload.limit, payload.time),
     success,
     error,
     source: AvailableApis[AvailableApis.imgur],

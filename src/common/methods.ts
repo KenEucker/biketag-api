@@ -320,7 +320,12 @@ export const isSettingData = (setting: Partial<Setting>): boolean => {
   return !!setting.name && !!setting.key && !!setting.description
 }
 
-export const sortTags = (tags: Tag[], sort = 'new', limit = 0): Tag[] => {
+export const sortTags = (
+  tags: Tag[],
+  sort = 'new',
+  limit = 0,
+  time = 'all'
+): Tag[] => {
   let sorted = tags
 
   switch (sort) {
@@ -371,6 +376,27 @@ export const sortTags = (tags: Tag[], sort = 'new', limit = 0): Tag[] => {
     default:
       sorted = tags.sort((a, b) => a?.tagnumber - b?.tagnumber)
       break
+  }
+
+  let timeConstraint = 0
+  switch (time) {
+    case 'hour':
+      timeConstraint = 60 * 60 * 1000
+      break
+    case 'day':
+      timeConstraint = 60 * 60 * 24 * 1000
+      break
+    case 'week':
+      timeConstraint = 60 * 60 * 24 * 7 * 1000
+      break
+    case 'all':
+    default:
+      break
+  }
+
+  if (timeConstraint) {
+    const afterDate = Date.now() - timeConstraint
+    sorted = sorted.filter((t) => t.mysteryTime * 1000 > afterDate)
   }
 
   return limit !== 0 ? sorted.slice(0, limit) : sorted
