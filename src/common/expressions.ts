@@ -8,7 +8,7 @@ export const getPlayerFromTextRegex = new RegExp(
 )
 
 export const getFoundLocationFromTextRegex = new RegExp(
-  /(?:is\s*(at|the)?\s*\(?)(.+?)(?:\)|]|$)|(?:found\s*(at)?\s*\(?)(.+?)(?:\)|])|(?:found\s*at\s*\()(.+?)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/im
+  /(?:is\s*(at|the)?\s*\(?)(.*)(?:\)|]|$)|(?:found\s*(at)?\s*\(?)(.*)(?:\)|])|(?:found\s*at\s*\()(.*)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/im
 )
 
 export const getConfirmedBoundaryFromTextRegex = new RegExp(
@@ -25,7 +25,7 @@ export const getGameFromInfoFromTextRegex = new RegExp(
 
 export const getGameSlugFromTextRegex = new RegExp(/((\w*)\s*bike\s*tag!?)/i)
 
-export const getHintFromTextRegex = new RegExp(/(?:hint:\s*?)([^)]*)/i)
+export const getHintFromTextRegex = new RegExp(/(?:hint:\s*)(.*)\)/i)
 
 export const getGPSLocationFromTextRegex = new RegExp(
   /(([0-9]{1,2})[:|°]([0-9]{1,2})[:|'|′]?([0-9]{1,2}(?:\.[0-9]+){0,1})?["|″]([N|S]),?\s*([0-9]{1,3})[:|°]([0-9]{1,2})[:|'|′]?([0-9]{1,2}(?:\.[0-9]+){0,1})?["|″]([E|W]))|((-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?))/
