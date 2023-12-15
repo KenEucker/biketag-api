@@ -58,6 +58,8 @@ export const getTagNumbersFromText = (
   if (!tagNumberText) return fallback || []
 
   const tagNumbers = tagNumberText.reduce((numbers, text) => {
+    if (!text) return numbers
+
     const tagNumberMatches = text.match(/\d+/)
     const tagNumber =
       tagNumberMatches && tagNumberMatches.length ? tagNumberMatches[0] : null
@@ -217,6 +219,7 @@ export const getGPSLocationFromText = (
 ): geopoint => {
   const gpsString = getGpsStringLocationFromText(inputText, '', cache)
 
+  /// Encode/decode the GPS string here
   if (gpsString.length) {
     const gpsPair = gpsString.split(',')
     const gpsLocation = {

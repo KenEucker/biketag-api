@@ -160,6 +160,7 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
 [sanity]: https://www.sanity.io/docs/api-versioning
 [imgur]: https://www.npmjs.com/package/imgur/v/next
 
+![Alt](https://repobeats.axiom.co/api/embed/efea76b8d7f37062fcded362417a369dc9a3a401.svg "Repobeats analytics image")
 
 <div align="center">
 

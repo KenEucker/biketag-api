@@ -56,6 +56,8 @@ export function getTagNumbersFromText(
   fallback: number[] | null = null,
   cache?: typeof TinyCache
 ): number[] {
+  if (!inputText?.length) return fallback
+
   const cacheKey = `${cacheKeys.tagNumberText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
@@ -64,8 +66,10 @@ export function getTagNumbersFromText(
   if (!tagNumberText) return fallback ?? []
 
   const tagNumbers = tagNumberText.reduce((numbers, text) => {
+    if (!text) return numbers
+
     let tagNumber: any = text.match(/\d+/)
-    tagNumber = tagNumber && tagNumber.length ? tagNumber[0] : null
+    tagNumber = tagNumber?.length ? tagNumber[0] : null
 
     if (!tagNumber) return numbers
 
