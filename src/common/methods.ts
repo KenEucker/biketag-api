@@ -474,7 +474,7 @@ export const getGameAlbumFromCache = async (
   gameAlbumHash: string,
   cache?: typeof TinyCache,
   fallback?: any
-) => {
+): Promise<any> => {
   const cacheKey = `imgur::${cacheKeys.albumHash}${gameAlbumHash}`
   const existsInCache = getCacheIfExists(cacheKey, cache)
   if (existsInCache) {

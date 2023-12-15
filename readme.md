@@ -152,7 +152,7 @@ This project is heavily influenced by the [node-imgur][node-imgur] package, the 
 
 Using the typescript library configured and developed on the node-imgur v2 project: https://github.com/kaimallea/node-imgur, this package comes bundled with testing using jest and automated releases using github actions. Many thanks to Kaimallea for collaborating with me on the imgur API because I learned so much along the way!
 
-Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly by going out and playing a round of [BikeTag in your city](https://client.org)!
+Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly by going out and playing a round of [BikeTag in your city](https://biketag.org)!
 
 [github]: https://github.com/sponsors/KenEucker
 [patreon]: https://patreon.com/BikeTag
@@ -160,6 +160,7 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
 [sanity]: https://www.sanity.io/docs/api-versioning
 [imgur]: https://www.npmjs.com/package/imgur/v/next
 
+![Alt](https://repobeats.axiom.co/api/embed/efea76b8d7f37062fcded362417a369dc9a3a401.svg "Repobeats analytics image")
 
 <div align="center">
 
