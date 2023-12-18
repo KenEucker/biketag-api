@@ -152,6 +152,14 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  protected Class Methods   ******************************** ///
 
+  /**
+   * Returns a normalized object of the payload and options for the API request from a variety of input types.
+   *
+   * @param opts - The options passed in from the request
+   * @param source - The source type to use for the request
+   * @param method - The method requested of the BikeTag API
+   * @returns The API options payload object
+   */
   protected getInitialPayload(
     opts: any,
     source?: AvailableApis | string,
@@ -494,11 +502,6 @@ export class BikeTagClient extends EventEmitter {
     return this.getConfig()
   }
 
-  // TODO: remove
-  toRemove(): string {
-    return 'remove'
-  }
-
   plainRequest(options: AxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
     return this.plainFetcher(options)
   }
@@ -517,6 +520,13 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  Game Data Methods   ************************************ ///
 
+  /**
+   * Retrieves BikeTag `Game` data based on the provided payload and options
+   *
+   * @param payload - The getGamePayload for retrieving BikeTag `Game` data
+   * @param opts - Credentials and other options for retrieving BikeTag `Game` data
+   * @returns A promise that resolves to a BikeTag `Game` object
+   */
   game(
     payload?: RequireAtLeastOne<getGamePayload> | string,
     opts?: RequireAtLeastOne<Credentials>
@@ -680,6 +690,7 @@ export class BikeTagClient extends EventEmitter {
     switch (options.source) {
       case AvailableApis.imgur:
         clientMethod = clientMethod.bind({
+          getGame: this.getPassthroughApiMethod(api.getGame, client),
           getQueue: this.getPassthroughApiMethod(api.getQueue, client),
           getTags: this.getPassthroughApiMethod(api.getTags, client),
         })
@@ -733,6 +744,13 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  Tag Data Methods   ************************************ ///
 
+  /**
+   * Retrieves BikeTags based on the provided payload and options for a given game
+   *
+   * @param payload - The getTagPayload for retrieving tags
+   * @param opts - Credentials and other options for retrieving tags
+   * @returns A promise that resolves to an array of tags
+   */
   tags(
     payload?:
       | RequireAtLeastOne<getTagPayload>
@@ -747,6 +765,13 @@ export class BikeTagClient extends EventEmitter {
     )
   }
 
+  /**
+   * Retrieves a single BikeTag for a given game
+   *
+   * @param payload - The getTagPayload for retrieving tags
+   * @param opts - Credentials and other options for retrieving tags
+   * @returns A promise that resolves to a `BikeTagApiResponse` object containing the tag data.
+   */
   getTag(
     payload?: RequireAtLeastOne<getTagPayload> | number,
     opts?: RequireAtLeastOne<Credentials>

@@ -17,6 +17,8 @@ import { cacheKeys, createTagObject } from '../common/data'
 import TinyCache from 'tinycache'
 import { Tag } from './schema'
 
+export const getConfirmedBoundarySymbol = '✓'
+
 export const getTagnumberFromSlug = (
   inputText: string,
   fallback?: number,
@@ -219,7 +221,6 @@ export const getGPSLocationFromText = (
 ): geopoint => {
   const gpsString = getGpsStringLocationFromText(inputText, '', cache)
 
-  /// Encode/decode the GPS string here
   if (gpsString.length) {
     const gpsPair = gpsString.split(',')
     const gpsLocation = {
@@ -466,10 +467,8 @@ export const getImgurFoundTitleFromBikeTagData = (tag: Tag): string =>
     !tag.gps || (tag.gps.lat === 0 && tag.gps.long === 0)
       ? ''
       : `(${tag.gps.lat ?? 0}, ${tag.gps.long ?? 0}, ${tag.gps.alt ?? 0})`
-  } ${
-    tag.playerId?.length
-      ? `[${tag.playerId}]${tag.confirmedBoundary ? '✓' : ''}`
-      : ''
+  } ${tag.playerId?.length ? `[${tag.playerId}]` : ''} ${
+    tag.confirmedBoundary ? getConfirmedBoundarySymbol : ''
   }`
 
 export const getImgurMysteryImageHashFromBikeTagData = (
@@ -483,7 +482,9 @@ export const getImgurMysteryTitleFromBikeTagData = (tag: Tag): string =>
     !tag.gps || (tag.gps.lat === 0 && tag.gps.long === 0)
       ? ''
       : `(${tag.gps.lat ?? 0}, ${tag.gps.long ?? 0}, ${tag.gps.alt ?? 0})`
-  } ${tag.discussionUrl ? `{${tag.discussionUrl}}` : ''}`
+  } ${tag.playerId?.length ? `[${tag.playerId}]` : ''} ${
+    tag.confirmedBoundary ? getConfirmedBoundarySymbol : ''
+  }`
 
 export const getImgurMysteryDescriptionFromBikeTagData = (
   tag: Tag,
