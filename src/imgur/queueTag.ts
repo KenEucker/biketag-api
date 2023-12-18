@@ -40,14 +40,17 @@ export async function queueTag(
   let data
   let error
 
-  const queuedTags = await this.getQueue(undefined, cache)
-  const playerAlreadyQueued = queuedTags.data?.find((t) => {
-    return !isCompleteQueuedTag && t.foundPlayer === payload.foundPlayer
-  })
+  const queuedTags = await this.getQueue(
+    { queuehash: payload.queuehash },
+    cache
+  )
+  const playerAlreadyQueuedError =
+    !isCompleteQueuedTag &&
+    queuedTags.data?.find((t) => t.foundPlayer === payload.foundPlayer)
   const currentTags = await this.getTags(undefined, cache)
   const currentTag = currentTags?.data?.length ? currentTags.data[0] : undefined
 
-  if (playerAlreadyQueued) {
+  if (playerAlreadyQueuedError) {
     data = payload
     success = false
     error = 'player already has queued tag'
@@ -59,7 +62,6 @@ export async function queueTag(
     status = HttpStatusCode.Conflict
   } else {
     if (isCompleteQueuedTag) {
-      /// Remove the playerId so that it can't be mimicked
       /// Update just the mystery image (current.tagnumber + 1)
       const mysteryTagUpdatePayload = getUpdateTagPayloadFromTagData(
         payload,
