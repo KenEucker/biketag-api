@@ -1065,7 +1065,11 @@ export class BikeTagClient extends EventEmitter {
 
     /// Else, use the get all and filter method
     return this.getPlayers(
-      this.getInitialPayload(payload, undefined, 'getPlayers') as getPlayersPayload,
+      this.getInitialPayload(
+        payload,
+        undefined,
+        'getPlayers'
+      ) as getPlayersPayload,
       opts
     ).then((r) => {
       return {
@@ -1159,7 +1163,11 @@ export class BikeTagClient extends EventEmitter {
 
     /// Else, use the get all and filter method
     return this.getAmbassadors(
-      this.getInitialPayload(payload, undefined, 'getAmbassadors') as getAmbassadorsPayload,
+      this.getInitialPayload(
+        payload,
+        undefined,
+        'getAmbassadors'
+      ) as getAmbassadorsPayload,
       opts
     ).then((r) => {
       return {
