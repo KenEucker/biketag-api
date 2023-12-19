@@ -622,6 +622,13 @@ export class BikeTagClient extends EventEmitter {
 
   /// ****************************  Queue Data Methods   *********************************** ///
 
+  /**
+   * Retrieves BikeTag `Tag` from the queue for a given game
+   *
+   * @param payload - The getQueuePayload for retrieving BikeTag `Tag` data
+   * @param opts - Credentials and other options for retrieving BikeTag `Tag` data
+   * @returns A promise that resolves to a BikeTag `Tag` object
+   */
   queue(
     payload?: RequireAtLeastOne<getQueuePayload>,
     opts?: RequireAtLeastOne<Credentials>
@@ -690,7 +697,6 @@ export class BikeTagClient extends EventEmitter {
     switch (options.source) {
       case AvailableApis.imgur:
         clientMethod = clientMethod.bind({
-          getGame: this.getPassthroughApiMethod(api.getGame, client),
           getQueue: this.getPassthroughApiMethod(api.getQueue, client),
           getTags: this.getPassthroughApiMethod(api.getTags, client),
         })
@@ -768,8 +774,8 @@ export class BikeTagClient extends EventEmitter {
   /**
    * Retrieves a single BikeTag for a given game
    *
-   * @param payload - The getTagPayload for retrieving tags
-   * @param opts - Credentials and other options for retrieving tags
+   * @param payload - The getTagPayload for retrieving a tag
+   * @param opts - Credentials and other options for retrieving a tag
    * @returns A promise that resolves to a `BikeTagApiResponse` object containing the tag data.
    */
   getTag(
@@ -810,6 +816,13 @@ export class BikeTagClient extends EventEmitter {
     })
   }
 
+  /**
+   * Retrieves BikeTags based on the provided payload and options for a given game
+   *
+   * @param payload - The getTagsPayload for retrieving tags
+   * @param opts - Credentials and other options for retrieving tags
+   * @returns A promise that resolves to an array of tags
+   */
   getTags(
     payload?: RequireAtLeastOne<getTagsPayload> | number[],
     opts?: RequireAtLeastOne<Credentials>
@@ -1052,7 +1065,7 @@ export class BikeTagClient extends EventEmitter {
 
     /// Else, use the get all and filter method
     return this.getPlayers(
-      this.getInitialPayload(payload) as getPlayersPayload,
+      this.getInitialPayload(payload, undefined, 'getPlayers') as getPlayersPayload,
       opts
     ).then((r) => {
       return {
@@ -1146,7 +1159,7 @@ export class BikeTagClient extends EventEmitter {
 
     /// Else, use the get all and filter method
     return this.getAmbassadors(
-      this.getInitialPayload(payload) as getAmbassadorsPayload,
+      this.getInitialPayload(payload, undefined, 'getAmbassadors') as getAmbassadorsPayload,
       opts
     ).then((r) => {
       return {

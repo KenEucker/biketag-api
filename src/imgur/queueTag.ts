@@ -40,10 +40,7 @@ export async function queueTag(
   let data
   let error
 
-  const queuedTags = await this.getQueue(
-    { queuehash: payload.queuehash },
-    cache
-  )
+  const queuedTags = await this.getQueue(undefined, cache)
   const playerAlreadyQueuedError =
     !isCompleteQueuedTag &&
     queuedTags.data?.find((t) => t.foundPlayer === payload.foundPlayer)
