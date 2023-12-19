@@ -467,9 +467,9 @@ export const getImgurFoundTitleFromBikeTagData = (tag: Tag): string =>
     !tag.gps || (tag.gps.lat === 0 && tag.gps.long === 0)
       ? ''
       : `(${tag.gps.lat ?? 0}, ${tag.gps.long ?? 0}, ${tag.gps.alt ?? 0})`
-  } ${tag.playerId?.length ? `[${tag.playerId}]` : ''} ${
-    tag.confirmedBoundary ? getConfirmedBoundarySymbol : ''
-  }`
+  } 
+  ${tag.playerId?.length ? `[${tag.playerId}]` : ''} 
+  ${tag.confirmedBoundary ? getConfirmedBoundarySymbol : ''}`
 
 export const getImgurMysteryImageHashFromBikeTagData = (
   tag: Tag,
@@ -482,9 +482,9 @@ export const getImgurMysteryTitleFromBikeTagData = (tag: Tag): string =>
     !tag.gps || (tag.gps.lat === 0 && tag.gps.long === 0)
       ? ''
       : `(${tag.gps.lat ?? 0}, ${tag.gps.long ?? 0}, ${tag.gps.alt ?? 0})`
-  } ${tag.playerId?.length ? `[${tag.playerId}]` : ''} ${
-    tag.confirmedBoundary ? getConfirmedBoundarySymbol : ''
-  }`
+  } 
+  ${tag.playerId?.length ? `[${tag.playerId}]` : ''} 
+  ${tag.discussionUrl ? `{${tag.discussionUrl}}` : ''}`
 
 export const getImgurMysteryDescriptionFromBikeTagData = (
   tag: Tag,
