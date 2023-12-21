@@ -16,7 +16,8 @@ export async function deleteTags(
 
   if (!tags.length && (payload.tagnumbers || payload.slugs)) {
     const { data: tagsData } = await this.getTags(
-      payload.tagnumbers ?? payload.slugs, cache
+      payload.tagnumbers ?? payload.slugs,
+      cache
     )
     tags = tagsData?.length ? tagsData : []
   }

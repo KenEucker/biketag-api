@@ -11,7 +11,7 @@ import TinyCache from 'tinycache'
 export async function updateTag(
   client: ImgurClient,
   payload: updateTagPayload,
-  cache?: typeof TinyCache,
+  cache?: typeof TinyCache
 ): Promise<BikeTagApiResponse<Tag>> {
   /// Construct imgur payloads for both mystery and found images separately
   const imgurMysteryImagePayload = getUpdateTagPayloadFromTagData(payload, true)
@@ -27,7 +27,10 @@ export async function updateTag(
       isValidUpdatePayload(imgurFoundImagePayload)
     ) {
       /// Check if tag exists
-      const tagExistsForBikeTagAlbum = await this.getTags(payload.tagnumber, cache)
+      const tagExistsForBikeTagAlbum = await this.getTags(
+        payload.tagnumber,
+        cache
+      )
       const tagExists =
         tagExistsForBikeTagAlbum.success && tagExistsForBikeTagAlbum.data.length
       const existingTag = tagExists ? tagExistsForBikeTagAlbum.data[0] : null
@@ -62,7 +65,7 @@ export async function updateTag(
 
       /// If the tag already exists, update the image data (title, description)
       if (existingTag?.foundImageUrl?.length) {
-          /// Pass in the contents of the found image payload
+        /// Pass in the contents of the found image payload
         const foundImageUpdated = (await client.updateImage({
           ...imgurFoundImagePayload,
           /// Use the image hash from the existing tag, not what was passed in
