@@ -3,10 +3,12 @@ import { deleteTagsPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { getImageHashFromImgurImage } from './helpers'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
+import TinyCache from 'tinycache'
 
 export async function deleteTags(
   client: ImgurClient,
-  payload: deleteTagsPayload
+  payload: deleteTagsPayload,
+  cache?: typeof TinyCache
 ): Promise<BikeTagApiResponse<boolean[]>> {
   const responses: boolean[] = []
   const deleteHashes = []
@@ -14,7 +16,7 @@ export async function deleteTags(
 
   if (!tags.length && (payload.tagnumbers || payload.slugs)) {
     const { data: tagsData } = await this.getTags(
-      payload.tagnumbers ?? payload.slugs
+      payload.tagnumbers ?? payload.slugs, cache
     )
     tags = tagsData?.length ? tagsData : []
   }
