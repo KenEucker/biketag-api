@@ -22,8 +22,9 @@ export async function getTags(
 
   const albumInfo = await getGameAlbumFromCache(
     payload.hash,
-    payload.cached ? cache : undefined,
-    () => client.getAlbum(payload.hash)
+    cache,
+    () => client.getAlbum(payload.hash),
+    payload.cached
   )
 
   if (payload.tagnumbers?.length) {
