@@ -374,10 +374,11 @@ export class BikeTagClient extends EventEmitter {
     const getPayload = this.getInitialPayload.bind(this)
     const getOptions = this.getDefaultOptions.bind(this)
 
-    return function (opts) {
+    return function (opts, cache) {
       return method.bind(binding)(
         client,
-        getOptions(getPayload(opts), dataType)
+        getOptions(getPayload(opts), dataType),
+        cache
       )
     }
   }
