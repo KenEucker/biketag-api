@@ -2,9 +2,9 @@ export const getTagNumbersFromTextRegex = new RegExp(
   /((?:(?:bike\s*)?(?:\s*tag)?)(#|num|number)(\d+)(?:(?:\s*tag)?|(?:\s*proof)?))|((?:bike\s*)?(?:tag\s*)(#|num|number)?\s*(\d+))|((?:(?:found\s*#?)|(?:here'?i?s?\s*))\[?(\d+)\]?)/gi
 )
 
-/// Too many ORs here, TEST: tag 1 found at (hint: ) by byers
+/// Too many ORs here, TEST: tag 1 found at (hint: ) by byers on [12/12/23@14:23:00]
 export const getPlayerFromTextRegex = new RegExp(
-  /((?:proof\s*(?:found\s*at\s*)?(?:\(.*\))?\s*by\s*)(.*?(?=]|$)))|((?:tag\s*(?:(?:\(\s*hint:\s*)?.*\))?\s*by\s*)(.+?(?=]|\r|\n|$))?)|((?:tag\s*(?:(?:\(\s*hint:\s*)?.*\))?\s*by\s*)(.+?(?=]|\r|\n))?)|((?:credit goes to:\s*)(.*)(?:\sfor finding))|(?:tag\s*)(?:number\s*)?(\d*)?(?:\s*by\s*)(.+?(?=$|\n))/i
+  /((?:proof\s*(?:found\s*at\s*)?(?:\(.*\))?\s*by\s*)(.*?(?= on \[|$)))|((?:tag\s*(?:(?:\(\s*hint:\s*)?.*\))?\s*by\s*)(.+?(?= on \[|\r|\n|$))?)|((?:tag\s*(?:(?:\(\s*hint:\s*)?.*\))?\s*by\s*)(.+?(?= on \[|\r|\n))?)|((?:credit goes to:\s*)(.*)(?:\sfor finding))|(?:tag\s*)(?:number\s*)?(\d*)?(?:\s*by\s*)(.+?(?= on \[|$|\n))/i
 )
 
 export const getFoundLocationFromTextRegex = new RegExp(
@@ -26,6 +26,9 @@ export const getGameFromInfoFromTextRegex = new RegExp(
 export const getGameSlugFromTextRegex = new RegExp(/((\w*)\s*bike\s*tag!?)/i)
 
 export const getHintFromTextRegex = new RegExp(/(?:hint:\s*)(.*)\)/i)
+export const getTimeFromTextRegex = new RegExp(
+  /(?:on\s+\[(\d+\/\d+\/\d\d)@(\d+:\d+:\d+)\])/i
+)
 
 export const getGPSLocationFromTextRegex = new RegExp(
   /(([0-9]{1,2})[:|°]([0-9]{1,2})[:|'|′]?([0-9]{1,2}(?:\.[0-9]+){0,1})?["|″]([N|S]),?\s*([0-9]{1,3})[:|°]([0-9]{1,2})[:|'|′]?([0-9]{1,2}(?:\.[0-9]+){0,1})?["|″]([E|W]))|((-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?))/

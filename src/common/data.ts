@@ -7,6 +7,7 @@ export const cacheKeys = {
   bikeTagImage: `biketag::`,
   bikeTagsByUser: `userTags::`,
   hintText: `hint::`,
+  timeText: `time::`,
   playerText: `player::`,
   playerData: `playerData::`,
   playerIdText: `playerId::`,

@@ -202,6 +202,7 @@ const biketagPortland = await client.getGame('portland')
 | `getPlayerFromText`                           | parses text for a player name based on existing BikeTag posts. (uses `getPlayerFromTextRegex`)                           |
 | `getFoundLocationFromText`                    | parses text for a found location based on existing BikeTag posts. (uses `getFoundLocationFromTextRegex`)                   |
 | `getHintFromText`                             | parses text for a hint based on existing BikeTag posts. (uses `getHintFromTextRegex`)                                      |
+| `geTimeFromText`                             | parses text for a timestamp based on existing BikeTag posts. (uses `getTimeFromTextRegex`)                                 |
 | `getGPSLocationFromText`                      | parses text for GPS coordinates. (uses `getGPSLocationFromTextRegex`)                                                      |
 | `getImageURLsFromText`                        | parses text for URLs of known BikeTag image providers. (uses `getImageURLsFromTextRegex`)                                  |
 | `getDiscussionUrlFromText`                    | parses a url, or string, for a Reddit post link. (uses `getDiscussionUrlFromTextRegex`)                                    |
@@ -224,6 +225,7 @@ const biketagPortland = await client.getGame('portland')
 | `getPlayerFromTextRegex`              | Searches a string for player names associated with BikeTag posts.                                                                 |
 | `getFoundLocationFromTextRegex`       | Searches a string for "found at ()" and parses out the innards of that substring.                                                   |
 | `getHintFromTextRegex`                | Searches a string for "(hint: )" and parses out the innards of that substring.                                                      |
+| `getTimeFromTextRegex`                | Searches a string for "on [ x/x/x @ y:y:y ]" and parses out the innards of that substring to a usable timestamp.                                |
 | `getGPSLocationFromTextRegex`         | Searches a string for GPS coordinates in the format (lat,long,alt)                                                                  |
 | `getImageURLsFromTextRegex`           | Searches a string for an Imgur.com image url                                                                                        |
 | `getDiscussionUrlFromTextRegex`       | Searches a string for a URL within `{}` brackets                                                                                    |

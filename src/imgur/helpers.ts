@@ -321,6 +321,31 @@ export function getConfirmedBoundaryFromText(
   return confirmedBoundary
 }
 
+export function getTimeFromText(
+  inputText: string,
+  fallback?: number,
+  cache?: typeof TinyCache
+): number {
+  const cacheKey = `${cacheKeys.timeText}${inputText}`
+  const existingParsed = getCacheIfExists(cacheKey)
+  if (existingParsed) return existingParsed
+
+  const timeMatch = expressions.getTimeFromTextRegex.exec(inputText)
+
+  if (!timeMatch || timeMatch?.length < 2) {
+    fallback = fallback ?? null
+    /// DO NOT PUT INTO CACHE, NO TIME WAS FOUND
+    // putCacheIfExists(cacheKey, fallback, cache)
+    return fallback
+  }
+
+  /// Imgur timestamps are in seconds, not milliseconds, so we should match suit
+  const time = new Date(`${timeMatch[1]} ${timeMatch[2]}`).getTime() / 1000
+  putCacheIfExists(cacheKey, time, cache)
+
+  return time
+}
+
 export function getHintFromText(
   inputText: string,
   fallback?: string | null,
@@ -444,7 +469,7 @@ export function getBikeTagFromImgurImageSet(
     foundImageLink = foundImage?.link
     foundImageDescription = foundImage?.description
     foundImageTitle = foundImage?.title
-    foundTime = foundImage?.datetime
+    foundTime = getTimeFromText(foundImageDescription, foundImage?.datetime)
     foundPlayer = getPlayerFromText(foundImageDescription)
     foundLocation = getFoundLocationFromText(foundImageDescription)
     confirmedBoundary = getConfirmedBoundaryFromText(foundImageTitle)
@@ -454,7 +479,10 @@ export function getBikeTagFromImgurImageSet(
     mysteryImageLink = mysteryImage?.link
     mysteryImageDescription = mysteryImage?.description
     mysteryImageTitle = mysteryImage?.title
-    mysteryTime = mysteryImage?.datetime
+    mysteryTime = getTimeFromText(
+      mysteryImageDescription,
+      mysteryImage?.datetime
+    )
     hint = getHintFromText(mysteryImageDescription)
     discussionUrl = getDiscussionUrlFromText(mysteryImageTitle)
     mysteryPlayer = getPlayerFromText(mysteryImageDescription)
