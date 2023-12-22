@@ -17,10 +17,7 @@ export async function getPlayers(
   const playerNames: string[] = []
 
   if (client) {
-    const { data: tags } = await this.getTags(
-      { sort: 'relevance' },
-      payload.cached ? cache : undefined
-    )
+    const { data: tags } = await this.getTags({ sort: 'relevance' }, cache)
     const albumInfo = await getGameAlbumFromCache(
       payload.hash,
       cache,
