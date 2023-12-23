@@ -22,6 +22,7 @@ export async function getPlayers(
   const query = constructSanityDocumentQuery(
     DataTypes[DataTypes.player],
     payload.game,
+    undefined,
     payload.slugs,
     undefined,
     fields

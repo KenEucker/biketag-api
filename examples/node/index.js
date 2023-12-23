@@ -62,21 +62,21 @@ const log = (message, response, toLog = false) => {
 }
 
 const getTag1Async = async (pre, client, out = false, opts = {}) => {
-  const tag1 = await client.tags(1, opts)
+  const tag1 = await client.tags(1, opts).catch(console.error)
   log(`${pre} :: successfully retrieved tag 1 data by number`, tag1, out)
 
   return tag1
 }
 
 const getTodaysTagsAsync = async (pre, client, out = false, opts = {}) => {
-  const todaysTags = await client.tags({ time :'day', limit: 10 }, opts)
+  const todaysTags = await client.tags({ time :'day', limit: 10 }, opts).catch(console.error)
   log(`${pre} :: successfully todays tags data`, todaysTags, out)
 
   return todaysTags
 }
 
 const getQueueAsync = async (pre, client, out = false, opts = {}) => {
-  const tags = await client.getQueue(undefined, opts)
+  const tags = await client.getQueue(undefined, opts).catch(console.error)
   log(`${pre} :: successfully retrieved queued tag data`, tags, out)
   console.log(tags[0])
 
@@ -100,7 +100,7 @@ const queueTagAsync = async (pre, client, out = false, opts = {}) => {
 
 const get10TagsAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
-  const tags = await client.getTags(undefined, opts)
+  const tags = await client.getTags(undefined, opts).catch(console.error)
   log(`${pre} :: successfully retrieved tags data`, tags, out)
   console.log(tags[0])
 
@@ -108,21 +108,21 @@ const get10TagsAsync = async (pre, client, out = false, opts = {}) => {
 }
 
 const getCurrentTagAsync = async (pre, client, out = false, opts = {}) => {
-  const current = await client.getTag(undefined, opts)
+  const current = await client.getTag(undefined, opts).catch(console.error)
   log(`${pre} :: successfully retrieved current tag data`, current, out)
 
   return current
 }
 
 const getGameAsync = async (pre, client, out = false, opts = {}) => {
-  const testGameData = await client.getGame(undefined, opts)
+  const testGameData = await client.getGame(undefined, opts).catch(console.error)
   log(`${pre} :: success fully retrieved game data`, testGameData, out)
 
   return testGameData
 }
 
 const getAllGamesAsync = async (pre, client, out = false, opts = {}) => {
-  const testGameData = await client.getGame({game: undefined}, opts)
+  const testGameData = await client.getGame({game: undefined}, opts).catch(console.error)
   log(`${pre} :: success fully retrieved game data`, testGameData, out)
 
   return testGameData
@@ -130,7 +130,7 @@ const getAllGamesAsync = async (pre, client, out = false, opts = {}) => {
 
 const get10PlayersAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
-  const testPlayerData = await client.getPlayers(undefined, opts)
+  const testPlayerData = await client.getPlayers(undefined, opts).catch(console.error)
   log(`${pre} :: success fully retrieved player data`, testPlayerData, out)
 
   return testPlayerData
@@ -138,7 +138,7 @@ const get10PlayersAsync = async (pre, client, out = false, opts = {}) => {
 
 const get10AmbassadorsAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
-  const testAmbassadorData = await client.getAmbassadors(undefined, opts)
+  const testAmbassadorData = await client.getAmbassadors(undefined, opts).catch(console.error)
   log(`${pre} :: success fully retrieved ambassador data`, testAmbassadorData, out)
 
   return testAmbassadorData
@@ -146,10 +146,27 @@ const get10AmbassadorsAsync = async (pre, client, out = false, opts = {}) => {
 
 const get10SettingsAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
-  const testSettingData = await client.getSettings(undefined, opts)
+  const testSettingData = await client.getSettings(undefined, opts).catch(console.error)
   log(`${pre} :: success fully retrieved game settings`, testSettingData, out)
 
   return testSettingData
+}
+
+const get10AchievementsAsync = async (pre, client, out = false, opts = {}) => {
+  opts.limit = opts.limit ? opts.limit : 10
+  const testAchievementData = await client.getAchievements(undefined, opts).catch(console.error)
+  log(`${pre} :: success fully retrieved game achievements`, testAchievementData, out)
+
+  return testAchievementData
+}
+
+const getPlayerAchievementsAsync = async (pre, client, out = false, opts = {}) => {
+  opts.limit = opts.limit ? opts.limit : 10
+  opts.player = 'Ken'
+  const testAchievementData = await client.getAchievements(undefined, opts).catch(console.error)
+  log(`${pre} :: success fully retrieved player achievements for player [${opts.player}]`, testAchievementData, out)
+
+  return testAchievementData
 }
 
 const runTests = async (out = false) => {
@@ -163,7 +180,7 @@ const runTests = async (out = false) => {
     await get10PlayersAsync("BikeTag", biketagDefaultInstance, out)
   }
 
-  if (bikeTagImgurInstance) {
+  if (false) {
     console.log(pretty("Imgur BikeTag Client Instantiated"), imgurInstanceOpts)
     await getGameAsync("Imgur", bikeTagImgurInstance, out)
     // await getTag1Async("Imgur", bikeTagImgurInstance, out)
@@ -175,7 +192,7 @@ const runTests = async (out = false) => {
     // await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
   }
 
-  if (false) {
+  if (bikeTagSanityInstance) {
     console.log(pretty("Sanity BikeTag Client Instantiated"), sanityInstanceOpts)
     // await getTag1Async("Sanity", bikeTagSanityInstance, out)
     // await get10TagsAsync("Sanity", bikeTagSanityInstance, out)
@@ -184,6 +201,8 @@ const runTests = async (out = false) => {
     // await get10PlayersAsync("Sanity", bikeTagSanityInstance, out)
     // await get10AmbassadorsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10SettingsAsync("Sanity", bikeTagSanityInstance, out)
+    // await get10AchievementsAsync("Sanity", bikeTagSanityInstance, out)
+    await getPlayerAchievementsAsync("Sanity", bikeTagSanityInstance, out)
   }
 }
 

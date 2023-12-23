@@ -17,6 +17,14 @@ export type Setting = {
   value: string
 }
 
+export type Achievement = {
+  slug: string
+  name: string
+  description: string
+  key: string
+  value: string
+}
+
 export type Region = {
   slug: string
   name: string
@@ -29,6 +37,7 @@ export type Player = {
   name: string
   bicon: string
   games: string[]
+  achievements: string[]
   tags: Tag[]
   metadata: UserMetadata
 }
@@ -92,4 +101,11 @@ export interface Game {
   region: Region
 }
 
-export type Documents = Tag | Player | Game | Region | Ambassador | Setting
+export type Documents =
+  | Tag
+  | Player
+  | Game
+  | Region
+  | Ambassador
+  | Setting
+  | Achievement

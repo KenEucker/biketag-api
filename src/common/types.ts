@@ -1,7 +1,7 @@
 import { ImageData } from 'imgur/lib/common/types'
 export { Payload } from 'imgur/lib/common/types'
 import { AvailableApis, Errors } from '../common/enums'
-import { Tag, Game, Player, Setting } from './schema'
+import { Tag, Game, Player, Setting, Achievement } from './schema'
 import { ImgurCredentials as ImgurApiCredentials } from 'imgur'
 
 export type RequireAtLeastOne<T> = {
@@ -124,6 +124,10 @@ export interface Players {
 
 export interface Settings {
   [key: string]: Setting
+}
+
+export interface Achievements {
+  [key: string]: Achievement
 }
 
 export type BikeTagGame = {

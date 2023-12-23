@@ -25,6 +25,7 @@ export async function getAmbassadors(
   const query = constructSanityDocumentQuery(
     DataTypes[DataTypes.ambassador],
     payload.game,
+    undefined,
     payload.slugs,
     undefined,
     fields

@@ -19,6 +19,7 @@ export enum DataTypes {
   setting,
   tag,
   queue,
+  achievement,
 }
 
 export enum Errors {

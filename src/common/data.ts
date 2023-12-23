@@ -1,4 +1,4 @@
-import { Tag, Game, Player, Ambassador, Setting } from './schema'
+import { Tag, Game, Player, Ambassador, Setting, Achievement } from './schema'
 
 export const cacheKeys = {
   sanityUrlText: `sanity::`,
@@ -109,17 +109,18 @@ export const gameDataObjectFields = {
 
 export const createPlayerObject = (playerData: any = {}): Player => {
   return {
-    tags: playerData.tags ?? [],
-    games: playerData.games ?? (playerData.game ? [playerData.game] : []),
+    achievements: playerData.tags ?? [],
     bicon: playerData.bicon ?? '',
+    games: playerData.games ?? (playerData.game ? [playerData.game] : []),
     name: playerData.name ?? '',
     slug: playerData.slug ?? '',
+    tags: playerData.tags ?? [],
   } as Player
 }
 
 export const playerDataFields = Object.keys(createPlayerObject())
-export const playerDataReferenceFields = ['games', 'tags']
-export const playerDataArrayFields = ['games', 'tags']
+export const playerDataReferenceFields = ['games', 'tags', 'achievements']
+export const playerDataArrayFields = ['games', 'tags', 'achievements']
 export const playerDataAssetFields = ['bicon']
 export const playerDataObjectFields = {
   bicon: 'asset->_ref',
@@ -156,3 +157,16 @@ export const createSettingObject = (settingData: any = {}): Setting => {
   } as Setting
 }
 export const settingDataFields = Object.keys(createSettingObject())
+
+export const createAchievementObject = (
+  achievementData: any = {}
+): Achievement => {
+  return {
+    slug: achievementData.slug ?? '',
+    description: achievementData.description ?? '',
+    name: achievementData.name ?? '',
+    key: achievementData.key ?? '',
+    value: achievementData.value ?? '',
+  } as Achievement
+}
+export const achievementDataFields = Object.keys(createAchievementObject())

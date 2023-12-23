@@ -300,12 +300,16 @@ export function constructAmbassadorFromSanityObject(
 export function constructSanityDocumentQuery(
   docType: string,
   game?: string,
+  player?: string,
   slugs: string[] = [],
   tagnumbers: number[] = [],
   fields: string[] = []
 ): any {
   const gameQuery = game
     ? ` && ((game._ref in *[_type=="game" && lower(name)=="${game.toLowerCase()}"]._id) || (count(*[ _type == "game" && lower(name) =="${game.toLowerCase()}" && ^._id in ${docType}s[]._ref ]) > 0))`
+    : ''
+  const playerQuery = player
+    ? ` && ((player._ref in *[_type=="player" && lower(name)=="${player.toLowerCase()}"]._id) || (count(*[ _type == "player" && lower(name) =="${player.toLowerCase()}" && ^._id in ${docType}s[]._ref ]) > 0))`
     : ''
   const slugsQuery = slugs.length
     ? ` && slug.current in ${JSON.stringify(slugs)}`
@@ -314,7 +318,7 @@ export function constructSanityDocumentQuery(
     ? ` && tagnumber in ${JSON.stringify(tagnumbers)}`
     : ''
 
-  return `*[_type == "${docType}"${gameQuery}${slugsQuery}${tagnumbersQuery}]{${fields}}`
+  return `*[_type == "${docType}"${gameQuery}${playerQuery}${slugsQuery}${tagnumbersQuery}]{${fields}}`
 }
 
 export function constructSanityFieldsQuery(
@@ -352,6 +356,12 @@ export function constructSanityFieldsQuery(
       break
 
     case DataTypes.setting:
+      referenceFields = []
+      arrayFields = []
+      fields = fields.length ? fields : settingDataFields
+      break
+
+    case DataTypes.achievement:
       referenceFields = []
       arrayFields = []
       fields = fields.length ? fields : settingDataFields

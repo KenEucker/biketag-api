@@ -11,7 +11,7 @@ import {
 } from './types'
 import FormData from 'form-data'
 import TinyCache from 'tinycache'
-import { Tag, Game, Player, Ambassador, Setting } from './schema'
+import { Tag, Game, Player, Ambassador, Setting, Achievement } from './schema'
 import { ApiAvailability } from './enums'
 import { cacheKeys } from './data'
 
@@ -320,6 +320,12 @@ export const isSettingData = (setting: Partial<Setting>): boolean => {
   return !!setting.name && !!setting.key && !!setting.description
 }
 
+export const isAchievementData = (
+  achievement: Partial<Achievement>
+): boolean => {
+  return !!achievement.name && !!achievement.key && !!achievement.description
+}
+
 export const sortTags = (
   tags: Tag[],
   sort = 'new',
@@ -464,6 +470,26 @@ export const sortSettings = (
     case 'new':
       /// Since the players should already be sorted by first to last played, reverse the list
       sorted = settings.reverse()
+      break
+  }
+
+  return limit !== 0 ? sorted.slice(0, limit) : sorted
+}
+
+export const sortAchievements = (
+  achievements: Achievement[],
+  sort = 'new',
+  limit = 0
+): Achievement[] => {
+  let sorted = achievements
+
+  switch (sort) {
+    case 'comments':
+      sorted = achievements.sort((a, b) => a.name.localeCompare(b.name))
+      break
+    case 'new':
+      /// Since the players should already be sorted by first to last played, reverse the list
+      sorted = achievements.reverse()
       break
   }
 
