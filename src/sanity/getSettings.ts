@@ -19,6 +19,7 @@ export async function getSettings(
   const query = constructSanityDocumentQuery(
     DataTypes[DataTypes.setting],
     payload.game,
+    undefined,
     payload.slugs,
     undefined,
     fields

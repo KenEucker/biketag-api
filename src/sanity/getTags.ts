@@ -20,6 +20,7 @@ export async function getTags(
   const query = constructSanityDocumentQuery(
     DataTypes[DataTypes.tag],
     payload.game,
+    undefined,
     payload.slugs,
     payload.tagnumbers,
     fields

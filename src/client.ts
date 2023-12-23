@@ -1,4 +1,11 @@
-import { Game, Tag, Player, Ambassador, Setting } from './common/schema'
+import {
+  Game,
+  Tag,
+  Player,
+  Ambassador,
+  Setting,
+  Achievement,
+} from './common/schema'
 import {
   Credentials,
   BikeTagApiResponse,
@@ -35,6 +42,7 @@ import {
   getQueuePayload,
   queueTagPayload,
   archiveTagPayload,
+  getAchievementsPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -374,10 +382,11 @@ export class BikeTagClient extends EventEmitter {
     const getPayload = this.getInitialPayload.bind(this)
     const getOptions = this.getDefaultOptions.bind(this)
 
-    return function (opts) {
+    return function (opts, cache) {
       return method.bind(binding)(
         client,
-        getOptions(getPayload(opts), dataType)
+        getOptions(getPayload(opts), dataType),
+        cache
       )
     }
   }
@@ -1300,6 +1309,98 @@ export class BikeTagClient extends EventEmitter {
       })
     } else {
       return Promise.reject(`getSettings ${Errors.NotImplemented} ${source}`)
+    }
+  }
+
+  /// ****************************  Achievement Data Methods   ********************************* ///
+
+  achievements(
+    payload?:
+      | RequireAtLeastOne<getAchievementsPayload>
+      | RequireAtLeastOne<getAchievementsPayload>
+      | string
+      | string[],
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Achievement[]> | Achievement[]> {
+    const options = this.options(
+      payload,
+      DataTypes.game,
+      opts,
+      'getAchievements'
+    )
+    return this.getAchievements(options as getAchievementsPayload, opts).then(
+      (r) => (options.concise ? r.data : r)
+    )
+  }
+
+  getAchievement(
+    payload: RequireAtLeastOne<getAchievementsPayload> | string,
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Achievement>> {
+    const { client, options, api } = this.getClientAdapter(
+      payload,
+      opts,
+      DataTypes.setting
+    )
+    const clientMethod = api.getAchievement
+
+    /// If the client adapter implements a direct way to retrieve a single setting
+    if (clientMethod) {
+      return clientMethod(client, options).catch((e) => {
+        return {
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e.code ?? e,
+          success: false,
+          source: AvailableApis[options.source],
+        }
+      })
+    }
+
+    /// Else, use the get all and filter method
+    return this.getAchievements(
+      this.getInitialPayload(
+        payload,
+        undefined,
+        'getAchievements'
+      ) as unknown as getAchievementsPayload,
+      opts
+    ).then((r) => {
+      return {
+        data: r.data?.length ? r.data[0] : null,
+        status: r.status,
+        source: r.source,
+        success: r.success,
+      }
+    })
+  }
+
+  getAchievements(
+    payload?: RequireAtLeastOne<getAchievementsPayload> | string[],
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Achievement[]>> {
+    const { client, options, api, source } = this.getClientAdapter(
+      payload,
+      opts,
+      DataTypes.achievement,
+      'getAchievements'
+    )
+    const clientMethod = api.getAchievements
+
+    if (clientMethod) {
+      return clientMethod(client, options).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e.code ?? e,
+          success: false,
+          source,
+        })
+      })
+    } else {
+      return Promise.reject(
+        `getAchievements ${Errors.NotImplemented} ${source}`
+      )
     }
   }
 
