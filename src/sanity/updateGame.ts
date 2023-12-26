@@ -1,9 +1,10 @@
 import { SanityClient } from '@sanity/client'
-import { constructSanityObjectFromGame } from './helpers'
+import { constructSanityObjectFromData } from './helpers'
 import { HttpStatusCode, AvailableApis } from '../common/enums'
 import { BikeTagApiResponse } from '../common/types'
 import { updateGamePayload } from '../common/payloads'
 import { Game } from '../common/schema'
+import { gameDataArrayFields, gameDataReferenceFields } from '../common/data'
 
 // function isValidUpdatePayload(utp: updateGamePayload) {
 //   return (
@@ -17,7 +18,14 @@ export async function updateGame(
   client: SanityClient,
   payload: updateGamePayload
 ): Promise<BikeTagApiResponse<Game>> {
-  payload = await constructSanityObjectFromGame(client, payload)
+  payload = await constructSanityObjectFromData(
+    client,
+    payload,
+    undefined,
+    'game',
+    gameDataReferenceFields,
+    gameDataArrayFields
+  )
 
   const success = await client.createOrReplace(payload)
 

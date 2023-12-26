@@ -10,6 +10,8 @@ export type UserMetadata = {
 }
 
 export type Setting = {
+  _id?: string
+  _type?: string
   slug: string
   name: string
   description: string
@@ -18,6 +20,8 @@ export type Setting = {
 }
 
 export type Achievement = {
+  _id?: string
+  _type?: string
   slug: string
   name: string
   description: string
@@ -33,6 +37,8 @@ export type Region = {
 }
 
 export type Player = {
+  _id?: string
+  _type?: string
   slug: string
   name: string
   bicon: string
@@ -43,6 +49,8 @@ export type Player = {
 }
 
 export type Ambassador = {
+  _id?: string
+  _type?: string
   id: string
   slug: string
   name: string
@@ -58,6 +66,8 @@ export type Ambassador = {
 }
 
 export interface Tag {
+  _id?: string
+  _type?: string
   slug: string
   name: string
   tagnumber: number

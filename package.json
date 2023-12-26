@@ -30,6 +30,8 @@
     "dev": "npm run dev:node",
     "dev:build": "npm run build && npm run compile && npm run dev",
     "dev:node": "node examples/node/index.js",
+    "dev:testnode": "node examples/node/test.js",
+    "dev:upnode": "node examples/node/update.js",
     "dev:test": "jest examples/node/index.test.ts",
     "dev:browser": "npm-run-all --parallel watch serve",
     "dev:both": "npm-run-all --parallel dev:node dev:browser",
@@ -60,7 +62,7 @@
     "convert": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@sanity/client": "^2.23.2",
+    "@sanity/client": "2.25.1-feature-image-file-input-refactor.150",
     "axios": "^0.21.1",
     "axios-cache-adapter": "^2.7.3",
     "form-data": "^4.0.0",

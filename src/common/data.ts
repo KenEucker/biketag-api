@@ -78,6 +78,8 @@ export const tagDataObjectFields = {
 
 export const createGameObject = (gameData: any = {}): Game => {
   return {
+    _id: gameData._id,
+    _type: gameData._type,
     name: gameData.name ?? gameData.slug ?? '',
     ambassadors: gameData.ambassadors ?? [],
     settings: gameData.settings ?? [],
@@ -88,8 +90,6 @@ export const createGameObject = (gameData: any = {}): Game => {
     logo: gameData.logo,
     region: gameData.region ?? { name: gameData.name },
     slug: gameData.slug ?? gameData.name ?? '',
-    _id: gameData._id ?? gameData._id,
-    _type: gameData._type ?? gameData._type,
   } as Game
 }
 
@@ -109,7 +109,9 @@ export const gameDataObjectFields = {
 
 export const createPlayerObject = (playerData: any = {}): Player => {
   return {
-    achievements: playerData.tags ?? [],
+    _id: playerData._id,
+    _type: playerData._type,
+    achievements: playerData.achievements ?? [],
     bicon: playerData.bicon ?? '',
     games: playerData.games ?? (playerData.game ? [playerData.game] : []),
     name: playerData.name ?? '',
@@ -121,10 +123,8 @@ export const createPlayerObject = (playerData: any = {}): Player => {
 export const playerDataFields = Object.keys(createPlayerObject())
 export const playerDataReferenceFields = ['games', 'tags', 'achievements']
 export const playerDataArrayFields = ['games', 'tags', 'achievements']
-export const playerDataAssetFields = ['bicon']
-export const playerDataObjectFields = {
-  bicon: 'asset->_ref',
-}
+export const playerDataAssetFields = []
+export const playerDataObjectFields = {}
 
 export const createAmbassadorObject = (
   ambassadorData: any = {}

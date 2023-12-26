@@ -224,7 +224,8 @@ export class BikeTagClient extends EventEmitter {
   protected getDefaultOptions(
     options: ApiOptions,
     dataType: DataTypes = DataTypes.tag,
-    overrides: any = {}
+    overrides: any = {},
+    method?: string
   ): ApiOptions {
     /// Data defaults
     switch (dataType) {
@@ -235,6 +236,10 @@ export class BikeTagClient extends EventEmitter {
 
       case DataTypes.player:
         options.game = options.game ? options.game : this.biketagConfig?.game
+
+        if (method === 'updatePlayer' || method === 'updatePlayers') {
+          delete options.game
+        }
         break
 
       case DataTypes.tag:
@@ -433,7 +438,8 @@ export class BikeTagClient extends EventEmitter {
     return this.getDefaultOptions(
       this.getInitialPayload(opts, undefined, method),
       dataType,
-      overrides
+      overrides,
+      method
     )
   }
 
@@ -1122,6 +1128,41 @@ export class BikeTagClient extends EventEmitter {
       })
     } else {
       return Promise.reject(`getPlayers ${Errors.NotImplemented} ${source}`)
+    }
+  }
+
+  updatePlayer(
+    payload?: RequireAtLeastOne<getPlayersPayload> | string[],
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Player[]>> {
+    const { client, options, api, source } = this.getClientAdapter(
+      payload,
+      opts,
+      DataTypes.player,
+      'updatePlayer'
+    )
+    let clientMethod = api.updatePlayer
+
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.imgur:
+          clientMethod = clientMethod.bind({
+            getTags: this.getPassthroughApiMethod(api.getTags, client),
+          })
+          break
+      }
+
+      return clientMethod(client, options, apiCache).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e.code ?? e,
+          success: false,
+          source,
+        })
+      })
+    } else {
+      return Promise.reject(`updatePlayer ${Errors.NotImplemented} ${source}`)
     }
   }
 

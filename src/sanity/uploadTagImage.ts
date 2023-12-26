@@ -15,7 +15,7 @@ export async function uploadTagImage(
   for (const uploadPayload of uploadPayloads) {
     const uploadResponse = await client.assets.upload(
       'image',
-      uploadPayload.stream
+      uploadPayload.stream as any
     )
     const updateTag = {
       tagnumber: uploadPayload.tagnumber,

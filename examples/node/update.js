@@ -57,5 +57,21 @@ const updateTag = async (client) => {
   }
 }
 
+const updatePlayer = async (client) => {
+  if (client) {
+    console.log('calling updatePlayer')
+    const updateTagResponse = await client.updatePlayer({
+      name: 'test',
+      bicon: 'https://i.imgur.com/2lsj26s.png',
+      // achievements: [],
+      games: [],
+      // games: ['portland','seattle'],
+      achievements: ['3-day-streak'],
+    })
+    console.log({ updateTagResponse }, updateTagResponse?.data)
+  }
+}
+
 // updateGame(bikeTagSanityInstance)
-updateTag(bikeTagImgurInstance)
+// updateTag(bikeTagImgurInstance)
+updatePlayer(bikeTagSanityInstance)
