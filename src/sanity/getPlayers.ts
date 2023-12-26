@@ -21,8 +21,9 @@ export async function getPlayers(
     : playerDataFields
   const query = constructSanityDocumentQuery(
     DataTypes[DataTypes.player],
-    payload.game,
-    undefined,
+    /// NOT PASSING IN THE GAME because we are not yet assigning players to games
+    undefined, // payload.game,
+    payload.name,
     payload.slugs,
     undefined,
     fields

@@ -68,6 +68,7 @@ const ambassadorsPayload = {
 }
 
 const runIntegrationTests = async (client) => {
+    const testPromises = []
     const gamePayResponse = await client.getGame(gamePayload, {
         source: 'sanity'
     })

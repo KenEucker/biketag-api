@@ -21,6 +21,7 @@ import {
   settingDataFields,
   ambassadorDataFields,
   gameDataAssetFields,
+  playerDataAssetFields,
 } from '../common/data'
 import { DataTypes } from '../common/enums'
 
@@ -44,11 +45,13 @@ export function constructTagFromSanityObject(
   Object.keys(tagDataObjectFields).forEach((f) => {
     if (tagData[f] && typeof tagData[f] !== 'undefined') {
       const objectTree = tagDataObjectFields[f].split('->')
-      let targetObj: any = tagData[f]
-      objectTree.forEach((o) => {
-        targetObj = targetObj[o] ?? undefined
-      })
-      tagData[f] = targetObj
+      if (tagData[f]) {
+        let targetObj: any = tagData[f]
+        objectTree.forEach((o) => {
+          targetObj = targetObj[o] ?? undefined
+        })
+        tagData[f] = targetObj
+      }
     }
   })
 
@@ -177,6 +180,95 @@ export async function constructSanityObjectFromGame(
   return createGameObject(gameData)
 }
 
+export async function constructSanityObjectFromData(
+  client: SanityClient,
+  data: any,
+  fields: string[] = [],
+  dataType: 'game' | 'player' | 'tag',
+  dataReferenceFields: string[] = [],
+  dataArrayFields: string[] = []
+): Promise<any> {
+  const biketagData = fields.length
+    ? fields.reduce((o: any, f: any) => {
+        o[f] = data[f]
+        return o
+      }, {})
+    : data
+
+  for (const field of dataReferenceFields) {
+    const fieldValue = biketagData[field]
+
+    if (fieldValue) {
+      const fieldValueIsArrayField = dataArrayFields.indexOf(field) !== -1
+      const fieldArray = fieldValueIsArrayField ? fieldValue : [fieldValue]
+      const fieldType = fieldValueIsArrayField
+        ? field.substring(0, field.length - 1)
+        : field
+      const fieldReferenceArray = []
+      /// get the reference values from cache
+      for (const arrayFieldValue of fieldArray) {
+        const refQuery = `*[_type == "${fieldType}" && slug.current == "${arrayFieldValue}"]{_id}`
+        const referenceObject = await client.fetch(refQuery, {})
+        let referenceId = ''
+
+        if (referenceObject.length) {
+          referenceId = referenceObject[0]._id
+        } else {
+          // Create new reference
+          const newReferenceObject: any = await client.createIfNotExists({
+            _id: constructObjectIdFromSlug(arrayFieldValue),
+            _type: fieldType,
+            name: arrayFieldValue,
+          })
+          referenceId = newReferenceObject._ref
+        }
+        fieldReferenceArray.push({
+          _type: 'reference',
+          _ref: referenceId,
+          _key: Date.now().toString(),
+        })
+      }
+
+      if (fieldReferenceArray.length) {
+        biketagData[field] = fieldValueIsArrayField
+          ? fieldReferenceArray
+          : fieldReferenceArray[0]
+      }
+    }
+  }
+
+  for (const field of playerDataAssetFields) {
+    const fieldValue = biketagData[field]
+
+    if (fieldValue) {
+      biketagData[field] = {
+        _type: 'image',
+        asset: { _type: 'reference', _ref: fieldValue },
+      }
+    }
+  }
+
+  biketagData._type = dataType
+  biketagData.slug =
+    biketagData.slug ?? `${biketagData._type}-${biketagData.name.toLowerCase()}`
+  biketagData._id = biketagData._id ?? biketagData.slug
+
+  biketagData.slug = { current: biketagData.slug?.current ?? biketagData.slug }
+
+  switch (dataType) {
+    case 'player':
+      return createPlayerObject(biketagData)
+      break
+    case 'game':
+      return createGameObject(biketagData)
+      break
+    case 'tag':
+      return createTagObject(biketagData)
+      break
+  }
+  return biketagData
+}
+
 export function constructGameFromSanityObject(
   data: any,
   fields: string[] = []
@@ -224,11 +316,13 @@ export function constructGameFromSanityObject(
     Object.keys(gameDataObjectFields).forEach((f) => {
       if (gameData[f] && typeof gameData[f] !== 'undefined') {
         const objectTree = gameDataObjectFields[f].split('->')
-        let targetObj: any = gameData[f]
-        objectTree.forEach((o) => {
-          targetObj = targetObj[o] ?? undefined
-        })
-        gameData[f] = targetObj
+        if (gameData[f]) {
+          let targetObj: any = gameData[f]
+          objectTree.forEach((o) => {
+            targetObj = targetObj[o] ?? undefined
+          })
+          gameData[f] = targetObj
+        }
       }
     })
 
@@ -262,11 +356,13 @@ export function constructPlayerFromSanityObject(
   Object.keys(playerDataObjectFields).forEach((f) => {
     if (playerData[f] && typeof playerData[f] !== 'undefined') {
       const objectTree = playerDataObjectFields[f].split('->')
-      let targetObj: any = playerData[f]
-      objectTree.forEach((o) => {
-        targetObj = targetObj[o] ?? undefined
-      })
-      playerData[f] = targetObj
+      if (playerData[f]) {
+        let targetObj: any = playerData[f]
+        objectTree.forEach((o) => {
+          targetObj = targetObj ? targetObj[o] : undefined
+        })
+        playerData[f] = targetObj
+      }
     }
   })
 

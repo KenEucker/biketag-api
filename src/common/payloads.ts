@@ -1,4 +1,4 @@
-import { Tag, Game } from './schema'
+import { Tag, Game, Player } from './schema'
 import { CommonPayloadData } from './types'
 import { SanityUploadPayload } from '../common/data'
 
@@ -43,6 +43,7 @@ export type archiveTagPayload = {
 
 export type updateGamePayload = Partial<Game> & SanityUploadPayload
 export type updateTagPayload = Partial<Tag> & SanityUploadPayload
+export type updatePlayerPayload = Partial<Player> & SanityUploadPayload
 
 export type uploadTagImagePayload = {
   tagnumber: number
@@ -74,6 +75,7 @@ export type getPlayersPayload = {
   hash?: string
   limit?: number
   account?: string
+  name?: string
 } & CommonPayloadData
 
 export type getPlayerPayload = {

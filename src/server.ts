@@ -10,9 +10,17 @@ import {
   getPlayersPayload,
   getAmbassadorsPayload,
   getSettingsPayload,
+  getAchievementsPayload,
   getQueuePayload,
 } from './common/payloads'
-import { Game, Tag, Player, Ambassador, Setting } from './common/schema'
+import {
+  Game,
+  Tag,
+  Player,
+  Ambassador,
+  Setting,
+  Achievement,
+} from './common/schema'
 import {
   Credentials,
   BikeTagCredentials,
@@ -92,7 +100,7 @@ export class BikeTagServer extends BikeTagClient {
   // @ts-ignore
   queueImageRoute(
     // @ts-ignore
-    @Body() payload: queueTagPayload,
+    @Body() payload: getQueuePayload,
     // @ts-ignore
     @Path('game') game?: string,
     opts?: Credentials
@@ -254,6 +262,24 @@ export class BikeTagServer extends BikeTagClient {
       payload,
       opts as unknown as RequireAtLeastOne<Credentials>
     ) as Promise<BikeTagApiResponse<Setting[]>>
+  }
+
+  /// ****************************  Achievement Route Methods   ********************************* ///
+
+  @Post('achievements/{game}')
+  // @ts-ignore
+  achievementsRoute(
+    // @ts-ignore
+    @Body() payload: getAchievementsPayload,
+    // @ts-ignore
+    @Path('game') game?: string,
+    opts?: Credentials
+  ): Promise<BikeTagApiResponse<Achievement[]>> {
+    payload.game = game ?? payload.game
+    return this.getAchievements(
+      payload,
+      opts as unknown as RequireAtLeastOne<Credentials>
+    ) as Promise<BikeTagApiResponse<Achievement[]>>
   }
 }
 
