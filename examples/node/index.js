@@ -130,7 +130,7 @@ const getAllGamesAsync = async (pre, client, out = false, opts = {}) => {
 
 const get1PlayerAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
-  const testPlayerData = await client.getPlayer('player-test', opts).catch(console.error)
+  const testPlayerData = await client.getPlayer('Ken', opts).catch(console.error)
   log(`${pre} :: success fully retrieved player data`, testPlayerData, out)
 
   return testPlayerData
@@ -188,7 +188,8 @@ const runTests = async (out = false) => {
     await get10PlayersAsync("BikeTag", biketagDefaultInstance, out)
   }
 
-  if (bikeTagImgurInstance) {
+  if (false) {
+  // if (bikeTagImgurInstance) {
     console.log(pretty("Imgur BikeTag Client Instantiated"), imgurInstanceOpts)
     await getGameAsync("Imgur", bikeTagImgurInstance, out)
     // await getTag1Async("Imgur", bikeTagImgurInstance, out)
@@ -206,9 +207,9 @@ const runTests = async (out = false) => {
     // await get10TagsAsync("Sanity", bikeTagSanityInstance, out)
     await getGameAsync("Sanity", bikeTagSanityInstance, out)
     // await getAllGamesAsync("Sanity", bikeTagSanityInstance, out)
-    await get10PlayersAsync("Sanity", bikeTagSanityInstance, out)
-    // await get1PlayerAsync("Sanity", bikeTagSanityInstance, out)
-    await get10AchievementsAsync("Sanity", bikeTagSanityInstance, out)
+    // await get10PlayersAsync("Sanity", bikeTagSanityInstance, out)
+    await get1PlayerAsync("Sanity", bikeTagSanityInstance, out)
+    // await get10AchievementsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10AmbassadorsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10SettingsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10AchievementsAsync("Sanity", bikeTagSanityInstance, out)
