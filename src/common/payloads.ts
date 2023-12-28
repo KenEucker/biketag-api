@@ -75,10 +75,11 @@ export type getPlayersPayload = {
   hash?: string
   limit?: number
   account?: string
-  name?: string
+  names?: string[]
 } & CommonPayloadData
 
 export type getPlayerPayload = {
+  name?: string
   fields?: string[]
   slug?: string
   hash?: string
@@ -117,6 +118,7 @@ export type getAmbassadorsPayload = {
   sort?: SortOptions
   slugs?: string[]
 } & CommonPayloadData
+
 export type getAmbassadorPayload = {
   fields?: string[]
   slug?: string

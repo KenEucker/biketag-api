@@ -23,7 +23,7 @@ export async function getPlayers(
     DataTypes[DataTypes.player],
     /// NOT PASSING IN THE GAME because we are not yet assigning players to games
     undefined, // payload.game,
-    payload.name,
+    payload.names?.length === 1 ? payload.names[0] : undefined,
     payload.slugs,
     undefined,
     fields
