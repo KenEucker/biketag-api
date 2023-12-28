@@ -2,7 +2,7 @@ import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse } from '../common/types'
 import { AvailableApis, HttpStatusCode, DataTypes } from '../common/enums'
 import {
-  constructPlayerFromSanityObject,
+  constructSettingFromSanityObject,
   constructSanityDocumentQuery,
   constructSanityFieldsQuery,
 } from './helpers'
@@ -27,7 +27,7 @@ export async function getSettings(
 
   return client.fetch(query, {}).then((settingsData) => {
     const settings = settingsData.map((setting: any) =>
-      constructPlayerFromSanityObject(setting, fieldsFilter)
+      constructSettingFromSanityObject(setting, fieldsFilter)
     )
 
     const response = {

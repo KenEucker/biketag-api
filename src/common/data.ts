@@ -1,5 +1,6 @@
 import { Tag, Game, Player, Ambassador, Setting, Achievement } from './schema'
 
+/// TODO: make an enum and put into the enums
 export const cacheKeys = {
   sanityUrlText: `sanity::`,
   imageHashText: `hash::`,

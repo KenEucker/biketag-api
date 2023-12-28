@@ -30,9 +30,15 @@ export async function getPlayers(
   )
 
   return client.fetch(query, {}).then((players) => {
-    const playersData = players.map((player: any) =>
+    let playersData = players.map((player: any) =>
       constructPlayerFromSanityObject(player, fieldsFilter)
     )
+
+    if (payload.slugs?.length) {
+      playersData = playersData.filter((p) => payload.slugs?.includes(p.slug))
+    } else if (payload.names?.length) {
+      playersData = playersData.filter((p) => payload.names?.includes(p.name))
+    }
 
     const response = {
       data: sortPlayers(playersData, payload.sort, payload.limit),

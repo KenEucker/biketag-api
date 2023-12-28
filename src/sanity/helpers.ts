@@ -16,12 +16,14 @@ import {
   playerDataObjectFields,
   playerDataArrayFields,
   createPlayerObject,
+  createAchievementObject,
   ambassadorDataReferenceFields,
   createAmbassadorObject,
   settingDataFields,
   ambassadorDataFields,
   gameDataAssetFields,
   playerDataAssetFields,
+  createSettingObject,
 } from '../common/data'
 import { DataTypes } from '../common/enums'
 
@@ -391,6 +393,38 @@ export function constructAmbassadorFromSanityObject(
   ambassadorData.slug = ambassadorData.slug?.current ?? ambassadorData.slug
 
   return createAmbassadorObject(ambassadorData)
+}
+
+export function constructSettingFromSanityObject(
+  data: any,
+  fields: string[] = []
+): any {
+  const settingData = fields.length
+    ? fields.reduce((o: any, f: any) => {
+        o[f] = data[f]
+        return o
+      }, {})
+    : data
+
+  settingData.slug = settingData.slug?.current ?? settingData.slug
+
+  return createSettingObject(settingData)
+}
+
+export function constructAchievementFromSanityObject(
+  data: any,
+  fields: string[] = []
+): any {
+  const achievementData = fields.length
+    ? fields.reduce((o: any, f: any) => {
+        o[f] = data[f]
+        return o
+      }, {})
+    : data
+
+  achievementData.slug = achievementData.slug?.current ?? achievementData.slug
+
+  return createAchievementObject(achievementData)
 }
 
 export function constructSanityDocumentQuery(
