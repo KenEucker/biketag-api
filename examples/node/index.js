@@ -128,6 +128,14 @@ const getAllGamesAsync = async (pre, client, out = false, opts = {}) => {
   return testGameData
 }
 
+const get1PlayerAsync = async (pre, client, out = false, opts = {}) => {
+  opts.limit = opts.limit ? opts.limit : 10
+  const testPlayerData = await client.getPlayer('player-test', opts).catch(console.error)
+  log(`${pre} :: success fully retrieved player data`, testPlayerData, out)
+
+  return testPlayerData
+}
+
 const get10PlayersAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
   const testPlayerData = await client.getPlayers(undefined, opts).catch(console.error)
@@ -199,6 +207,7 @@ const runTests = async (out = false) => {
     await getGameAsync("Sanity", bikeTagSanityInstance, out)
     // await getAllGamesAsync("Sanity", bikeTagSanityInstance, out)
     await get10PlayersAsync("Sanity", bikeTagSanityInstance, out)
+    await get1PlayerAsync("Sanity", bikeTagSanityInstance, out)
     // await get10AmbassadorsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10SettingsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10AchievementsAsync("Sanity", bikeTagSanityInstance, out)

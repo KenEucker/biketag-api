@@ -1081,7 +1081,7 @@ export class BikeTagClient extends EventEmitter {
     /// Else, use the get all and filter method
     return this.getPlayers(
       this.getInitialPayload(
-        payload,
+        options,
         undefined,
         'getPlayers'
       ) as getPlayersPayload,
@@ -1214,7 +1214,7 @@ export class BikeTagClient extends EventEmitter {
     /// Else, use the get all and filter method
     return this.getAmbassadors(
       this.getInitialPayload(
-        payload,
+        options,
         undefined,
         'getAmbassadors'
       ) as getAmbassadorsPayload,
@@ -1311,7 +1311,7 @@ export class BikeTagClient extends EventEmitter {
     /// Else, use the get all and filter method
     return this.getSettings(
       this.getInitialPayload(
-        payload,
+        options,
         undefined,
         'getSettings'
       ) as unknown as getSettingsPayload,
@@ -1401,7 +1401,7 @@ export class BikeTagClient extends EventEmitter {
     /// Else, use the get all and filter method
     return this.getAchievements(
       this.getInitialPayload(
-        payload,
+        options,
         undefined,
         'getAchievements'
       ) as unknown as getAchievementsPayload,
