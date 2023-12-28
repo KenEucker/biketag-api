@@ -1,8 +1,13 @@
 import { SanityClient } from '@sanity/client'
 import { BikeTagApiResponse } from '../common/types'
-import { AvailableApis, HttpStatusCode, DataTypes } from '../common/enums'
 import {
-  constructPlayerFromSanityObject,
+  AvailableApis,
+  HttpStatusCode,
+  DataTypes,
+  GameSettingsKeys,
+} from '../common/enums'
+import {
+  constructAchievementFromSanityObject,
   constructSanityDocumentQuery,
   constructSanityFieldsQuery,
 } from './helpers'
@@ -22,17 +27,37 @@ export async function getAchievements(
   const fieldsFilter = payload.fields?.length ? payload.fields : []
   const query = constructSanityDocumentQuery(
     DataTypes[DataTypes.achievement],
-    payload.game,
+    // payload.game, // don't include the game here because we are not specifically assigning achievements to a game
+    undefined,
     payload.player,
     payload.slugs,
     undefined,
     fields
   )
 
-  return client.fetch(query, {}).then((achievementsData) => {
-    const achievements = achievementsData.map((achievement: any) =>
-      constructPlayerFromSanityObject(achievement, fieldsFilter)
+  return client.fetch(query, {}).then(async (achievementsData) => {
+    let achievements = achievementsData.map((achievement: any) =>
+      constructAchievementFromSanityObject(achievement, fieldsFilter)
     )
+
+    if (payload.game?.length) {
+      const game = (await this.getGame(payload.game)).data
+      if (game) {
+        const achievementsEnabled =
+          game.settings[GameSettingsKeys.achievementsEnabled]
+
+        if (!achievementsEnabled || achievementsEnabled === 'false') {
+          achievements = []
+        } else if (achievementsEnabled && achievementsEnabled !== 'true') {
+          const enabledAchievements = achievementsEnabled.split(',')
+          achievements = achievements.filter((a) =>
+            enabledAchievements.includes(a.key)
+          )
+        } else {
+          // first do nothing
+        }
+      }
+    }
 
     const response = {
       data: sortAchievements(achievements, payload.sort, payload.limit),

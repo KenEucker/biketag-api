@@ -22,6 +22,10 @@ export enum DataTypes {
   achievement,
 }
 
+export enum GameSettingsKeys {
+  achievementsEnabled = 'achievements::enabled',
+}
+
 export enum Errors {
   NotImplemented = 'method not implemented for adapter: ',
 }

@@ -234,6 +234,14 @@ export class BikeTagClient extends EventEmitter {
         options.slug = options.slug ?? options.game?.toLowerCase() ?? undefined
         break
 
+      case DataTypes.achievement:
+        options.game = options.game ?? options.slug ?? this.biketagConfig?.game
+        break
+
+      case DataTypes.setting:
+        options.game = options.game ?? options.slug ?? this.biketagConfig?.game
+        break
+
       case DataTypes.player:
         options.game = options.game ? options.game : this.biketagConfig?.game
 
@@ -1383,10 +1391,22 @@ export class BikeTagClient extends EventEmitter {
       opts,
       DataTypes.setting
     )
-    const clientMethod = api.getAchievement
+    let clientMethod = api.getAchievement
 
     /// If the client adapter implements a direct way to retrieve a single setting
     if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.sanity:
+          clientMethod = clientMethod.bind({
+            getGame: this.getPassthroughApiMethod(
+              api.getGame,
+              client,
+              DataTypes.game
+            ),
+          })
+          break
+      }
+
       return clientMethod(client, options).catch((e) => {
         return {
           status: HttpStatusCode.InternalServerError,
@@ -1426,9 +1446,21 @@ export class BikeTagClient extends EventEmitter {
       DataTypes.achievement,
       'getAchievements'
     )
-    const clientMethod = api.getAchievements
+    let clientMethod = api.getAchievements
 
     if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.sanity:
+          clientMethod = clientMethod.bind({
+            getGame: this.getPassthroughApiMethod(
+              api.getGame,
+              client,
+              DataTypes.game
+            ),
+          })
+          break
+      }
+
       return clientMethod(client, options).catch((e) => {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
