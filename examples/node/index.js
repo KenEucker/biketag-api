@@ -209,7 +209,7 @@ const runTests = async (out = false) => {
     // await getAllGamesAsync("Sanity", bikeTagSanityInstance, out)
     // await get10PlayersAsync("Sanity", bikeTagSanityInstance, out)
     await get1PlayerAsync("Sanity", bikeTagSanityInstance, out)
-    // await get10AchievementsAsync("Sanity", bikeTagSanityInstance, out)
+    await get10AchievementsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10AmbassadorsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10SettingsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10AchievementsAsync("Sanity", bikeTagSanityInstance, out)

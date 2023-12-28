@@ -40,6 +40,13 @@ export async function getPlayers(
       playersData = playersData.filter((p) => payload.names?.includes(p.name))
     }
 
+    /// TODO: put this into the query
+    if (payload.game) {
+      playersData = playersData.filter(
+        (p) => p.games.indexOf(payload.game) !== -1
+      )
+    }
+
     const response = {
       data: sortPlayers(playersData, payload.sort, payload.limit),
       status: HttpStatusCode.Found,
