@@ -26,7 +26,10 @@ export async function getPlayers(
     payload.names?.length === 1 ? payload.names[0] : undefined,
     payload.slugs,
     undefined,
-    fields
+    fields,
+    payload.game?.length
+      ? ` && "${payload.game.toLowerCase()}" in games[]->slug.current`
+      : undefined
   )
 
   return client.fetch(query, {}).then((players) => {
@@ -37,13 +40,8 @@ export async function getPlayers(
     if (payload.slugs?.length) {
       playersData = playersData.filter((p) => payload.slugs?.includes(p.slug))
     } else if (payload.names?.length) {
-      playersData = playersData.filter((p) => payload.names?.includes(p.name))
-    }
-
-    /// TODO: put this into the query
-    if (payload.game) {
-      playersData = playersData.filter(
-        (p) => p.games.indexOf(payload.game) !== -1
+      playersData = playersData.filter((p) =>
+        payload.names?.includes(p.name.toLowerCase())
       )
     }
 
