@@ -433,7 +433,8 @@ export function constructSanityDocumentQuery(
   player?: string,
   slugs: string[] = [],
   tagnumbers: number[] = [],
-  fields: string[] = []
+  fields: string[] = [],
+  append = ''
 ): any {
   const gameQuery = game
     ? ` && ((game._ref in *[_type=="game" && lower(name)=="${game.toLowerCase()}"]._id) || (count(*[ _type == "game" && lower(name) =="${game.toLowerCase()}" && ^._id in ${docType}s[]._ref ]) > 0))`
@@ -448,7 +449,7 @@ export function constructSanityDocumentQuery(
     ? ` && tagnumber in ${JSON.stringify(tagnumbers)}`
     : ''
 
-  return `*[_type == "${docType}"${gameQuery}${playerQuery}${slugsQuery}${tagnumbersQuery}]{${fields}}`
+  return `*[_type == "${docType}"${gameQuery}${playerQuery}${slugsQuery}${tagnumbersQuery}${append}]{${fields}}`
 }
 
 export function constructSanityFieldsQuery(

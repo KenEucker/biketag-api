@@ -288,7 +288,11 @@ export function getFoundLocationFromText(
     return fallback as string
   }
 
-  const foundLocation = (foundLocationText[4] || '').trim()
+  const foundLocation = (
+    foundLocationText[1] ??
+    foundLocationText[2] ??
+    ''
+  ).trim()
   putCacheIfExists(cacheKey, foundLocation, cache)
 
   return foundLocation
