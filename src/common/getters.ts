@@ -142,7 +142,11 @@ export const getFoundLocationFromText = (
     return fallback
   }
 
-  const foundLocation = (foundLocationText[1] || '').trim()
+  const foundLocation = (
+    foundLocationText[1] ??
+    foundLocationText[2] ??
+    ''
+  ).trim()
   putCacheIfExists(cacheKey, foundLocation, cache)
 
   return foundLocation
@@ -472,13 +476,14 @@ export const getDateStringForImgurDescription = (isodate: number): string => {
 
 export const getImgurFoundDescriptionFromBikeTagData = (
   tag: Tag,
-  includeCredit = true
+  includeCredit = true,
+  includeDate = true
 ): string =>
   `#${tag.tagnumber} proof${
     tag.foundLocation ? ` found at (${tag.foundLocation})` : ''
-  }${
-    includeCredit ? ` by ${tag.foundPlayer}` : ''
-  }${getDateStringForImgurDescription(tag.foundTime)}`
+  }${includeCredit ? ` by ${tag.foundPlayer}` : ''}${
+    includeDate ? getDateStringForImgurDescription(tag.foundTime) : ''
+  }`
 
 export const getImgurFoundTitleFromBikeTagData = (tag: Tag): string =>
   `${
@@ -507,13 +512,14 @@ export const getImgurMysteryTitleFromBikeTagData = (tag: Tag): string =>
 export const getImgurMysteryDescriptionFromBikeTagData = (
   tag: Tag,
   includeCredit = true,
-  includeHint = true
+  includeHint = true,
+  includeDate = true
 ): string =>
   `#${tag.tagnumber} tag ${
     includeHint && tag.hint ? `(hint: ${tag.hint})` : ''
-  }${
-    includeCredit ? ` by ${tag.mysteryPlayer}` : ''
-  }${getDateStringForImgurDescription(tag.mysteryTime)}`
+  }${includeCredit ? ` by ${tag.mysteryPlayer}` : ''}${
+    includeDate ? getDateStringForImgurDescription(tag.mysteryTime) : ''
+  }`
 
 export const getOnlyMysteryTagFromTagData = (tagData: Tag): Tag => {
   const onlyMysteryTagFields = {

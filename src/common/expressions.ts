@@ -7,8 +7,9 @@ export const getPlayerFromTextRegex = new RegExp(
   /((?:proof\s*(?:found\s*at\s*)?(?:\(.*\))?\s*by\s*)(.*?(?= on \[|$)))|((?:tag\s*(?:(?:\(\s*hint:\s*)?.*\))?\s*by\s*)(.+?(?= on \[|\r|\n|$))?)|((?:tag\s*(?:(?:\(\s*hint:\s*)?.*\))?\s*by\s*)(.+?(?= on \[|\r|\n))?)|((?:credit goes to:\s*)(.*)(?:\sfor finding))|(?:tag\s*)(?:number\s*)?(\d*)?(?:\s*by\s*)(.+?(?= on \[|$|\n))/i
 )
 
+/// Removed an OR from here, TEST: #64 proof found at (Earth) by Tim on [1/4/24@11:16:05)
 export const getFoundLocationFromTextRegex = new RegExp(
-  /(?:is\s*(at|the)?\s*\(?)(.*)(?:\)|]|$)|(?:found\s*(at)?\s*\(?)(.*)(?:\)|])|(?:found\s*at\s*\()(.*)(?:\))|(?:\[(?:\s*bike\s*)(?:\s*tag\s*))#?(\d+)(?:(?:\])|(?:\s*.\s*(.*)\]))/im
+  /(?:is\s*(?:at|the)?\s*?)(.*?)(?=\s*by\s+|\]|$)|(?:found)\s*(?:at)?\s*\(([^()]+(\([^()]+\)[^()]*)*)\)(.*(?:\)|]|$))|(?:found\s*at\s*\()(.*(?:\)))/im
 )
 
 export const getConfirmedBoundaryFromTextRegex = new RegExp(
