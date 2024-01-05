@@ -19,6 +19,7 @@ import {
   createAchievementObject,
   ambassadorDataReferenceFields,
   createAmbassadorObject,
+  achievementDataFields,
   settingDataFields,
   ambassadorDataFields,
   gameDataAssetFields,
@@ -495,7 +496,7 @@ export function constructSanityFieldsQuery(
     case DataTypes.achievement:
       referenceFields = []
       arrayFields = []
-      fields = fields.length ? fields : settingDataFields
+      fields = fields.length ? fields : achievementDataFields
       break
   }
 
