@@ -168,6 +168,7 @@ export const createAchievementObject = (
     name: achievementData.name ?? '',
     key: achievementData.key ?? '',
     value: achievementData.value ?? '',
+    group: achievementData.value ?? '',
   } as Achievement
 }
 export const achievementDataFields = Object.keys(createAchievementObject())

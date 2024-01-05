@@ -27,6 +27,7 @@ export type Achievement = {
   description: string
   key: string
   value: string
+  group: string
 }
 
 export type Region = {
