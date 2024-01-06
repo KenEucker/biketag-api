@@ -485,13 +485,21 @@ export const getImgurFoundDescriptionFromBikeTagData = (
     includeDate ? getDateStringForImgurDescription(tag.foundTime) : ''
   }`
 
-export const getImgurFoundTitleFromBikeTagData = (tag: Tag): string =>
+export const getImgurFoundTitleFromBikeTagData = (
+  tag: Tag,
+  fromCombinedTag = false
+): string =>
   `${
     !tag.gps || (tag.gps.lat === 0 && tag.gps.long === 0)
       ? ''
       : `(${tag.gps.lat ?? 0}, ${tag.gps.long ?? 0}, ${tag.gps.alt ?? 0})`
   } 
-  ${tag.playerId?.length ? `[${tag.playerId}]` : ''} 
+  ${
+    !fromCombinedTag && // don't include the player id from a combined tag in the found tag
+    tag.playerId?.length
+      ? `[${tag.playerId}]`
+      : ''
+  } 
   ${tag.confirmedBoundary ? getConfirmedBoundarySymbol : ''}`
 
 export const getImgurMysteryImageHashFromBikeTagData = (
@@ -500,9 +508,14 @@ export const getImgurMysteryImageHashFromBikeTagData = (
 ): string => {
   return getImageHashFromText(tag.mysteryImageUrl, cache)
 }
-export const getImgurMysteryTitleFromBikeTagData = (tag: Tag): string =>
+export const getImgurMysteryTitleFromBikeTagData = (
+  tag: Tag,
+  fromCombinedTag = false
+): string =>
   `${
-    !tag.gps || (tag.gps.lat === 0 && tag.gps.long === 0)
+    (!fromCombinedTag && // don't include the gps from a combined tag in the mystery
+      !tag.gps) ||
+    (tag.gps.lat === 0 && tag.gps.long === 0)
       ? ''
       : `(${tag.gps.lat ?? 0}, ${tag.gps.long ?? 0}, ${tag.gps.alt ?? 0})`
   } 
