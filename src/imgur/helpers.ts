@@ -648,15 +648,16 @@ export const isValidUploadTagImagePayload = (
 
 export const getUpdateTagPayloadFromTagData = (
   payload: uploadTagImagePayload,
-  mystery = false
+  mystery = false,
+  combined = false
 ): uploadTagImagePayload => {
   return {
     imageHash: mystery
       ? getImgurMysteryImageHashFromBikeTagData(payload as Tag)
       : getImgurFoundImageHashFromBikeTagData(payload as Tag),
     title: mystery
-      ? getImgurMysteryTitleFromBikeTagData(payload as Tag)
-      : getImgurFoundTitleFromBikeTagData(payload as Tag),
+      ? getImgurMysteryTitleFromBikeTagData(payload as Tag, combined)
+      : getImgurFoundTitleFromBikeTagData(payload as Tag, combined),
     description: mystery
       ? getImgurMysteryDescriptionFromBikeTagData(payload as Tag)
       : getImgurFoundDescriptionFromBikeTagData(payload as Tag),

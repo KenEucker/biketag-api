@@ -14,8 +14,16 @@ export async function updateTag(
   cache?: typeof TinyCache
 ): Promise<BikeTagApiResponse<Tag>> {
   /// Construct imgur payloads for both mystery and found images separately
-  const imgurMysteryImagePayload = getUpdateTagPayloadFromTagData(payload, true)
-  const imgurFoundImagePayload = getUpdateTagPayloadFromTagData(payload)
+  const imgurMysteryImagePayload = getUpdateTagPayloadFromTagData(
+    payload,
+    true,
+    true
+  )
+  const imgurFoundImagePayload = getUpdateTagPayloadFromTagData(
+    payload,
+    false,
+    true
+  )
 
   return new Promise(async (resolve) => {
     let success = true
