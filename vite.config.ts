@@ -27,7 +27,7 @@ export default defineConfig({
           'axios-cache-adapter': 'axiosCacheAdapter',
         },
       },
-      //   external: ['imgur', 'imgur//common/types'],
+      //   external: ['imgur', 'imgur/common/types'],
     },
   },
 })
