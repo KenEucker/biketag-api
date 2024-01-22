@@ -1,7 +1,8 @@
 *.code-workspace
 .github
+.vscode
 .husky
-dist
+lib
 examples
 src
 coverage

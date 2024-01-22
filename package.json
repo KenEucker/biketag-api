@@ -12,6 +12,14 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "files": [
+    "dist/**/*",
+    "package.json",
+    "LICENSE.md",
+    "readme.md",
+    "documentation.md",
+    "code_of_conduct.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/keneucker/biketag-api.git"
