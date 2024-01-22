@@ -9,9 +9,7 @@ export default defineConfig({
     ssr: true,
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'BikeTag',
-      //   formats: ['es', 'cjs'],
-      fileName: (format) => `biketag.${format}.js`,
+      name: 'BikeTagClient',
     },
     rollupOptions: {
       plugins: [nodePolyfills()],
@@ -27,7 +25,6 @@ export default defineConfig({
           'axios-cache-adapter': 'axiosCacheAdapter',
         },
       },
-      //   external: ['imgur', 'imgur/common/types'],
     },
   },
 })
