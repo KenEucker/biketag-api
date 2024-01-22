@@ -52,7 +52,8 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "format:check": "prettier . --check ",
     "lint": "prettier . --write && eslint . --fix",
-    "lint:check": "npm run format:check && npm run lint:check && npm run typecheck && echo '🤖 !linter ✅ success! 🤖'",
+    "lint:check": "eslint . && prettier . --check",
+    "lint:release": "npm run format:check && npm run lint:check && npm run typecheck && echo '🤖 !linter ✅ success! 🤖'",
     "lint:staged": "npx --no-install lint-staged",
     "commit": "cz",
     "convert": "tsoa spec-and-routes"
