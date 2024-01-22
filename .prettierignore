@@ -6,6 +6,5 @@ src/coverage/
 dist
 examples/
 _site/
-webpack.config.js
 *.md
 /biketag.*

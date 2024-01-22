@@ -54,5 +54,5 @@ This package follows the lead of the Open-Source API [node-imgur][node-imgur], w
 [msw]: https://mswjs.io/
 [commitizen]: https://github.com/commitizen/cz-cli
 [conventional commits]: https://www.conventionalcommits.org/
-[code of conduct]: CODE_OF_CONDUCT.md
+[code of conduct]: code_of_conduct.md
 [node-imgur]: https://github.com/kaimallea/node-imgur

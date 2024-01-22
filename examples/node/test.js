@@ -1,6 +1,6 @@
 const {
     BikeTagClient
-} = require('../../biketag.node.js')
+} = require('../../dist/index.js')
 require('dotenv').config()
 
 const gamePayload = {

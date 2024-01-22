@@ -5,9 +5,7 @@ import * as path from 'path'
 
 describe(`Built Module`, () => {
   test(`Resolves proper node build`, () => {
-    expect(require.resolve(packagePath)).toBe(
-      path.join(testPath, 'biketag.node.js')
-    )
+    expect(require.resolve(packagePath)).toBe(path.join(testPath, 'index.js'))
   })
 
   test(`Module exports BikeTagClient as default and named export`, () => {

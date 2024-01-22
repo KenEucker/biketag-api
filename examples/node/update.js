@@ -1,6 +1,6 @@
 const {
   BikeTagClient
-} = require('../../dist/biketag.node.js')
+} = require('../../dist/index.js')
 require('dotenv').config()
 
 const host = process.env.BIKETAG_API_HOST

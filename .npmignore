@@ -21,4 +21,6 @@ contributing.md
 index.md
 jest.*.js
 tsconfig.json
-webpack.config.js
+tsoa.json
+jest.*.ts
+vite.config.ts

@@ -1,12 +1,12 @@
 lib/
 src/coverage/
-webpack.config.js
+vite.config.ts
 src/imgurClient/index.js
 _site/
 examples
 dist
 *.md
-biketag.js
-biketag.js.map
-biketag.node.js
-biketag.node.js.map
+index.js
+index.js.map
+index.mjs
+index.mjs.map
