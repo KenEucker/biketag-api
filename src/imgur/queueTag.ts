@@ -1,5 +1,5 @@
 import type { ImgurClient } from 'imgur'
-import { Payload } from 'imgur/lib/common/types'
+import { Payload } from 'imgur//common/types'
 import { createTagObject } from '../common/data'
 import {
   getQueueTagImagePayloadFromTagData,
@@ -11,7 +11,7 @@ import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
 import { queueTagPayload } from '../common/payloads'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { UpdateImagePayload } from 'imgur/lib/image'
+import { UpdateImagePayload } from 'imgur//image'
 import TinyCache from 'tinycache'
 
 export async function queueTag(

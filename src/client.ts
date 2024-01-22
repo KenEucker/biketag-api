@@ -6,7 +6,7 @@ import {
   Setting,
   Achievement,
 } from './common/schema'
-import {
+import type {
   Credentials,
   BikeTagApiResponse,
   ImgurCredentials,
@@ -69,7 +69,7 @@ import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 
-import ImgurClient from 'imgur'
+import { ImgurClient } from 'imgur'
 import sanityClient, { SanityClient } from '@sanity/client'
 
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'

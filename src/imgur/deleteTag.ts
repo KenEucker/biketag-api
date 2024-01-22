@@ -1,4 +1,4 @@
-import ImgurClient from 'imgur'
+import { ImgurClient } from 'imgur'
 import { deleteTagPayload } from '../common/payloads'
 import { BikeTagApiResponse, ImgurImage } from '../common/types'
 import { getImageHashFromImgurImage } from './helpers'

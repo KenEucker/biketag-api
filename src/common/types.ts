@@ -1,5 +1,5 @@
-import { ImageData } from 'imgur/lib/common/types'
-export { Payload } from 'imgur/lib/common/types'
+import { ImageData } from 'imgur//common/types'
+export { Payload } from 'imgur/common/types'
 import { AvailableApis, Errors } from '../common/enums'
 import { Tag, Game, Player, Setting, Achievement } from './schema'
 import { ImgurCredentials as ImgurApiCredentials } from 'imgur'

@@ -1,5 +1,5 @@
 import type { ImgurClient } from 'imgur'
-import { ImgurApiResponse, Payload } from 'imgur/lib/common/types'
+import { ImgurApiResponse, Payload } from 'imgur//common/types'
 import { createTagObject } from '../common/data'
 import {
   uploadTagImagePayload,

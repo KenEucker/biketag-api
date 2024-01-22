@@ -1,12 +1,9 @@
 import { BikeTagClient } from './client'
+export { BikeTagClient }
 
-export {
-  BikeTagClient,
-  BikeTagConfiguration,
-  BikeTagCredentials,
-} from './client'
+export type { BikeTagConfiguration, BikeTagCredentials } from './client'
 
-export { BikeTagApiResponse } from './common/types'
+export type { BikeTagApiResponse } from './common/types'
 
 export {
   createGameObject,
