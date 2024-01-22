@@ -47,7 +47,7 @@ export async function getPlayers(
 
     const response = {
       data: sortPlayers(playersData, payload.sort, payload.limit),
-      status: HttpStatusCode.Found,
+      status: HttpStatusCode.Ok,
       success: true,
       source: AvailableApis[AvailableApis.sanity],
     }
