@@ -1,6 +1,6 @@
 {
   "name": "biketag",
-  "version": "3.3.2",
+  "version": "3.3.3",
   "description": "The Javascript client API for BikeTag Games",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -39,7 +39,7 @@
   "homepage": "https://keneucker.github.io/biketag-api/",
   "scripts": {
     "dev": "npm run dev:node",
-    "dev:build": "npm run build && npm run compile && npm run dev",
+    "dev:build": "npm run build && npm run dev",
     "dev:node": "node examples/node/index.js",
     "dev:testnode": "node examples/node/test.js",
     "dev:upnode": "node examples/node/update.js",
