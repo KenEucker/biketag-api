@@ -438,10 +438,10 @@ export function constructSanityDocumentQuery(
   append = ''
 ): any {
   const gameQuery = game
-    ? ` && ((game._ref in *[_type=="game" && lower(name)=="${game.toLowerCase()}"]._id) || (count(*[ _type == "game" && lower(name) =="${game.toLowerCase()}" && ^._id in ${docType}s[]._ref ]) > 0))`
+    ? ` && ((lower(name) =="${game.toLowerCase()}") || (game._ref in *[_type=="game" && lower(name)=="${game.toLowerCase()}"]._id) || (count(*[ _type == "game" && lower(name) =="${game.toLowerCase()}" && ^._id in ${docType}s[]._ref ]) > 0))`
     : ''
   const playerQuery = player
-    ? ` && ((player._ref in *[_type=="player" && lower(name)=="${player.toLowerCase()}"]._id) || (count(*[ _type == "player" && lower(name) =="${player.toLowerCase()}" && ^._id in ${docType}s[]._ref ]) > 0))`
+    ? ` && ((lower(name) =="${player.toLowerCase()}") || (player._ref in *[_type=="player" && lower(name)=="${player.toLowerCase()}"]._id) || (count(*[ _type == "player" && lower(name) =="${player.toLowerCase()}" && ^._id in ${docType}s[]._ref ]) > 0))`
     : ''
   const slugsQuery = slugs.length
     ? ` && slug.current in ${JSON.stringify(slugs)}`
