@@ -42,7 +42,7 @@ export async function getPlayers(
       playersData = playersData.filter((p) => payload.slugs?.includes(p.slug))
     } else if (payload.names?.length) {
       playersData = playersData.filter((p) =>
-        payload.names?.includes(p.name.toLowerCase())
+        payload.names?.find((n) => n.toLowerCase() === p.name.toLowerCase())
       )
     }
 
