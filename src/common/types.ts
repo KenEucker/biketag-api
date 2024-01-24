@@ -77,11 +77,13 @@ export type ApiOptions = RequireAtLeastOne<{
   host?: string
   queuehash?: string
   archivehash?: string
-  slugs?: string[]
   fields?: string[]
   slug?: string
-  tagnumbers?: number[]
+  slugs?: string[]
   tagnumber?: number
+  tagnumbers?: number[]
+  name?: string
+  names?: string[]
   account?: string
   concise?: boolean
   cached?: boolean

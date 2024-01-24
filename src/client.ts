@@ -245,6 +245,13 @@ export class BikeTagClient extends EventEmitter {
       case DataTypes.player:
         options.game = options.game ? options.game : this.biketagConfig?.game
 
+        if (method === 'getPlayers') {
+          options.names =
+            options.names ?? options.name ? [options.name] : undefined
+        }
+
+        options.game = options.game ? options.game : this.biketagConfig?.game
+
         if (method === 'updatePlayer' || method === 'updatePlayers') {
           delete options.game
         }
