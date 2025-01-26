@@ -25,7 +25,7 @@ export async function getQueue(
     payload.cached
   )
 
-  const images = getGroupedImagesByTagnumber(albumInfo?.data?.images, cache)
+  const images = getGroupedImagesByTagnumber(albumInfo?.data?.images ?? [], cache)
   const queuedTags = getGroupedTagsByPlayer(images, payload)
 
   return {
