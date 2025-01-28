@@ -98,7 +98,7 @@ export const gameDataReferenceFields = ['region', 'settings']
 export const gameDataArrayFields = ['ambassadors', 'tags', 'settings']
 export const gameDataCustomFields = {
   settings: '[]->{key,value}',
-  region: 'name,description,zipcode',
+  region: 'name,description,zipcode,radius',
 }
 
 export const gameDataFields = Object.keys(createGameObject())
