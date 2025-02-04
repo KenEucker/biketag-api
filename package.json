@@ -67,6 +67,7 @@
     "convert": "tsoa spec-and-routes"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.654.0",
     "@sanity/client": "2.25.1-feature-image-file-input-refactor.150",
     "axios": "^0.21.1",
     "axios-cache-adapter": "^2.7.3",

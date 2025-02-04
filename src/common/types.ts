@@ -32,6 +32,14 @@ export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
   password: string
 }
 
+export interface AWSRegion {
+  region: string
+}
+
+export interface AWSCredentials {
+  region: string
+}
+
 /// ****************************  BikeTag Credential Objects   ************************* ///
 export interface CommonData {
   game: string
@@ -57,6 +65,7 @@ export interface BikeTagCredentials
 
 export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
+  Partial<AWSCredentials> &
   Partial<ImgurCredentials>
 
 /// ****************************  BikeTag API Objects   ******************************** ///
@@ -105,14 +114,16 @@ export type geopoint = {
 /// ****************************  BikeTag Configurations   ***************************** ///
 export type BikeTagConfiguration = {
   biketag: BikeTagCredentials
-  sanity: SanityCredentials
+  aws: AWSCredentials
   imgur: ImgurCredentials
+  sanity: SanityCredentials
 }
 
 export type PartialBikeTagConfiguration = RequireAtLeastOne<{
   biketag: Partial<BikeTagCredentials>
-  sanity: Partial<SanityCredentials>
+  aws: Partial<AWSCredentials>
   imgur: Partial<ImgurCredentials>
+  sanity: Partial<SanityCredentials>
 }>
 
 /// ****************************  Gun Data State   ************************************* ///

@@ -2,6 +2,7 @@ import {
   AccessToken,
   ClientKey,
   ImgurCredentials,
+  AWSCredentials,
   SanityCredentials,
   Credentials,
   BikeTagCredentials,
@@ -99,6 +100,18 @@ export const isSanityCredentials = (
   credentials: SanityCredentials
 ): boolean => {
   return credentials?.projectId !== undefined
+}
+
+export const isAWSCredentials = (credentials: AWSCredentials): boolean => {
+  return credentials?.region !== undefined
+}
+
+export const isAWSApiReady = (credentials: AWSCredentials): ApiAvailability => {
+  if (credentials.region !== undefined) {
+    return credentials.region !== undefined ? 3 : 1
+  }
+
+  return 0
 }
 
 export const isSanityApiReady = (
@@ -229,6 +242,26 @@ export const assignSanityCredentials = (
   return sanityCredentials as SanityCredentials
 }
 
+export const createAWSCredentials = (
+  credentials: Partial<AWSCredentials>,
+  defaults: Partial<AWSCredentials> = {}
+): AWSCredentials => {
+  return {
+    region: credentials.region?.length ? credentials.region : defaults.region,
+  }
+}
+
+export const assignAWSCredentials = (
+  credentials: AWSCredentials,
+  defaults?: Partial<AWSCredentials>
+): AWSCredentials => {
+  const awsCredentials = isAWSCredentials(credentials as AWSCredentials)
+    ? createAWSCredentials(credentials, defaults)
+    : defaults
+
+  return awsCredentials as AWSCredentials
+}
+
 export const createBikeTagCredentials = (
   credentials: Partial<BikeTagCredentials>,
   defaults: Partial<BikeTagCredentials> = {}
@@ -280,6 +313,10 @@ export const assignBikeTagConfiguration = (
       config as unknown as SanityCredentials,
       defaults?.sanity
     ),
+    aws: assignAWSCredentials(
+      config as unknown as AWSCredentials,
+      defaults?.aws
+    ),
     imgur: assignImgurCredentials(
       config as unknown as ImgurCredentials,
       defaults?.imgur
@@ -290,6 +327,9 @@ export const assignBikeTagConfiguration = (
   configuration.biketag = config.biketag
     ? { ...parsedConfig.biketag, ...createBikeTagCredentials(config.biketag) }
     : parsedConfig.biketag
+  configuration.aws = config.aws
+    ? { ...parsedConfig.aws, ...createAWSCredentials(config.aws) }
+    : parsedConfig.aws
   configuration.sanity = config.sanity
     ? { ...parsedConfig.sanity, ...createSanityCredentials(config.sanity) }
     : parsedConfig.sanity

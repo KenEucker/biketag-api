@@ -10,6 +10,7 @@ import type {
   Credentials,
   BikeTagApiResponse,
   ImgurCredentials,
+  AWSCredentials,
   SanityCredentials,
   RequireAtLeastOne,
   BikeTagCredentials,
@@ -49,12 +50,15 @@ import {
   assignBikeTagConfiguration,
   isImgurCredentials,
   isSanityCredentials,
+  isAWSCredentials,
   isBikeTagCredentials,
   isBikeTagApiReady,
+  isAWSApiReady,
   isSanityApiReady,
   isImgurApiReady,
   createBikeTagCredentials,
   createImgurCredentials,
+  createAWSCredentials,
   createSanityCredentials,
 } from './common/methods'
 import {
@@ -65,10 +69,12 @@ import {
 
 import * as BikeTagExpressions from './common/expressions'
 import * as BikeTagGetters from './common/getters'
+import * as awsApi from './aws'
 import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 
+import { S3Client } from '@aws-sdk/client-s3'
 import { ImgurClient } from 'imgur'
 import sanityClient, { SanityClient } from '@sanity/client'
 
@@ -96,6 +102,8 @@ export class BikeTagClient extends EventEmitter {
 
   protected imgurClient?: ImgurClient
   protected sanityClient?: SanityClient
+  protected awsClient?: S3Client
+  protected awsConfig?: AWSCredentials
   protected sanityConfig?: SanityCredentials
   protected imgurConfig?: ImgurCredentials
   protected biketagConfig?: BikeTagCredentials
@@ -333,6 +341,10 @@ export class BikeTagClient extends EventEmitter {
         client = this.sanityClient
         api = sanityApi
         break
+      case AvailableApis.aws:
+        client = this.awsClient
+        api = awsApi
+        break
       case AvailableApis.imgur:
         client = this.imgurClient
         api = imgurApi
@@ -366,6 +378,12 @@ export class BikeTagClient extends EventEmitter {
       (!method || !!sanityApi[method])
     ) {
       return AvailableApis.sanity
+    } else if (
+      this.awsConfig &&
+      this.awsClient &&
+      (!method || !!awsApi[method])
+    ) {
+      return AvailableApis.aws
     } else if (
       this.biketagConfig &&
       isBikeTagCredentials(this.biketagConfig) &&
@@ -432,6 +450,13 @@ export class BikeTagClient extends EventEmitter {
       this.imgurClient = new ImgurClient(config.imgur)
     }
     if (
+      config.aws &&
+      isAWSCredentials(config.aws) &&
+      isAWSApiReady(config.aws)
+    ) {
+      this.awsClient = new S3Client(config.aws)
+    }
+    if (
       config.sanity &&
       isSanityCredentials(config.sanity) &&
       isSanityApiReady(config.sanity)
@@ -481,6 +506,9 @@ export class BikeTagClient extends EventEmitter {
           case AvailableApis.imgur:
             createCredentialsMethod = createImgurCredentials
             break
+          case AvailableApis.aws:
+            createCredentialsMethod = createAWSCredentials
+            break
           case AvailableApis.sanity:
             createCredentialsMethod = createSanityCredentials
             break
@@ -510,6 +538,7 @@ export class BikeTagClient extends EventEmitter {
       if (reInitialize) {
         const initializeConfig: BikeTagConfiguration = {
           biketag: undefined,
+          aws: undefined,
           imgur: undefined,
           sanity: undefined,
         }
