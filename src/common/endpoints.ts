@@ -1,4 +1,4 @@
-export const BIKETAG_API_HOST = 'biketag.io'
+export const BIKETAG_API_HOST = 'biketag.org'
 
 export const API_VERSION = 'api'
 
