@@ -100,7 +100,7 @@ const runIntegrationTests = async (client) => {
 
 const biketag = new BikeTagClient({
     game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
-    host: process.env.BIKETAG_API_HOST ? process.env.BIKETAG_API_HOST : 'biketag.io',
+    host: process.env.BIKETAG_API_HOST ? process.env.BIKETAG_API_HOST : 'biketag.org',
     imgur: {
         hash: process.env.IMGUR_HASH,
         queuehash: process.env.IMGUR_QUEUEHASH,

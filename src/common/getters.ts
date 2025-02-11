@@ -577,7 +577,7 @@ export const getRedditPostTextFromTagData = (
   gameData: any = {},
   wrapInPreTag = true
 ): string => {
-  const host = gameData.host ?? `${tagData.game}.biketag.io`
+  const host = gameData.host ?? `${tagData.game}.biketag.org`
   const selfPostText = `
   [#${tagData.tagnumber} tag by ${tagData.mysteryPlayer}](${
     tagData.mysteryImageUrl
