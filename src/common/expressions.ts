@@ -54,6 +54,6 @@ export const getSanityImageUrlHashFromTextRegex = RegExp(
   /^(?:image-)(.*?(?=-(-png|-jpg|-jpeg|-gif)))/i
 )
 
-export const getCreditFromTwitterTextRegex = RegExp(
+export const getCreditFromBlueskyTextRegex = RegExp(
   /(?:tag\s*)(?:number\s*)?(\d*)?(?:\s*by\s*)(.+?(?=$|\n))/i
 )

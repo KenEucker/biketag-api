@@ -162,7 +162,7 @@ export function getGameDataFromText(
     queuehash: gameData[14],
     region: { name: gameData[10], description: gameData[3] },
     subreddit: gameData[5],
-    twitter: gameData[7],
+    bluesky: gameData[7],
   })
 
   if (!game.name?.length) {
