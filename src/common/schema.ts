@@ -35,7 +35,7 @@ export type Region = {
   name: string
   description: string
   zipcode: number
-  utc: string
+  tz: string
 }
 
 export type Player = {
