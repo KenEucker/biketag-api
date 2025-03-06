@@ -108,7 +108,7 @@ export interface Game {
   archivehash?: string
   queuehash?: string
   subreddit?: string
-  twitter?: string
+  bluesky?: string
   logo: string
   region: Region
 }
