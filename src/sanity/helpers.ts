@@ -191,7 +191,7 @@ export async function constructSanityObjectFromData(
   client: SanityClient,
   data: any,
   fields: string[] = [],
-  dataType: 'game' | 'player' | 'tag',
+  dataType: 'game' | 'player' | 'tag' | 'stat',
   dataReferenceFields: string[] = [],
   dataArrayFields: string[] = []
 ): Promise<any> {
