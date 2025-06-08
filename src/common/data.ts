@@ -168,6 +168,7 @@ export const createSettingObject = (settingData: any = {}): Setting => {
 export const settingDataFields = Object.keys(createSettingObject())
 
 export const statDataReferenceFields = ['game']
+export const statDataArrayFields = []
 export const createStatObject = (statData: any = {}): Stat => {
   return {
     description: statData.description ?? '',

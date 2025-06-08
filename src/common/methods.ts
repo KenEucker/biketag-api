@@ -220,7 +220,7 @@ export const createSanityCredentials = (
       : defaults.username,
     apiVersion: credentials.apiVersion?.length
       ? credentials.apiVersion
-      : defaults.apiVersion ?? '2021-06-07',
+      : defaults.apiVersion ?? '2021-10-21',
   }
 }
 

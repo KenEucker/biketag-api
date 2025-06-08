@@ -28,6 +28,7 @@ import {
   createStatObject,
   statDataFields,
   statDataReferenceFields,
+  statDataArrayFields,
 } from '../common/data'
 import { DataTypes } from '../common/enums'
 
@@ -428,7 +429,7 @@ export function constructStatFromSanityObject(
 
   statDataReferenceFields.forEach((f) => {
     if (statData[f] && typeof statData[f] !== 'undefined') {
-      const isArrayField = statDataReferenceFields.indexOf(f) !== -1
+      const isArrayField = statDataArrayFields.indexOf(f) !== -1
       if (isArrayField) {
         statData[f] = statData[f].map((a) => a.name)
       } else {

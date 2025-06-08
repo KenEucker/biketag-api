@@ -26,7 +26,7 @@ export interface SanityProjectId {
 
 export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
   dataset: string
-  apiVersion: '2021-06-07' | string
+  apiVersion: '2021-10-21' | string
   useCdn: boolean
   username: string
   password: string
