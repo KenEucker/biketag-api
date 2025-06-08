@@ -98,6 +98,18 @@ export type getSettingsPayload = {
   slugs?: string[]
 } & CommonPayloadData
 
+export type getStatPayload = {
+  fields?: string[]
+  slug?: string
+} & CommonPayloadData
+
+export type getStatsPayload = {
+  fields?: string[]
+  sort?: SortOptions
+  limit?: number
+  slugs?: string[]
+} & CommonPayloadData
+
 export type getAchievementPayload = {
   player?: string
   fields?: string[]

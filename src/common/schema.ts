@@ -19,6 +19,18 @@ export type Setting = {
   value: string
 }
 
+export type Stat = {
+  _id?: string
+  _type?: string
+  slug: string
+  name: string
+  description: string
+  key: string
+  value: string
+  game: string
+  updatedAt: string
+}
+
 export type Achievement = {
   _id?: string
   _type?: string

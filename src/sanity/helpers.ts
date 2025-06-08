@@ -25,6 +25,9 @@ import {
   gameDataAssetFields,
   playerDataAssetFields,
   createSettingObject,
+  createStatObject,
+  statDataFields,
+  statDataReferenceFields,
 } from '../common/data'
 import { DataTypes } from '../common/enums'
 
@@ -412,6 +415,33 @@ export function constructSettingFromSanityObject(
   return createSettingObject(settingData)
 }
 
+export function constructStatFromSanityObject(
+  data: any,
+  fields: string[] = []
+): any {
+  const statData = fields.length
+    ? fields.reduce((o: any, f: any) => {
+        o[f] = data[f]
+        return o
+      }, {})
+    : data
+
+  statDataReferenceFields.forEach((f) => {
+    if (statData[f] && typeof statData[f] !== 'undefined') {
+      const isArrayField = statDataReferenceFields.indexOf(f) !== -1
+      if (isArrayField) {
+        statData[f] = statData[f].map((a) => a.name)
+      } else {
+        statData[f] = statData[f].name
+      }
+    }
+  })
+
+  statData.slug = statData.slug?.current ?? statData.slug
+
+  return createStatObject(statData)
+}
+
 export function constructAchievementFromSanityObject(
   data: any,
   fields: string[] = []
@@ -491,6 +521,12 @@ export function constructSanityFieldsQuery(
       referenceFields = []
       arrayFields = []
       fields = fields.length ? fields : settingDataFields
+      break
+
+    case DataTypes.stat:
+      referenceFields = statDataReferenceFields
+      arrayFields = []
+      fields = fields.length ? fields : statDataFields
       break
 
     case DataTypes.achievement:

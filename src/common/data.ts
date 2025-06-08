@@ -1,4 +1,12 @@
-import { Tag, Game, Player, Ambassador, Setting, Achievement } from './schema'
+import {
+  Tag,
+  Game,
+  Player,
+  Ambassador,
+  Setting,
+  Achievement,
+  Stat,
+} from './schema'
 
 /// TODO: make an enum and put into the enums
 export const cacheKeys = {
@@ -158,6 +166,19 @@ export const createSettingObject = (settingData: any = {}): Setting => {
   } as Setting
 }
 export const settingDataFields = Object.keys(createSettingObject())
+
+export const statDataReferenceFields = ['game']
+export const createStatObject = (statData: any = {}): Stat => {
+  return {
+    description: statData.description ?? '',
+    game: statData.game ?? '',
+    name: statData.name ?? '',
+    key: statData.key ?? '',
+    value: statData.value ?? '',
+    updatedAt: statData._updatedAt ?? statData._updatedAt ?? new Date(),
+  } as Stat
+}
+export const statDataFields = [...Object.keys(createStatObject()), '_updatedAt']
 
 export const createAchievementObject = (
   achievementData: any = {}

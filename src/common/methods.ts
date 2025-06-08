@@ -11,7 +11,15 @@ import {
 } from './types'
 import FormData from 'form-data'
 import TinyCache from 'tinycache'
-import { Tag, Game, Player, Ambassador, Setting, Achievement } from './schema'
+import {
+  Tag,
+  Game,
+  Player,
+  Ambassador,
+  Setting,
+  Achievement,
+  Stat,
+} from './schema'
 import { ApiAvailability } from './enums'
 import { cacheKeys } from './data'
 
@@ -470,6 +478,22 @@ export const sortSettings = (
     case 'new':
       /// Since the players should already be sorted by first to last played, reverse the list
       sorted = settings.reverse()
+      break
+  }
+
+  return limit !== 0 ? sorted.slice(0, limit) : sorted
+}
+
+export const sortStats = (stats: Stat[], sort = 'new', limit = 0): Stat[] => {
+  let sorted = stats
+
+  switch (sort) {
+    case 'comments':
+      sorted = stats.sort((a, b) => a.name.localeCompare(b.name))
+      break
+    case 'new':
+      /// Since the players should already be sorted by first to last played, reverse the list
+      sorted = stats.reverse()
       break
   }
 
