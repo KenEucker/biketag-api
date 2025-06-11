@@ -1,6 +1,7 @@
 export { deleteTag } from './deleteTag'
 export { deleteTags } from './deleteTags'
 export { getTags } from './getTags'
+export { getStats } from './getStats'
 export { getGame } from './getGame'
 export { getPlayers } from './getPlayers'
 export { getAmbassadors } from './getAmbassadors'
