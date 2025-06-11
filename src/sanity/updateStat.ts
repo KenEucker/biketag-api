@@ -3,10 +3,7 @@ import { constructSanityObjectFromData } from './helpers'
 import { HttpStatusCode, AvailableApis } from '../common/enums'
 import { BikeTagApiResponse } from '../common/types'
 import { updateStatPayload } from '../common/payloads'
-import {
-  statDataArrayFields,
-  statDataReferenceFields,
-} from '../common/data'
+import { statDataArrayFields, statDataReferenceFields } from '../common/data'
 
 function isValidUpdatePayload(utp: updateStatPayload) {
   return (

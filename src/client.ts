@@ -1486,6 +1486,23 @@ export class BikeTagClient extends EventEmitter {
             ),
           })
           break
+        case AvailableApis.imgur:
+          // eslint-disable-next-line no-case-declarations
+          const getTags = this.getPassthroughApiMethod(
+            api.getTags,
+            client,
+            DataTypes.tag
+          )
+          clientMethod = clientMethod.bind({
+            getTags,
+            getPlayers: this.getPassthroughApiMethod(
+              api.getPlayers,
+              client,
+              DataTypes.player,
+              { getTags }
+            ),
+          })
+          break
       }
 
       return clientMethod(client, options).catch((e) => {
