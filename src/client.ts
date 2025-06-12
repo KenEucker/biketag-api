@@ -1557,7 +1557,7 @@ export class BikeTagClient extends EventEmitter {
       DataTypes.stat,
       'updateStats'
     )
-    let clientMethod = api.updateStat
+    let clientMethod = api.updateStats
 
     if (clientMethod) {
       switch (options.source) {
