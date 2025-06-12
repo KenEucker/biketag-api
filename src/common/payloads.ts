@@ -1,4 +1,4 @@
-import { Tag, Game, Player, Stat } from './schema'
+import { Game, Player, Stat, Tag } from './schema'
 import { CommonPayloadData } from './types'
 import { SanityUploadPayload } from '../common/data'
 

@@ -31,7 +31,10 @@ export async function getStats(
   const tagsResponse = await this.getTags(undefined, cache)
   const playersResponse = await this.getPlayers(undefined, cache)
 
-  if (playersResponse.status !== 200 && tagsResponse.status !== 200) {
+  if (
+    playersResponse.status !== HttpStatusCode.Ok &&
+    tagsResponse.status !== HttpStatusCode.Ok
+  ) {
     success = false
     error = playersResponse.error ?? tagsResponse.error
   } else {

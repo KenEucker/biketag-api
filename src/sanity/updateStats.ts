@@ -14,12 +14,13 @@ export async function updateStats(
     successPayloads.push(this.updateStat(updatePayload))
   }
 
-  await Promise.allSettled(successPayloads)
-
+  const settled = await Promise.allSettled(successPayloads)
   return {
-    success: true,
+    success: settled.every((s) => s.status === 'fulfilled'),
     status: HttpStatusCode.Ok,
     source: AvailableApis[AvailableApis.sanity],
-    data: successPayloads.map((p) => p.data),
+    data: settled.map((s) =>
+      s.status === 'fulfilled' ? s.value.data : s.reason
+    ),
   }
 }

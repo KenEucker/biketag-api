@@ -1,14 +1,14 @@
 import { BikeTagClient } from '../client'
 import { STATS_ENDPOINT } from '../common/endpoints'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { getSettingsPayload } from '../common/payloads'
+import { getStatsPayload } from '../common/payloads'
 import { Stat } from '../common/schema'
 import { BikeTagApiResponse } from '../common/types'
 import { getApiUrl } from './helpers'
 
 export async function getStats(
   client: BikeTagClient,
-  payload: getSettingsPayload
+  payload: getStatsPayload
 ): Promise<BikeTagApiResponse<Stat[]>> {
   delete payload.source
   const opts = {

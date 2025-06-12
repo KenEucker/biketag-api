@@ -46,6 +46,7 @@ import {
   getAchievementsPayload,
   getStatPayload,
   getStatsPayload,
+  updateStatPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -1516,6 +1517,68 @@ export class BikeTagClient extends EventEmitter {
       })
     } else {
       return Promise.reject(`getStats ${Errors.NotImplemented} ${source}`)
+    }
+  }
+
+  updateStat(
+    payload?: RequireAtLeastOne<updateStatPayload> | string[],
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Stat[]>> {
+    const { client, options, api, source } = this.getClientAdapter(
+      payload,
+      opts,
+      DataTypes.stat,
+      'updateStat'
+    )
+    const clientMethod = api.updateStat
+
+    if (clientMethod) {
+      return clientMethod(client, options, apiCache).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e.code ?? e,
+          success: false,
+          source,
+        })
+      })
+    } else {
+      return Promise.reject(`updateStat ${Errors.NotImplemented} ${source}`)
+    }
+  }
+
+  updateStats(
+    payload?: RequireAtLeastOne<updateStatPayload[]> | string[],
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Stat[]>> {
+    const { client, options, api, source } = this.getClientAdapter(
+      payload,
+      opts,
+      DataTypes.stat,
+      'updateStats'
+    )
+    let clientMethod = api.updateStat
+
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.sanity:
+          clientMethod = clientMethod.bind({
+            updateStat: this.getPassthroughApiMethod(api.updateStat, client),
+          })
+          break
+      }
+
+      return clientMethod(client, options, apiCache).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e.code ?? e,
+          success: false,
+          source,
+        })
+      })
+    } else {
+      return Promise.reject(`updateStats ${Errors.NotImplemented} ${source}`)
     }
   }
 

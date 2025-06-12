@@ -759,7 +759,7 @@ export const getIsSameDay = (d1: Date, d2: Date): boolean => {
  */
 export const getDaysDifference = (d1: Date, d2: Date): number => {
   const timeDiff = Math.abs(d2.getTime() - d1.getTime())
-  const oneDay: number = 24 * 60 * 60 * 1000 * 1
+  const oneDay: number = 24 * 60 * 60 * 1000
   const diffDays = Math.ceil(timeDiff / oneDay)
   return diffDays
 }
@@ -802,7 +802,7 @@ export const getGameHighestNumberTagsPerNumberDaysData = (
     startDate: null,
     endDate: null,
   }
-  const oneDay: number = 24 * 60 * 60 * 1000 * 1
+  const oneDay: number = 24 * 60 * 60 * 1000
   const daysBack: number[] = [...Array(days).keys()]
   const sortedTags = [...tags].reverse()
   for (const tag of sortedTags) {
