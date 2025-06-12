@@ -5,6 +5,7 @@ import {
   Ambassador,
   Setting,
   Achievement,
+  Stat,
 } from './common/schema'
 import type {
   Credentials,
@@ -43,6 +44,9 @@ import {
   queueTagPayload,
   archiveTagPayload,
   getAchievementsPayload,
+  getStatPayload,
+  getStatsPayload,
+  updateStatPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -242,6 +246,10 @@ export class BikeTagClient extends EventEmitter {
         options.game = options.game ?? options.slug ?? this.biketagConfig?.game
         break
 
+      case DataTypes.stat:
+        options.game = options.game ?? options.slug ?? this.biketagConfig?.game
+        break
+
       case DataTypes.player:
         options.game = options.game ? options.game : this.biketagConfig?.game
 
@@ -341,6 +349,7 @@ export class BikeTagClient extends EventEmitter {
       case AvailableApis.biketag:
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         client = this
+        options.source = 'biketag'
         api = biketagApi
         break
     }
@@ -1193,7 +1202,7 @@ export class BikeTagClient extends EventEmitter {
   ): Promise<BikeTagApiResponse<Ambassador[]> | Ambassador[]> {
     const options = this.options(
       payload,
-      DataTypes.game,
+      DataTypes.ambassador,
       opts,
       'getAmbassadors'
     )
@@ -1293,7 +1302,12 @@ export class BikeTagClient extends EventEmitter {
       | string[],
     opts?: RequireAtLeastOne<Credentials>
   ): Promise<BikeTagApiResponse<Setting[]> | Setting[]> {
-    const options = this.options(payload, DataTypes.game, opts, 'getSettings')
+    const options = this.options(
+      payload,
+      DataTypes.setting,
+      opts,
+      'getSettings'
+    )
     return this.getSettings(options as getSettingsPayload, opts).then((r) =>
       options.concise ? r.data : r
     )
@@ -1308,10 +1322,22 @@ export class BikeTagClient extends EventEmitter {
       opts,
       DataTypes.setting
     )
-    const clientMethod = api.getSetting
+    let clientMethod = api.getSetting
 
     /// If the client adapter implements a direct way to retrieve a single setting
     if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.sanity:
+          clientMethod = clientMethod.bind({
+            getGame: this.getPassthroughApiMethod(
+              api.getGame,
+              client,
+              DataTypes.game
+            ),
+          })
+          break
+      }
+
       return clientMethod(client, options).catch((e) => {
         return {
           status: HttpStatusCode.InternalServerError,
@@ -1368,6 +1394,194 @@ export class BikeTagClient extends EventEmitter {
     }
   }
 
+  /// ****************************  Stats Data Methods   ********************************* ///
+
+  stats(
+    payload?:
+      | RequireAtLeastOne<getStatPayload>
+      | RequireAtLeastOne<getStatsPayload>
+      | string
+      | string[],
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Stat[]> | Stat[]> {
+    const options = this.options(payload, DataTypes.stat, opts, 'getStats')
+    return this.getStats(options as getStatsPayload, opts).then((r) =>
+      options.concise ? r.data : r
+    )
+  }
+
+  getStat(
+    payload: RequireAtLeastOne<getStatPayload> | string,
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Stat>> {
+    const { client, options, api } = this.getClientAdapter(
+      payload,
+      opts,
+      DataTypes.stat
+    )
+    let clientMethod = api.getStat
+
+    /// If the client adapter implements a direct way to retrieve a single stat
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.sanity:
+          clientMethod = clientMethod.bind({
+            getGame: this.getPassthroughApiMethod(
+              api.getGame,
+              client,
+              DataTypes.game
+            ),
+          })
+          break
+      }
+
+      return clientMethod(client, options).catch((e) => {
+        return {
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e.code ?? e,
+          success: false,
+          source: AvailableApis[options.source],
+        }
+      })
+    }
+
+    /// Else, use the get all and filter method
+    return this.getStats(
+      this.getInitialPayload(
+        options,
+        undefined,
+        'getStats'
+      ) as unknown as getStatsPayload,
+      opts
+    ).then((r) => {
+      return {
+        data: r.data?.length ? r.data[0] : null,
+        status: r.status,
+        source: r.source,
+        success: r.success,
+      }
+    })
+  }
+
+  getStats(
+    payload?: RequireAtLeastOne<getStatsPayload> | string[],
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Stat[]>> {
+    const { client, options, api, source } = this.getClientAdapter(
+      payload,
+      opts,
+      DataTypes.stat,
+      'getStats'
+    )
+    let clientMethod = api.getStats
+
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.sanity:
+          clientMethod = clientMethod.bind({
+            getGame: this.getPassthroughApiMethod(
+              api.getGame,
+              client,
+              DataTypes.game
+            ),
+          })
+          break
+        case AvailableApis.imgur:
+          // eslint-disable-next-line no-case-declarations
+          const getTags = this.getPassthroughApiMethod(
+            api.getTags,
+            client,
+            DataTypes.tag
+          )
+          clientMethod = clientMethod.bind({
+            getTags,
+            getPlayers: this.getPassthroughApiMethod(
+              api.getPlayers,
+              client,
+              DataTypes.player,
+              { getTags }
+            ),
+          })
+          break
+      }
+
+      return clientMethod(client, options).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e.code ?? e,
+          success: false,
+          source,
+        })
+      })
+    } else {
+      return Promise.reject(`getStats ${Errors.NotImplemented} ${source}`)
+    }
+  }
+
+  updateStat(
+    payload?: RequireAtLeastOne<updateStatPayload> | string[],
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Stat[]>> {
+    const { client, options, api, source } = this.getClientAdapter(
+      payload,
+      opts,
+      DataTypes.stat,
+      'updateStat'
+    )
+    const clientMethod = api.updateStat
+
+    if (clientMethod) {
+      return clientMethod(client, options, apiCache).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e.code ?? e,
+          success: false,
+          source,
+        })
+      })
+    } else {
+      return Promise.reject(`updateStat ${Errors.NotImplemented} ${source}`)
+    }
+  }
+
+  updateStats(
+    payload?: RequireAtLeastOne<updateStatPayload[]> | string[],
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Stat[]>> {
+    const { client, options, api, source } = this.getClientAdapter(
+      payload,
+      opts,
+      DataTypes.stat,
+      'updateStats'
+    )
+    let clientMethod = api.updateStat
+
+    if (clientMethod) {
+      switch (options.source) {
+        case AvailableApis.sanity:
+          clientMethod = clientMethod.bind({
+            updateStat: this.getPassthroughApiMethod(api.updateStat, client),
+          })
+          break
+      }
+
+      return clientMethod(client, options, apiCache).catch((e) => {
+        return Promise.resolve({
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e.code ?? e,
+          success: false,
+          source,
+        })
+      })
+    } else {
+      return Promise.reject(`updateStats ${Errors.NotImplemented} ${source}`)
+    }
+  }
+
   /// ****************************  Achievement Data Methods   ********************************* ///
 
   achievements(
@@ -1380,7 +1594,7 @@ export class BikeTagClient extends EventEmitter {
   ): Promise<BikeTagApiResponse<Achievement[]> | Achievement[]> {
     const options = this.options(
       payload,
-      DataTypes.game,
+      DataTypes.achievement,
       opts,
       'getAchievements'
     )
@@ -1396,11 +1610,11 @@ export class BikeTagClient extends EventEmitter {
     const { client, options, api } = this.getClientAdapter(
       payload,
       opts,
-      DataTypes.setting
+      DataTypes.achievement
     )
     let clientMethod = api.getAchievement
 
-    /// If the client adapter implements a direct way to retrieve a single setting
+    /// If the client adapter implements a direct way to retrieve a single achievement
     if (clientMethod) {
       switch (options.source) {
         case AvailableApis.sanity:
