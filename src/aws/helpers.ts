@@ -29,9 +29,8 @@ export async function loadIndex(
     const obj = await client.send(
       new GetObjectCommand({ Bucket: bucket, Key: key })
     )
-    const chunks: any[] = []
-    for await (const chunk of obj.Body as any) chunks.push(chunk)
-    const raw = Buffer.concat(chunks).toString('utf-8')
+    /// This code is all wrong, it should be pulling tag data from metadata of the file, title and description
+    const raw = await obj.Body?.transformToString('utf-8')
     return JSON.parse(raw) as Tag[]
   } catch (err: any) {
     if (err.name === 'NoSuchKey') return []

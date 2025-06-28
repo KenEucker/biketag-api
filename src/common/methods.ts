@@ -108,7 +108,7 @@ export const isAWSCredentials = (credentials: AWSCredentials): boolean => {
 
 export const isAWSApiReady = (credentials: AWSCredentials): ApiAvailability => {
   if (credentials.accessKeyId !== undefined) {
-    return credentials.accessKeyId !== undefined ? 3 : 1
+    return credentials.secretAccessKey !== undefined ? 3 : 1
   }
 
   return 0

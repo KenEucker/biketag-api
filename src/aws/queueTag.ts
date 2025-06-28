@@ -12,6 +12,7 @@ import {
 import { uploadTagImage } from './uploadTagImage'
 import TinyCache from 'tinycache'
 
+/// TODO: this function is incomplete. It should be saving to a title and description field just like we do with Imgur for storing all of the tag data.
 export async function queueTag(
   client: S3Client,
   payload: queueTagPayload,

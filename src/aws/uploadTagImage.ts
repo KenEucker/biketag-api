@@ -28,6 +28,16 @@ export async function uploadTagImage(
       ? getUploadTagImagePayloadFromTagData(payload)
       : null
 
+  if (!mysteryImageUploadPayload && !foundImageUploadPayload) {
+    return {
+      data: createTagObject(payload),
+      success: false,
+      error: 'No images to upload',
+      source: AvailableApis[AvailableApis.aws],
+      status: HttpStatusCode.BadRequest,
+    }
+  }
+
   if (isValidUploadTagImagePayload(foundImageUploadPayload)) {
     const foundImageUpload = await uploadImageAndResize(
       client,
