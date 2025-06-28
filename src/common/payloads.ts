@@ -12,13 +12,17 @@ export type getTagsPayload = {
   time?: 'year' | 'hour' | 'day' | 'week' | 'month' | 'all'
   sort?: SortOptions
   limit?: number
-  tagnumbers: number[]
+  tagnumbers?: number[]
+  rebuildIndex?: boolean
+  awsRegion?: string
+  folder?: string
 } & CommonPayloadData
 
 export type deleteTagsPayload = {
   slugs?: string[]
   tagnumbers: number[]
   tags?: Partial<Tag>[]
+  folder?: string
 } & CommonPayloadData
 
 export type getTagPayload = {
@@ -34,6 +38,7 @@ export type getTagPayload = {
 
 export type deleteTagPayload = {
   hash?: string
+  folder?: string
 } & Partial<Tag>
 
 export type archiveTagPayload = {
@@ -133,6 +138,8 @@ export type importTagPayload = Pick<
 export type getQueuePayload = {
   hash?: string
   queuehash?: string
+  awsRegion?: string
+  rebuildIndex: boolean
 } & CommonPayloadData
 
 export type queueTagPayload = {
