@@ -31,14 +31,14 @@ export async function getTags(
   try {
     if (!rebuildIndex) {
       try {
-        tags = await loadIndex(s3, bucket, indexPath)
+        tags = await loadIndex(client, bucket, indexPath)
       } catch {
         rebuildIndex = true
       }
     }
 
     if (rebuildIndex) {
-      const result = await s3.send(
+      const result = await client.send(
         new ListObjectsV2Command({ Bucket: bucket, Prefix: `${folder}/` })
       )
 
@@ -65,7 +65,7 @@ export async function getTags(
       }
 
       tags = Object.values(tagMap) as Tag[]
-      await saveIndex(s3, bucket, indexPath, tags)
+      await saveIndex(client, bucket, indexPath, tags)
     }
 
     if (tagnumbers?.length) {

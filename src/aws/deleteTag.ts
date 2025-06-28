@@ -22,7 +22,7 @@ export async function deleteTag(
   let error = ''
 
   try {
-    const list = await s3.send(
+    const list = await client.send(
       new ListObjectsV2Command({
         Bucket: bucket,
         Prefix: prefix, // Gets all files starting with the tagId
@@ -31,7 +31,7 @@ export async function deleteTag(
 
     const deleteOps = (list.Contents || []).map(async (obj) => {
       try {
-        await s3.send(
+        await client.send(
           new DeleteObjectCommand({
             Bucket: bucket,
             Key: obj.Key,
@@ -47,9 +47,9 @@ export async function deleteTag(
 
     // Update the index.json
     const indexPath = indexKey(folder)
-    const index: Tag[] = await loadIndex(s3, bucket, indexPath)
+    const index: Tag[] = await loadIndex(client, bucket, indexPath)
     const updatedIndex = index.filter((tag) => tag.tagnumber !== tagnumber)
-    await saveIndex(s3, bucket, indexPath, updatedIndex)
+    await saveIndex(client, bucket, indexPath, updatedIndex)
 
     success = deleted.every(Boolean)
   } catch (err: any) {

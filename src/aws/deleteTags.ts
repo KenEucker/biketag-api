@@ -16,6 +16,11 @@ export async function deleteTags(
   await Promise.all(
     tags.map(async (tag) => {
       try {
+        if (!tag.tagnumber) {
+          results.push(false)
+          return
+        }
+
         const res = await deleteTag(client, {
           tagnumber: tag.tagnumber,
           folder,

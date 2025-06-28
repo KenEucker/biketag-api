@@ -5,8 +5,8 @@ import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { createTagObject } from '../common/data'
 import {
   getUploadTagImagePayloadFromTagData,
-  isValidUploadTagImagePayload,
   uploadImageAndResize,
+  isValidUploadTagImagePayload,
   uploadTagImagePayload,
 } from './helpers'
 
@@ -61,6 +61,6 @@ export async function uploadTagImage(
     success,
     error,
     source: AvailableApis[AvailableApis.aws],
-    status: HttpStatusCode.Ok,
+    status: success ? HttpStatusCode.Ok : HttpStatusCode.BadRequest,
   }
 }

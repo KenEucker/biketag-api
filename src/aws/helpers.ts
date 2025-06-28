@@ -26,7 +26,7 @@ export async function loadIndex(
   key: string
 ): Promise<Tag[]> {
   try {
-    const obj = await s3.send(
+    const obj = await client.send(
       new GetObjectCommand({ Bucket: bucket, Key: key })
     )
     const chunks: any[] = []
@@ -46,7 +46,7 @@ export async function saveIndex(
   key: string,
   tags: Tag[]
 ) {
-  await s3.send(
+  await client.send(
     new PutObjectCommand({
       Bucket: bucket,
       Key: key,

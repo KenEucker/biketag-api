@@ -22,7 +22,7 @@ export async function getQueue(
   try {
     if (!needsRebuild) {
       try {
-        tags = await loadIndex(s3, bucket, indexPath)
+        tags = await loadIndex(client, bucket, indexPath)
       } catch {
         needsRebuild = true
       }
@@ -30,7 +30,7 @@ export async function getQueue(
 
     if (needsRebuild) {
       const prefix = 'queue/'
-      const result = await s3.send(
+      const result = await client.send(
         new ListObjectsV2Command({ Bucket: bucket, Prefix: prefix })
       )
 
@@ -55,7 +55,7 @@ export async function getQueue(
       }
 
       tags = Object.values(foundTags) as Tag[]
-      await saveIndex(s3, bucket, indexPath, tags)
+      await saveIndex(client, bucket, indexPath, tags)
     }
   } catch (err: any) {
     success = false

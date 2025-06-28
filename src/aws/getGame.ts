@@ -25,7 +25,7 @@ export async function getGame(
 
   if (!game) {
     try {
-      const obj = await s3.send(
+      const obj = await client.send(
         new GetObjectCommand({
           Bucket: bucket,
           Key: 'game.json',

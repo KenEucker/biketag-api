@@ -20,7 +20,7 @@ export async function archiveTag(
   const folderTo = 'archive'
 
   const prefix = getTagPrefix(folderFrom, payload.game, payload.tagnumber)
-  const list = await s3.send(
+  const list = await client.send(
     new ListObjectsV2Command({
       Bucket: bucket,
       Prefix: prefix,
@@ -39,7 +39,7 @@ export async function archiveTag(
       const keyFrom = obj.Key
       const keyTo = keyFrom.replace(/^queue\//, 'archive/')
       copyOps.push(
-        s3.send(
+        client.send(
           new CopyObjectCommand({
             Bucket: bucket,
             CopySource: `${bucket}/${keyFrom}`,
@@ -49,7 +49,7 @@ export async function archiveTag(
         )
       )
       deleteOps.push(
-        s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: keyFrom }))
+        client.send(new DeleteObjectCommand({ Bucket: bucket, Key: keyFrom }))
       )
     }
 
@@ -59,8 +59,8 @@ export async function archiveTag(
     const queueIndexKey = indexKey(folderFrom)
     const archiveIndexKey = indexKey(folderTo)
 
-    const queueIndex = await loadIndex(s3, bucket, queueIndexKey)
-    const archiveIndex = await loadIndex(s3, bucket, archiveIndexKey)
+    const queueIndex = await loadIndex(client, bucket, queueIndexKey)
+    const archiveIndex = await loadIndex(client, bucket, archiveIndexKey)
 
     const tagToMove = queueIndex.find((t) => t.tagnumber === payload.tagnumber)
     const updatedQueue = queueIndex.filter(
@@ -71,8 +71,8 @@ export async function archiveTag(
       : archiveIndex
 
     await Promise.all([
-      saveIndex(s3, bucket, queueIndexKey, updatedQueue),
-      saveIndex(s3, bucket, archiveIndexKey, updatedArchive),
+      saveIndex(client, bucket, queueIndexKey, updatedQueue),
+      saveIndex(client, bucket, archiveIndexKey, updatedArchive),
     ])
 
     data = tagToMove ? getOnlyFoundTagFromTagData(tagToMove) : null

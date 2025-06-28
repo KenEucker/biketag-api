@@ -14,8 +14,20 @@ export async function getPlayers(
   const { game, slugs = [], sort, limit } = payload
   const bucket = `${game}-biketag`
   const indexPath = indexKey('main')
+  let tags: Tag[] = []
 
-  const tags: Tag[] = await loadIndex(s3, bucket, indexPath)
+  try {
+    tags = await loadIndex(client, bucket, indexPath)
+  } catch (err: any) {
+    return {
+      data: [],
+      success: false,
+      error: err.message,
+      source: AvailableApis[AvailableApis.aws],
+      status: HttpStatusCode.InternalServerError,
+    }
+  }
+  // const tags: Tag[] = await loadIndex(client, bucket, indexPath)
   const playersData: Player[] = []
   const playerNames: string[] = []
 

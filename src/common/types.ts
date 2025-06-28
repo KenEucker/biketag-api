@@ -32,12 +32,9 @@ export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
   password: string
 }
 
-export interface AWSRegion {
-  region: string
-}
-
 export interface AWSCredentials {
-  region: string
+  accessKeyId?: string
+  secretAccessKey?: string
 }
 
 /// ****************************  BikeTag Credential Objects   ************************* ///
