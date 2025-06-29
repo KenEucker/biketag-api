@@ -18,7 +18,7 @@ export async function getAuthorizationHeader(
   }
 
   // @ts-ignore
-  const { clientKey, clientToken } = client.config.biketag
+  const { clientKey, clientToken } = client.config.biketag ?? {}
 
   const options: Record<string, unknown> = {
     url: getApiUrl(config.biketag.host, AUTHORIZE_ENDPOINT),

@@ -27,6 +27,7 @@ const imgurInstanceOpts = {
     accessToken: process.env.IMGUR_ACCESS_TOKEN,
     clientSecret: process.env.IMGUR_CLIENT_SECRET,
     refreshToken: process.env.IMGUR_REFRESH_TOKEN,
+    rapidApiKey: process.env.RAPID_API_KEY,
   }
 }
 const bikeTagImgurInstance = imgurInstanceOpts.imgur && imgurInstanceOpts.imgur.clientId ? new BikeTagClient(imgurInstanceOpts) : null
@@ -161,6 +162,21 @@ const get10SettingsAsync = async (pre, client, out = false, opts = {}) => {
   return testSettingData
 }
 
+const get10StatsAsync = async (pre, client, out = false, opts = {}) => {
+  opts.limit = opts.limit ? opts.limit : 10
+  const testStatData = await client.getStats(undefined, opts).catch(console.error)
+  log(`${pre} :: success fully retrieved game stats`, testStatData, out)
+
+  return testStatData
+}
+
+const getStatsAsync = async (pre, client, out = false, opts = {}) => {
+  const testStatData = await client.getStats(undefined, opts).catch(console.error)
+  log(`${pre} :: success fully retrieved game stats`, testStatData, out)
+
+  return testStatData
+}
+
 const get10AchievementsAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
   const testAchievementData = await client.getAchievements(undefined, opts).catch(console.error)
@@ -180,7 +196,7 @@ const getPlayerAchievementsAsync = async (pre, client, out = false, opts = {}) =
 
 const runTests = async (out = false) => {
   if (false) {
-    console.log(pretty("Default BikeTag Client Instantiated"), biketagDefaultInstanceOpts)
+    console.log(pretty("Default BikeTag Client Instantiated"), biketagDefaultInstance.config())
     await getGameAsync("BikeTag", biketagDefaultInstance, out)
     await getTag1Async("BikeTag", biketagDefaultInstance, out)
     // await getQueueAsync("BikeTag", biketagDefaultInstance, out)
@@ -189,31 +205,33 @@ const runTests = async (out = false) => {
     await get10PlayersAsync("BikeTag", biketagDefaultInstance, out)
   }
 
-  if (false) {
-  // if (bikeTagImgurInstance) {
-    console.log(pretty("Imgur BikeTag Client Instantiated"), imgurInstanceOpts)
-    await getGameAsync("Imgur", bikeTagImgurInstance, out)
+  // if (false) {
+  if (bikeTagImgurInstance) {
+    console.log(pretty("Imgur BikeTag Client Instantiated"), bikeTagImgurInstance.config())
+    // await getGameAsync("Imgur", bikeTagImgurInstance, out)
     // await getTag1Async("Imgur", bikeTagImgurInstance, out)
-    await getTodaysTagsAsync("Imgur", bikeTagImgurInstance, out)
+    // await getTodaysTagsAsync("Imgur", bikeTagImgurInstance, out)
     // await queueTagAsync("Imgur", bikeTagImgurInstance, out)
     // await getQueueAsync("Imgur", bikeTagImgurInstance, out)
-    await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
-    await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
+    // await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
+    // await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
     // await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
+    await getStatsAsync("Imgur", bikeTagImgurInstance, out)
   }
 
-  // if (false) {
-  if (bikeTagSanityInstance) {
-    console.log(pretty("Sanity BikeTag Client Instantiated"), sanityInstanceOpts)
+  if (false) {
+  // if (bikeTagSanityInstance) {
+    console.log(pretty("Sanity BikeTag Client Instantiated"), bikeTagSanityInstance.config())
     // await getTag1Async("Sanity", bikeTagSanityInstance, out)
     // await get10TagsAsync("Sanity", bikeTagSanityInstance, out)
-    await getGameAsync("Sanity", bikeTagSanityInstance, out)
+    // await getGameAsync("Sanity", bikeTagSanityInstance, out)
     // await getAllGamesAsync("Sanity", bikeTagSanityInstance, out)
     // await get10PlayersAsync("Sanity", bikeTagSanityInstance, out)
-    await get1PlayerAsync("Sanity", bikeTagSanityInstance, out)
+    // await get1PlayerAsync("Sanity", bikeTagSanityInstance, out)
     // await get10AchievementsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10AmbassadorsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10SettingsAsync("Sanity", bikeTagSanityInstance, out)
+    await get10StatsAsync("Sanity", bikeTagSanityInstance, out)
     // await get10AchievementsAsync("Sanity", bikeTagSanityInstance, out)
     // await getPlayerAchievementsAsync("Sanity", bikeTagSanityInstance, out)
   }

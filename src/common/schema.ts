@@ -19,6 +19,18 @@ export type Setting = {
   value: string
 }
 
+export type Stat = {
+  _id?: string
+  _type?: string
+  slug: string
+  name: string
+  description: string
+  key: string
+  value: string
+  game: string
+  updatedAt: string
+}
+
 export type Achievement = {
   _id?: string
   _type?: string
@@ -35,6 +47,7 @@ export type Region = {
   name: string
   description: string
   zipcode: number
+  tz: string
 }
 
 export type Player = {
@@ -107,7 +120,7 @@ export interface Game {
   archivehash?: string
   queuehash?: string
   subreddit?: string
-  twitter?: string
+  bluesky?: string
   logo: string
   region: Region
 }

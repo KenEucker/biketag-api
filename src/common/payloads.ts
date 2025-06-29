@@ -1,4 +1,4 @@
-import { Tag, Game, Player } from './schema'
+import { Game, Player, Stat, Tag } from './schema'
 import { CommonPayloadData } from './types'
 import { SanityUploadPayload } from '../common/data'
 
@@ -47,6 +47,7 @@ export type archiveTagPayload = {
 } & Partial<Tag>
 
 export type updateGamePayload = Partial<Game> & SanityUploadPayload
+export type updateStatPayload = Partial<Stat> & SanityUploadPayload
 export type updateTagPayload = Partial<Tag> & SanityUploadPayload
 export type updatePlayerPayload = Partial<Player> & SanityUploadPayload
 
@@ -97,6 +98,18 @@ export type getSettingPayload = {
 } & CommonPayloadData
 
 export type getSettingsPayload = {
+  fields?: string[]
+  sort?: SortOptions
+  limit?: number
+  slugs?: string[]
+} & CommonPayloadData
+
+export type getStatPayload = {
+  fields?: string[]
+  slug?: string
+} & CommonPayloadData
+
+export type getStatsPayload = {
   fields?: string[]
   sort?: SortOptions
   limit?: number

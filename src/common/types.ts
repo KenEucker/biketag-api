@@ -1,7 +1,6 @@
 import { ImageData } from 'imgur/dist/common/types'
 export { Payload } from 'imgur/dist/common/types'
 import { AvailableApis, Errors } from '../common/enums'
-import { Tag, Game, Player, Setting, Achievement } from './schema'
 import { ImgurCredentials as ImgurApiCredentials } from 'imgur'
 
 export type RequireAtLeastOne<T> = {
@@ -26,7 +25,7 @@ export interface SanityProjectId {
 
 export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
   dataset: string
-  apiVersion: '2021-06-07' | string
+  apiVersion: '2021-10-21' | string
   useCdn: boolean
   username: string
   password: string
@@ -123,35 +122,46 @@ export type PartialBikeTagConfiguration = RequireAtLeastOne<{
   sanity: Partial<SanityCredentials>
 }>
 
-/// ****************************  Gun Data State   ************************************* ///
-export interface Tags {
-  [key: string]: Tag
+/// ****************************  BikeTag Stats Types   ***************************** ///
+
+export interface GameHighestNumberTagsPerNumberDaysData {
+  tagCount: number
+  dayCount: number
+  startDate: Date | null
+  endDate: Date | null
 }
 
-export interface Players {
-  [key: string]: Player
+export interface PlayerHighestNumberTagsPerDayData {
+  playerName: string
+  tagCount: number | null
+  tagDate: Date | null
 }
 
-export interface Settings {
-  [key: string]: Setting
+export interface StreakData {
+  longestStreakDaysCount: number
+  longestStreakStartDate: Date | null
+  longestStreakEndDate: Date | null
 }
 
-export interface Achievements {
-  [key: string]: Achievement
+export interface PlayerStreakData {
+  playerName: string
+  longestStreakData: StreakData
 }
 
-export type BikeTagGame = {
-  game: Game
-  currentTagNumber: number
-  players: Players
-  tags: Tags
-  queue: Tags
-  settings: Settings
+export interface gameLongestTimeBetweenTagsData {
+  timeBetweenTagsDays: number
+  startDate: Date | null
+  staleTagNumber: number
+  endDate: Date | null
 }
 
-export interface BikeTagGameState {
-  [key: string]: BikeTagGame
-}
-export interface BikeTagServerConfiguration extends BikeTagConfiguration {
-  host: string
+export interface StatsReportData {
+  playersWithMostTagsInOneDay: PlayerHighestNumberTagsPerDayData[]
+  playersWithLongestTagStreakDaysData: PlayerStreakData[]
+  gameTotalNumberOfPlayers: number
+  gameTotalNumberOfTags: number
+  gameHighestNumberTagsPerOneDayData: GameHighestNumberTagsPerNumberDaysData
+  gameHighestNumberTagsPerSevenDaysData: GameHighestNumberTagsPerNumberDaysData
+  gameLongestDailyTagStreakData: StreakData
+  gameLongestTimeBetweenTags: gameLongestTimeBetweenTagsData
 }

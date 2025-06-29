@@ -16,6 +16,7 @@ export default defineConfig({
       output: {
         exports: 'named',
         globals: {
+          '@aws-sdk/client-s3': 'S3Client',
           imgur: 'ImgurClient',
           '@sanity/client': 'sanityClient',
           axios: 'axios',

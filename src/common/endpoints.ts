@@ -18,6 +18,8 @@ export const QUEUE_ENDPOINT = `queue`
 
 export const SETTINGS_ENDPOINT = `settings`
 
+export const STATS_ENDPOINT = `stats`
+
 export const ACHIEVEMENTS_ENDPOINT = `achievements`
 
 export const UPDATE_ENDPOINT = `update`
