@@ -1,7 +1,6 @@
 *.code-workspace
 .github
 .vscode
-.husky
 lib
 examples
 src
