@@ -2,29 +2,39 @@ import {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  HeadObjectCommand,
+  DeleteObjectCommand,
+  ListObjectsV2Command,
 } from '@aws-sdk/client-s3'
 import { Tag } from '../common/schema'
+import { Readable } from 'form-data'
+import {
+  getImgurMysteryTitleFromBikeTagData,
+  getImgurFoundTitleFromBikeTagData,
+  getImgurMysteryDescriptionFromBikeTagData,
+  getImgurFoundDescriptionFromBikeTagData,
+} from '../common/getters'
 
 /** Returns the S3 key prefix for a given tag */
-export function getTagPrefix(
+export const getTagPrefix = (
   folder: string,
   game: string,
   tagnumber: number
-): string {
+): string => {
   return `${folder}/${game}-tag-${tagnumber}`
 }
 
 /** Returns the path to the index.json file for a folder */
-export function indexKey(folder: string): string {
+export const indexKey = (folder: string): string => {
   return `${folder}/index.json`
 }
 
 /** Loads the index.json file and returns parsed tag array */
-export async function loadIndex(
+export const loadIndex = async (
   client: S3Client,
   bucket: string,
   key: string
-): Promise<Tag[]> {
+): Promise<Tag[]> => {
   try {
     const obj = await client.send(
       new GetObjectCommand({ Bucket: bucket, Key: key })
@@ -39,12 +49,12 @@ export async function loadIndex(
 }
 
 /** Writes the given tag array to index.json */
-export async function saveIndex(
+export const saveIndex = async (
   client: S3Client,
   bucket: string,
   key: string,
   tags: Tag[]
-) {
+) => {
   await client.send(
     new PutObjectCommand({
       Bucket: bucket,
@@ -59,10 +69,10 @@ export async function saveIndex(
 /**
  * Builds a valid S3UploadPayload for either mystery or found image based on Tag data.
  */
-export function getQueueTagImagePayloadFromTagData(
+export const getQueueTagImagePayloadFromTagData = (
   tag: uploadTagImagePayload,
   isMystery = false
-): S3UploadPayload {
+): S3UploadPayload => {
   return {
     game: tag.game,
     folder: 'queue',
@@ -77,9 +87,9 @@ export function getQueueTagImagePayloadFromTagData(
 /**
  * Confirms if a given upload payload has the necessary properties for upload.
  */
-export function isValidUploadTagImagePayload(
+export const isValidUploadTagImagePayload = (
   payload?: Partial<S3UploadPayload>
-): payload is S3UploadPayload {
+): payload is S3UploadPayload => {
   return !!(
     payload &&
     typeof payload.game === 'string' &&
@@ -92,10 +102,10 @@ export function isValidUploadTagImagePayload(
 /**
  * Builds a lightweight update payload from a Tag for use with updateTag.
  */
-export function getUpdateTagPayloadFromTagData(
+export const getUpdateTagPayloadFromTagData = (
   tag: Partial<Tag>,
   isMystery = false
-): uploadTagImagePayload {
+): uploadTagImagePayload => {
   const payload: uploadTagImagePayload = {
     game: tag.game,
     folder: 'main',
@@ -116,10 +126,10 @@ export function getUpdateTagPayloadFromTagData(
   return payload
 }
 
-export function getUploadTagImagePayloadFromTagData(
+export const getUploadTagImagePayloadFromTagData = (
   payload: uploadTagImagePayload,
   isMystery = false
-): S3UploadPayload | null {
+): S3UploadPayload | null => {
   const imageFile = isMystery ? payload.mysteryImage : payload.foundImage
   const game = payload.game
   const tagnumber = payload.tagnumber
@@ -143,61 +153,127 @@ export function getUploadTagImagePayloadFromTagData(
   }
 }
 
-export async function uploadImageAndResize(
-  client: S3Client,
-  payload: S3UploadPayload,
-  resize = true
-): Promise<{ url: string } | null> {
-  const {
-    image,
-    folder,
-    awsRegion,
-    game,
-    tagnumber,
-    filenameSuffix,
-    contentType,
-  } = payload
-  const tagPrefix = getTagPrefix(folder, game, tagnumber)
-  const keyBase = `${tagPrefix}${filenameSuffix ?? ''}`
-  const bucket = `${game}-biketag`
-  const key = `${keyBase}.webp`
+export const resizeAndSaveVariants = async ({
+  client,
+  tag,
+  imageType,
+  maxRetries = 3,
+}: {
+  client: S3Client
+  tag: Tag
+  imageType: 'mystery' | 'found'
+  maxRetries?: number
+}): Promise<void> => {
+  const delay = (ms: number) => new Promise((res) => setTimeout(res, ms))
 
-  let imageBuffer = image
-  if (resize) {
+  const filename = `${tag.slug}--${imageType}`
+  const inputUrl =
+    imageType === 'mystery' ? tag.mysteryImageUrl : tag.foundImageUrl
+  if (!inputUrl)
+    throw new Error(`Missing ${imageType}ImageUrl for tag ${tag.slug}`)
+
+  const transforms = {
+    original: `${inputUrl}?tr=f-webp`,
+    medium: `${inputUrl}?tr=w-800,f-webp`,
+    small: `${inputUrl}?tr=w-300,f-webp`,
+  }
+
+  const title =
+    imageType === 'mystery'
+      ? getImgurMysteryTitleFromBikeTagData(tag)
+      : getImgurFoundTitleFromBikeTagData(tag)
+
+  const description =
+    imageType === 'mystery'
+      ? getImgurMysteryDescriptionFromBikeTagData(tag)
+      : getImgurFoundDescriptionFromBikeTagData(tag)
+
+  const baseKey = `queue/${filename}`
+  const bucket = `${tag.game}-biketag`
+
+  let originalUploaded = false
+
+  for (const [variant, url] of Object.entries(transforms)) {
+    const suffix = variant === 'original' ? '.webp' : `--${variant}.webp`
+    const key = `${baseKey}${suffix}`
+
     try {
-      imageBuffer = await resizeImageViaImageKit(imageBuffer)
+      await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
+      continue // Skip if already exists
+    } catch {}
+
+    let attempt = 0
+    let success = false
+
+    while (attempt < maxRetries && !success) {
+      try {
+        const res = await fetch(url)
+        if (!res.ok)
+          throw new Error(`Failed to fetch ${variant} variant from ImageKit`)
+
+        const stream = Readable.from(res.body as any)
+        await client.send(
+          new PutObjectCommand({
+            Bucket: bucket,
+            Key: key,
+            Body: stream,
+            ContentType: 'image/webp',
+            ACL: 'public-read',
+            Metadata: {
+              title: title.trim(),
+              description: description.trim(),
+            },
+          })
+        )
+        success = true
+        if (variant === 'original') originalUploaded = true
+      } catch (err) {
+        attempt++
+        if (attempt >= maxRetries) {
+          console.error(`Failed to save ${variant} for tag ${tag.slug}:`, err)
+        } else {
+          await delay(500 * attempt)
+        }
+      }
+    }
+  }
+
+  // Remove any non-webp original image if resized image was saved
+  if (originalUploaded) {
+    try {
+      const list = await client.send(
+        new ListObjectsV2Command({
+          Bucket: bucket,
+          Prefix: `queue/${filename}`,
+        })
+      )
+
+      const nonWebp = (list.Contents || []).filter(
+        (obj) => obj.Key && !obj.Key.endsWith('.webp')
+      )
+
+      for (const obj of nonWebp) {
+        try {
+          await client.send(
+            new DeleteObjectCommand({
+              Bucket: bucket,
+              Key: obj.Key,
+            })
+          )
+        } catch (err) {
+          console.error(
+            `Failed to delete original image ${obj.Key} for tag ${tag.slug}:`,
+            err
+          )
+        }
+      }
     } catch (err) {
-      console.warn(
-        'ImageKit resize failed, falling back to original image.',
+      console.error(
+        `Failed to list objects for cleanup for tag ${tag.slug}:`,
         err
       )
     }
   }
-
-  try {
-    const putCommand = new PutObjectCommand({
-      Bucket: bucket,
-      Key: key,
-      Body: imageBuffer,
-      ContentType: contentType,
-      ACL: 'public-read',
-    })
-
-    await client.send(putCommand)
-    return {
-      url: `https://${bucket}.${awsRegion}.digitaloceanspaces.com/${key}`,
-    }
-  } catch (err) {
-    console.error('S3 upload failed:', err)
-    return null
-  }
-}
-
-export async function resizeImageViaImageKit(
-  buffer: Buffer | Uint8Array | string | Blob
-): Promise<Buffer | Uint8Array | string | Blob> {
-  // Placeholder: actual implementation here
-  return buffer
 }
 
 export interface S3UploadPayload {

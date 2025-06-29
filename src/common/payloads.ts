@@ -152,7 +152,8 @@ export type getQueuePayload = {
   hash?: string
   queuehash?: string
   awsRegion?: string
-  rebuildIndex: boolean
+  rebuildIndex?: boolean
+  handleResize?: boolean
 } & CommonPayloadData
 
 export type queueTagPayload = {
