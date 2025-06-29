@@ -80,11 +80,11 @@ import * as biketagApi from './biketag'
 
 import { S3Client } from '@aws-sdk/client-s3'
 import { ImgurClient } from 'imgur'
-import sanityClient, { SanityClient } from '@sanity/client'
+import { createClient, SanityClient } from '@sanity/client'
 
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
 import { EventEmitter } from 'events'
-import { setup } from 'axios-cache-adapter'
+import { type AxiosCacheInstance, setupCache } from 'axios-cache-interceptor'
 import { isEqual } from 'lodash'
 import { getAuthorizationHeader, getClaims } from './common/auth'
 import TinyCache from 'tinycache'
@@ -102,7 +102,7 @@ export class BikeTagClient extends EventEmitter {
 
   protected fetcher: AxiosInstance
   protected plainFetcher: AxiosInstance
-  protected cachedFetcher: AxiosInstance
+  protected cachedFetcher: AxiosCacheInstance
 
   protected imgurClient?: ImgurClient
   protected sanityClient?: SanityClient
@@ -147,23 +147,18 @@ export class BikeTagClient extends EventEmitter {
       (e: Error) => Promise.reject(e)
     )
 
-    this.cachedFetcher = setup({
-      cache: {
-        maxAge: 15 * 60 * 1000,
-        exclude: {
-          // Only exclude PUT, PATCH and DELETE methods from cache
-          methods: ['put', 'patch', 'delete'],
-        },
-        // Attempt reading stale cache data when response status is either 4xx or 5xx
-        readOnError: (error) => {
-          return error.response.status >= 400 && error.response.status < 600
-        },
-        // Deactivate `clearOnStale` option so that we can actually read stale cache data
-        clearOnStale: false,
-      },
-      headers,
-      responseType,
-    })
+    this.cachedFetcher = setupCache(
+      axios.create({
+        headers,
+        responseType,
+      }),
+      {
+        ttl: 15 * 60 * 1000,
+        methods: ['get', 'head'],
+        staleIfError: true,
+      }
+    )
+
     this.cachedFetcher.interceptors.request.use(
       authenticationInterceptor,
       (e: Error) => Promise.reject(e)
@@ -263,7 +258,7 @@ export class BikeTagClient extends EventEmitter {
 
         if (method === 'getPlayers') {
           options.names =
-            options.names ?? options.name ? [options.name] : undefined
+            (options.names ?? options.name) ? [options.name] : undefined
         }
 
         options.game = options.game ? options.game : this.biketagConfig?.game
@@ -470,7 +465,7 @@ export class BikeTagClient extends EventEmitter {
       isSanityCredentials(config.sanity) &&
       isSanityApiReady(config.sanity)
     ) {
-      this.sanityClient = sanityClient(config.sanity)
+      this.sanityClient = createClient(config.sanity)
     }
 
     return config
@@ -525,7 +520,7 @@ export class BikeTagClient extends EventEmitter {
 
         return !overwrite && this[configName] && config
           ? createCredentialsMethod(config, this[configName])
-          : config ?? this[configName]
+          : (config ?? this[configName])
       }
 
       const biketagConfig = initClientConfig(
@@ -1752,7 +1747,7 @@ export class BikeTagClient extends EventEmitter {
     const options = opts ?? this.sanityConfig
 
     if (isSanityCredentials(options)) {
-      return sanityClient(options)
+      return createClient(options)
     }
 
     throw new Error('options are invalid for creating a sanity client')
