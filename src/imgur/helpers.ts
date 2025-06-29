@@ -739,8 +739,8 @@ export const getGroupedTagsByTagnumber = (
     const mysteryImage = image1IsMysteryImage
       ? images[0]
       : moreThanOneImage
-      ? images[1]
-      : undefined
+        ? images[1]
+        : undefined
     let foundImage =
       moreThanOneImage && image1IsMysteryImage ? images[1] : undefined
 
@@ -749,8 +749,8 @@ export const getGroupedTagsByTagnumber = (
       foundImage = image2IsFoundImage
         ? images[1]
         : !image1IsMysteryImage
-        ? images[0]
-        : undefined
+          ? images[0]
+          : undefined
     }
     if (!mysteryImage || !foundImage) {
       // console.log(
@@ -813,13 +813,13 @@ export const getGroupedTagsByPlayer = (
       const mysteryImage = isMysteryImage(groupedImages[0])
         ? groupedImages[0]
         : isMysteryImage(groupedImages[1])
-        ? groupedImages[1]
-        : undefined
+          ? groupedImages[1]
+          : undefined
       const foundImage = isFoundImage(groupedImages[1])
         ? groupedImages[1]
         : isFoundImage(groupedImages[0])
-        ? groupedImages[0]
-        : undefined
+          ? groupedImages[0]
+          : undefined
       playerGroupedTags.push(
         getBikeTagFromImgurImageSet(mysteryImage, foundImage, appendToTagData)
       )

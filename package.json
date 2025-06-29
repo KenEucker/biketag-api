@@ -42,15 +42,15 @@
     "dev:node": "node examples/node/index.js",
     "dev:testnode": "node examples/node/test.js",
     "dev:upnode": "node examples/node/update.js",
-    "dev:test": "jest examples/node/index.test.ts",
+    "dev:test": "vitest examples/node/index.test.ts",
     "dev:browser": "npm-run-all --parallel watch serve",
     "dev:both": "npm-run-all --parallel dev:node dev:browser",
     "serve": "npx @11ty/eleventy --serve",
     "serve:prod": "npx @11ty/eleventy --serve --port=80",
     "start": "npm run serve:prod",
-    "test": "jest --verbose",
-    "test:dev": "jest --silent=false",
-    "test:ci": "jest --ci --coverage --maxWorkers=2",
+    "test": "vitest run",
+    "test:dev": "vitest --watch --silent=false",
+    "test:ci": "vitest run --coverage --maxWorkers=2",
     "build": "vite build",
     "build:prod": "npx tsc && vite build",
     "typecheck": "tsc --noEmit",
@@ -84,13 +84,16 @@
     "@types/mock-fs": "^4.13.4",
     "@typescript-eslint/eslint-plugin": "^8.35.0",
     "@typescript-eslint/parser": "^8.35.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "axios-mock-adapter": "^2.1.0",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
     "dotenv": "^15.0.0",
     "eslint": "^9.30.0",
     "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.1",
     "globals": "^16.2.0",
+    "happy-dom": "^18.0.1",
     "jest": "^30.0.3",
     "lint-staged": "^16.1.2",
     "mock-fs": "^5.5.0",
@@ -104,12 +107,13 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.35.0",
     "vite": "^7.0.0",
-    "vite-plugin-dts": "^4.5.4"
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^3.2.4"
   },
   "lint-staged": {
     "*.ts": [
       "eslint . --fix",
-      "jest --bail --findRelatedTests --passWithNoTests"
+      "vitest --bail --findRelatedTests --passWithNoTests"
     ],
     "*.{js,css,md,yml,yaml,json}": "prettier . --write"
   },

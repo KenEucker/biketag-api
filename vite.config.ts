@@ -16,7 +16,9 @@ export default defineConfig({
       output: {
         exports: 'named',
         globals: {
+          'form-data': 'formData',
           '@aws-sdk/client-s3': 'S3Client',
+          stream: 'stream',
           imgur: 'ImgurClient',
           axios: 'axios',
           events: 'events',

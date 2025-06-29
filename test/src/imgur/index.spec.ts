@@ -1,3 +1,5 @@
+import { describe, test } from 'vitest'
+
 describe('biketag.images()', () => {
   test.todo('BikeTagClient provides ImgurClient adapter from Credentials')
 

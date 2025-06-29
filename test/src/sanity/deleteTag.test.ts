@@ -1,3 +1,5 @@
+import { describe, test } from 'vitest'
+
 const sanityDeleteTagMethod = 'biketag.content.deleteTag'
 describe(sanityDeleteTagMethod, () => {
   test.todo(`${sanityDeleteTagMethod} method requires ImgurHash from payload`)

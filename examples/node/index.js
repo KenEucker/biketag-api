@@ -6,7 +6,7 @@ const {
 } = require('path')
 const {
   BikeTagClient
-} = require('../../dist/index.js')
+} = require('../..')
 require('dotenv').config()
 
 const host = process.env.BIKETAG_API_HOST
@@ -197,7 +197,7 @@ const getPlayerAchievementsAsync = async (pre, client, out = false, opts = {}) =
 }
 
 const runTests = async (out = false) => {
-  if (biketagDefaultInstance) {
+  if (false) {
     console.log(pretty("Default BikeTag Client Instantiated"), biketagDefaultInstance.config())
     await getGameAsync("BikeTag", biketagDefaultInstance, out)
     // await getTag1Async("BikeTag", biketagDefaultInstance, out)

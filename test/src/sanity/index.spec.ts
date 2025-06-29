@@ -1,3 +1,5 @@
+import { describe, test } from 'vitest'
+
 describe('biketag.content()', () => {
   test.todo('BikeTagClient provides SanityClient adapter from Credentials')
 

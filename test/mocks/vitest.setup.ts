@@ -1,8 +1,11 @@
+import { beforeAll, beforeEach, afterEach, afterAll } from 'vitest'
 import { server } from './server'
 import mockfs from 'mock-fs'
 
 // Establish API mocking before all tests.
-beforeAll(() => server.listen())
+beforeAll(() => {
+  server.listen()
+})
 
 beforeEach(() => {
   mockfs({
@@ -12,12 +15,11 @@ beforeEach(() => {
   })
 })
 
-// Reset any request handlers that we may add during the tests,
-// so they don't affect other tests.
 afterEach(() => {
   mockfs.restore()
   server.resetHandlers()
 })
 
-// Clean up after the tests are finished.
-afterAll(() => server.close())
+afterAll(() => {
+  server.close()
+})

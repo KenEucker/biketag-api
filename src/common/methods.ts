@@ -219,17 +219,19 @@ export const createSanityCredentials = (
     useCdn: credentials.token?.length
       ? false
       : typeof credentials.useCdn !== 'undefined'
-      ? credentials.useCdn
-      : typeof defaults.useCdn !== 'undefined'
-      ? defaults.useCdn
-      : true,
+        ? credentials.useCdn
+        : typeof defaults.useCdn !== 'undefined'
+          ? defaults.useCdn
+          : true,
     projectId: credentials.projectId?.length
       ? credentials.projectId
       : defaults.projectId,
     dataset: credentials.dataset?.length
       ? credentials.dataset
-      : defaults.dataset ?? 'development',
-    token: credentials.token?.length ? credentials.token : defaults.token ?? '',
+      : (defaults.dataset ?? 'development'),
+    token: credentials.token?.length
+      ? credentials.token
+      : (defaults.token ?? ''),
     password: credentials.password?.length
       ? credentials.password
       : defaults.password,
@@ -238,7 +240,7 @@ export const createSanityCredentials = (
       : defaults.username,
     apiVersion: credentials.apiVersion?.length
       ? credentials.apiVersion
-      : defaults.apiVersion ?? '2021-10-21',
+      : (defaults.apiVersion ?? '2021-10-21'),
   }
 }
 

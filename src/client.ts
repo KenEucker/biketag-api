@@ -354,7 +354,6 @@ export class BikeTagClient extends EventEmitter {
         break
       default:
       case AvailableApis.biketag:
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
         client = this
         options.source = 'biketag'
         api = biketagApi
@@ -1512,7 +1511,6 @@ export class BikeTagClient extends EventEmitter {
           })
           break
         case AvailableApis.imgur:
-          // eslint-disable-next-line no-case-declarations
           const getTags = this.getPassthroughApiMethod(
             api.getTags,
             client,

@@ -1,3 +1,5 @@
+import { describe, test } from 'vitest'
+
 const imgurUploadTagImageMethod = 'biketag.images.uploadTagImage'
 describe(imgurUploadTagImageMethod, () => {
   test.todo(

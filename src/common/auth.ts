@@ -76,7 +76,7 @@ export async function getAuthorizationHeader(
 
   /// TODO: now that we have a token, we should save it back into the config, but how?
   const accessToken = token.access_token
-  
+
   /// WTF IS THIS?
   // ;(client.config as unknown as AccessToken).accessToken = accessToken
 

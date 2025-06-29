@@ -40,10 +40,10 @@ export async function getTag(
   const slugQuery = slugIsCurrent
     ? `|order(tagnumber desc)[0]`
     : slugIsFirst
-    ? `|order(tagnumber asc)[0]`
-    : slug.length
-    ? slug
-    : tagnumber
+      ? `|order(tagnumber asc)[0]`
+      : slug.length
+        ? slug
+        : tagnumber
 
   const query =
     slugIsCurrent || slugIsFirst

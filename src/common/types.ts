@@ -66,7 +66,7 @@ export type Credentials = Partial<BikeTagCredentials> &
 
 /// ****************************  BikeTag API Objects   ******************************** ///
 export interface BikeTagApiResponse<
-  T = Record<string, unknown> | Record<string, unknown>[] | string | boolean
+  T = Record<string, unknown> | Record<string, unknown>[] | string | boolean,
 > {
   data: T
   status: number
