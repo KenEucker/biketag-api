@@ -14,6 +14,8 @@ const host = process.env.BIKETAG_API_HOST
 const biketagDefaultInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
   host,
+  cached: false,
+  clientToken: process.env.BIKETAG_CLIENT_TOKEN,
 }
 const biketagDefaultInstance = host ? new BikeTagClient(biketagDefaultInstanceOpts) : null
 
@@ -195,18 +197,18 @@ const getPlayerAchievementsAsync = async (pre, client, out = false, opts = {}) =
 }
 
 const runTests = async (out = false) => {
-  if (false) {
+  if (biketagDefaultInstance) {
     console.log(pretty("Default BikeTag Client Instantiated"), biketagDefaultInstance.config())
     await getGameAsync("BikeTag", biketagDefaultInstance, out)
-    await getTag1Async("BikeTag", biketagDefaultInstance, out)
+    // await getTag1Async("BikeTag", biketagDefaultInstance, out)
     // await getQueueAsync("BikeTag", biketagDefaultInstance, out)
-    await get10TagsAsync("BikeTag", biketagDefaultInstance, out)
-    await getCurrentTagAsync("BikeTag", biketagDefaultInstance, out)
-    await get10PlayersAsync("BikeTag", biketagDefaultInstance, out)
+    // await get10TagsAsync("BikeTag", biketagDefaultInstance, out)
+    // await getCurrentTagAsync("BikeTag", biketagDefaultInstance, out)
+    // await get10PlayersAsync("BikeTag", biketagDefaultInstance, out)
   }
 
   // if (false) {
-  if (bikeTagImgurInstance) {
+  if (false) {
     console.log(pretty("Imgur BikeTag Client Instantiated"), bikeTagImgurInstance.config())
     // await getGameAsync("Imgur", bikeTagImgurInstance, out)
     // await getTag1Async("Imgur", bikeTagImgurInstance, out)
