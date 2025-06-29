@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-
 import { apiCredentials, testPath, packagePath } from './config'
+import { describe, test, expect } from 'vitest'
 import * as path from 'path'
 
 describe(`Built Module`, () => {
@@ -9,10 +8,9 @@ describe(`Built Module`, () => {
   })
 
   test(`Module exports BikeTagClient as default and named export`, () => {
-    const {
-      default: defaultExport,
-      BikeTagClient: namedExport,
-    } = require(packagePath)
+    const { default: defaultExport, BikeTagClient: namedExport } = require(
+      packagePath
+    )
     expect(namedExport).toBe(defaultExport)
   })
 

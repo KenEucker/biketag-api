@@ -1,6 +1,7 @@
 /// ****************************  BikeTag Enums   ************************************** ///
 export enum AvailableApis {
   biketag = 'biketag',
+  aws = 'aws',
   imgur = 'imgur',
   sanity = 'sanity',
 }
