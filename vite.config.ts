@@ -32,6 +32,7 @@ export default defineConfig({
           '@aws-sdk/client-s3': 'S3Client',
           imgur: 'ImgurClient',
           axios: 'axios',
+          util: 'util',
           lodash: 'lodash',
           tinycache: 'TinyCache',
           '@sanity/client': 'SanityClient',

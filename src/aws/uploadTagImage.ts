@@ -5,8 +5,10 @@ import { Tag } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { createTagObject } from '../common/data'
 import {
+  encodeMetadataValue,
   getUploadTagImagePayloadFromTagData,
   isValidUploadTagImagePayload,
+  normalizeUploadBody,
   uploadTagImagePayload,
 } from './helpers'
 import {
@@ -111,12 +113,12 @@ export async function uploadTagImage(
       new PutObjectCommand({
         Bucket: bucket,
         Key: key,
-        Body: p.image,
+        Body: await normalizeUploadBody(p.image),
         ContentType: p.contentType,
         ACL: 'public-read',
         Metadata: {
-          title: title.trim(),
-          description: description.trim(),
+          title: encodeMetadataValue(title.trim()),
+          description: encodeMetadataValue(description.trim()),
         },
       })
     )
