@@ -165,3 +165,9 @@ export interface StatsReportData {
   gameLongestDailyTagStreakData: StreakData
   gameLongestTimeBetweenTags: gameLongestTimeBetweenTagsData
 }
+
+export interface S3ImageMeta {
+  url?: string
+  title?: string
+  description?: string
+}

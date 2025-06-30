@@ -5,6 +5,7 @@ import {
   HeadObjectCommand,
   DeleteObjectCommand,
   ListObjectsV2Command,
+  ObjectCannedACL,
 } from '@aws-sdk/client-s3'
 import { Tag } from '../common/schema'
 import { Readable } from 'form-data'
@@ -13,6 +14,7 @@ import {
   getImgurFoundTitleFromBikeTagData,
   getImgurMysteryDescriptionFromBikeTagData,
   getImgurFoundDescriptionFromBikeTagData,
+  getBikeTagFromS3ImageSet,
 } from '../common/getters'
 
 /** Returns the S3 key prefix for a given tag */
@@ -33,19 +35,49 @@ export const indexKey = (folder: string): string => {
 export const loadIndex = async (
   client: S3Client,
   bucket: string,
-  key: string
+  folder: string
 ): Promise<Tag[]> => {
-  try {
-    const obj = await client.send(
-      new GetObjectCommand({ Bucket: bucket, Key: key })
-    )
-    /// This code is all wrong, it should be pulling tag data from metadata of the file, title and description
-    const raw = await obj.Body?.transformToString('utf-8')
-    return JSON.parse(raw) as Tag[]
-  } catch (err: any) {
-    if (err.name === 'NoSuchKey') return []
-    throw err
+  const prefix = `${folder}/`
+  const listed = await client.send(
+    new ListObjectsV2Command({ Bucket: bucket, Prefix: prefix })
+  )
+
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp']
+  const imagesByTag: Record<string, { mystery?: any; found?: any }> = {}
+
+  for (const item of listed.Contents || []) {
+    const key = item.Key
+    if (!key || !imageExtensions.some((ext) => key.toLowerCase().endsWith(ext)))
+      continue
+
+    const filename = key.replace(prefix, '').replace(/\.[^.]+$/, '')
+    const [slug, suffix] = filename.split('--')
+    const imageType = suffix === 'found' ? 'found' : 'mystery'
+
+    try {
+      const head = await client.send(
+        new HeadObjectCommand({ Bucket: bucket, Key: key })
+      )
+      const metadata = head.Metadata || {}
+      const url = `https://${bucket}.nyc3.cdn.digitaloceanspaces.com/${key}`
+      const metaImage = {
+        url,
+        title: metadata.title,
+        description: metadata.description,
+      }
+
+      const entry = imagesByTag[slug] || {}
+      entry[imageType] = metaImage
+      imagesByTag[slug] = entry
+    } catch (err) {
+      console.error(`Failed to load metadata for ${key}:`, err)
+    }
   }
+
+  return Object.entries(imagesByTag).map(([slug, { mystery, found }]) => {
+    const game = slug.split('-')[0]
+    return getBikeTagFromS3ImageSet(mystery, found, { game })
+  })
 }
 
 /** Writes the given tag array to index.json */
@@ -53,17 +85,23 @@ export const saveIndex = async (
   client: S3Client,
   bucket: string,
   key: string,
-  tags: Tag[]
+  tags: Tag[],
+  acl: ObjectCannedACL = 'public-read'
 ) => {
-  await client.send(
-    new PutObjectCommand({
-      Bucket: bucket,
-      Key: key,
-      Body: JSON.stringify(tags),
-      ContentType: 'application/json',
-      ACL: 'public-read',
-    })
-  )
+  try {
+    await client.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: JSON.stringify(tags),
+        ContentType: 'application/json',
+        ACL: acl,
+      })
+    )
+  } catch (error) {
+    console.error(`Failed to save index to ${bucket}/${key}:`, error)
+    throw error
+  }
 }
 
 /**
@@ -71,9 +109,11 @@ export const saveIndex = async (
  */
 export const getQueueTagImagePayloadFromTagData = (
   tag: uploadTagImagePayload,
+  awsRegion: string,
   isMystery = false
 ): S3UploadPayload => {
   return {
+    awsRegion,
     game: tag.game,
     folder: 'queue',
     tagnumber: tag.tagnumber,
@@ -200,7 +240,12 @@ export const resizeAndSaveVariants = async ({
     try {
       await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
       continue // Skip if already exists
-    } catch {}
+    } catch (err: any) {
+      // Object doesn't exist, proceed with upload
+      if (err.name !== 'NoSuchKey') {
+        console.warn(`Unexpected error checking existence of ${key}:`, err)
+      }
+    }
 
     let attempt = 0
     let success = false
@@ -211,7 +256,7 @@ export const resizeAndSaveVariants = async ({
         if (!res.ok)
           throw new Error(`Failed to fetch ${variant} variant from ImageKit`)
 
-        const stream = Readable.from(res.body as any)
+        const stream = Readable.from(res.body as AsyncIterable<any>)
         await client.send(
           new PutObjectCommand({
             Bucket: bucket,
@@ -277,14 +322,14 @@ export const resizeAndSaveVariants = async ({
 }
 
 export interface S3UploadPayload {
+  awsRegion: string
   game: string // e.g., 'denver' — used to build bucket name
   folder: string // e.g., 'queue' — which folder to upload to
   tagnumber: number // used in key naming
-  filenameSuffix?: string // '--mystery' or '--found'
   image: Buffer | Uint8Array | Blob | string // binary data or base64 string or remote URL
+  filenameSuffix?: string // '--mystery' or '--found'
   contentType?: string // 'image/jpeg', 'image/png', etc.
   resize?: boolean // default true — whether to make small/medium versions
-  awsRegion?: string
 }
 export type uploadTagImagePayload = Partial<Tag> & Partial<S3UploadPayload>
 export type queueTagPayload = Partial<Tag> & Partial<S3UploadPayload>

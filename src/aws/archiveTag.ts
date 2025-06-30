@@ -37,7 +37,10 @@ export async function archiveTag(
   try {
     for (const obj of list.Contents || []) {
       const keyFrom = obj.Key
-      const keyTo = keyFrom.replace(/^queue\//, 'archive/')
+      const keyTo = keyFrom.replace(
+        new RegExp(`^${folderFrom}/`),
+        `${folderTo}/`
+      )
       copyOps.push(
         client.send(
           new CopyObjectCommand({

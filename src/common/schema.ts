@@ -119,7 +119,7 @@ export interface Game {
   mainhash?: string
   archivehash?: string
   queuehash?: string
-  subreddit?: string
+  awsRegion?: string
   bluesky?: string
   logo: string
   region: Region
@@ -133,3 +133,4 @@ export type Documents =
   | Ambassador
   | Setting
   | Achievement
+  | Stat

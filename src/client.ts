@@ -258,7 +258,7 @@ export class BikeTagClient extends EventEmitter {
 
         if (method === 'getPlayers') {
           options.names =
-            (options.names ?? options.name) ? [options.name] : undefined
+            options.names ?? (options.name ? [options.name] : undefined)
         }
 
         options.game = options.game ? options.game : this.biketagConfig?.game

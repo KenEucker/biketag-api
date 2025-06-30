@@ -10,14 +10,14 @@ export async function deleteTags(
 ): Promise<BikeTagApiResponse<boolean[]>> {
   const { tags = [], folder, game } = payload
 
-  const results: boolean[] = []
+  const results: boolean[] = new Array(tags.length)
 
   // Fire off all deletions in parallel
-  await Promise.all(
-    tags.map(async (tag) => {
+  await Promise.allSettled(
+    tags.map(async (tag, index) => {
       try {
         if (!tag.tagnumber) {
-          results.push(false)
+          results[index] = false
           return
         }
 
@@ -26,9 +26,9 @@ export async function deleteTags(
           folder,
           game,
         })
-        results.push(res.success)
+        results[index] = res.success
       } catch {
-        results.push(false)
+        results[index] = false
       }
     })
   )

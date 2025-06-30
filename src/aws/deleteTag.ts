@@ -21,40 +21,45 @@ export async function deleteTag(
   let success = true
   let error = ''
 
-  try {
-    const list = await client.send(
-      new ListObjectsV2Command({
-        Bucket: bucket,
-        Prefix: prefix, // Gets all files starting with the tagId
-      })
-    )
-
-    const deleteOps = (list.Contents || []).map(async (obj) => {
-      try {
-        await client.send(
-          new DeleteObjectCommand({
-            Bucket: bucket,
-            Key: obj.Key,
-          })
-        )
-        deleted.push(true)
-      } catch {
-        deleted.push(false)
-      }
+  const list = await client.send(
+    new ListObjectsV2Command({
+      Bucket: bucket,
+      Prefix: prefix, // Gets all files starting with the tagId
     })
+  )
 
-    await Promise.all(deleteOps)
+  const deleteOps = (list.Contents || []).map(async (obj) => {
+    try {
+      await client.send(
+        new DeleteObjectCommand({
+          Bucket: bucket,
+          Key: obj.Key,
+        })
+      )
+      return true
+    } catch {
+      return false
+    }
+  })
 
-    // Update the index.json
+  const results = await Promise.all(deleteOps)
+  deleted.push(...results)
+
+  let indexUpdateError = ''
+  // Update the index.json
+  try {
     const indexPath = indexKey(folder)
     const index: Tag[] = await loadIndex(client, bucket, indexPath)
     const updatedIndex = index.filter((tag) => tag.tagnumber !== tagnumber)
     await saveIndex(client, bucket, indexPath, updatedIndex)
+  } catch (indexErr: any) {
+    indexUpdateError = `Index update failed: ${indexErr.message}`
+  }
 
-    success = deleted.every(Boolean)
-  } catch (err: any) {
+  success = deleted.every(Boolean)
+  if (indexUpdateError) {
     success = false
-    error = err.message
+    error = error ? `${error}; ${indexUpdateError}` : indexUpdateError
   }
 
   return {

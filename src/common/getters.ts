@@ -1,4 +1,4 @@
-import { geopoint } from './types'
+import { geopoint, S3ImageMeta } from './types'
 import {
   getTagnumberFromSlugRegex,
   getTagNumbersFromTextRegex,
@@ -12,10 +12,19 @@ import {
   getAlbumIdFromTextRegex,
   getSanityImageUrlHashFromTextRegex,
 } from '../common/expressions'
-import { getCacheIfExists, putCacheIfExists } from '../common/methods'
+import {
+  constructTagNumberSlug,
+  getCacheIfExists,
+  putCacheIfExists,
+} from '../common/methods'
 import { cacheKeys, createTagObject } from '../common/data'
 import TinyCache from 'tinycache'
 import { Tag } from './schema'
+import {
+  getTimeFromText,
+  getConfirmedBoundaryFromText,
+  getPlayerIdFromText,
+} from '../imgur/helpers'
 
 export const getConfirmedBoundarySymbol = '✓'
 
@@ -125,7 +134,7 @@ export const getPlayerFromText = (
 
 export const getFoundLocationFromText = (
   inputText: string,
-  fallback: string,
+  fallback?: string,
   cache?: typeof TinyCache
 ): string => {
   if (!inputText.length) return fallback
@@ -154,7 +163,7 @@ export const getFoundLocationFromText = (
 
 export const getHintFromText = (
   inputText: string,
-  fallback: string | string[],
+  fallback?: string | string[],
   cache?: typeof TinyCache
 ): string | string[] => {
   if (!inputText.length) return fallback
@@ -596,4 +605,85 @@ export const getRedditPostTextFromTagData = (
   ${gameData.mapLink}`
 
   return wrapInPreTag ? `<pre>${selfPostText}</pre>` : selfPostText
+}
+
+export const getBikeTagFromS3ImageSet = (
+  mysteryImage?: S3ImageMeta,
+  foundImage?: S3ImageMeta,
+  opts?: { game?: string }
+): Tag => {
+  if (!foundImage && !mysteryImage) return null as Tag
+
+  let foundImageLink, foundImageDescription, foundImageTitle, foundTime
+  let mysteryImageLink, mysteryImageDescription, mysteryImageTitle, mysteryTime
+  let hint,
+    discussionUrl,
+    mysteryPlayer,
+    foundPlayer,
+    foundLocation,
+    confirmedBoundary
+
+  if (foundImage) {
+    foundImageLink = foundImage.url
+    foundImageDescription = foundImage.description
+    foundImageTitle = foundImage.title
+    foundTime = getTimeFromText(foundImageDescription)
+    foundPlayer = getPlayerFromText(foundImageDescription)
+    foundLocation = getFoundLocationFromText(foundImageDescription)
+    confirmedBoundary = getConfirmedBoundaryFromText(foundImageTitle)
+  }
+
+  if (mysteryImage) {
+    mysteryImageLink = mysteryImage.url
+    mysteryImageDescription = mysteryImage.description
+    mysteryImageTitle = mysteryImage.title
+    mysteryTime = getTimeFromText(mysteryImageDescription)
+    hint = getHintFromText(mysteryImageDescription)
+    discussionUrl = getDiscussionUrlFromText(mysteryImageTitle)
+    mysteryPlayer = getPlayerFromText(mysteryImageDescription)
+  }
+
+  const game = opts?.game || ''
+  const tagnumber = mysteryImageDescription
+    ? getTagNumbersFromText(mysteryImageDescription)[0]
+    : getTagNumbersFromText(foundImageDescription)[0]
+
+  const slug = constructTagNumberSlug(tagnumber, game)
+  const playerId =
+    getPlayerIdFromText(mysteryImageTitle) ||
+    getPlayerIdFromText(foundImageTitle)
+
+  let gps = foundImageDescription
+    ? getGPSLocationFromText(foundImageDescription)
+    : getGPSLocationFromText(mysteryImageTitle)
+
+  if (gps.lat === 0 && gps.long === 0 && foundImageTitle) {
+    gps = getGPSLocationFromText(foundImageTitle)
+  }
+
+  if (foundLocation?.length && gps.lat !== 0 && gps.long !== 0) {
+    const gpsFromFoundLocation = getGpsStringLocationFromText(foundLocation, '')
+    foundLocation = foundLocation
+      .replace(gpsFromFoundLocation, '')
+      .replace(gpsFromFoundLocation.slice(0, -3), '')
+  }
+
+  return {
+    tagnumber,
+    name: slug,
+    slug,
+    game,
+    discussionUrl,
+    foundLocation,
+    mysteryPlayer,
+    foundPlayer,
+    foundTime,
+    mysteryTime,
+    hint,
+    playerId,
+    confirmedBoundary,
+    mysteryImageUrl: mysteryImageLink,
+    foundImageUrl: foundImageLink,
+    gps,
+  }
 }
