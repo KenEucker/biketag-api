@@ -443,7 +443,7 @@ export const getGroupedTagsByPlayer = (
 
   // Determine the highest tagnumber (assumes array index = tagnumber)
   const highestTagnumber = groupedImages.reduce((max, group, index) => {
-    return group && group.length ? Math.max(max, index) : max
+    return group?.length ? Math.max(max, index) : max
   }, 0)
 
   // Group player images from the current and previous round
