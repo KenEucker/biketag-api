@@ -376,17 +376,17 @@ export class BikeTagClient {
     ) {
       return AvailableApis.imgur
     } else if (
-      this.sanityConfig &&
-      this.sanityClient &&
-      (!method || !!sanityApi[method])
-    ) {
-      return AvailableApis.sanity
-    } else if (
       this.awsConfig &&
       this.awsClient &&
       (!method || !!awsApi[method])
     ) {
       return AvailableApis.aws
+    } else if (
+      this.sanityConfig &&
+      this.sanityClient &&
+      (!method || !!sanityApi[method])
+    ) {
+      return AvailableApis.sanity
     } else if (
       this.biketagConfig &&
       isBikeTagCredentials(this.biketagConfig) &&
