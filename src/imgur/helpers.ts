@@ -24,7 +24,7 @@ import {
 export interface ImgurUploadPayload {
   imageHash: string
   type?: string
-  image?: string
+  image?: string | Blob
   title: string
   description: string
   hash?: string
