@@ -18,7 +18,7 @@ export async function getAuthorizationHeader(
   }
 
   // @ts-ignore
-  const { clientKey, clientToken } = client.config.biketag ?? {}
+  const { clientKey, clientToken } = config.biketag ?? {}
 
   const options: Record<string, unknown> = {
     url: getApiUrl(config.biketag.host, AUTHORIZE_ENDPOINT),
@@ -29,7 +29,7 @@ export async function getAuthorizationHeader(
     },
   }
 
-  let response = await client.request(options)
+  let response = await client.plainRequest(options)
 
   const cookies = Array.isArray(response.headers['set-cookie'])
     ? response.headers['set-cookie'][0]
@@ -74,8 +74,11 @@ export async function getAuthorizationHeader(
       '"}'
   )
 
+  /// TODO: now that we have a token, we should save it back into the config, but how?
   const accessToken = token.access_token
-  ;(client.config as unknown as AccessToken).accessToken = accessToken
+
+  /// WTF IS THIS?
+  // ;(client.config as unknown as AccessToken).accessToken = accessToken
 
   return `Bearer ${accessToken}`
 }

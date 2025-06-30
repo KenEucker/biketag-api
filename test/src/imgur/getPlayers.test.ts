@@ -1,3 +1,5 @@
+import { describe, test } from 'vitest'
+
 const imgurGetPlayersMethod = 'biketag.images.getPlayers'
 describe(imgurGetPlayersMethod, () => {
   test.todo(`${imgurGetPlayersMethod} method requires ImgurHash from payload`)

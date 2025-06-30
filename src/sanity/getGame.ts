@@ -39,8 +39,8 @@ export async function getGame(
   const query = slugIsSet
     ? `*[_type == "game" && slug.current == "${payload.slug}"][0]{${fields}}`
     : nameIsSet
-    ? `*[_type == "game" && name match "${payload.name}"][0]{${fields}}`
-    : `*[_type == "game"]{${fields}}`
+      ? `*[_type == "game" && name match "${payload.name}"][0]{${fields}}`
+      : `*[_type == "game"]{${fields}}`
 
   const params = {}
 

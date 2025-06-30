@@ -2,6 +2,7 @@ import {
   AccessToken,
   ClientKey,
   ImgurCredentials,
+  AWSCredentials,
   SanityCredentials,
   Credentials,
   BikeTagCredentials,
@@ -26,7 +27,7 @@ import {
   Stat,
 } from './schema'
 import { ApiAvailability } from './enums'
-import { cacheKeys } from './data'
+import { awsRegions, cacheKeys } from './data'
 
 export const putCacheIfExists = (
   key: string,
@@ -112,6 +113,18 @@ export const isSanityCredentials = (
   credentials: SanityCredentials
 ): boolean => {
   return credentials?.projectId !== undefined
+}
+
+export const isAWSCredentials = (credentials: AWSCredentials): boolean => {
+  return credentials?.accessKeyId !== undefined
+}
+
+export const isAWSApiReady = (credentials: AWSCredentials): ApiAvailability => {
+  if (credentials.accessKeyId !== undefined) {
+    return credentials.secretAccessKey !== undefined ? 3 : 1
+  }
+
+  return 0
 }
 
 export const isSanityApiReady = (
@@ -206,17 +219,19 @@ export const createSanityCredentials = (
     useCdn: credentials.token?.length
       ? false
       : typeof credentials.useCdn !== 'undefined'
-      ? credentials.useCdn
-      : typeof defaults.useCdn !== 'undefined'
-      ? defaults.useCdn
-      : true,
+        ? credentials.useCdn
+        : typeof defaults.useCdn !== 'undefined'
+          ? defaults.useCdn
+          : true,
     projectId: credentials.projectId?.length
       ? credentials.projectId
       : defaults.projectId,
     dataset: credentials.dataset?.length
       ? credentials.dataset
-      : defaults.dataset ?? 'development',
-    token: credentials.token?.length ? credentials.token : defaults.token ?? '',
+      : (defaults.dataset ?? 'development'),
+    token: credentials.token?.length
+      ? credentials.token
+      : (defaults.token ?? ''),
     password: credentials.password?.length
       ? credentials.password
       : defaults.password,
@@ -225,7 +240,7 @@ export const createSanityCredentials = (
       : defaults.username,
     apiVersion: credentials.apiVersion?.length
       ? credentials.apiVersion
-      : defaults.apiVersion ?? '2021-10-21',
+      : (defaults.apiVersion ?? '2021-10-21'),
   }
 }
 
@@ -240,6 +255,44 @@ export const assignSanityCredentials = (
     : defaults
 
   return sanityCredentials as SanityCredentials
+}
+
+export const createAWSCredentials = (
+  credentials: Partial<AWSCredentials>,
+  defaults: Partial<AWSCredentials> = {}
+): AWSCredentials => {
+  let region = credentials.region?.length ? credentials.region : defaults.region
+  let endpoint = credentials.endpoint?.length
+    ? credentials.endpoint
+    : defaults.endpoint
+
+  // If the region is not an aws region, then it must be an AWS compatible region
+  if (awsRegions.indexOf(region) === -1 && !endpoint?.length) {
+    // TODO: Make URL construction configurable for different S3-compatible services
+    endpoint = `https://${region}.digitaloceanspaces.com`
+  }
+
+  return {
+    accessKeyId: credentials.accessKeyId?.length
+      ? credentials.accessKeyId
+      : defaults.accessKeyId,
+    secretAccessKey: credentials.secretAccessKey?.length
+      ? credentials.secretAccessKey
+      : defaults.secretAccessKey,
+    region,
+    endpoint,
+  }
+}
+
+export const assignAWSCredentials = (
+  credentials: AWSCredentials,
+  defaults?: Partial<AWSCredentials>
+): AWSCredentials => {
+  const awsCredentials = isAWSCredentials(credentials as AWSCredentials)
+    ? createAWSCredentials(credentials, defaults)
+    : defaults
+
+  return awsCredentials as AWSCredentials
 }
 
 export const createBikeTagCredentials = (
@@ -293,6 +346,10 @@ export const assignBikeTagConfiguration = (
       config as unknown as SanityCredentials,
       defaults?.sanity
     ),
+    aws: assignAWSCredentials(
+      config as unknown as AWSCredentials,
+      defaults?.aws
+    ),
     imgur: assignImgurCredentials(
       config as unknown as ImgurCredentials,
       defaults?.imgur
@@ -303,6 +360,9 @@ export const assignBikeTagConfiguration = (
   configuration.biketag = config.biketag
     ? { ...parsedConfig.biketag, ...createBikeTagCredentials(config.biketag) }
     : parsedConfig.biketag
+  configuration.aws = config.aws
+    ? { ...parsedConfig.aws, ...createAWSCredentials(config.aws) }
+    : parsedConfig.aws
   configuration.sanity = config.sanity
     ? { ...parsedConfig.sanity, ...createSanityCredentials(config.sanity) }
     : parsedConfig.sanity

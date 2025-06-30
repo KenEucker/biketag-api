@@ -1,3 +1,5 @@
+import { describe, test } from 'vitest'
+
 describe('biketag.data()', () => {
   test.todo('BikeTagClient provides BikeTag adapter from Credentials')
 

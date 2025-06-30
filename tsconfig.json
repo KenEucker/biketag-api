@@ -5,12 +5,13 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "moduleResolution": "node",
-    "module": "es6",
-    "target": "es6",
+    "module": "ESNext",
+    "target": "ES2020",
     "typeRoots": ["@types", "./node_modules/@types"],
     "rootDir": "./src",
     "outDir": "lib",
     "esModuleInterop": true,
-    "declaration": true
+    "declaration": true,
+    "skipLibCheck": true
   }
 }

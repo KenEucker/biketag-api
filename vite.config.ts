@@ -16,13 +16,16 @@ export default defineConfig({
       output: {
         exports: 'named',
         globals: {
+          'form-data': 'formData',
+          '@aws-sdk/client-s3': 'S3Client',
+          stream: 'stream',
           imgur: 'ImgurClient',
-          '@sanity/client': 'sanityClient',
           axios: 'axios',
           events: 'events',
           lodash: 'lodash',
           tinycache: 'TinyCache',
-          'axios-cache-adapter': 'axiosCacheAdapter',
+          '@sanity/client': 'SanityClient',
+          'axios-cache-interceptor': 'axiosCacheInterceptor',
         },
       },
     },

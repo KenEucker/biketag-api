@@ -1,3 +1,5 @@
+import { describe, test } from 'vitest'
+
 const queueTagMethod = 'biketag.content.queueTag'
 describe(queueTagMethod, () => {
   test.todo(`${queueTagMethod} method requires ImgurHash from payload`)

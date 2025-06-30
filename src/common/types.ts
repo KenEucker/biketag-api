@@ -31,6 +31,13 @@ export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
   password: string
 }
 
+export interface AWSCredentials {
+  accessKeyId?: string
+  secretAccessKey?: string
+  region?: string
+  endpoint?: string
+}
+
 /// ****************************  BikeTag Credential Objects   ************************* ///
 export interface CommonData {
   game: string
@@ -38,6 +45,7 @@ export interface CommonData {
   source?: AvailableApis | string
   concise?: boolean
   cached?: boolean
+  region?: string
 }
 
 export type CommonPayloadData = CommonData
@@ -56,11 +64,12 @@ export interface BikeTagCredentials
 
 export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
+  Partial<AWSCredentials> &
   Partial<ImgurCredentials>
 
 /// ****************************  BikeTag API Objects   ******************************** ///
 export interface BikeTagApiResponse<
-  T = Record<string, unknown> | Record<string, unknown>[] | string | boolean
+  T = Record<string, unknown> | Record<string, unknown>[] | string | boolean,
 > {
   data: T
   status: number
@@ -86,6 +95,7 @@ export type ApiOptions = RequireAtLeastOne<{
   account?: string
   concise?: boolean
   cached?: boolean
+  region?: string
 }>
 
 /// ****************************  Imgur API Objects   ********************************** ///
@@ -104,14 +114,16 @@ export type geopoint = {
 /// ****************************  BikeTag Configurations   ***************************** ///
 export type BikeTagConfiguration = {
   biketag: BikeTagCredentials
-  sanity: SanityCredentials
+  aws: AWSCredentials
   imgur: ImgurCredentials
+  sanity: SanityCredentials
 }
 
 export type PartialBikeTagConfiguration = RequireAtLeastOne<{
   biketag: Partial<BikeTagCredentials>
-  sanity: Partial<SanityCredentials>
+  aws: Partial<AWSCredentials>
   imgur: Partial<ImgurCredentials>
+  sanity: Partial<SanityCredentials>
 }>
 
 /// ****************************  BikeTag Stats Types   ***************************** ///
@@ -156,4 +168,10 @@ export interface StatsReportData {
   gameHighestNumberTagsPerSevenDaysData: GameHighestNumberTagsPerNumberDaysData
   gameLongestDailyTagStreakData: StreakData
   gameLongestTimeBetweenTags: gameLongestTimeBetweenTagsData
+}
+
+export interface S3ImageMeta {
+  url?: string
+  title?: string
+  description?: string
 }

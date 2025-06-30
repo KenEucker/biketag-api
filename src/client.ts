@@ -11,6 +11,7 @@ import type {
   Credentials,
   BikeTagApiResponse,
   ImgurCredentials,
+  AWSCredentials,
   SanityCredentials,
   RequireAtLeastOne,
   BikeTagCredentials,
@@ -53,12 +54,15 @@ import {
   assignBikeTagConfiguration,
   isImgurCredentials,
   isSanityCredentials,
+  isAWSCredentials,
   isBikeTagCredentials,
   isBikeTagApiReady,
+  isAWSApiReady,
   isSanityApiReady,
   isImgurApiReady,
   createBikeTagCredentials,
   createImgurCredentials,
+  createAWSCredentials,
   createSanityCredentials,
 } from './common/methods'
 import {
@@ -69,16 +73,18 @@ import {
 
 import * as BikeTagExpressions from './common/expressions'
 import * as BikeTagGetters from './common/getters'
+import * as awsApi from './aws'
 import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 
+import { S3Client, S3ClientConfig } from '@aws-sdk/client-s3'
 import { ImgurClient } from 'imgur'
-import sanityClient, { SanityClient } from '@sanity/client'
+import { createClient, SanityClient } from '@sanity/client'
 
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
 import { EventEmitter } from 'events'
-import { setup } from 'axios-cache-adapter'
+import { type AxiosCacheInstance, setupCache } from 'axios-cache-interceptor'
 import { isEqual } from 'lodash'
 import { getAuthorizationHeader, getClaims } from './common/auth'
 import TinyCache from 'tinycache'
@@ -96,10 +102,12 @@ export class BikeTagClient extends EventEmitter {
 
   protected fetcher: AxiosInstance
   protected plainFetcher: AxiosInstance
-  protected cachedFetcher: AxiosInstance
+  protected cachedFetcher: AxiosCacheInstance
 
   protected imgurClient?: ImgurClient
   protected sanityClient?: SanityClient
+  protected awsClient?: S3Client
+  protected awsConfig?: AWSCredentials
   protected sanityConfig?: SanityCredentials
   protected imgurConfig?: ImgurCredentials
   protected biketagConfig?: BikeTagCredentials
@@ -139,23 +147,18 @@ export class BikeTagClient extends EventEmitter {
       (e: Error) => Promise.reject(e)
     )
 
-    this.cachedFetcher = setup({
-      cache: {
-        maxAge: 15 * 60 * 1000,
-        exclude: {
-          // Only exclude PUT, PATCH and DELETE methods from cache
-          methods: ['put', 'patch', 'delete'],
-        },
-        // Attempt reading stale cache data when response status is either 4xx or 5xx
-        readOnError: (error) => {
-          return error.response.status >= 400 && error.response.status < 600
-        },
-        // Deactivate `clearOnStale` option so that we can actually read stale cache data
-        clearOnStale: false,
-      },
-      headers,
-      responseType,
-    })
+    this.cachedFetcher = setupCache(
+      axios.create({
+        headers,
+        responseType,
+      }),
+      {
+        ttl: 15 * 60 * 1000,
+        methods: ['get', 'head'],
+        staleIfError: true,
+      }
+    )
+
     this.cachedFetcher.interceptors.request.use(
       authenticationInterceptor,
       (e: Error) => Promise.reject(e)
@@ -255,7 +258,7 @@ export class BikeTagClient extends EventEmitter {
 
         if (method === 'getPlayers') {
           options.names =
-            options.names ?? options.name ? [options.name] : undefined
+            options.names ?? (options.name ? [options.name] : undefined)
         }
 
         options.game = options.game ? options.game : this.biketagConfig?.game
@@ -312,6 +315,9 @@ export class BikeTagClient extends EventEmitter {
         options.archivehash =
           options.archivehash ?? this.imgurConfig.archivehash
         break
+      case AvailableApis.aws:
+        options.region = options.region ?? this.awsConfig.region
+        break
     }
 
     /// Host defaults
@@ -341,13 +347,16 @@ export class BikeTagClient extends EventEmitter {
         client = this.sanityClient
         api = sanityApi
         break
+      case AvailableApis.aws:
+        client = this.awsClient
+        api = awsApi
+        break
       case AvailableApis.imgur:
         client = this.imgurClient
         api = imgurApi
         break
       default:
       case AvailableApis.biketag:
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
         client = this
         options.source = 'biketag'
         api = biketagApi
@@ -375,6 +384,12 @@ export class BikeTagClient extends EventEmitter {
       (!method || !!sanityApi[method])
     ) {
       return AvailableApis.sanity
+    } else if (
+      this.awsConfig &&
+      this.awsClient &&
+      (!method || !!awsApi[method])
+    ) {
+      return AvailableApis.aws
     } else if (
       this.biketagConfig &&
       isBikeTagCredentials(this.biketagConfig) &&
@@ -422,6 +437,7 @@ export class BikeTagClient extends EventEmitter {
 
   protected getConfig(config?: BikeTagConfiguration): BikeTagConfiguration {
     return {
+      aws: config?.aws ?? this.awsConfig,
       biketag: config?.biketag ?? this.biketagConfig,
       sanity: config?.sanity ?? this.sanityConfig,
       imgur: config?.imgur ?? this.imgurConfig,
@@ -441,11 +457,21 @@ export class BikeTagClient extends EventEmitter {
       this.imgurClient = new ImgurClient(config.imgur)
     }
     if (
+      config.aws &&
+      isAWSCredentials(config.aws) &&
+      isAWSApiReady(config.aws)
+    ) {
+      this.awsClient = new S3Client({
+        credentials: config.aws,
+        ...config.aws,
+      } as S3ClientConfig)
+    }
+    if (
       config.sanity &&
       isSanityCredentials(config.sanity) &&
       isSanityApiReady(config.sanity)
     ) {
-      this.sanityClient = sanityClient(config.sanity)
+      this.sanityClient = createClient(config.sanity)
     }
 
     return config
@@ -490,6 +516,9 @@ export class BikeTagClient extends EventEmitter {
           case AvailableApis.imgur:
             createCredentialsMethod = createImgurCredentials
             break
+          case AvailableApis.aws:
+            createCredentialsMethod = createAWSCredentials
+            break
           case AvailableApis.sanity:
             createCredentialsMethod = createSanityCredentials
             break
@@ -497,7 +526,7 @@ export class BikeTagClient extends EventEmitter {
 
         return !overwrite && this[configName] && config
           ? createCredentialsMethod(config, this[configName])
-          : config ?? this[configName]
+          : (config ?? this[configName])
       }
 
       const biketagConfig = initClientConfig(
@@ -515,10 +544,16 @@ export class BikeTagClient extends EventEmitter {
         parsedConfig,
         overwrite
       )
+      const awsConfig = initClientConfig(
+        AvailableApis.aws,
+        parsedConfig,
+        overwrite
+      )
 
       if (reInitialize) {
         const initializeConfig: BikeTagConfiguration = {
           biketag: undefined,
+          aws: undefined,
           imgur: undefined,
           sanity: undefined,
         }
@@ -529,6 +564,9 @@ export class BikeTagClient extends EventEmitter {
         if (!isEqual(this.sanityConfig, sanityConfig)) {
           initializeConfig.sanity = sanityConfig
         }
+        if (!isEqual(this.awsConfig, awsConfig)) {
+          initializeConfig.aws = awsConfig
+        }
 
         this.initializeClients(initializeConfig)
       }
@@ -536,6 +574,7 @@ export class BikeTagClient extends EventEmitter {
       this.biketagConfig = biketagConfig
       this.imgurConfig = imgurConfig
       this.sanityConfig = sanityConfig
+      this.awsConfig = awsConfig
     }
 
     return this.getConfig()
@@ -907,11 +946,19 @@ export class BikeTagClient extends EventEmitter {
       payload,
       opts
     )
-    const clientMethod = api.uploadTagImage
+    let clientMethod = api.uploadTagImage
 
     /// If the client adapter implements the method
     if (clientMethod) {
-      return api.uploadTagImage(client, options).catch((e) => {
+      switch (options.source) {
+        case AvailableApis.aws:
+          clientMethod = clientMethod.bind({
+            plainFetcher: this.plainFetcher,
+          })
+          break
+      }
+
+      return clientMethod(client, options).catch((e) => {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,
@@ -1488,7 +1535,6 @@ export class BikeTagClient extends EventEmitter {
           })
           break
         case AvailableApis.imgur:
-          // eslint-disable-next-line no-case-declarations
           const getTags = this.getPassthroughApiMethod(
             api.getTags,
             client,
@@ -1723,7 +1769,7 @@ export class BikeTagClient extends EventEmitter {
     const options = opts ?? this.sanityConfig
 
     if (isSanityCredentials(options)) {
-      return sanityClient(options)
+      return createClient(options)
     }
 
     throw new Error('options are invalid for creating a sanity client')

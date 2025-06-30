@@ -1,4 +1,5 @@
 import { geopoint } from './types'
+import { Readable } from 'stream'
 
 /// ****************************  Schema Data Types   ********************************** ///
 export type UserMetadata = {
@@ -119,7 +120,7 @@ export interface Game {
   mainhash?: string
   archivehash?: string
   queuehash?: string
-  subreddit?: string
+  awsRegion?: string
   bluesky?: string
   logo: string
   region: Region
@@ -133,3 +134,4 @@ export type Documents =
   | Ambassador
   | Setting
   | Achievement
+  | Stat
