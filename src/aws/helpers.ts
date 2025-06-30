@@ -1,6 +1,5 @@
 import {
   S3Client,
-  GetObjectCommand,
   PutObjectCommand,
   HeadObjectCommand,
   DeleteObjectCommand,
@@ -10,14 +9,18 @@ import {
   ListObjectsV2CommandInput,
 } from '@aws-sdk/client-s3'
 import { Tag } from '../common/schema'
-
 import {
   getImgurMysteryTitleFromBikeTagData,
   getImgurFoundTitleFromBikeTagData,
   getImgurMysteryDescriptionFromBikeTagData,
   getImgurFoundDescriptionFromBikeTagData,
   getBikeTagFromS3ImageSet,
+  getPlayerFromText,
+  getTagNumbersFromText,
 } from '../common/getters'
+import { Readable } from 'form-data'
+import { TextEncoder, TextDecoder } from 'util'
+import { S3ImageMeta } from '../common/types'
 
 /** Returns the S3 key prefix for a given tag */
 export const getTagPrefix = (
@@ -87,8 +90,8 @@ export const loadIndex = async (
       const url = `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`
       const metaImage = {
         url,
-        title: metadata.title,
-        description: metadata.description,
+        title: decodeMetadataValue(metadata.title),
+        description: decodeMetadataValue(metadata.description),
       }
 
       const entry = imagesByTag[slug] || {}
@@ -223,24 +226,37 @@ export const resizeAndSaveVariants = async ({
   tag,
   imageType,
   maxRetries = 3,
+  folder = 'queue',
 }: {
   client: S3Client
   tag: Tag
   imageType: 'mystery' | 'found'
   maxRetries?: number
-}): Promise<void> => {
+  folder?: string
+}): Promise<string> => {
   const delay = (ms: number) => new Promise((res) => setTimeout(res, ms))
 
-  const filename = `${tag.slug}--${imageType}`
-  const inputUrl =
-    imageType === 'mystery' ? tag.mysteryImageUrl : tag.foundImageUrl
-  if (!inputUrl)
-    throw new Error(`Missing ${imageType}ImageUrl for tag ${tag.slug}`)
+  const bucket = `${tag.game}-biketag`
+  const url = imageType === 'mystery' ? tag.mysteryImageUrl : tag.foundImageUrl
+  if (!url) throw new Error(`Missing ${imageType}ImageUrl for tag`)
 
-  const transforms = {
-    original: `${inputUrl}?tr=f-webp`,
-    medium: `${inputUrl}?tr=w-800,f-webp`,
-    small: `${inputUrl}?tr=w-300,f-webp`,
+  const match = url.match(/\/([^\/?#]+)$/)
+  if (!match) throw new Error(`Could not extract filename from URL: ${url}`)
+
+  const originalFilename = match[1] // e.g. denver-tag-369--found.jpg
+  const filenameBase = originalFilename.replace(/\.\w+$/, '') // strip extension
+  const originalExt = originalFilename.split('.').pop()?.toLowerCase() || 'jpg'
+  const baseKey = `${folder}/${filenameBase}`
+  const imagekitBase = 'https://ik.imagekit.io/biketag'
+  const imagekitPath = originalFilename.replace(/^.*?\//, '') // remove any folders
+
+  const transforms: Record<string, string> = {
+    medium: `${imagekitBase}/tr:w-800,f-webp/${imagekitPath}`,
+    small: `${imagekitBase}/tr:w-300,f-webp/${imagekitPath}`,
+  }
+
+  if (originalExt !== 'webp') {
+    transforms.original = `${imagekitBase}/tr:f-webp/${imagekitPath}`
   }
 
   const title =
@@ -253,10 +269,7 @@ export const resizeAndSaveVariants = async ({
       ? getImgurMysteryDescriptionFromBikeTagData(tag)
       : getImgurFoundDescriptionFromBikeTagData(tag)
 
-  const baseKey = `queue/${filename}`
-  const bucket = `${tag.game}-biketag`
-
-  let originalUploaded = false
+  let resizedOriginalUploaded = false
 
   for (const [variant, url] of Object.entries(transforms)) {
     const suffix = variant === 'original' ? '.webp' : `--${variant}.webp`
@@ -264,11 +277,12 @@ export const resizeAndSaveVariants = async ({
 
     try {
       await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
-      continue // Skip if already exists
+      continue // already exists
     } catch (err: any) {
-      // Object doesn't exist, proceed with upload
-      if (err.name !== 'NoSuchKey') {
-        console.warn(`Unexpected error checking existence of ${key}:`, err)
+      const isNotFound =
+        err.name === 'NotFound' || err.$metadata?.httpStatusCode === 404
+      if (!isNotFound) {
+        console.warn(`Unexpected error checking ${key}:`, err)
       }
     }
 
@@ -286,21 +300,23 @@ export const resizeAndSaveVariants = async ({
           new PutObjectCommand({
             Bucket: bucket,
             Key: key,
-            Body: blob,
+            Body: await normalizeUploadBody(blob),
             ContentType: 'image/webp',
             ACL: 'public-read',
             Metadata: {
-              title: title.trim(),
-              description: description.trim(),
+              title: encodeMetadataValue(title.trim()),
+              description: encodeMetadataValue(description.trim()),
             },
           })
         )
         success = true
-        if (variant === 'original') originalUploaded = true
+        if (variant === 'original') {
+          resizedOriginalUploaded = true
+        }
       } catch (err) {
         attempt++
         if (attempt >= maxRetries) {
-          console.error(`Failed to save ${variant} for tag ${tag.slug}:`, err)
+          console.error(`Failed to save ${variant} for ${filenameBase}:`, err)
         } else {
           await delay(500 * attempt)
         }
@@ -308,12 +324,12 @@ export const resizeAndSaveVariants = async ({
     }
   }
 
-  // Remove any non-webp original image if resized image was saved
-  if (originalUploaded) {
+  // Delete old original (non-webp) only if we just replaced it with a webp
+  if (resizedOriginalUploaded) {
     try {
       const list = await listAllS3Objects(client, {
         Bucket: bucket,
-        Prefix: `queue/${filename}`,
+        Prefix: `${folder}/${filenameBase}`,
       })
 
       const nonWebp = (list || []).filter(
@@ -329,19 +345,167 @@ export const resizeAndSaveVariants = async ({
             })
           )
         } catch (err) {
-          console.error(
-            `Failed to delete original image ${obj.Key} for tag ${tag.slug}:`,
-            err
-          )
+          console.error(`Failed to delete ${obj.Key} for ${filenameBase}:`, err)
         }
       }
     } catch (err) {
-      console.error(
-        `Failed to list objects for cleanup for tag ${tag.slug}:`,
-        err
-      )
+      console.error(`Failed to list/delete originals for ${filenameBase}:`, err)
     }
   }
+
+  // Return updated .webp URL using original base path
+  return url.replace(/\.\w+$/, '.webp')
+}
+
+export const encodeMetadataValue = (value: string): string => {
+  const encoder = new TextEncoder()
+  const bytes = encoder.encode(value)
+  return btoa(String.fromCharCode(...bytes))
+}
+
+export const decodeMetadataValue = (value: string): string => {
+  try {
+    // Fail fast if not likely base64
+    if (!value || !/^[A-Za-z0-9+/=]+$/.test(value)) return value
+
+    const binary = atob(value)
+    const bytes = new Uint8Array([...binary].map((c) => c.charCodeAt(0)))
+    return new TextDecoder().decode(bytes)
+  } catch {
+    return value // fallback to raw input if decoding fails
+  }
+}
+
+export const normalizeUploadBody = async (
+  stream: string | Blob | ReadableStream | Uint8Array | Buffer | Readable
+): Promise<Uint8Array | Buffer> => {
+  if (!stream) throw new Error('No stream provided')
+
+  if (typeof stream === 'string') {
+    return new TextEncoder().encode(stream)
+  }
+
+  const isBlob =
+    typeof Blob !== 'undefined' &&
+    (stream instanceof Blob ||
+      Object.prototype.toString.call(stream) === '[object Blob]')
+
+  if (typeof window !== 'undefined') {
+    // --- BROWSER ENVIRONMENT ---
+    if (stream instanceof Blob) {
+      const arrayBuffer = await stream.arrayBuffer()
+      return new Uint8Array(arrayBuffer)
+    }
+
+    if (stream instanceof ReadableStream) {
+      const res = new Response(stream)
+      const arrayBuffer = await res.arrayBuffer()
+      return new Uint8Array(arrayBuffer)
+    }
+
+    throw new Error('Unsupported input in browser')
+  } else {
+    // --- NODE ENVIRONMENT ---
+    const isReadable =
+      typeof stream === 'object' &&
+      stream !== null &&
+      typeof (stream as any).pipe === 'function'
+
+    if (isReadable) {
+      const chunks: any[] = []
+      for await (const chunk of stream as AsyncIterable<any>) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+      }
+      return Buffer.concat(chunks)
+    }
+
+    if (stream instanceof Uint8Array || Buffer.isBuffer(stream)) {
+      return stream
+    }
+
+    if (isBlob) {
+      const arrayBuffer = await (stream as Blob).arrayBuffer()
+      return Buffer.from(arrayBuffer)
+    }
+
+    throw new Error('Unsupported input in Node')
+  }
+}
+
+export const getGroupedTagsByPlayer = (
+  groupedImages: S3ImageMeta[][] = [],
+  appendToTagData = {}
+) => {
+  if (!groupedImages.length) return []
+
+  const playerGroupedImages: Record<string, S3ImageMeta[]> = {}
+  const playerGroupedTags: any[] = []
+
+  // Determine the highest tagnumber (assumes array index = tagnumber)
+  const highestTagnumber = groupedImages.reduce((max, group, index) => {
+    return group?.length ? Math.max(max, index) : max
+  }, 0)
+
+  // Group player images from the current and previous round
+  for (const image of groupedImages[highestTagnumber] ?? []) {
+    const player = getPlayerFromText(image.description)
+    if (!player) continue
+    playerGroupedImages[player] = playerGroupedImages[player] ?? []
+    playerGroupedImages[player].push(image)
+  }
+
+  for (const image of groupedImages[highestTagnumber - 1] ?? []) {
+    const player = getPlayerFromText(image.description)
+    if (!player) continue
+    playerGroupedImages[player] = playerGroupedImages[player] ?? []
+    playerGroupedImages[player].push(image)
+  }
+
+  // Generate merged tags
+  for (const player of Object.keys(playerGroupedImages)) {
+    const images = playerGroupedImages[player]
+
+    if (images.length === 1) {
+      playerGroupedTags.push(
+        getBikeTagFromS3ImageSet(
+          images[0].description.includes('tag') ? images[0] : undefined,
+          images[0].description.includes('proof found') ? images[0] : undefined,
+          appendToTagData
+        )
+      )
+    } else if (images.length === 2) {
+      const mysteryImage = images.find((img) => img.description.includes('tag'))
+      const foundImage = images.find((img) =>
+        img.description.includes('proof found')
+      )
+
+      playerGroupedTags.push(
+        getBikeTagFromS3ImageSet(mysteryImage, foundImage, appendToTagData)
+      )
+    } else {
+      console.warn('Unexpected image count for player:', player, images)
+    }
+  }
+
+  return playerGroupedTags
+}
+
+export const getGroupedImagesByTagnumber = (
+  ungroupedImages: S3ImageMeta[] = []
+): S3ImageMeta[][] => {
+  const groupedImages: S3ImageMeta[][] = []
+
+  ungroupedImages.forEach((image) => {
+    const tagnumbers = getTagNumbersFromText(image.description)
+    const tagnumber = tagnumbers[0] // Assume the first is primary
+
+    if (typeof tagnumber === 'number') {
+      groupedImages[tagnumber] = groupedImages[tagnumber] ?? []
+      groupedImages[tagnumber].push(image)
+    }
+  })
+
+  return groupedImages
 }
 
 export interface S3UploadPayload {

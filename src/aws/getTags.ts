@@ -3,7 +3,12 @@ import { getTagsPayload } from '../common/payloads'
 import { BikeTagApiResponse, S3ImageMeta } from '../common/types'
 import { Tag } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { listAllS3Objects, loadIndex, saveIndex } from './helpers'
+import {
+  decodeMetadataValue,
+  listAllS3Objects,
+  loadIndex,
+  saveIndex,
+} from './helpers'
 import { sortTags } from '../common/methods'
 import {
   getBikeTagFromS3ImageSet,
@@ -71,8 +76,8 @@ export async function getTags(
         // TODO: Make URL construction configurable for different S3-compatible services
         const meta: S3ImageMeta = {
           url: `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`,
-          title: head.Metadata?.title || '',
-          description: head.Metadata?.description || '',
+          title: decodeMetadataValue(head.Metadata?.title || ''),
+          description: decodeMetadataValue(head.Metadata?.description || ''),
         }
 
         // Extract tagnumber from metadata

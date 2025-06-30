@@ -256,7 +256,7 @@ const runTests = async (out = false) => {
     console.log(pretty("AWS BikeTag Client Instantiated"), bikeTagAWSInstance.config())
     // await getTag1Async("AWS", bikeTagAWSInstance, out)
     await get10TagsAsync("AWS", bikeTagAWSInstance, out, {rebuildIndex: true})
-    await getQueueAsync("AWS", bikeTagAWSInstance, out, {rebuildIndex: true})
+    await getQueueAsync("AWS", bikeTagAWSInstance, out, {rebuildIndex: true, handleResize: true})
     // await getGameAsync("AWS", bikeTagAWSInstance, out)
     // await getAllGamesAsync("AWS", bikeTagAWSInstance, out)
     await get10PlayersAsync("AWS", bikeTagAWSInstance, out)
