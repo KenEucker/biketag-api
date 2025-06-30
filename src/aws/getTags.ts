@@ -27,7 +27,6 @@ export async function getTags(
   let { rebuildIndex } = payload
 
   const bucket = `${game}-biketag`
-  const indexPath = `${folder}/index.json`
   let tags: Tag[] = []
   let success = true
   let error: string | undefined
@@ -35,7 +34,7 @@ export async function getTags(
   try {
     if (!rebuildIndex) {
       try {
-        tags = await loadIndex(client, bucket, indexPath, region)
+        tags = await loadIndex(client, bucket, folder, region)
       } catch {
         rebuildIndex = true
       }
@@ -69,6 +68,7 @@ export async function getTags(
           new HeadObjectCommand({ Bucket: bucket, Key: key })
         )
 
+        // TODO: Make URL construction configurable for different S3-compatible services
         const meta: S3ImageMeta = {
           url: `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`,
           title: head.Metadata?.title || '',
@@ -107,7 +107,7 @@ export async function getTags(
         )
         .filter(Boolean)
 
-      await saveIndex(client, bucket, indexPath, tags)
+      await saveIndex(client, bucket, folder, tags)
     }
 
     if (tagnumbers?.length) {

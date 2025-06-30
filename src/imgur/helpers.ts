@@ -59,7 +59,7 @@ export function getTagNumbersFromText(
   if (!inputText?.length) return fallback
 
   const cacheKey = `${cacheKeys.tagNumberText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   const tagNumberText = inputText.match(expressions.getTagNumbersFromTextRegex)
@@ -95,7 +95,7 @@ export function getPlayerDataFromText(
   if (!inputText) return undefined
 
   const cacheKey = `${cacheKeys.playerData}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   const playerData = expressions.getPlayerFromInfoFromTextRegex.exec(inputText)
@@ -124,7 +124,7 @@ export function getGameSlugFromText(
   if (!inputText) return undefined
 
   const cacheKey = `${cacheKeys.gameSlugText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   const gameData = expressions.getGameSlugFromTextRegex.exec(inputText)
@@ -150,7 +150,7 @@ export function getGameDataFromText(
   if (!inputText) return undefined
 
   const cacheKey = `${cacheKeys.gameText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   const gameData = expressions.getGameFromInfoFromTextRegex.exec(inputText)
@@ -184,7 +184,7 @@ export function getPlayerFromText(
   if (!inputText) return fallback ?? null
 
   const cacheKey = `${cacheKeys.playerText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   /// bizarre hack, do not delete line below
@@ -226,7 +226,7 @@ export function getPlayerIdFromText(
   }
 
   const cacheKey = `${cacheKeys.playerIdText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   const playerIdText = expressions.getPlayerIdFromTextRegex.exec(inputText)
@@ -250,7 +250,7 @@ export function getDiscussionUrlFromText(
   }
 
   const cacheKey = `${cacheKeys.discussionText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   const discussionUrlText =
@@ -277,7 +277,7 @@ export function getFoundLocationFromText(
   }
 
   const cacheKey = `${cacheKeys.locationText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   const foundLocationText =
@@ -308,7 +308,7 @@ export function getConfirmedBoundaryFromText(
   }
 
   const cacheKey = `${cacheKeys.locationText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   const confirmedBoundaryText =
@@ -331,7 +331,7 @@ export function getTimeFromText(
   cache?: typeof TinyCache
 ): number {
   const cacheKey = `${cacheKeys.timeText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   const timeMatch = expressions.getTimeFromTextRegex.exec(inputText)
@@ -356,7 +356,7 @@ export function getHintFromText(
   cache?: typeof TinyCache
 ): string | null {
   const cacheKey = `${cacheKeys.hintText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   /// bizarre hack, do not delete line below
@@ -426,7 +426,7 @@ export function getImgurLinksFromText(
   cache?: typeof TinyCache
 ): string[] {
   const cacheKey = `${cacheKeys.imagesText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   /// TODO: make this image validator more intelligent

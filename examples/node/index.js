@@ -210,6 +210,7 @@ const getPlayerAchievementsAsync = async (pre, client, out = false, opts = {}) =
 
 const runTests = async (out = false) => {
   if (false) {
+    // if (biketagDefaultInstance) {
     console.log(pretty("Default BikeTag Client Instantiated"), biketagDefaultInstance.config())
     await getGameAsync("BikeTag", biketagDefaultInstance, out)
     // await getTag1Async("BikeTag", biketagDefaultInstance, out)
@@ -219,21 +220,21 @@ const runTests = async (out = false) => {
     // await get10PlayersAsync("BikeTag", biketagDefaultInstance, out)
   }
 
-  // if (false) {
   if (false) {
+  // if (bikeTagImgurInstance) {
     console.log(pretty("Imgur BikeTag Client Instantiated"), bikeTagImgurInstance.config())
     // await getGameAsync("Imgur", bikeTagImgurInstance, out)
     // await getTag1Async("Imgur", bikeTagImgurInstance, out)
     // await getTodaysTagsAsync("Imgur", bikeTagImgurInstance, out)
     // await queueTagAsync("Imgur", bikeTagImgurInstance, out)
-    // await getQueueAsync("Imgur", bikeTagImgurInstance, out)
+    await getQueueAsync("Imgur", bikeTagImgurInstance, out)
     // await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
-    // await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
-    // await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
-    await getStatsAsync("Imgur", bikeTagImgurInstance, out)
+    await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
+    await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
+    // await getStatsAsync("Imgur", bikeTagImgurInstance, out)
   }
 
-  // if (true) {
+  // if (false) {
   if (bikeTagSanityInstance) {
     console.log(pretty("Sanity BikeTag Client Instantiated"), bikeTagSanityInstance.config())
     // await getTag1Async("Sanity", bikeTagSanityInstance, out)
@@ -250,7 +251,7 @@ const runTests = async (out = false) => {
     // await getPlayerAchievementsAsync("Sanity", bikeTagSanityInstance, out)
   }
 
-  // if (true) {
+  // if (false) {
   if (bikeTagAWSInstance) {
     console.log(pretty("AWS BikeTag Client Instantiated"), bikeTagAWSInstance.config())
     // await getTag1Async("AWS", bikeTagAWSInstance, out)
@@ -258,7 +259,7 @@ const runTests = async (out = false) => {
     await getQueueAsync("AWS", bikeTagAWSInstance, out, {rebuildIndex: true})
     // await getGameAsync("AWS", bikeTagAWSInstance, out)
     // await getAllGamesAsync("AWS", bikeTagAWSInstance, out)
-    // await get10PlayersAsync("AWS", bikeTagAWSInstance, out)
+    await get10PlayersAsync("AWS", bikeTagAWSInstance, out)
     // await get1PlayerAsync("AWS", bikeTagAWSInstance, out)
     // await get10AchievementsAsync("AWS", bikeTagAWSInstance, out)
     // await get10AmbassadorsAsync("AWS", bikeTagAWSInstance, out)

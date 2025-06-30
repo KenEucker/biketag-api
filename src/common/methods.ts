@@ -268,6 +268,7 @@ export const createAWSCredentials = (
 
   // If the region is not an aws region, then it must be an AWS compatible region
   if (awsRegions.indexOf(region) === -1 && !endpoint?.length) {
+    // TODO: Make URL construction configurable for different S3-compatible services
     endpoint = `https://${region}.digitaloceanspaces.com`
   }
 

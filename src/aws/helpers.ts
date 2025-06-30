@@ -83,6 +83,7 @@ export const loadIndex = async (
         new HeadObjectCommand({ Bucket: bucket, Key: key })
       )
       const metadata = head.Metadata || {}
+      // TODO: Make URL construction configurable for different S3-compatible services
       const url = `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`
       const metaImage = {
         url,

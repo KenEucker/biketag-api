@@ -118,6 +118,7 @@ export async function uploadTagImage(
       })
     )
 
+    // TODO: Make URL construction configurable for different S3-compatible services
     return `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`
   }
 

@@ -13,11 +13,10 @@ export async function getPlayers(
 ): Promise<BikeTagApiResponse<Player[]>> {
   const { game, slugs = [], sort, limit, region } = payload
   const bucket = `${game}-biketag`
-  const indexPath = `main/index.json`
   let tags: Tag[] = []
 
   try {
-    tags = await loadIndex(client, bucket, indexPath, region)
+    tags = await loadIndex(client, bucket, 'main', region)
   } catch (err: any) {
     return {
       data: [],
@@ -27,7 +26,6 @@ export async function getPlayers(
       status: HttpStatusCode.InternalServerError,
     }
   }
-  // const tags: Tag[] = await loadIndex(client, bucket, indexPath)
   const playersData: Player[] = []
   const playerNames: string[] = []
 
@@ -48,7 +46,7 @@ export async function getPlayers(
     // Mystery player
     const includeMystery = !slugs.length || slugs.includes(tag.mysteryPlayer)
     const mysteryIndex = playerNames.indexOf(tag.mysteryPlayer)
-    if (includeMystery) {
+    if (includeMystery && tag.mysteryPlayer) {
       if (mysteryIndex === -1) {
         includePlayer(tag, tag.mysteryPlayer)
       } else {
@@ -59,7 +57,7 @@ export async function getPlayers(
     // Found player
     const includeFound = !slugs.length || slugs.includes(tag.foundPlayer)
     const foundIndex = playerNames.indexOf(tag.foundPlayer)
-    if (includeFound) {
+    if (includeFound && tag.foundPlayer) {
       if (foundIndex === -1) {
         includePlayer(tag, tag.foundPlayer)
       } else {

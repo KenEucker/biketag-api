@@ -64,6 +64,7 @@ export async function getQueue(
           new HeadObjectCommand({ Bucket: bucket, Key: key })
         )
 
+        // TODO: Make URL construction configurable for different S3-compatible services
         const meta: S3ImageMeta = {
           url: `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`,
           title: head.Metadata?.title || '',
@@ -128,6 +129,7 @@ export async function getQueue(
 
             if (!hasVariants) {
               await resizeAndSaveVariants({ client, tag, imageType: type })
+              // TODO: Make URL construction configurable for different S3-compatible services
               const newUrl = `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${base}.webp`
               if (type === 'mystery') tags[i].mysteryImageUrl = newUrl
               else tags[i].foundImageUrl = newUrl

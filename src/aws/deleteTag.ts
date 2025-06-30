@@ -42,10 +42,9 @@ export async function deleteTag(
   let indexUpdateError = ''
   // Update the index.json
   try {
-    const indexPath = `${folder}/index.json`
-    const index: Tag[] = await loadIndex(client, bucket, indexPath, region)
+    const index: Tag[] = await loadIndex(client, bucket, folder, region)
     const updatedIndex = index.filter((tag) => tag.tagnumber !== tagnumber)
-    await saveIndex(client, bucket, indexPath, updatedIndex)
+    await saveIndex(client, bucket, folder, updatedIndex)
   } catch (indexErr: any) {
     indexUpdateError = `Index update failed: ${indexErr.message}`
   }
