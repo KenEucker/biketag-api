@@ -438,7 +438,7 @@ export const getGroupedTagsByPlayer = (
 ) => {
   if (!groupedImages.length) return []
 
-  const playerGroupedImages: Tag[] = []
+  const playerGroupedImages: Record<string, S3ImageMeta[]> = {}
   const playerGroupedTags: any[] = []
 
   // Determine the highest tagnumber (assumes array index = tagnumber)
