@@ -1,5 +1,4 @@
 import { geopoint } from './types'
-import { Readable } from 'stream'
 
 /// ****************************  Schema Data Types   ********************************** ///
 export type UserMetadata = {
@@ -87,11 +86,11 @@ export interface Tag {
   name: string
   tagnumber: number
   mysteryPlayer: string
-  mysteryImage?: string
+  mysteryImage?: string | Blob
   mysteryImageUrl: string
   mysteryTime: number
   foundPlayer: string
-  foundImage?: string
+  foundImage?: string | Blob
   foundImageUrl: string
   foundTime: number
   foundLocation: string

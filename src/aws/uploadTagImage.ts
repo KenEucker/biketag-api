@@ -1,6 +1,5 @@
 import type { S3Client } from '@aws-sdk/client-s3'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { Readable } from 'stream'
 import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
@@ -26,13 +25,17 @@ export async function uploadTagImage(
 
   const maybeDownloadImage = async (
     url?: string
-  ): Promise<{ stream: Readable; contentType: string } | undefined> => {
+  ): Promise<{ blob: Blob; contentType: string } | undefined> => {
     if (!url) return
-    const res = await this.plainFetcher(url, { responseType: 'stream' })
-    if (!res?.data) throw new Error(`Failed to download image: ${url}`)
-    const contentType = res.headers['content-type'] || 'image/jpeg'
+
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`Failed to download image: ${url}`)
+
+    const contentType = res.headers.get('content-type') || 'image/jpeg'
+    const blob = await res.blob()
+
     return {
-      stream: res.data as Readable,
+      blob,
       contentType,
     }
   }
@@ -40,11 +43,11 @@ export async function uploadTagImage(
   // Download images if necessary
   if (!payload.mysteryImage && payload.mysteryImageUrl) {
     try {
-      const { stream, contentType } = await maybeDownloadImage(
-        payload.mysteryImageUrl
-      )
-      payload.mysteryImage = stream
-      payload.contentType = payload.contentType || contentType
+      const result = await maybeDownloadImage(payload.mysteryImageUrl)
+      if (result) {
+        payload.mysteryImage = result.blob
+        payload.contentType ||= result.contentType
+      }
     } catch (err) {
       success = false
       error = 'Failed to download mysteryImage from URL'
@@ -53,11 +56,11 @@ export async function uploadTagImage(
 
   if (!payload.foundImage && payload.foundImageUrl) {
     try {
-      const { stream, contentType } = await maybeDownloadImage(
-        payload.foundImageUrl
-      )
-      payload.foundImage = stream
-      payload.contentType = payload.contentType || contentType
+      const result = await maybeDownloadImage(payload.foundImageUrl)
+      if (result) {
+        payload.foundImage = result.blob
+        payload.contentType ||= result.contentType
+      }
     } catch (err) {
       success = false
       error = 'Failed to download foundImage from URL'
@@ -108,7 +111,7 @@ export async function uploadTagImage(
       new PutObjectCommand({
         Bucket: bucket,
         Key: key,
-        Body: Readable.from(p.image as any),
+        Body: p.image,
         ContentType: p.contentType,
         ACL: 'public-read',
         Metadata: {

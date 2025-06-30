@@ -97,6 +97,7 @@ export const createGameObject = (gameData: any = {}): Game => {
     archivehash: gameData.archivehash ?? '',
     queuehash: gameData.queuehash ?? '',
     logo: gameData.logo,
+    awsRegion: gameData.awsRegion,
     region: gameData.region ?? { name: gameData.name },
     slug: gameData.slug ?? gameData.name ?? '',
   } as Game

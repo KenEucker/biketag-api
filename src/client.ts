@@ -83,7 +83,6 @@ import { ImgurClient } from 'imgur'
 import { createClient, SanityClient } from '@sanity/client'
 
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
-import { EventEmitter } from 'events'
 import { type AxiosCacheInstance, setupCache } from 'axios-cache-interceptor'
 import { isEqual } from 'lodash'
 import { getAuthorizationHeader, getClaims } from './common/auth'
@@ -93,7 +92,7 @@ const apiCache = new TinyCache()
 
 // export const USERAGENT =
 //   'biketag-api (https://github.com/keneucker/biketag-api)'
-export class BikeTagClient extends EventEmitter {
+export class BikeTagClient {
   static expressions = BikeTagExpressions
   static getters = BikeTagGetters
   static createGameObject = createGameObject
@@ -113,8 +112,6 @@ export class BikeTagClient extends EventEmitter {
   protected biketagConfig?: BikeTagCredentials
 
   constructor(readonly configuration: Credentials | BikeTagConfiguration) {
-    super()
-
     const initConfig = this.config(configuration ?? {}, true, true)
     this.initializeClients(initConfig)
     const headers = {

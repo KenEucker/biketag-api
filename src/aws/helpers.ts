@@ -10,7 +10,7 @@ import {
   ListObjectsV2CommandInput,
 } from '@aws-sdk/client-s3'
 import { Tag } from '../common/schema'
-import { Readable } from 'form-data'
+
 import {
   getImgurMysteryTitleFromBikeTagData,
   getImgurFoundTitleFromBikeTagData,
@@ -281,12 +281,12 @@ export const resizeAndSaveVariants = async ({
         if (!res.ok)
           throw new Error(`Failed to fetch ${variant} variant from ImageKit`)
 
-        const stream = Readable.from(res.body as AsyncIterable<any>)
+        const blob = await res.blob()
         await client.send(
           new PutObjectCommand({
             Bucket: bucket,
             Key: key,
-            Body: Readable.from(stream),
+            Body: blob,
             ContentType: 'image/webp',
             ACL: 'public-read',
             Metadata: {
@@ -349,15 +349,10 @@ export interface S3UploadPayload {
   game: string // e.g., 'denver' — used to build bucket name
   folder: string // e.g., 'queue' — which folder to upload to
   tagnumber: number // used in key naming
-  image: Buffer | Uint8Array | Blob | string | Readable // binary data or base64 string or remote URL
+  image: Buffer | Uint8Array | Blob | string // binary data or base64 string or remote URL
   filenameSuffix?: string // '--mystery' or '--found'
   contentType?: string // 'image/jpeg', 'image/png', etc.
   resize?: boolean // default true — whether to make small/medium versions
-  mysteryImage?: Readable | string
-  foundImage?: Readable | string
 }
-export type uploadTagImagePayload = Partial<
-  Omit<Tag, 'mysteryImage' | 'foundImage'>
-> &
-  Partial<S3UploadPayload>
+export type uploadTagImagePayload = Partial<Tag> & Partial<S3UploadPayload>
 export type queueTagPayload = Partial<Tag> & Partial<S3UploadPayload>
