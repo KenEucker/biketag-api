@@ -45,6 +45,7 @@ export interface CommonData {
   source?: AvailableApis | string
   concise?: boolean
   cached?: boolean
+  region?: string
 }
 
 export type CommonPayloadData = CommonData
@@ -94,6 +95,7 @@ export type ApiOptions = RequireAtLeastOne<{
   account?: string
   concise?: boolean
   cached?: boolean
+  region?: string
 }>
 
 /// ****************************  Imgur API Objects   ********************************** ///

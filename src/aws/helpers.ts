@@ -6,6 +6,8 @@ import {
   DeleteObjectCommand,
   ListObjectsV2Command,
   ObjectCannedACL,
+  _Object,
+  ListObjectsV2CommandInput,
 } from '@aws-sdk/client-s3'
 import { Tag } from '../common/schema'
 import { Readable } from 'form-data'
@@ -26,22 +28,48 @@ export const getTagPrefix = (
   return `${folder}/${game}-tag-${tagnumber}`
 }
 
+export const listAllS3Objects = async (
+  client: S3Client,
+  params: Omit<ListObjectsV2CommandInput, 'ContinuationToken'>
+): Promise<_Object[]> => {
+  const allObjects: _Object[] = []
+  let continuationToken: string | undefined = undefined
+
+  do {
+    const command = new ListObjectsV2Command({
+      ...params,
+      ContinuationToken: continuationToken,
+    })
+
+    const response = await client.send(command)
+
+    if (response.Contents) {
+      allObjects.push(...response.Contents)
+    }
+
+    continuationToken = response.NextContinuationToken
+  } while (continuationToken)
+
+  return allObjects
+}
+
 /** Loads the index.json file and returns parsed tag array */
 export const loadIndex = async (
   client: S3Client,
   bucket: string,
   folder: string,
-  awsRegion: string
+  region: string
 ): Promise<Tag[]> => {
   const prefix = `${folder}/`
-  const listed = await client.send(
-    new ListObjectsV2Command({ Bucket: bucket, Prefix: prefix })
-  )
+  const list = await listAllS3Objects(client, {
+    Bucket: bucket,
+    Prefix: prefix,
+  })
 
   const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp']
   const imagesByTag: Record<string, { mystery?: any; found?: any }> = {}
 
-  for (const item of listed.Contents || []) {
+  for (const item of list) {
     const key = item.Key
     if (!key || !imageExtensions.some((ext) => key.toLowerCase().endsWith(ext)))
       continue
@@ -55,7 +83,7 @@ export const loadIndex = async (
         new HeadObjectCommand({ Bucket: bucket, Key: key })
       )
       const metadata = head.Metadata || {}
-      const url = `https://${bucket}.${awsRegion}.cdn.digitaloceanspaces.com/${key}`
+      const url = `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`
       const metaImage = {
         url,
         title: metadata.title,
@@ -105,11 +133,11 @@ export const saveIndex = async (
  */
 export const getQueueTagImagePayloadFromTagData = (
   tag: uploadTagImagePayload,
-  awsRegion: string,
+  region: string,
   isMystery = false
 ): S3UploadPayload => {
   return {
-    awsRegion,
+    region,
     game: tag.game,
     folder: 'queue',
     tagnumber: tag.tagnumber,
@@ -169,17 +197,17 @@ export const getUploadTagImagePayloadFromTagData = (
   const imageFile = isMystery ? payload.mysteryImage : payload.foundImage
   const game = payload.game
   const tagnumber = payload.tagnumber
-  const awsRegion = payload.awsRegion
+  const region = payload.region
   const folder = payload.folder
   const resize = payload.resize ?? true
   const contentType = payload.contentType ?? 'image/webp'
   const filenameSuffix = isMystery ? '--mystery' : '--found'
 
-  if (!imageFile || !game || !tagnumber || !awsRegion || !folder) return null
+  if (!imageFile || !game || !tagnumber || !region || !folder) return null
 
   return {
     image: imageFile,
-    awsRegion,
+    region,
     game,
     folder,
     tagnumber,
@@ -257,7 +285,7 @@ export const resizeAndSaveVariants = async ({
           new PutObjectCommand({
             Bucket: bucket,
             Key: key,
-            Body: stream,
+            Body: Readable.from(stream),
             ContentType: 'image/webp',
             ACL: 'public-read',
             Metadata: {
@@ -282,14 +310,12 @@ export const resizeAndSaveVariants = async ({
   // Remove any non-webp original image if resized image was saved
   if (originalUploaded) {
     try {
-      const list = await client.send(
-        new ListObjectsV2Command({
-          Bucket: bucket,
-          Prefix: `queue/${filename}`,
-        })
-      )
+      const list = await listAllS3Objects(client, {
+        Bucket: bucket,
+        Prefix: `queue/${filename}`,
+      })
 
-      const nonWebp = (list.Contents || []).filter(
+      const nonWebp = (list || []).filter(
         (obj) => obj.Key && !obj.Key.endsWith('.webp')
       )
 
@@ -318,14 +344,19 @@ export const resizeAndSaveVariants = async ({
 }
 
 export interface S3UploadPayload {
-  awsRegion: string
+  region: string
   game: string // e.g., 'denver' — used to build bucket name
   folder: string // e.g., 'queue' — which folder to upload to
   tagnumber: number // used in key naming
-  image: Buffer | Uint8Array | Blob | string // binary data or base64 string or remote URL
+  image: Buffer | Uint8Array | Blob | string | Readable // binary data or base64 string or remote URL
   filenameSuffix?: string // '--mystery' or '--found'
   contentType?: string // 'image/jpeg', 'image/png', etc.
   resize?: boolean // default true — whether to make small/medium versions
+  mysteryImage?: Readable | string
+  foundImage?: Readable | string
 }
-export type uploadTagImagePayload = Partial<Tag> & Partial<S3UploadPayload>
+export type uploadTagImagePayload = Partial<
+  Omit<Tag, 'mysteryImage' | 'foundImage'>
+> &
+  Partial<S3UploadPayload>
 export type queueTagPayload = Partial<Tag> & Partial<S3UploadPayload>

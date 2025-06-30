@@ -1,13 +1,9 @@
-import {
-  S3Client,
-  ListObjectsV2Command,
-  HeadObjectCommand,
-} from '@aws-sdk/client-s3'
+import { S3Client, HeadObjectCommand } from '@aws-sdk/client-s3'
 import { getTagsPayload } from '../common/payloads'
 import { BikeTagApiResponse, S3ImageMeta } from '../common/types'
 import { Tag } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { loadIndex, saveIndex } from './helpers'
+import { listAllS3Objects, loadIndex, saveIndex } from './helpers'
 import { sortTags } from '../common/methods'
 import {
   getBikeTagFromS3ImageSet,
@@ -20,7 +16,7 @@ export async function getTags(
 ): Promise<BikeTagApiResponse<Tag[]>> {
   const {
     game,
-    awsRegion,
+    region,
     folder = 'main',
     tagnumbers,
     slugs,
@@ -39,23 +35,24 @@ export async function getTags(
   try {
     if (!rebuildIndex) {
       try {
-        tags = await loadIndex(client, bucket, indexPath, awsRegion)
+        tags = await loadIndex(client, bucket, indexPath, region)
       } catch {
         rebuildIndex = true
       }
     }
 
     if (rebuildIndex) {
-      const result = await client.send(
-        new ListObjectsV2Command({ Bucket: bucket, Prefix: `${folder}/` })
-      )
+      const list = await listAllS3Objects(client, {
+        Bucket: bucket,
+        Prefix: `${folder}/`,
+      })
 
       const imageMap = new Map<
         number,
         { mystery?: S3ImageMeta; found?: S3ImageMeta }
       >()
 
-      for (const obj of result.Contents || []) {
+      for (const obj of list) {
         const key = obj.Key
         if (!key) continue
 
@@ -73,7 +70,7 @@ export async function getTags(
         )
 
         const meta: S3ImageMeta = {
-          url: `https://${bucket}.${awsRegion}.cdn.digitaloceanspaces.com/${key}`,
+          url: `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`,
           title: head.Metadata?.title || '',
           description: head.Metadata?.description || '',
         }

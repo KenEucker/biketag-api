@@ -85,7 +85,7 @@ export async function queueTag(
       const isMystery = isMysteryQueuedTag
       const queuedTagUploadPayload = await getQueueTagImagePayloadFromTagData(
         payload,
-        payload.awsRegion,
+        payload.region,
         isMystery
       )
 

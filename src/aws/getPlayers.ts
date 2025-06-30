@@ -11,13 +11,13 @@ export async function getPlayers(
   client: S3Client,
   payload: getPlayersPayload
 ): Promise<BikeTagApiResponse<Player[]>> {
-  const { game, slugs = [], sort, limit } = payload
+  const { game, slugs = [], sort, limit, region } = payload
   const bucket = `${game}-biketag`
   const indexPath = `main/index.json`
   let tags: Tag[] = []
 
   try {
-    tags = await loadIndex(client, bucket, indexPath, payload.awsRegion)
+    tags = await loadIndex(client, bucket, indexPath, region)
   } catch (err: any) {
     return {
       data: [],

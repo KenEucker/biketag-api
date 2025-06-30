@@ -1,19 +1,15 @@
-import {
-  S3Client,
-  ListObjectsV2Command,
-  DeleteObjectCommand,
-} from '@aws-sdk/client-s3'
+import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { deleteTagPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { getTagPrefix, loadIndex, saveIndex } from './helpers'
+import { getTagPrefix, listAllS3Objects, loadIndex, saveIndex } from './helpers'
 import { Tag } from '../common/schema'
 
 export async function deleteTag(
   client: S3Client,
   payload: deleteTagPayload
 ): Promise<BikeTagApiResponse<boolean[]>> {
-  const { tagnumber, folder, game, awsRegion } = payload
+  const { tagnumber, folder, game, region } = payload
   const bucket = `${game}-biketag`
   const prefix = getTagPrefix(folder, game, tagnumber) // e.g. "queue/denver-tag-368"
   const deleted: boolean[] = []
@@ -21,14 +17,12 @@ export async function deleteTag(
   let success = true
   let error = ''
 
-  const list = await client.send(
-    new ListObjectsV2Command({
-      Bucket: bucket,
-      Prefix: prefix, // Gets all files starting with the tagId
-    })
-  )
+  const list = await listAllS3Objects(client, {
+    Bucket: bucket,
+    Prefix: prefix, // Gets all files starting with the tagId
+  })
 
-  const deleteOps = (list.Contents || []).map(async (obj) => {
+  const deleteOps = list.map(async (obj) => {
     try {
       await client.send(
         new DeleteObjectCommand({
@@ -49,12 +43,7 @@ export async function deleteTag(
   // Update the index.json
   try {
     const indexPath = `${folder}/index.json`
-    const index: Tag[] = await loadIndex(
-      client,
-      bucket,
-      indexPath,
-      payload.awsRegion
-    )
+    const index: Tag[] = await loadIndex(client, bucket, indexPath, region)
     const updatedIndex = index.filter((tag) => tag.tagnumber !== tagnumber)
     await saveIndex(client, bucket, indexPath, updatedIndex)
   } catch (indexErr: any) {

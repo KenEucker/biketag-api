@@ -1,13 +1,14 @@
-import {
-  S3Client,
-  ListObjectsV2Command,
-  HeadObjectCommand,
-} from '@aws-sdk/client-s3'
+import { S3Client, HeadObjectCommand } from '@aws-sdk/client-s3'
 import { getQueuePayload } from '../common/payloads'
 import { BikeTagApiResponse, S3ImageMeta } from '../common/types'
 import { Tag } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { loadIndex, saveIndex, resizeAndSaveVariants } from './helpers'
+import {
+  loadIndex,
+  saveIndex,
+  resizeAndSaveVariants,
+  listAllS3Objects,
+} from './helpers'
 import { getBikeTagFromS3ImageSet } from '../common/getters'
 import { getTagNumbersFromText, getPlayerFromText } from '../imgur/helpers'
 
@@ -21,7 +22,7 @@ export async function getQueue(
     handleResize = false,
   } = payload
   const bucket = `${game}-biketag`
-  const region = payload.awsRegion
+  const region = payload.region
   const queueFolder = 'queue'
 
   let tags: Tag[] = []
@@ -39,11 +40,12 @@ export async function getQueue(
     }
 
     if (needsRebuild) {
-      const result = await client.send(
-        new ListObjectsV2Command({ Bucket: bucket, Prefix: 'queue/' })
-      )
+      const list = await listAllS3Objects(client, {
+        Bucket: bucket,
+        Prefix: 'queue/',
+      })
 
-      const filesInQueue = result.Contents?.map((obj) => obj.Key ?? '') ?? []
+      const filesInQueue = list.map((obj) => obj.Key ?? '') ?? []
 
       const imageMap = new Map<
         number,

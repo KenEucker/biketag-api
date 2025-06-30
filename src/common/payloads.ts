@@ -14,7 +14,6 @@ export type getTagsPayload = {
   limit?: number
   tagnumbers?: number[]
   rebuildIndex?: boolean
-  awsRegion?: string
   folder?: string
 } & CommonPayloadData
 
@@ -39,13 +38,13 @@ export type getTagPayload = {
 export type deleteTagPayload = {
   hash?: string
   folder?: string
-  awsRegion?: string
+  region?: string
 } & Partial<Tag>
 
 export type archiveTagPayload = {
   archivehash?: string
   playerId?: string
-  awsRegion?: string
+  region?: string
 } & Partial<Tag>
 
 export type updateGamePayload = Partial<Game> & SanityUploadPayload
@@ -84,7 +83,6 @@ export type getPlayersPayload = {
   limit?: number
   account?: string
   names?: string[]
-  awsRegion?: string
 } & CommonPayloadData
 
 export type getPlayerPayload = {
@@ -154,7 +152,7 @@ export type importTagPayload = Pick<
 export type getQueuePayload = {
   hash?: string
   queuehash?: string
-  awsRegion?: string
+  region?: string
   rebuildIndex?: boolean
   handleResize?: boolean
 } & CommonPayloadData

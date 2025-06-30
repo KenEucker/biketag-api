@@ -269,7 +269,6 @@ export const createAWSCredentials = (
   // If the region is not an aws region, then it must be an AWS compatible region
   if (awsRegions.indexOf(region) === -1 && !endpoint?.length) {
     endpoint = `https://${region}.digitaloceanspaces.com`
-    region = 'us-west-2'
   }
 
   return {

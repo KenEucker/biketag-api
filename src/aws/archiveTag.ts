@@ -1,6 +1,5 @@
 import {
   S3Client,
-  ListObjectsV2Command,
   CopyObjectCommand,
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3'
@@ -9,7 +8,7 @@ import { Tag } from '../common/schema'
 import { archiveTagPayload } from '../common/payloads'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { getOnlyFoundTagFromTagData } from '../common/getters'
-import { getTagPrefix, loadIndex, saveIndex } from './helpers'
+import { getTagPrefix, listAllS3Objects, loadIndex, saveIndex } from './helpers'
 
 export async function archiveTag(
   client: S3Client,
@@ -20,12 +19,10 @@ export async function archiveTag(
   const folderTo = 'archive'
 
   const prefix = getTagPrefix(folderFrom, payload.game, payload.tagnumber)
-  const list = await client.send(
-    new ListObjectsV2Command({
-      Bucket: bucket,
-      Prefix: prefix,
-    })
-  )
+  const list = await listAllS3Objects(client, {
+    Bucket: bucket,
+    Prefix: prefix,
+  })
 
   let success = true
   let error = ''
@@ -35,7 +32,7 @@ export async function archiveTag(
   const deleteOps = []
 
   try {
-    for (const obj of list.Contents || []) {
+    for (const obj of list) {
       const keyFrom = obj.Key
       const keyTo = keyFrom.replace(
         new RegExp(`^${folderFrom}/`),
@@ -63,13 +60,13 @@ export async function archiveTag(
       client,
       bucket,
       folderFrom,
-      payload.awsRegion
+      payload.region
     )
     const archiveIndex = await loadIndex(
       client,
       bucket,
       folderTo,
-      payload.awsRegion
+      payload.region
     )
 
     const tagToMove = queueIndex.find((t) => t.tagnumber === payload.tagnumber)

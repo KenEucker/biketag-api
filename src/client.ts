@@ -315,6 +315,9 @@ export class BikeTagClient extends EventEmitter {
         options.archivehash =
           options.archivehash ?? this.imgurConfig.archivehash
         break
+      case AvailableApis.aws:
+        options.region = options.region ?? this.awsConfig.region
+        break
     }
 
     /// Host defaults
@@ -943,11 +946,19 @@ export class BikeTagClient extends EventEmitter {
       payload,
       opts
     )
-    const clientMethod = api.uploadTagImage
+    let clientMethod = api.uploadTagImage
 
     /// If the client adapter implements the method
     if (clientMethod) {
-      return api.uploadTagImage(client, options).catch((e) => {
+      switch (options.source) {
+        case AvailableApis.aws:
+          clientMethod = clientMethod.bind({
+            plainFetcher: this.plainFetcher,
+          })
+          break
+      }
+
+      return clientMethod(client, options).catch((e) => {
         return Promise.resolve({
           status: HttpStatusCode.InternalServerError,
           data: null,

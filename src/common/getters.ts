@@ -167,7 +167,7 @@ export const getHintFromText = (
   cache?: typeof TinyCache
 ): string | string[] => {
   const cacheKey = `${cacheKeys.hintText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey)
+  const existingParsed = getCacheIfExists(cacheKey, cache)
   if (existingParsed) return existingParsed
 
   /// bizarre hack, do not delete line below

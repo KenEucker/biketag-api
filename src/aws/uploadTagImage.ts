@@ -24,15 +24,54 @@ export async function uploadTagImage(
   let success = true
   let error: any = false
 
-  const mysteryImageUploadPayload =
-    !payload.mysteryImageUrl && payload.mysteryImage
-      ? getUploadTagImagePayloadFromTagData(payload, true)
-      : null
+  const maybeDownloadImage = async (
+    url?: string
+  ): Promise<{ stream: Readable; contentType: string } | undefined> => {
+    if (!url) return
+    const res = await this.plainFetcher(url, { responseType: 'stream' })
+    if (!res?.data) throw new Error(`Failed to download image: ${url}`)
+    const contentType = res.headers['content-type'] || 'image/jpeg'
+    return {
+      stream: res.data as Readable,
+      contentType,
+    }
+  }
 
-  const foundImageUploadPayload =
-    !payload.foundImageUrl && payload.foundImage
-      ? getUploadTagImagePayloadFromTagData(payload)
-      : null
+  // Download images if necessary
+  if (!payload.mysteryImage && payload.mysteryImageUrl) {
+    try {
+      const { stream, contentType } = await maybeDownloadImage(
+        payload.mysteryImageUrl
+      )
+      payload.mysteryImage = stream
+      payload.contentType = payload.contentType || contentType
+    } catch (err) {
+      success = false
+      error = 'Failed to download mysteryImage from URL'
+    }
+  }
+
+  if (!payload.foundImage && payload.foundImageUrl) {
+    try {
+      const { stream, contentType } = await maybeDownloadImage(
+        payload.foundImageUrl
+      )
+      payload.foundImage = stream
+      payload.contentType = payload.contentType || contentType
+    } catch (err) {
+      success = false
+      error = 'Failed to download foundImage from URL'
+    }
+  }
+
+  // Prepare upload payloads
+  const mysteryImageUploadPayload = payload.mysteryImage
+    ? getUploadTagImagePayloadFromTagData(payload, true)
+    : null
+
+  const foundImageUploadPayload = payload.foundImage
+    ? getUploadTagImagePayloadFromTagData(payload)
+    : null
 
   if (!mysteryImageUploadPayload && !foundImageUploadPayload) {
     return {
@@ -53,7 +92,7 @@ export async function uploadTagImage(
     const extension = p.contentType?.includes('png') ? 'png' : 'jpg'
     const key = `${folder}/${p.game}-tag-${p.tagnumber}${suffix}.${extension}`
     const bucket = `${p.game}-biketag`
-    const region = p.awsRegion ?? 'nyc3'
+    const region = p.region ?? 'nyc3'
 
     const title =
       imageType === 'mystery'
