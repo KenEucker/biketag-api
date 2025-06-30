@@ -39,11 +39,13 @@ export type getTagPayload = {
 export type deleteTagPayload = {
   hash?: string
   folder?: string
+  awsRegion?: string
 } & Partial<Tag>
 
 export type archiveTagPayload = {
   archivehash?: string
   playerId?: string
+  awsRegion?: string
 } & Partial<Tag>
 
 export type updateGamePayload = Partial<Game> & SanityUploadPayload
@@ -82,6 +84,7 @@ export type getPlayersPayload = {
   limit?: number
   account?: string
   names?: string[]
+  awsRegion?: string
 } & CommonPayloadData
 
 export type getPlayerPayload = {

@@ -17,7 +17,7 @@ export async function getPlayers(
   let tags: Tag[] = []
 
   try {
-    tags = await loadIndex(client, bucket, indexPath)
+    tags = await loadIndex(client, bucket, indexPath, payload.awsRegion)
   } catch (err: any) {
     return {
       data: [],

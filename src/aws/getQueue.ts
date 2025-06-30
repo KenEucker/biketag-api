@@ -31,7 +31,7 @@ export async function getQueue(
   try {
     if (!needsRebuild) {
       try {
-        tags = await loadIndex(client, bucket, indexPath)
+        tags = await loadIndex(client, bucket, indexPath, payload.awsRegion)
       } catch {
         needsRebuild = true
       }

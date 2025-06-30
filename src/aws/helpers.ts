@@ -35,7 +35,8 @@ export const indexKey = (folder: string): string => {
 export const loadIndex = async (
   client: S3Client,
   bucket: string,
-  folder: string
+  folder: string,
+  awsRegion: string
 ): Promise<Tag[]> => {
   const prefix = `${folder}/`
   const listed = await client.send(
@@ -59,7 +60,7 @@ export const loadIndex = async (
         new HeadObjectCommand({ Bucket: bucket, Key: key })
       )
       const metadata = head.Metadata || {}
-      const url = `https://${bucket}.nyc3.cdn.digitaloceanspaces.com/${key}`
+      const url = `https://${bucket}.${awsRegion}.cdn.digitaloceanspaces.com/${key}`
       const metaImage = {
         url,
         title: metadata.title,

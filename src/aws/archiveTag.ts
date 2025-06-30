@@ -62,8 +62,18 @@ export async function archiveTag(
     const queueIndexKey = indexKey(folderFrom)
     const archiveIndexKey = indexKey(folderTo)
 
-    const queueIndex = await loadIndex(client, bucket, queueIndexKey)
-    const archiveIndex = await loadIndex(client, bucket, archiveIndexKey)
+    const queueIndex = await loadIndex(
+      client,
+      bucket,
+      queueIndexKey,
+      payload.awsRegion
+    )
+    const archiveIndex = await loadIndex(
+      client,
+      bucket,
+      archiveIndexKey,
+      payload.awsRegion
+    )
 
     const tagToMove = queueIndex.find((t) => t.tagnumber === payload.tagnumber)
     const updatedQueue = queueIndex.filter(

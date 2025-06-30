@@ -13,7 +13,7 @@ export async function deleteTag(
   client: S3Client,
   payload: deleteTagPayload
 ): Promise<BikeTagApiResponse<boolean[]>> {
-  const { tagnumber, folder, game } = payload
+  const { tagnumber, folder, game, awsRegion } = payload
   const bucket = `${game}-biketag`
   const prefix = getTagPrefix(folder, game, tagnumber) // e.g. "queue/denver-tag-368"
   const deleted: boolean[] = []
@@ -49,7 +49,12 @@ export async function deleteTag(
   // Update the index.json
   try {
     const indexPath = indexKey(folder)
-    const index: Tag[] = await loadIndex(client, bucket, indexPath)
+    const index: Tag[] = await loadIndex(
+      client,
+      bucket,
+      indexPath,
+      payload.awsRegion
+    )
     const updatedIndex = index.filter((tag) => tag.tagnumber !== tagnumber)
     await saveIndex(client, bucket, indexPath, updatedIndex)
   } catch (indexErr: any) {
