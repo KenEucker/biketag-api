@@ -3,7 +3,7 @@ import { getPlayersPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { Player, Tag } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { loadIndex, indexKey } from './helpers'
+import { loadIndex } from './helpers'
 import { createPlayerObject, createTagObject } from '../common/data'
 import { sortPlayers } from '../common/methods'
 
@@ -13,7 +13,7 @@ export async function getPlayers(
 ): Promise<BikeTagApiResponse<Player[]>> {
   const { game, slugs = [], sort, limit } = payload
   const bucket = `${game}-biketag`
-  const indexPath = indexKey('main')
+  const indexPath = `main/index.json`
   let tags: Tag[] = []
 
   try {

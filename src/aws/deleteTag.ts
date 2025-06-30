@@ -6,7 +6,7 @@ import {
 import { deleteTagPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { getTagPrefix, indexKey, loadIndex, saveIndex } from './helpers'
+import { getTagPrefix, loadIndex, saveIndex } from './helpers'
 import { Tag } from '../common/schema'
 
 export async function deleteTag(
@@ -48,7 +48,7 @@ export async function deleteTag(
   let indexUpdateError = ''
   // Update the index.json
   try {
-    const indexPath = indexKey(folder)
+    const indexPath = `${folder}/index.json`
     const index: Tag[] = await loadIndex(
       client,
       bucket,

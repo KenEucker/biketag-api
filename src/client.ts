@@ -78,7 +78,7 @@ import * as sanityApi from './sanity'
 import * as imgurApi from './imgur'
 import * as biketagApi from './biketag'
 
-import { S3Client } from '@aws-sdk/client-s3'
+import { S3Client, S3ClientConfig } from '@aws-sdk/client-s3'
 import { ImgurClient } from 'imgur'
 import { createClient, SanityClient } from '@sanity/client'
 
@@ -434,6 +434,7 @@ export class BikeTagClient extends EventEmitter {
 
   protected getConfig(config?: BikeTagConfiguration): BikeTagConfiguration {
     return {
+      aws: config?.aws ?? this.awsConfig,
       biketag: config?.biketag ?? this.biketagConfig,
       sanity: config?.sanity ?? this.sanityConfig,
       imgur: config?.imgur ?? this.imgurConfig,
@@ -457,7 +458,10 @@ export class BikeTagClient extends EventEmitter {
       isAWSCredentials(config.aws) &&
       isAWSApiReady(config.aws)
     ) {
-      this.awsClient = new S3Client(config.aws)
+      this.awsClient = new S3Client({
+        credentials: config.aws,
+        ...config.aws,
+      } as S3ClientConfig)
     }
     if (
       config.sanity &&
@@ -537,6 +541,11 @@ export class BikeTagClient extends EventEmitter {
         parsedConfig,
         overwrite
       )
+      const awsConfig = initClientConfig(
+        AvailableApis.aws,
+        parsedConfig,
+        overwrite
+      )
 
       if (reInitialize) {
         const initializeConfig: BikeTagConfiguration = {
@@ -552,6 +561,9 @@ export class BikeTagClient extends EventEmitter {
         if (!isEqual(this.sanityConfig, sanityConfig)) {
           initializeConfig.sanity = sanityConfig
         }
+        if (!isEqual(this.awsConfig, awsConfig)) {
+          initializeConfig.aws = awsConfig
+        }
 
         this.initializeClients(initializeConfig)
       }
@@ -559,6 +571,7 @@ export class BikeTagClient extends EventEmitter {
       this.biketagConfig = biketagConfig
       this.imgurConfig = imgurConfig
       this.sanityConfig = sanityConfig
+      this.awsConfig = awsConfig
     }
 
     return this.getConfig()

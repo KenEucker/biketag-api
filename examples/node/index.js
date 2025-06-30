@@ -46,6 +46,18 @@ const sanityInstanceOpts = {
 }
 const bikeTagSanityInstance = sanityInstanceOpts.sanity && sanityInstanceOpts.sanity.projectId ? new BikeTagClient(sanityInstanceOpts) : null
 
+const awsInstanceOpts = {
+  game: process.env.BIKETAG_GAME,
+  host,
+  aws: {
+    accessKeyId: process.env.S3_ACCESS_ID,
+    secretAccessKey: process.env.S3_ACCESS_KEY,
+    region: process.env.S3_REGION,
+  }
+}
+const bikeTagAWSInstance = awsInstanceOpts.aws?.secretAccessKey && awsInstanceOpts.aws?.accessKeyId ? new BikeTagClient(awsInstanceOpts) : null
+
+
 const pretty = m => `\x1b[44m${m}\x1b[0m`
 const log = (message, response, toLog = false) => {
   if (toLog) {
@@ -221,8 +233,8 @@ const runTests = async (out = false) => {
     await getStatsAsync("Imgur", bikeTagImgurInstance, out)
   }
 
-  if (true) {
-  // if (bikeTagSanityInstance) {
+  // if (true) {
+  if (bikeTagSanityInstance) {
     console.log(pretty("Sanity BikeTag Client Instantiated"), bikeTagSanityInstance.config())
     // await getTag1Async("Sanity", bikeTagSanityInstance, out)
     // await get10TagsAsync("Sanity", bikeTagSanityInstance, out)
@@ -237,6 +249,24 @@ const runTests = async (out = false) => {
     // await get10AchievementsAsync("Sanity", bikeTagSanityInstance, out)
     // await getPlayerAchievementsAsync("Sanity", bikeTagSanityInstance, out)
   }
+
+  // if (true) {
+  if (bikeTagAWSInstance) {
+    console.log(pretty("AWS BikeTag Client Instantiated"), bikeTagAWSInstance.config())
+    // await getTag1Async("AWS", bikeTagAWSInstance, out)
+    await get10TagsAsync("AWS", bikeTagAWSInstance, out, {rebuildIndex: true})
+    await getQueueAsync("AWS", bikeTagAWSInstance, out, {rebuildIndex: true})
+    // await getGameAsync("AWS", bikeTagAWSInstance, out)
+    // await getAllGamesAsync("AWS", bikeTagAWSInstance, out)
+    // await get10PlayersAsync("AWS", bikeTagAWSInstance, out)
+    // await get1PlayerAsync("AWS", bikeTagAWSInstance, out)
+    // await get10AchievementsAsync("AWS", bikeTagAWSInstance, out)
+    // await get10AmbassadorsAsync("AWS", bikeTagAWSInstance, out)
+    // await get10SettingsAsync("AWS", bikeTagAWSInstance, out)
+    // await get10StatsAsync("AWS", bikeTagAWSInstance, out)
+    // await get10AchievementsAsync("AWS", bikeTagAWSInstance, out)
+    // await getPlayerAchievementsAsync("AWS", bikeTagAWSInstance, out)
+  }
 }
 
 if (require.main === module) {
@@ -247,10 +277,12 @@ module.exports = {
   BikeTagClient,
   bikeTagImgurInstance,
   bikeTagSanityInstance,
+  bikeTagAWSInstance,
   getGameAsync,
   getCurrentTagAsync,
   getTag1Async,
   get10TagsAsync,
   imgurInstanceOpts,
   sanityInstanceOpts,
+  awsInstanceOpts,
 }

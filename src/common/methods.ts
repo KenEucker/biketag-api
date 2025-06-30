@@ -27,7 +27,7 @@ import {
   Stat,
 } from './schema'
 import { ApiAvailability } from './enums'
-import { cacheKeys } from './data'
+import { awsRegions, cacheKeys } from './data'
 
 export const putCacheIfExists = (
   key: string,
@@ -261,6 +261,17 @@ export const createAWSCredentials = (
   credentials: Partial<AWSCredentials>,
   defaults: Partial<AWSCredentials> = {}
 ): AWSCredentials => {
+  let region = credentials.region?.length ? credentials.region : defaults.region
+  let endpoint = credentials.endpoint?.length
+    ? credentials.endpoint
+    : defaults.endpoint
+
+  // If the region is not an aws region, then it must be an AWS compatible region
+  if (awsRegions.indexOf(region) === -1 && !endpoint?.length) {
+    endpoint = `https://${region}.digitaloceanspaces.com`
+    region = 'us-west-2'
+  }
+
   return {
     accessKeyId: credentials.accessKeyId?.length
       ? credentials.accessKeyId
@@ -268,6 +279,8 @@ export const createAWSCredentials = (
     secretAccessKey: credentials.secretAccessKey?.length
       ? credentials.secretAccessKey
       : defaults.secretAccessKey,
+    region,
+    endpoint,
   }
 }
 

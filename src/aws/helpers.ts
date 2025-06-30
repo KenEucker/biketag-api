@@ -26,11 +26,6 @@ export const getTagPrefix = (
   return `${folder}/${game}-tag-${tagnumber}`
 }
 
-/** Returns the path to the index.json file for a folder */
-export const indexKey = (folder: string): string => {
-  return `${folder}/index.json`
-}
-
 /** Loads the index.json file and returns parsed tag array */
 export const loadIndex = async (
   client: S3Client,
@@ -85,7 +80,7 @@ export const loadIndex = async (
 export const saveIndex = async (
   client: S3Client,
   bucket: string,
-  key: string,
+  folder: string,
   tags: Tag[],
   acl: ObjectCannedACL = 'public-read'
 ) => {
@@ -93,14 +88,14 @@ export const saveIndex = async (
     await client.send(
       new PutObjectCommand({
         Bucket: bucket,
-        Key: key,
+        Key: `${folder}/index.json`,
         Body: JSON.stringify(tags),
         ContentType: 'application/json',
         ACL: acl,
       })
     )
   } catch (error) {
-    console.error(`Failed to save index to ${bucket}/${key}:`, error)
+    console.error(`Failed to save index to ${bucket}/${folder}:`, error)
     throw error
   }
 }

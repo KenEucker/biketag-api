@@ -9,7 +9,7 @@ import { Tag } from '../common/schema'
 import { archiveTagPayload } from '../common/payloads'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { getOnlyFoundTagFromTagData } from '../common/getters'
-import { getTagPrefix, indexKey, loadIndex, saveIndex } from './helpers'
+import { getTagPrefix, loadIndex, saveIndex } from './helpers'
 
 export async function archiveTag(
   client: S3Client,
@@ -59,19 +59,16 @@ export async function archiveTag(
     await Promise.all(copyOps)
     await Promise.all(deleteOps)
 
-    const queueIndexKey = indexKey(folderFrom)
-    const archiveIndexKey = indexKey(folderTo)
-
     const queueIndex = await loadIndex(
       client,
       bucket,
-      queueIndexKey,
+      folderFrom,
       payload.awsRegion
     )
     const archiveIndex = await loadIndex(
       client,
       bucket,
-      archiveIndexKey,
+      folderTo,
       payload.awsRegion
     )
 
@@ -84,8 +81,8 @@ export async function archiveTag(
       : archiveIndex
 
     await Promise.all([
-      saveIndex(client, bucket, queueIndexKey, updatedQueue),
-      saveIndex(client, bucket, archiveIndexKey, updatedArchive),
+      saveIndex(client, bucket, folderFrom, updatedQueue),
+      saveIndex(client, bucket, folderTo, updatedArchive),
     ])
 
     data = tagToMove ? getOnlyFoundTagFromTagData(tagToMove) : null

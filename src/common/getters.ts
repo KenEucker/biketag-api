@@ -166,35 +166,24 @@ export const getHintFromText = (
   fallback?: string | string[],
   cache?: typeof TinyCache
 ): string | string[] => {
-  if (!inputText.length) return fallback
-
   const cacheKey = `${cacheKeys.hintText}${inputText}`
-  const existingParsed = getCacheIfExists(cacheKey, cache)
+  const existingParsed = getCacheIfExists(cacheKey)
   if (existingParsed) return existingParsed
 
-  const tagNumberText = inputText.match(getHintFromTextRegex)
-  if (!tagNumberText) return fallback ?? null
+  /// bizarre hack, do not delete line below
+  // inputText.match(expressions.getHintFromTextRegex)
+  const hintMatch = getHintFromTextRegex.exec(inputText)
 
-  const tagNumbers = tagNumberText.reduce((numbers, text) => {
-    const tagNumberMatches = text.match(/\d+/)
-    const tagNumber =
-      tagNumberMatches && tagNumberMatches.length ? tagNumberMatches[0] : null
-
-    if (!tagNumber) return numbers
-
-    const number = Number.parseInt(tagNumber)
-    if (numbers.indexOf(number) == -1) numbers.push(number)
-
-    return numbers
-  }, [])
-
-  if (!tagNumbers.length && fallback) {
+  if (!hintMatch) {
+    fallback = fallback ?? null
     putCacheIfExists(cacheKey, fallback, cache)
     return fallback
   }
 
-  putCacheIfExists(cacheKey, tagNumbers, cache)
-  return tagNumbers
+  const hint = (hintMatch[1] || '').trim()
+  putCacheIfExists(cacheKey, hint, cache)
+
+  return hint
 }
 
 export const getGpsStringLocationFromText = (

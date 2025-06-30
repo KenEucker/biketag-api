@@ -34,6 +34,8 @@ export interface SanityCredentials extends SanityAccessToken, SanityProjectId {
 export interface AWSCredentials {
   accessKeyId?: string
   secretAccessKey?: string
+  region?: string
+  endpoint?: string
 }
 
 /// ****************************  BikeTag Credential Objects   ************************* ///
