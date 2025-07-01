@@ -2,6 +2,7 @@ import { ImageData } from 'imgur/dist/common/types'
 export { Payload } from 'imgur/dist/common/types'
 import { AvailableApis, Errors } from '../common/enums'
 import { ImgurCredentials as ImgurApiCredentials } from 'imgur'
+import { S3Client } from '@aws-sdk/client-s3'
 
 export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>

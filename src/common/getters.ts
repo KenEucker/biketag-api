@@ -33,7 +33,7 @@ export const getTagnumberFromSlug = (
   fallback?: number,
   cache?: typeof TinyCache
 ): number => {
-  if (!inputText.length) return fallback
+  if (!inputText?.length) return fallback
 
   const cacheKey = `${cacheKeys.slugText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)
@@ -59,7 +59,7 @@ export const getTagNumbersFromText = (
   fallback?: number | number[],
   cache?: typeof TinyCache
 ): number | number[] => {
-  if (!inputText.length) return fallback
+  if (!inputText?.length) return fallback
 
   const cacheKey = `${cacheKeys.tagNumberText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)
@@ -97,7 +97,7 @@ export const getPlayerFromText = (
   fallback?: string,
   cache?: typeof TinyCache
 ): string => {
-  if (!inputText.length) return fallback
+  if (!inputText?.length) return fallback
 
   const cacheKey = `${cacheKeys.playerText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)
@@ -137,7 +137,7 @@ export const getFoundLocationFromText = (
   fallback?: string,
   cache?: typeof TinyCache
 ): string => {
-  if (!inputText.length) return fallback
+  if (!inputText?.length) return fallback
 
   const cacheKey = `${cacheKeys.locationText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)
@@ -248,7 +248,7 @@ export const getImgurAlbumIdFromText = (
   fallback: string,
   cache?: typeof TinyCache
 ): string => {
-  if (!inputText.length) return fallback
+  if (!inputText?.length) return fallback
 
   const cacheKey = `${cacheKeys.imageUrlText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)
@@ -285,7 +285,7 @@ export const getMentionURLsFromText = (
   fallback: string | string[],
   cache?: typeof TinyCache
 ): string | string[] => {
-  if (!inputText.length) return fallback
+  if (!inputText?.length) return fallback
 
   const cacheKey = `${cacheKeys.mentionText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)
@@ -333,7 +333,7 @@ export const getImageURLsFromText = (
   fallback: string | string[],
   cache?: typeof TinyCache
 ): string | string[] => {
-  if (!inputText.length) return fallback
+  if (!inputText?.length) return fallback
 
   const cacheKey = `${cacheKeys.imagesText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)
@@ -383,7 +383,7 @@ export const getDiscussionUrlFromText = (
   inputText: string,
   cache?: typeof TinyCache
 ): string => {
-  if (!inputText.length) return ''
+  if (!inputText?.length) return ''
 
   const cacheKey = `${cacheKeys.discussionText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)
@@ -430,7 +430,7 @@ export const getSanityImageUrlHashFromText = (
   inputText: string,
   cache?: typeof TinyCache
 ): string => {
-  if (!inputText.length) return ''
+  if (!inputText?.length) return ''
 
   const cacheKey = `${cacheKeys.sanityUrlText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)

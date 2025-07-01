@@ -10,7 +10,7 @@ export async function getAchievements(
   client: BikeTagClient,
   payload: getAchievementsPayload
 ): Promise<BikeTagApiResponse<Achievement[]>> {
-  delete payload.source
+  payload.source = undefined
   const opts = {
     url: getApiUrl(payload.host, ACHIEVEMENTS_ENDPOINT, payload.game),
     data: payload,

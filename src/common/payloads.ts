@@ -161,3 +161,10 @@ export type queueTagPayload = {
   queuehash?: string
   playerId?: string
 } & Partial<Tag>
+
+export type fetchSignedUrlPayload = {
+  bucket: string
+  key: string
+  contentType: string
+  expiresIn?: number
+}

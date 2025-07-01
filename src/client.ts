@@ -48,6 +48,7 @@ import {
   getStatPayload,
   getStatsPayload,
   updateStatPayload,
+  fetchSignedUrlPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -112,8 +113,7 @@ export class BikeTagClient {
   protected biketagConfig?: BikeTagCredentials
 
   constructor(readonly configuration: Credentials | BikeTagConfiguration) {
-    const initConfig = this.config(configuration ?? {}, true, true)
-    this.initializeClients(initConfig)
+    this.config(configuration ?? {}, true, true)
     const headers = {
       // 'user-agent': USERAGENT,
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -261,7 +261,7 @@ export class BikeTagClient {
         options.game = options.game ? options.game : this.biketagConfig?.game
 
         if (method === 'updatePlayer' || method === 'updatePlayers') {
-          delete options.game
+          options.game = undefined
         }
         break
 
@@ -589,6 +589,27 @@ export class BikeTagClient {
     return this.fetcher(options)
   }
 
+  /// ****************************  Authentication Methods   ******************************* ///
+
+  fetchSignedUrl(
+    payload: fetchSignedUrlPayload,
+    opts?: RequireAtLeastOne<Credentials>
+  ) {
+    const { client, api, source } = this.getClientAdapter(
+      payload,
+      opts,
+      undefined,
+      'fetchSignedUrl'
+    )
+    const clientMethod = api.fetchSignedUrl
+
+    if (clientMethod) {
+      return clientMethod(client, payload)
+    } else {
+      return Promise.reject(`fetchSignedUrl ${Errors.NotImplemented} ${source}`)
+    }
+  }
+
   fetchCredentials(authorization?: string) {
     return getClaims(this, authorization)
   }
@@ -654,6 +675,35 @@ export class BikeTagClient {
         })
     } else {
       return Promise.reject(`getGame ${Errors.NotImplemented} ${source}`)
+    }
+  }
+
+  getAllGames(
+    payload?: RequireAtLeastOne<getGamePayload> | string,
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Game[]>> {
+    const { client, options, api, source } = this.getClientAdapter(
+      payload,
+      opts,
+      DataTypes.game,
+      'getGame'
+    )
+    const clientMethod = api.getGame
+    /// If we remove the game we are looking for, we get ALL games
+    options.game = undefined
+
+    if (clientMethod) {
+      return clientMethod(client, options, apiCache).catch((e) => {
+        return {
+          status: HttpStatusCode.InternalServerError,
+          data: null,
+          error: e.code ?? e,
+          success: false,
+          source,
+        }
+      })
+    } else {
+      return Promise.reject(`getAllGames ${Errors.NotImplemented} ${source}`)
     }
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "biketag",
-  "version": "3.5.2",
+  "version": "3.5.3",
   "description": "The Javascript client API for BikeTag Games",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -63,10 +63,12 @@
     "lint:release": "npm run format:check && npm run lint:check && npm run typecheck && echo '🤖 !linter ✅ success! 🤖'",
     "lint:staged": "npx --no-install lint-staged",
     "commit": "cz",
-    "convert": "tsoa spec-and-routes"
+    "convert": "tsoa spec-and-routes",
+    "prepare": "simple-git-hooks"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.839.0",
+    "@aws-sdk/s3-request-presigner": "^3.840.0",
     "@sanity/client": "^7.6.0",
     "axios": "^1.10.0",
     "axios-cache-interceptor": "^1.8.0",
@@ -102,6 +104,7 @@
     "prettier": "^3.6.2",
     "rollup-plugin-polyfill-node": "^0.13.0",
     "semantic-release": "^24.2.5",
+    "simple-git-hooks": "^2.13.0",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "tsoa": "^6.6.0",
@@ -111,10 +114,12 @@
     "vite-plugin-dts": "^4.5.4",
     "vitest": "^3.2.4"
   },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged && npm test"
+  },
   "lint-staged": {
     "*.ts": [
-      "eslint . --fix",
-      "vitest --bail --findRelatedTests --passWithNoTests"
+      "eslint . --fix"
     ],
     "*.{js,css,md,yml,yaml,json}": "prettier . --write"
   },

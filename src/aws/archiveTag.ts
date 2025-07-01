@@ -1,14 +1,16 @@
-import {
-  S3Client,
-  CopyObjectCommand,
-  DeleteObjectCommand,
-} from '@aws-sdk/client-s3'
+import { S3Client } from '@aws-sdk/client-s3'
 import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
 import { archiveTagPayload } from '../common/payloads'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { getOnlyFoundTagFromTagData } from '../common/getters'
-import { getTagPrefix, listAllS3Objects, loadIndex, saveIndex } from './helpers'
+import {
+  getTagPrefix,
+  listAllS3Objects,
+  loadIndex,
+  moveImage,
+  saveIndex,
+} from './helpers'
 
 export async function archiveTag(
   client: S3Client,
@@ -28,34 +30,21 @@ export async function archiveTag(
   let error = ''
   let data: Tag | null = null
 
-  const copyOps = []
-  const deleteOps = []
-
   try {
     for (const obj of list) {
-      const keyFrom = obj.Key
-      const keyTo = keyFrom.replace(
+      const sourceKey = obj.Key
+      const destinationKey = sourceKey.replace(
         new RegExp(`^${folderFrom}/`),
         `${folderTo}/`
       )
-      copyOps.push(
-        client.send(
-          new CopyObjectCommand({
-            Bucket: bucket,
-            CopySource: `${bucket}/${keyFrom}`,
-            Key: keyTo,
-            ACL: 'public-read',
-          })
-        )
-      )
-      deleteOps.push(
-        client.send(new DeleteObjectCommand({ Bucket: bucket, Key: keyFrom }))
-      )
+
+      const result = await moveImage(client, bucket, sourceKey, destinationKey)
+      if (!result.success) {
+        throw new Error(`Failed to move ${sourceKey}: ${result.error}`)
+      }
     }
 
-    await Promise.all(copyOps)
-    await Promise.all(deleteOps)
-
+    // Load and update indices
     const queueIndex = await loadIndex(
       client,
       bucket,
@@ -85,7 +74,7 @@ export async function archiveTag(
     data = tagToMove ? getOnlyFoundTagFromTagData(tagToMove) : null
   } catch (err: any) {
     success = false
-    error = err.message
+    error = err.message || String(err)
   }
 
   return {
