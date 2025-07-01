@@ -24,10 +24,10 @@ export const fetchSignedUrl = async (
 
     success = true
     data = signedUrl
-  } catch (error) {
+  } catch (err) {
     success = false
     error = `fetchSignedUrl failed (${payload.bucket}/${payload.key}): ${
-      error instanceof Error ? error.message : String(error)
+      err instanceof Error ? err.message : String(err)
     }`
   }
 
