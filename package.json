@@ -119,8 +119,7 @@
   },
   "lint-staged": {
     "*.ts": [
-      "eslint . --fix",
-      "vitest --bail --findRelatedTests --passWithNoTests"
+      "eslint . --fix"
     ],
     "*.{js,css,md,yml,yaml,json}": "prettier . --write"
   },
