@@ -176,11 +176,3 @@ export interface S3ImageMeta {
   title?: string
   description?: string
 }
-
-export interface SignedUrlRequest {
-  client: S3Client
-  bucket: string
-  key: string
-  contentType: string
-  expiresIn?: number
-}

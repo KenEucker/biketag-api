@@ -67,7 +67,7 @@ export async function updateTag(
         )
       } else {
         success = false
-        error = moveResult.error || true
+        error = moveResult.error || 'Image move failed'
       }
     } else {
       const mysteryUploadResponse = await uploadTagImage(client, {
@@ -83,7 +83,7 @@ export async function updateTag(
         payload.mysteryImageUrl = mysteryUploadResponse.data.mysteryImageUrl
       } else {
         success = false
-        error = mysteryUploadResponse.error || true
+        error = mysteryUploadResponse.error || 'Image upload failed'
       }
     }
   }
@@ -110,7 +110,7 @@ export async function updateTag(
         )
       } else {
         success = false
-        error = moveResult.error || true
+        error = moveResult.error || 'Image move failed'
       }
     } else {
       const foundUploadResponse = await uploadTagImage(client, {
@@ -126,7 +126,7 @@ export async function updateTag(
         payload.foundImageUrl = foundUploadResponse.data.foundImageUrl
       } else {
         success = false
-        error = foundUploadResponse.error || true
+        error = foundUploadResponse.error || 'Image upload failed'
       }
     }
   }

@@ -261,7 +261,7 @@ export class BikeTagClient {
         options.game = options.game ? options.game : this.biketagConfig?.game
 
         if (method === 'updatePlayer' || method === 'updatePlayers') {
-          delete options.game
+          options.game = undefined
         }
         break
 
@@ -690,7 +690,7 @@ export class BikeTagClient {
     )
     const clientMethod = api.getGame
     /// If we remove the game we are looking for, we get ALL games
-    delete options.game
+    options.game = undefined
 
     if (clientMethod) {
       return clientMethod(client, options, apiCache).catch((e) => {

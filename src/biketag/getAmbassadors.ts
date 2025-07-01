@@ -10,7 +10,7 @@ export async function getAmbassadors(
   client: BikeTagClient,
   payload: getAmbassadorsPayload
 ): Promise<BikeTagApiResponse<Ambassador[]>> {
-  delete payload.source
+  payload.source = undefined
   const opts = {
     url: getApiUrl(payload.host, AMBASSADORS_ENDPOINT, payload.game),
     data: payload,

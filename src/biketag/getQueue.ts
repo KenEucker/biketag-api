@@ -10,7 +10,7 @@ export async function getQueue(
   client: BikeTagClient,
   payload: getQueuePayload
 ): Promise<BikeTagApiResponse<Tag[]>> {
-  delete payload.source
+  payload.source = undefined
   const opts = {
     url: getApiUrl(payload.host, QUEUE_ENDPOINT, payload.game),
     data: payload,

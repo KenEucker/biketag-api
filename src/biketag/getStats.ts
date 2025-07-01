@@ -10,7 +10,7 @@ export async function getStats(
   client: BikeTagClient,
   payload: getStatsPayload
 ): Promise<BikeTagApiResponse<Stat[]>> {
-  delete payload.source
+  payload.source = undefined
   const opts = {
     url: getApiUrl(payload.host, STATS_ENDPOINT, payload.game),
     data: payload,

@@ -1,10 +1,8 @@
-import { AccessToken, BikeTagCredentials, SignedUrlRequest } from './types'
+import { AccessToken, BikeTagCredentials } from './types'
 import { hasClientKey, hasAccessToken } from './methods'
 import { BikeTagClient } from '../client'
 import { AUTHORIZE_ENDPOINT, TOKEN_ENDPOINT } from './endpoints'
 import { getApiUrl } from '../biketag/helpers'
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 export async function getAuthorizationHeader(
   client: BikeTagClient
