@@ -221,7 +221,7 @@ export function getPlayerIdFromText(
   fallback?: string,
   cache?: typeof TinyCache
 ): string {
-  if (!inputText || !inputText.length) {
+  if (!inputText?.length) {
     return fallback
   }
 
@@ -245,7 +245,7 @@ export function getDiscussionUrlFromText(
   fallback?: string,
   cache?: typeof TinyCache
 ): string {
-  if (!inputText || !inputText.length) {
+  if (!inputText?.length) {
     return fallback
   }
 
@@ -272,7 +272,7 @@ export function getFoundLocationFromText(
   fallback?: string,
   cache?: typeof TinyCache
 ): string {
-  if (!inputText || !inputText.length) {
+  if (!inputText?.length) {
     return fallback
   }
 
@@ -303,7 +303,7 @@ export function getConfirmedBoundaryFromText(
   fallback?: string,
   cache?: typeof TinyCache
 ): string {
-  if (!inputText || !inputText.length) {
+  if (!inputText?.length) {
     return fallback
   }
 

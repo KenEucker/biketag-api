@@ -7,6 +7,8 @@ import {
   ObjectCannedACL,
   _Object,
   ListObjectsV2CommandInput,
+  GetObjectCommand,
+  CopyObjectCommand,
 } from '@aws-sdk/client-s3'
 import { Tag } from '../common/schema'
 import {
@@ -19,9 +21,10 @@ import {
   getTagNumbersFromText,
 } from '../common/getters'
 import { Readable } from 'form-data'
-import { TextEncoder, TextDecoder } from 'util'
 import { S3ImageMeta } from '../common/types'
+import TinyCache from 'tinycache'
 
+const indexCache = new TinyCache()
 /** Returns the S3 key prefix for a given tag */
 export const getTagPrefix = (
   folder: string,
@@ -56,13 +59,88 @@ export const listAllS3Objects = async (
   return allObjects
 }
 
-/** Loads the index.json file and returns parsed tag array */
+export const streamToString = async (stream: any): Promise<string> => {
+  const chunks: Uint8Array[] = []
+
+  // For Node.js: stream is async iterable
+  if (stream[Symbol.asyncIterator]) {
+    for await (const chunk of stream) {
+      chunks.push(
+        typeof chunk === 'string' ? new TextEncoder().encode(chunk) : chunk
+      )
+    }
+    const all = Uint8Array.from(chunks.flatMap((c) => Array.from(c)))
+    return new TextDecoder('utf-8').decode(all)
+  }
+
+  // For browser: stream is a ReadableStream
+  if (typeof stream.getReader === 'function') {
+    const reader = stream.getReader()
+    let result = ''
+    const decoder = new TextDecoder('utf-8')
+    while (true) {
+      const { value, done } = await reader.read()
+      if (done) break
+      result += decoder.decode(value, { stream: true })
+    }
+    return result
+  }
+
+  throw new Error('Unsupported stream type')
+}
+
 export const loadIndex = async (
   client: S3Client,
   bucket: string,
   folder: string,
   region: string
 ): Promise<Tag[]> => {
+  const indexKey = `${folder}/index.json`
+  const cacheKey = `${region}:${bucket}:${indexKey}`
+  const CACHE_TTL_MS = 5000
+
+  const cached = indexCache.get(cacheKey)
+  if (cached) return cached
+
+  try {
+    const command = new GetObjectCommand({ Bucket: bucket, Key: indexKey })
+    const response = await client.send(command)
+    const body = await streamToString(response.Body)
+    const indexData = JSON.parse(body)
+
+    if (!Array.isArray(indexData)) {
+      throw new Error(`Invalid index format in ${indexKey}`)
+    }
+
+    indexCache.put(cacheKey, indexData, CACHE_TTL_MS)
+    return indexData as Tag[]
+  } catch (err: any) {
+    if (err.name !== 'NoSuchKey') {
+      console.warn(`Failed to load ${indexKey}:`, err)
+    }
+
+    // Fallback to rebuilding from images
+    const fallbackData = await loadIndexFromImages(
+      client,
+      bucket,
+      folder,
+      region
+    )
+    indexCache.put(cacheKey, fallbackData, CACHE_TTL_MS)
+    return fallbackData
+  }
+}
+
+const loadIndexFromImages = async (
+  client: S3Client,
+  bucket: string,
+  folder: string,
+  region: string
+): Promise<Tag[]> => {
+  if (!region) {
+    throw new Error('Missing or invalid region when calling loadIndex')
+  }
+
   const prefix = `${folder}/`
   const list = await listAllS3Objects(client, {
     Bucket: bucket,
@@ -74,8 +152,17 @@ export const loadIndex = async (
 
   for (const item of list) {
     const key = item.Key
-    if (!key || !imageExtensions.some((ext) => key.toLowerCase().endsWith(ext)))
+    if (
+      !key ||
+      !imageExtensions.some((ext) => key.toLowerCase().endsWith(ext))
+    ) {
       continue
+    }
+
+    // Ignore --medium and --small variants
+    if (key.includes('--medium') || key.includes('--small')) {
+      continue
+    }
 
     const filename = key.replace(prefix, '').replace(/\.[^.]+$/, '')
     const [slug, suffix] = filename.split('--')
@@ -86,7 +173,6 @@ export const loadIndex = async (
         new HeadObjectCommand({ Bucket: bucket, Key: key })
       )
       const metadata = head.Metadata || {}
-      // TODO: Make URL construction configurable for different S3-compatible services
       const url = `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`
       const metaImage = {
         url,
@@ -508,6 +594,47 @@ export const getGroupedImagesByTagnumber = (
   return groupedImages
 }
 
+export const getKeyFromUrl = (urlStr: string) => {
+  try {
+    const url = new URL(urlStr)
+    return url.pathname.slice(1) // remove leading slash
+  } catch {
+    return ''
+  }
+}
+
+export const moveImage = async (
+  client: S3Client,
+  bucket: string,
+  sourceKey: string,
+  destinationKey: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    // Copy with metadata preserved
+    await client.send(
+      new CopyObjectCommand({
+        Bucket: bucket,
+        CopySource: `${bucket}/${sourceKey}`,
+        Key: destinationKey,
+        ACL: 'public-read',
+        MetadataDirective: 'COPY', // Ensures original metadata is preserved
+      })
+    )
+
+    // Delete original
+    await client.send(
+      new DeleteObjectCommand({
+        Bucket: bucket,
+        Key: sourceKey,
+      })
+    )
+
+    return { success: true }
+  } catch (err: any) {
+    return { success: false, error: err.message || String(err) }
+  }
+}
+
 export interface S3UploadPayload {
   region: string
   game: string // e.g., 'denver' — used to build bucket name
@@ -520,3 +647,4 @@ export interface S3UploadPayload {
 }
 export type uploadTagImagePayload = Partial<Tag> & Partial<S3UploadPayload>
 export type queueTagPayload = Partial<Tag> & Partial<S3UploadPayload>
+export type updateTagPayload = Partial<Tag> & Partial<S3UploadPayload>

@@ -261,24 +261,27 @@ export const createAWSCredentials = (
   credentials: Partial<AWSCredentials>,
   defaults: Partial<AWSCredentials> = {}
 ): AWSCredentials => {
-  let region = credentials.region?.length ? credentials.region : defaults.region
+  const region = credentials.region?.length
+    ? credentials.region
+    : defaults.region
+
   let endpoint = credentials.endpoint?.length
     ? credentials.endpoint
     : defaults.endpoint
 
-  // If the region is not an aws region, then it must be an AWS compatible region
-  if (awsRegions.indexOf(region) === -1 && !endpoint?.length) {
-    // TODO: Make URL construction configurable for different S3-compatible services
+  if (!endpoint && region && awsRegions.indexOf(region) === -1) {
     endpoint = `https://${region}.digitaloceanspaces.com`
   }
 
   return {
-    accessKeyId: credentials.accessKeyId?.length
-      ? credentials.accessKeyId
-      : defaults.accessKeyId,
-    secretAccessKey: credentials.secretAccessKey?.length
-      ? credentials.secretAccessKey
-      : defaults.secretAccessKey,
+    accessKeyId:
+      credentials.accessKeyId?.length > 0
+        ? credentials.accessKeyId
+        : defaults.accessKeyId,
+    secretAccessKey:
+      credentials.secretAccessKey?.length > 0
+        ? credentials.secretAccessKey
+        : defaults.secretAccessKey,
     region,
     endpoint,
   }

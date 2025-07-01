@@ -6,6 +6,7 @@ import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { getCacheIfExists, putCacheIfExists } from '../common/methods'
 import { cacheKeys } from '../common/data'
 import TinyCache from 'tinycache'
+import { streamToString } from './helpers'
 
 export async function getGame(
   client: S3Client,
@@ -25,17 +26,15 @@ export async function getGame(
 
   if (!game) {
     try {
-      const obj = await client.send(
+      const response = await client.send(
         new GetObjectCommand({
           Bucket: bucket,
           Key: 'game.json',
         })
       )
 
-      const chunks: any[] = []
-      for await (const chunk of obj.Body as any) chunks.push(chunk)
-      const raw = Buffer.concat(chunks).toString('utf-8')
-      game = JSON.parse(raw) as Game
+      const body = await streamToString(response.Body)
+      game = JSON.parse(body) as Game
 
       putCacheIfExists(cacheKey, game, cache)
     } catch (err: any) {

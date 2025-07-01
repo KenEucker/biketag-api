@@ -2,6 +2,7 @@ import { ImageData } from 'imgur/dist/common/types'
 export { Payload } from 'imgur/dist/common/types'
 import { AvailableApis, Errors } from '../common/enums'
 import { ImgurCredentials as ImgurApiCredentials } from 'imgur'
+import { S3Client } from '@aws-sdk/client-s3'
 
 export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>
@@ -174,4 +175,12 @@ export interface S3ImageMeta {
   url?: string
   title?: string
   description?: string
+}
+
+export interface SignedUrlRequest {
+  client: S3Client
+  bucket: string
+  key: string
+  contentType: string
+  expiresIn?: number
 }
