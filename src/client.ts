@@ -18,7 +18,6 @@ import type {
   BikeTagConfiguration,
   PartialBikeTagConfiguration,
   ApiOptions,
-  SignedUrlRequest,
 } from './common/types'
 import {
   AvailableApis,
@@ -49,6 +48,7 @@ import {
   getStatPayload,
   getStatsPayload,
   updateStatPayload,
+  fetchSignedUrlPayload,
 } from './common/payloads'
 import {
   constructTagNumberSlug,
@@ -592,7 +592,7 @@ export class BikeTagClient {
   /// ****************************  Authentication Methods   ******************************* ///
 
   fetchSignedUrl(
-    payload: SignedUrlRequest,
+    payload: fetchSignedUrlPayload,
     opts?: RequireAtLeastOne<Credentials>
   ) {
     const { client, api, source } = this.getClientAdapter(
