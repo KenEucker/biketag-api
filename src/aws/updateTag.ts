@@ -19,6 +19,7 @@ export async function updateTag(
 ): Promise<BikeTagApiResponse<Tag>> {
   /// TODO: put the payload logic into getDefaultOptions?
   payload.folder = payload.folder ?? 'main'
+
   const mysteryImagePayload = getUpdateTagPayloadFromTagData(
     payload as Tag,
     true
@@ -45,10 +46,29 @@ export async function updateTag(
       ? tagExistsResponse.data[0]
       : null
 
+  const getCanonicalFilename = (
+    key: string,
+    type: 'mystery' | 'found'
+  ): string => {
+    const match = key.match(
+      new RegExp(
+        `^(?:.+/)?(.*)--${type}(?:--[a-z0-9]+)?\\.(webp|jpg|jpeg|png)$`,
+        'i'
+      )
+    )
+    if (!match)
+      throw new Error(
+        `Invalid filename pattern for canonicalization. Expected format: <base>--${type}[--<suffix>].<ext>, got: ${key}`
+      )
+
+    return `${match[1]}--${type}.webp`
+  }
+
   // Handle mystery image
   if (!existingTag?.mysteryImageUrl?.length) {
     const currentKey = getKeyFromUrl(payload.mysteryImageUrl)
-    const targetKey = `${payload.folder}/${currentKey.split('/').pop()}`
+    const canonicalFilename = getCanonicalFilename(currentKey, 'mystery')
+    const targetKey = `${payload.folder}/${canonicalFilename}`
 
     if (
       payload.mysteryImageUrl?.includes(`${payload.game}-biketag`) &&
@@ -91,7 +111,8 @@ export async function updateTag(
   // Handle found image
   if (!existingTag?.foundImageUrl?.length) {
     const currentKey = getKeyFromUrl(payload.foundImageUrl)
-    const targetKey = `${payload.folder}/${currentKey.split('/').pop()}`
+    const canonicalFilename = getCanonicalFilename(currentKey, 'found')
+    const targetKey = `${payload.folder}/${canonicalFilename}`
 
     if (
       payload.foundImageUrl?.includes(`${payload.game}-biketag`) &&

@@ -49,9 +49,12 @@ export async function getQueue(
 
       const metaList: S3ImageMeta[] = []
       for (const key of files) {
+        // Skip variants
+        if (/_medium\.webp$|_small\.webp$/i.test(key)) continue
+
         const match = key.match(
           new RegExp(
-            `${folder}/(.+?)--(mystery|found)\\.(webp|jpg|jpeg|png)$`,
+            `${folder}/(.+?)--(mystery|found)--([a-z0-9]+)\\.(webp|jpg|jpeg|png)$`,
             'i'
           )
         )
@@ -61,6 +64,7 @@ export async function getQueue(
           new HeadObjectCommand({ Bucket: bucket, Key: key })
         )
 
+        // TODO: Make URL construction configurable for different S3-compatible services
         const meta: S3ImageMeta = {
           url: `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`,
           title: decodeMetadataValue(head.Metadata?.title || ''),
@@ -76,17 +80,19 @@ export async function getQueue(
       if (handleResize) {
         for (let i = 0; i < tags.length; i++) {
           const tag = tags[i]
-          const tagId = tag.slug ?? `tag-${tag.tagnumber}`
           const types: ('mystery' | 'found')[] = []
           if (tag.mysteryImageUrl) types.push('mystery')
           if (tag.foundImageUrl) types.push('found')
 
           for (const type of types) {
-            const base = `queue/${tagId}--${type}`
+            const url =
+              type === 'mystery' ? tag.mysteryImageUrl! : tag.foundImageUrl!
+            const filename = url.split('/').pop() || ''
+            const base = filename.replace(/\.(webp|jpg|jpeg|png)$/i, '')
+
             const hasVariants =
-              files.includes(`${base}.webp`) &&
-              files.includes(`${base}--medium.webp`) &&
-              files.includes(`${base}--small.webp`)
+              files.includes(`${folder}/${base}_medium.webp`) &&
+              files.includes(`${folder}/${base}_small.webp`)
 
             if (!hasVariants) {
               const newUrl = await resizeAndSaveVariants({

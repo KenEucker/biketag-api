@@ -173,6 +173,7 @@ const loadIndexFromImages = async (
         new HeadObjectCommand({ Bucket: bucket, Key: key })
       )
       const metadata = head.Metadata || {}
+      // TODO: Make URL construction configurable for different S3-compatible services
       const url = `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`
       const metaImage = {
         url,
@@ -329,7 +330,7 @@ export const resizeAndSaveVariants = async ({
   const match = url.match(/\/([^\/?#]+)$/)
   if (!match) throw new Error(`Could not extract filename from URL: ${url}`)
 
-  const originalFilename = match[1] // e.g. denver-tag-369--found.jpg
+  const originalFilename = match[1] // e.g. denver-tag-369--found--abc123.jpg
   const filenameBase = originalFilename.replace(/\.\w+$/, '') // strip extension
   const originalExt = originalFilename.split('.').pop()?.toLowerCase() || 'jpg'
   const baseKey = `${folder}/${filenameBase}`
@@ -358,7 +359,7 @@ export const resizeAndSaveVariants = async ({
   let resizedOriginalUploaded = false
 
   for (const [variant, url] of Object.entries(transforms)) {
-    const suffix = variant === 'original' ? '.webp' : `--${variant}.webp`
+    const suffix = variant === 'original' ? '.webp' : `_${variant}.webp`
     const key = `${baseKey}${suffix}`
 
     try {
@@ -439,7 +440,6 @@ export const resizeAndSaveVariants = async ({
     }
   }
 
-  // Return updated .webp URL using original base path
   return url.replace(/\.\w+$/, '.webp')
 }
 
@@ -633,6 +633,19 @@ export const moveImage = async (
   } catch (err: any) {
     return { success: false, error: err.message || String(err) }
   }
+}
+
+export const getHashedPlayerSuffix = async (
+  playerId: string
+): Promise<string> => {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(playerId)
+  const hashBuffer = await crypto.subtle.digest('SHA-1', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+    .slice(0, 6)
 }
 
 export interface S3UploadPayload {

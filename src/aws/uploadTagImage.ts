@@ -6,6 +6,7 @@ import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { createTagObject } from '../common/data'
 import {
   encodeMetadataValue,
+  getHashedPlayerSuffix,
   getUploadTagImagePayloadFromTagData,
   isValidUploadTagImagePayload,
   normalizeUploadBody,
@@ -94,8 +95,12 @@ export async function uploadTagImage(
   ) => {
     const folder = p.folder ?? 'queue'
     const suffix = p.filenameSuffix ?? `--${imageType}`
+    const postfix =
+      folder === 'queue'
+        ? `--${await getHashedPlayerSuffix(p.foundPlayer)}`
+        : ''
     const extension = p.contentType?.includes('png') ? 'png' : 'jpg'
-    const key = `${folder}/${p.game}-tag-${p.tagnumber}${suffix}.${extension}`
+    const key = `${folder}/${p.game}-tag-${p.tagnumber}${suffix}${postfix}.${extension}`
     const bucket = `${p.game}-biketag`
     const region = p.region ?? 'nyc3'
 
