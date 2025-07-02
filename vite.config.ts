@@ -28,13 +28,14 @@ export default defineConfig({
       output: {
         exports: 'named',
         globals: {
-          'form-data': 'formData',
-          '@aws-sdk/client-s3': 'S3Client',
           imgur: 'ImgurClient',
           axios: 'axios',
           util: 'util',
           lodash: 'lodash',
           tinycache: 'TinyCache',
+          'form-data': 'formData',
+          '@aws-sdk/client-s3': 'S3Client',
+          '@aws-sdk/s3-request-presigner': 'S3RequestPresigner',
           '@sanity/client': 'SanityClient',
           'axios-cache-interceptor': 'axiosCacheInterceptor',
         },

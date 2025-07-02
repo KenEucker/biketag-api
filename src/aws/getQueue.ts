@@ -66,8 +66,9 @@ export async function getQueue(
           new HeadObjectCommand({ Bucket: bucket, Key: key })
         )
 
+        // TODO: Make URL construction configurable for different S3-compatible services
         const meta: S3ImageMeta = {
-          url: `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${folder}/${fullTagId}.webp`,
+          url: `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`,
           title: decodeMetadataValue(head.Metadata?.title || ''),
           description: decodeMetadataValue(head.Metadata?.description || ''),
         }
