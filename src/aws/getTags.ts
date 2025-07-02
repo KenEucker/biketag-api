@@ -87,7 +87,8 @@ export async function getTags(
         if (!metadataTagnumber) continue
 
         // Validate filename and metadata agree on tagnumber
-        const filenameTagnumberMatch = filenameTagId.match(/-(\d+)(--.*)?$/)
+        const filenameOnly = filenameTagId.split('/').pop() ?? ''
+        const filenameTagnumberMatch = filenameOnly.match(/-tag-(\d+)/)
         const filenameTagnumber = filenameTagnumberMatch
           ? parseInt(filenameTagnumberMatch[1], 10)
           : null
@@ -98,7 +99,6 @@ export async function getTags(
           )
           continue
         }
-
         const existing = imageMap.get(metadataTagnumber) || {}
         imageMap.set(metadataTagnumber, {
           ...existing,
