@@ -56,7 +56,11 @@ export async function updateTag(
         'i'
       )
     )
-    if (!match) throw new Error(`Invalid filename for canonicalization: ${key}`)
+    if (!match)
+      throw new Error(
+        `Invalid filename pattern for canonicalization. Expected format: <base>--${type}[--<suffix>].<ext>, got: ${key}`
+      )
+
     return `${match[1]}--${type}.webp`
   }
 

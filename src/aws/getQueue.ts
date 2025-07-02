@@ -60,8 +60,6 @@ export async function getQueue(
         )
         if (!match) continue
 
-        const fullTagId = `${match[1]}--${match[2]}--${match[3]}`
-
         const head = await client.send(
           new HeadObjectCommand({ Bucket: bucket, Key: key })
         )
