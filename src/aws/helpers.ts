@@ -254,60 +254,6 @@ export const isValidUploadTagImagePayload = (
   )
 }
 
-/**
- * Builds a lightweight update payload from a Tag for use with updateTag.
- */
-export const getUpdateTagPayloadFromTagData = (
-  tag: Partial<Tag>,
-  isMystery = false
-): uploadTagImagePayload => {
-  const payload: uploadTagImagePayload = {
-    game: tag.game,
-    folder: 'main',
-    tagnumber: tag.tagnumber,
-  }
-
-  if (isMystery) {
-    payload.mysteryImageUrl = tag.mysteryImageUrl
-    payload.mysteryPlayer = tag.mysteryPlayer
-    payload.hint = tag.hint
-    payload.gps = tag.gps
-  } else {
-    payload.foundImageUrl = tag.foundImageUrl
-    payload.foundPlayer = tag.foundPlayer
-    payload.foundLocation = tag.foundLocation
-  }
-
-  return payload
-}
-
-export const getUploadTagImagePayloadFromTagData = (
-  payload: uploadTagImagePayload,
-  isMystery = false
-): S3UploadPayload | null => {
-  const imageFile = isMystery ? payload.mysteryImage : payload.foundImage
-  const game = payload.game
-  const tagnumber = payload.tagnumber
-  const region = payload.region
-  const folder = payload.folder
-  const resize = payload.resize ?? true
-  const contentType = payload.contentType ?? 'image/webp'
-  const filenameSuffix = isMystery ? '--mystery' : '--found'
-
-  if (!imageFile || !game || !tagnumber || !region || !folder) return null
-
-  return {
-    image: imageFile,
-    region,
-    game,
-    folder,
-    tagnumber,
-    filenameSuffix,
-    resize,
-    contentType,
-  }
-}
-
 export const resizeAndSaveVariants = async ({
   client,
   tag,
@@ -331,10 +277,12 @@ export const resizeAndSaveVariants = async ({
   if (!match) throw new Error(`Could not extract filename from URL: ${url}`)
 
   const originalFilename = match[1] // e.g. denver-tag-369--found--abc123.jpg
-  const filenameBase = originalFilename.replace(/\.\w+$/, '') // strip extension
+  const filenameBase = originalFilename
+    .replace(/\.\w+$/, '') // strip extension
+    .replace(/_(small|medium|original)$/, '') // remove variant
   const originalExt = originalFilename.split('.').pop()?.toLowerCase() || 'jpg'
   const baseKey = `${folder}/${filenameBase}`
-  const imagekitBase = 'https://ik.imagekit.io/biketag'
+  const imagekitBase = `https://ik.imagekit.io/biketag/${tag.game}`
   const imagekitPath = originalFilename.replace(/^.*?\//, '') // remove any folders
 
   const transforms: Record<string, string> = {
@@ -358,7 +306,7 @@ export const resizeAndSaveVariants = async ({
 
   let resizedOriginalUploaded = false
 
-  for (const [variant, url] of Object.entries(transforms)) {
+  for (const [variant, transformUrl] of Object.entries(transforms)) {
     const suffix = variant === 'original' ? '.webp' : `_${variant}.webp`
     const key = `${baseKey}${suffix}`
 
@@ -378,9 +326,11 @@ export const resizeAndSaveVariants = async ({
 
     while (attempt < maxRetries && !success) {
       try {
-        const res = await fetch(url)
+        const res = await fetch(transformUrl)
         if (!res.ok)
-          throw new Error(`Failed to fetch ${variant} variant from ImageKit`)
+          throw new Error(
+            `Failed to fetch ${variant} variant from ImageKit: ${transformUrl}`
+          )
 
         const blob = await res.blob()
         await client.send(

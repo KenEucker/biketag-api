@@ -1040,6 +1040,11 @@ export class BikeTagClient {
             ),
           })
           break
+        case AvailableApis.aws:
+          clientMethod = clientMethod.bind({
+            getTags: this.getPassthroughApiMethod(api.getTags, client),
+          })
+          break
       }
 
       return clientMethod(client, options).catch((e) => {

@@ -7,10 +7,10 @@ import { createTagObject } from '../common/data'
 import {
   encodeMetadataValue,
   getHashedPlayerSuffix,
-  getUploadTagImagePayloadFromTagData,
-  isValidUploadTagImagePayload,
   normalizeUploadBody,
   uploadTagImagePayload,
+  getKeyFromUrl,
+  moveImage,
 } from './helpers'
 import {
   getImgurFoundTitleFromBikeTagData,
@@ -24,102 +24,88 @@ export async function uploadTagImage(
   payload: uploadTagImagePayload
 ): Promise<BikeTagApiResponse<Tag>> {
   let success = true
-  let error: any = false
+  let error: any = undefined
 
   const maybeDownloadImage = async (
     url?: string
   ): Promise<{ blob: Blob; contentType: string } | undefined> => {
     if (!url) return
-
     const res = await fetch(url)
     if (!res.ok) throw new Error(`Failed to download image: ${url}`)
-
     const contentType = res.headers.get('content-type') || 'image/jpeg'
     const blob = await res.blob()
-
-    return {
-      blob,
-      contentType,
-    }
+    return { blob, contentType }
   }
 
-  // Download images if necessary
-  if (!payload.mysteryImage && payload.mysteryImageUrl) {
-    try {
-      const result = await maybeDownloadImage(payload.mysteryImageUrl)
-      if (result) {
-        payload.mysteryImage = result.blob
-        payload.contentType ||= result.contentType
-      }
-    } catch (err) {
-      success = false
-      error = 'Failed to download mysteryImage from URL'
-    }
-  }
+  const tryUploadImage = async (
+    type: 'mystery' | 'found'
+  ): Promise<string | undefined> => {
+    const urlField = `${type}ImageUrl` as const
+    const blobField = `${type}Image` as const
 
-  if (!payload.foundImage && payload.foundImageUrl) {
-    try {
-      const result = await maybeDownloadImage(payload.foundImageUrl)
-      if (result) {
-        payload.foundImage = result.blob
-        payload.contentType ||= result.contentType
-      }
-    } catch (err) {
-      success = false
-      error = 'Failed to download foundImage from URL'
-    }
-  }
-
-  // Prepare upload payloads
-  const mysteryImageUploadPayload = payload.mysteryImage
-    ? getUploadTagImagePayloadFromTagData(payload, true)
-    : null
-
-  const foundImageUploadPayload = payload.foundImage
-    ? getUploadTagImagePayloadFromTagData(payload)
-    : null
-
-  if (!mysteryImageUploadPayload && !foundImageUploadPayload) {
-    return {
-      data: createTagObject(payload),
-      success: false,
-      error: 'No images to upload',
-      source: AvailableApis[AvailableApis.aws],
-      status: HttpStatusCode.BadRequest,
-    }
-  }
-
-  const uploadImage = async (
-    p: uploadTagImagePayload,
-    imageType: 'mystery' | 'found'
-  ) => {
-    const folder = p.folder ?? 'queue'
-    const suffix = p.filenameSuffix ?? `--${imageType}`
+    const folder = payload.folder ?? 'queue'
+    const suffix = `--${type}`
     const postfix =
       folder === 'queue'
-        ? `--${await getHashedPlayerSuffix(p.foundPlayer)}`
+        ? `--${await getHashedPlayerSuffix(payload.foundPlayer)}`
         : ''
-    const extension = p.contentType?.includes('png') ? 'png' : 'jpg'
-    const key = `${folder}/${p.game}-tag-${p.tagnumber}${suffix}${postfix}.${extension}`
-    const bucket = `${p.game}-biketag`
-    const region = p.region ?? 'nyc3'
+    const extension = payload.contentType?.includes('png') ? 'png' : 'jpg'
+    const key = `${folder}/${payload.game}-tag-${payload.tagnumber}${suffix}${postfix}.${extension}`
+    const bucket = `${payload.game}-biketag`
+    const region = payload.region ?? 'nyc3'
+    const fullUrl = `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`
+
+    // Download if blob is missing
+    if (!payload[blobField] && payload[urlField]) {
+      try {
+        const result = await maybeDownloadImage(payload[urlField])
+        if (result) {
+          payload[blobField] = result.blob
+          payload.contentType ||= result.contentType
+        }
+      } catch {
+        success = false
+        error = `Failed to download ${type} image from URL`
+        return undefined
+      }
+    }
+
+    const existingUrl = payload[urlField]
+    const currentKey = existingUrl ? getKeyFromUrl(existingUrl) : ''
+
+    if (existingUrl?.includes(bucket)) {
+      if (currentKey === key) {
+        return existingUrl // Already correct
+      }
+      // Move if possible
+      const moveResult = await moveImage(client, bucket, currentKey, key)
+      if (moveResult.success) return fullUrl
+      success = false
+      error = moveResult.error || `${type} image move failed`
+      return undefined
+    }
+
+    if (!payload[blobField]) {
+      success = false
+      error = `${type} image missing`
+      return undefined
+    }
 
     const title =
-      imageType === 'mystery'
-        ? getImgurMysteryTitleFromBikeTagData(p as Tag)
-        : getImgurFoundTitleFromBikeTagData(p as Tag)
-
+      type === 'mystery'
+        ? getImgurMysteryTitleFromBikeTagData(payload as Tag)
+        : getImgurFoundTitleFromBikeTagData(payload as Tag)
     const description =
-      imageType === 'mystery'
-        ? getImgurMysteryDescriptionFromBikeTagData(p as Tag)
-        : getImgurFoundDescriptionFromBikeTagData(p as Tag)
+      type === 'mystery'
+        ? getImgurMysteryDescriptionFromBikeTagData(payload as Tag)
+        : getImgurFoundDescriptionFromBikeTagData(payload as Tag)
 
     await client.send(
       new PutObjectCommand({
         Bucket: bucket,
         Key: key,
-        Body: await normalizeUploadBody(p.image),
-        ContentType: p.contentType,
+        Body: await normalizeUploadBody(payload[blobField]),
+        ContentType: payload.contentType,
         ACL: 'public-read',
         Metadata: {
           title: encodeMetadataValue(title.trim()),
@@ -128,33 +114,14 @@ export async function uploadTagImage(
       })
     )
 
-    // TODO: Make URL construction configurable for different S3-compatible services
-    return `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`
+    return fullUrl
   }
 
-  if (isValidUploadTagImagePayload(foundImageUploadPayload)) {
-    try {
-      payload.foundImageUrl = await uploadImage(
-        foundImageUploadPayload,
-        'found'
-      )
-    } catch (err) {
-      success = false
-      error = 'found image upload failed'
-    }
-  }
-
-  if (isValidUploadTagImagePayload(mysteryImageUploadPayload)) {
-    try {
-      payload.mysteryImageUrl = await uploadImage(
-        mysteryImageUploadPayload,
-        'mystery'
-      )
-    } catch (err) {
-      success = false
-      error = 'mystery image upload failed'
-    }
-  }
+  // Attempt both uploads
+  payload.mysteryImageUrl = await tryUploadImage('mystery')
+  payload.foundImageUrl = await tryUploadImage('found')
+  payload.mysteryImage = undefined
+  payload.foundImage = undefined
 
   return {
     data: createTagObject(payload),

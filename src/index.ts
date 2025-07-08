@@ -5,6 +5,9 @@ export type { BikeTagConfiguration, BikeTagCredentials } from './client'
 
 export type { BikeTagApiResponse } from './common/types'
 
+import * as helpers from './imgur/helpers'
+export { helpers }
+
 export type {
   Tag,
   Game,
