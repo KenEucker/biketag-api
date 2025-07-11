@@ -6,6 +6,14 @@ import { Tag } from '../common/schema'
 import { resizeAndSaveVariants, type updateTagPayload } from './helpers'
 import TinyCache from 'tinycache'
 
+/**
+ * Updates a bike tag's data and associated images in AWS S3, optionally resizing image variants.
+ *
+ * If the tag does not exist or is missing images, uploads the provided images to S3 and updates the tag with new image URLs. If requested, resizes and saves image variants. Returns the updated tag data, success status, error messages if any, the API source, and an HTTP status code.
+ *
+ * @param payload - The tag update data, including game, tagnumber, folder, images, and resize flag
+ * @returns An object containing the updated tag, success status, error message (if any), API source, and HTTP status code
+ */
 export async function updateTag(
   client: S3Client,
   payload: updateTagPayload,

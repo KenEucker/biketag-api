@@ -19,6 +19,14 @@ import {
   getImgurMysteryDescriptionFromBikeTagData,
 } from '../common/getters'
 
+/**
+ * Uploads "mystery" and "found" tag images to S3-compatible storage and returns the resulting tag data.
+ *
+ * Handles both backend (direct AWS SDK) and frontend (signed URL) upload flows, including image downloading, moving, and metadata assignment. Aggregates errors and reports overall success in the response.
+ *
+ * @param payload - The tag image upload payload containing image blobs, URLs, and metadata
+ * @returns An API response containing the updated tag data, success status, error messages if any, and HTTP status code
+ */
 export async function uploadTagImage(
   client: S3Client,
   payload: uploadTagImagePayload

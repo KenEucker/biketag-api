@@ -3,6 +3,14 @@ import { BikeTagClient } from '../client'
 import { AUTHORIZE_ENDPOINT } from './endpoints'
 import { getApiUrl } from '../biketag/helpers'
 
+/**
+ * Performs the legacy Imgur OAuth2 authorization flow using the provided BikeTagClient and returns an Imgur access token.
+ *
+ * This function exchanges BikeTag client credentials for an Imgur access token by simulating the legacy Imgur OAuth2 flow, including handling cookies and redirects.
+ *
+ * @returns The Imgur access token as a string.
+ * @throws If required cookies or tokens are missing or malformed during the authorization process.
+ */
 async function legacyImgurAuthorizationFlow(
   client: BikeTagClient
 ): Promise<string> {
@@ -67,6 +75,13 @@ async function legacyImgurAuthorizationFlow(
   return token.access_token
 }
 
+/**
+ * Determines and returns the appropriate authorization header string for the given BikeTagClient.
+ *
+ * Checks for available authentication credentials in priority order: BikeTag JWT, Imgur OAuth2 token, legacy Imgur client ID, or attempts to auto-authorize using available client credentials. Throws an error if no valid authorization method is found.
+ *
+ * @returns The authorization header string to use for API requests.
+ */
 export async function getAuthorizationHeader(
   client: BikeTagClient
 ): Promise<string> {
@@ -104,7 +119,14 @@ export async function getAuthorizationHeader(
   throw new Error('Unable to determine appropriate authorization header')
 }
 
-// Internal helper to run the biketag auth flow:
+/**
+ * Retrieves a BikeTag JWT token using the client's credentials and optional authorization override.
+ *
+ * Sends a POST request to the BikeTag `/authorize` endpoint with the client ID, shared secret, and access token to obtain a new JWT.
+ *
+ * @param authorization - Optional override for the shared secret used in the authorization request
+ * @returns The BikeTag JWT token as a plain string
+ */
 async function retrieveBiketagJwt(
   client: BikeTagClient,
   authorization?: string
@@ -135,30 +157,12 @@ async function retrieveBiketagJwt(
 }
 
 /**
- * getClaims
+ * Passively introspects an authorization token and returns the matching adapter credentials from the BikeTagClient configuration.
  *
- * Purpose:
- * -----------
- * Given an `authorization` token, this function passively introspects the token
- * and determines if it matches any configured adapter credentials
- * (biketag, imgur, aws, sanity) within this BikeTagClient instance.
+ * If the provided token matches the configured BikeTag, Imgur, AWS, or Sanity credentials, returns the corresponding partial configuration. Returns an empty object if no match is found or if no token is provided.
  *
- * Behavior:
- * -----------
- * - If the provided `authorization` matches the configured biketag accessToken,
- *   returns the biketag adapter credentials.
- * - If it matches an imgur, aws, or sanity token, returns those credentials.
- * - If no match is found or if `authorization` is not provided, returns an empty object (`{}`).
- *
- * Notes:
- * -----------
- * - This function does NOT proactively obtain new credentials
- * - This utility serves primarily as a way to inspect "What does this token map to?"
- *
- * @param client - The BikeTagClient instance holding current adapter configurations.
  * @param authorization - The authorization token to introspect.
- * @returns PartialBikeTagConfiguration containing the matched adapter credentials
- *          or `{}` if no match is found.
+ * @returns The matched adapter credentials as a partial configuration, or an empty object if no match is found.
  */
 export async function getClaims(
   client: BikeTagClient,

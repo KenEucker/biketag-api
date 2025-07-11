@@ -10,7 +10,14 @@ import {
 } from './helpers'
 import TinyCache from 'tinycache'
 
-/// TODO: this function is incomplete. It should be saving to a title and description field just like we do with Imgur for storing all of the tag data.
+/**
+ * Handles queuing and uploading of tag images for a game, managing both "found" and "mystery" tag states, and updates tag data in AWS S3.
+ *
+ * Determines the type of tag operation (found, mystery, or complete), validates player eligibility, uploads images if necessary, and updates tag records accordingly. Returns a response indicating the result of the operation, including success status, error messages, and the updated tag data.
+ *
+ * @param payload - The tag data and images to be queued or uploaded.
+ * @returns An API response containing the tag data, success status, error message if any, and HTTP status code.
+ */
 export async function queueTag(
   client: S3Client,
   payload: queueTagPayload,

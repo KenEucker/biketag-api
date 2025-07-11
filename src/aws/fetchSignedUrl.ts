@@ -5,6 +5,12 @@ import { HttpStatusCode } from 'axios'
 import { AvailableApis } from '../common/enums'
 import { BikeTagApiResponse } from '../common/types'
 
+/**
+ * Generates a pre-signed URL for uploading an object to an AWS S3 bucket.
+ *
+ * @param payload - Contains the target bucket, object key, content type, and optional expiration time for the signed URL.
+ * @returns An object indicating success or failure, the signed URL if successful, and error details if not.
+ */
 export async function fetchSignedUrl(
   client: S3Client,
   payload: fetchSignedUrlPayload
