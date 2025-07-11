@@ -435,11 +435,23 @@ export class BikeTagClient {
   }
 
   protected getConfig(config?: BikeTagConfiguration): BikeTagConfiguration {
+    const availableApis = []
+    if (this.awsClient) {
+      availableApis.push(AvailableApis.aws)
+    }
+    if (this.imgurClient) {
+      availableApis.push(AvailableApis.imgur)
+    }
+    if (this.sanityClient) {
+      availableApis.push(AvailableApis.sanity)
+    }
+
     return {
       aws: config?.aws ?? this.awsConfig,
       biketag: config?.biketag ?? this.biketagConfig,
       sanity: config?.sanity ?? this.sanityConfig,
       imgur: config?.imgur ?? this.imgurConfig,
+      availableApis,
     } as BikeTagConfiguration
   }
 
