@@ -53,6 +53,7 @@ export async function updateTag(
 
   // ✅ Resize variants if requested
   if (success && payload.resize === true) {
+    let resizeErrors = []
     const tag = createTagObject(payload)
 
     if (payload.mysteryImageUrl) {
@@ -65,7 +66,7 @@ export async function updateTag(
         })
       } catch (resizeErr) {
         success = false
-        error = `Failed to resize mystery image: ${resizeErr}`
+        resizeErrors.push(`Failed to resize mystery image: ${resizeErr}`)
       }
     }
 
@@ -79,8 +80,12 @@ export async function updateTag(
         })
       } catch (resizeErr) {
         success = false
-        error = `Failed to resize found image: ${resizeErr}`
+        resizeErrors.push(`Failed to resize found image: ${resizeErr}`)
       }
+    }
+
+    if (resizeErrors.length > 0) {
+      error += ' ' + resizeErrors.join('; ')
     }
   }
 
