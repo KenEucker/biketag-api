@@ -49,14 +49,18 @@ export type archiveTagPayload = {
 
 export type updateGamePayload = Partial<Game> & SanityUploadPayload
 export type updateStatPayload = Partial<Stat> & SanityUploadPayload
-export type updateTagPayload = Partial<Tag> & SanityUploadPayload
 export type updatePlayerPayload = Partial<Player> & SanityUploadPayload
+export type updateTagPayload = Partial<Tag> &
+  SanityUploadPayload & {
+    resize?: boolean
+  }
 
 export type uploadTagImagePayload = {
   tagnumber: number
   type: 'found' | 'mystery'
   slug?: string
   stream: ReadableStream
+  region?: string
 } & CommonPayloadData
 
 export type ImgurUploadPayload = {

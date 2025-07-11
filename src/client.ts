@@ -112,7 +112,9 @@ export class BikeTagClient {
   protected imgurConfig?: ImgurCredentials
   protected biketagConfig?: BikeTagCredentials
 
-  constructor(readonly configuration: Credentials | BikeTagConfiguration) {
+  constructor(
+    readonly configuration: Partial<Credentials> | Partial<BikeTagConfiguration>
+  ) {
     this.config(configuration ?? {}, true, true)
     const headers = {
       // 'user-agent': USERAGENT,
@@ -491,7 +493,10 @@ export class BikeTagClient {
   }
 
   config(
-    config?: Credentials | BikeTagConfiguration | PartialBikeTagConfiguration,
+    config?:
+      | Partial<Credentials>
+      | Partial<BikeTagConfiguration>
+      | PartialBikeTagConfiguration,
     overwrite = true,
     reInitialize = false
   ): BikeTagConfiguration {

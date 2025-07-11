@@ -455,6 +455,10 @@ export const sortTags = (
     case 'new':
       sorted = tags.sort((a, b) => b?.tagnumber - a?.tagnumber)
       break
+    /// BikeTags
+    case 'old':
+      sorted = tags.sort((a, b) => b?.tagnumber - a?.tagnumber).reverse()
+      break
     default:
       sorted = tags.sort((a, b) => a?.tagnumber - b?.tagnumber)
       break

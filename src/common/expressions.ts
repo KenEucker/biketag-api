@@ -57,3 +57,8 @@ export const getSanityImageUrlHashFromTextRegex = RegExp(
 export const getCreditFromBlueskyTextRegex = RegExp(
   /(?:tag\s*)(?:number\s*)?(\d*)?(?:\s*by\s*)(.+?(?=$|\n))/i
 )
+
+export const isMysteryImageRegex = /^#\d+\s+tag\s*\(.*?\)\s+by\s+.+/i
+export const isFoundImageRegex =
+  /^#\d+\s+proof\s+found\s+at\s*\(.*?\)\s+by\s+.+/i
+export const isFoundImageFallbackRegex = /^#\d+\s+proof\s+found\s+at\s*\(.*$/i

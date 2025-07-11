@@ -112,7 +112,7 @@ export async function getTags(
         )
         .filter(Boolean)
 
-      await saveIndex(client, bucket, folder, tags)
+      await saveIndex(client, bucket, folder, sortTags(tags))
     }
 
     if (tagnumbers?.length) {

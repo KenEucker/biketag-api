@@ -195,7 +195,7 @@ const loadIndexFromImages = async (
   })
 }
 
-/** Writes the given tag array to index.json */
+/** Writes the given tag array to index.json or deletes it if empty */
 export const saveIndex = async (
   client: S3Client,
   bucket: string,
@@ -203,18 +203,40 @@ export const saveIndex = async (
   tags: Tag[],
   acl: ObjectCannedACL = 'public-read'
 ) => {
+  const key = `${folder}/index.json`
+
+  if (tags.length === 0) {
+    // Delete index.json if tags array is empty
+    try {
+      await client.send(
+        new DeleteObjectCommand({
+          Bucket: bucket,
+          Key: key,
+        })
+      )
+      console.log(
+        `Deleted index.json from ${bucket}/${key} because tags array was empty.`
+      )
+    } catch (error) {
+      console.error(`Failed to delete index from ${bucket}/${key}:`, error)
+      throw error
+    }
+    return
+  }
+
+  // Otherwise save the index.json
   try {
     await client.send(
       new PutObjectCommand({
         Bucket: bucket,
-        Key: `${folder}/index.json`,
+        Key: key,
         Body: JSON.stringify(tags),
         ContentType: 'application/json',
         ACL: acl,
       })
     )
   } catch (error) {
-    console.error(`Failed to save index to ${bucket}/${folder}:`, error)
+    console.error(`Failed to save index to ${bucket}/${key}:`, error)
     throw error
   }
 }

@@ -24,7 +24,7 @@ export async function uploadTagImage(
   payload: uploadTagImagePayload
 ): Promise<BikeTagApiResponse<Tag>> {
   let success = true
-  let error: any = undefined
+  const errors: string[] = []
 
   const maybeDownloadImage = async (
     url?: string
@@ -65,7 +65,7 @@ export async function uploadTagImage(
         }
       } catch {
         success = false
-        error = `Failed to download ${type} image from URL`
+        errors.push(`Failed to download ${type} image from URL`)
         return undefined
       }
     }
@@ -81,13 +81,13 @@ export async function uploadTagImage(
       const moveResult = await moveImage(client, bucket, currentKey, key)
       if (moveResult.success) return fullUrl
       success = false
-      error = moveResult.error || `${type} image move failed`
+      errors.push(`${type} ${moveResult.error}` || ` ${type} image move failed`)
       return undefined
     }
 
     if (!payload[blobField]) {
       success = false
-      error = `${type} image missing`
+      errors.push(`${type} image missing`)
       return undefined
     }
 
@@ -100,19 +100,25 @@ export async function uploadTagImage(
         ? getImgurMysteryDescriptionFromBikeTagData(payload as Tag)
         : getImgurFoundDescriptionFromBikeTagData(payload as Tag)
 
-    await client.send(
-      new PutObjectCommand({
-        Bucket: bucket,
-        Key: key,
-        Body: await normalizeUploadBody(payload[blobField]),
-        ContentType: payload.contentType,
-        ACL: 'public-read',
-        Metadata: {
-          title: encodeMetadataValue(title.trim()),
-          description: encodeMetadataValue(description.trim()),
-        },
-      })
-    )
+    try {
+      await client.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Body: await normalizeUploadBody(payload[blobField]),
+          ContentType: payload.contentType,
+          ACL: 'public-read',
+          Metadata: {
+            title: encodeMetadataValue(title.trim()),
+            description: encodeMetadataValue(description.trim()),
+          },
+        })
+      )
+    } catch (uploadError) {
+      success = false
+      errors.push(`Failed to upload ${type} image: ${uploadError.message}`)
+      return undefined
+    }
 
     return fullUrl
   }
@@ -126,7 +132,7 @@ export async function uploadTagImage(
   return {
     data: createTagObject(payload),
     success,
-    error,
+    error: errors.length ? errors.join(' ') : undefined,
     source: AvailableApis[AvailableApis.aws],
     status: success ? HttpStatusCode.Ok : HttpStatusCode.BadRequest,
   }

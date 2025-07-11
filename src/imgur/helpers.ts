@@ -389,18 +389,17 @@ export function isPlayerImage(image: ImgurImage): boolean {
 }
 
 export function isMysteryImage(image: ImgurImage): boolean {
-  // const hint = getHintFromText(image.description, '')
-  // const discussionUrl = getDiscussionUrlFromText(image.title, '')
-  const mysteryPlayer = getPlayerFromText(image.description, '')
-
-  return mysteryPlayer.length > 0 && image.description.indexOf('tag') !== -1
+  const description = image.description || ''
+  return expressions.isMysteryImageRegex.test(description)
 }
 
 export function isFoundImage(image: ImgurImage): boolean {
-  const foundPlayer = getPlayerFromText(image.description, '')
-  const foundLocation = getFoundLocationFromText(image.description, '')
+  const description = image.description || ''
 
-  return foundPlayer.length > 0 && foundLocation.length > 0
+  // Add fallback logic for corrupted but recognizable cases:
+  if (expressions.isFoundImageRegex.test(description)) return true
+
+  return expressions.isFoundImageFallbackRegex.test(description)
 }
 
 export function sortImgurImagesByTagNumber(
@@ -729,36 +728,46 @@ export const getGroupedTagsByTagnumber = (
   appendToTagData = {}
 ) => {
   const tagsData = []
-  groupedImages.forEach((images: ImgurImage[]) => {
-    if (!images.length) {
-      return false
-    }
 
-    const image1IsMysteryImage = isMysteryImage(images[0])
-    const moreThanOneImage = images.length > 1
-    const mysteryImage = image1IsMysteryImage
-      ? images[0]
-      : moreThanOneImage
-        ? images[1]
-        : undefined
-    let foundImage =
-      moreThanOneImage && image1IsMysteryImage ? images[1] : undefined
+  groupedImages.forEach((images: ImgurImage[], tagnumber) => {
+    if (!images || images.length === 0) return
 
-    if (!foundImage && moreThanOneImage) {
-      const image2IsFoundImage = isFoundImage(images[1])
-      foundImage = image2IsFoundImage
-        ? images[1]
-        : !image1IsMysteryImage
-          ? images[0]
-          : undefined
-    }
-    if (!mysteryImage || !foundImage) {
-      // console.log(
-      //   `tag is missing ${!mysteryImage ? 'mystery image' : ''}${
-      //     !mysteryImage && !foundImage ? ' and ' : ' '
-      //   }${!foundImage ? 'found image' : ''}`
+    let mysteryImage: ImgurImage | undefined
+    let foundImage: ImgurImage | undefined
+
+    if (images.length === 2) {
+      const image1 = images[0]
+      const image2 = images[1]
+
+      const image1IsMystery = isMysteryImage(image1)
+      const image2IsMystery = isMysteryImage(image2)
+
+      if (image1IsMystery) {
+        mysteryImage = image1
+        foundImage = image2
+      } else if (image2IsMystery) {
+        mysteryImage = image2
+        foundImage = image1
+      } else {
+        // Fallback if neither has mystery marker: assume original order
+        mysteryImage = image1
+        foundImage = image2
+      }
+    } else {
+      // console.warn(
+      //   `⚠ Unexpected image count for tagnumber=${tagnumber}: ${images.length} image(s).`
       // )
+      // images.forEach((img, idx) => {
+      //   console.log(
+      //     `  - [${idx}] id=${img.id} datetime=${img.datetime} desc="${img.description}" link=${img.link}`
+      //   )
+      // })
+
+      mysteryImage = images.find(isMysteryImage) ?? images[0]
+      foundImage =
+        images.find(isFoundImage) ?? (images.length > 1 ? images[1] : undefined)
     }
+
     const tagData = getBikeTagFromImgurImageSet(
       mysteryImage,
       foundImage,
