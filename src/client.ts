@@ -113,7 +113,7 @@ export class BikeTagClient {
   protected biketagConfig?: BikeTagCredentials
 
   constructor(
-    readonly configuration: Partial<Credentials> | Partial<BikeTagConfiguration>
+    readonly configuration: Credentials | PartialBikeTagConfiguration
   ) {
     this.config(configuration ?? {}, true, true)
     const headers = {
