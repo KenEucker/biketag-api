@@ -15,21 +15,21 @@ export async function fetchSignedUrl(
 
   if (!payload.key) {
     error = 'Missing key for signed URL request'
-  }
-
-  const opts = {
-    url: getApiUrl(payload.host, TOKEN_ENDPOINT, payload.game),
-    method: 'POST',
-    data: payload,
-  }
-
-  const response = await client.request(opts)
-
-  if (response.status !== 200 || !response.data) {
-    error = `Failed to fetch signed URL for key: ${payload.key}`
   } else {
-    success = true
-    data = response.data
+    const opts = {
+      url: getApiUrl(payload.host, TOKEN_ENDPOINT, payload.game),
+      method: 'POST',
+      data: payload,
+    }
+
+    const response = await client.request(opts)
+
+    if (response.status !== 200 || !response.data) {
+      error = `Failed to fetch signed URL for key: ${payload.key}`
+    } else {
+      success = true
+      data = response.data
+    }
   }
 
   return {
