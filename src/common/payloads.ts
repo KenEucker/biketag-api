@@ -171,4 +171,4 @@ export type fetchSignedUrlPayload = {
   key: string
   contentType: string
   expiresIn?: number
-}
+} & CommonPayloadData

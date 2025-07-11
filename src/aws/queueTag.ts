@@ -8,7 +8,6 @@ import {
   isValidUploadTagImagePayload,
   queueTagPayload,
 } from './helpers'
-import { uploadTagImage } from './uploadTagImage'
 import TinyCache from 'tinycache'
 
 /// TODO: this function is incomplete. It should be saving to a title and description field just like we do with Imgur for storing all of the tag data.
@@ -86,7 +85,7 @@ export async function queueTag(
       )
 
       if (isValidUploadTagImagePayload(queuedTagUploadPayload)) {
-        const uploadResponse = await uploadTagImage(
+        const uploadResponse = await this.uploadTagImage(
           client,
           queuedTagUploadPayload
         )

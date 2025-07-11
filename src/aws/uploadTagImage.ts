@@ -101,19 +101,42 @@ export async function uploadTagImage(
         : getImgurFoundDescriptionFromBikeTagData(payload as Tag)
 
     try {
-      await client.send(
-        new PutObjectCommand({
-          Bucket: bucket,
-          Key: key,
-          Body: await normalizeUploadBody(payload[blobField]),
-          ContentType: payload.contentType,
-          ACL: 'public-read',
-          Metadata: {
-            title: encodeMetadataValue(title.trim()),
-            description: encodeMetadataValue(description.trim()),
-          },
+      if (typeof window === 'undefined') {
+        // Backend path
+        await client.send(
+          new PutObjectCommand({
+            Bucket: bucket,
+            Key: key,
+            Body: await normalizeUploadBody(payload[blobField]),
+            ContentType: payload.contentType,
+            ACL: 'public-read',
+            Metadata: {
+              title: encodeMetadataValue(title.trim()),
+              description: encodeMetadataValue(description.trim()),
+            },
+          })
+        )
+      } else if (this.fetchSignedUrl && this.plainFetcher) {
+        // Frontend path: signed URL upload using plainFetcher
+        const signedUrlResponse = await this.fetchSignedUrl({
+          key,
+          contentType: payload.contentType,
         })
-      )
+
+        if (!signedUrlResponse.success || !signedUrlResponse.data) {
+          throw new Error(`Failed to get signed URL for ${type} image`)
+        }
+
+        await this.plainFetcher(signedUrlResponse.data, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': payload.contentType,
+            'x-amz-meta-title': encodeMetadataValue(title.trim()),
+            'x-amz-meta-description': encodeMetadataValue(description.trim()),
+          },
+          data: await normalizeUploadBody(payload[blobField]),
+        })
+      }
     } catch (uploadError) {
       success = false
       errors.push(`Failed to upload ${type} image: ${uploadError.message}`)

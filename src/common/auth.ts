@@ -110,7 +110,10 @@ async function retrieveBiketagJwt(
   authorization?: string
 ): Promise<string> {
   const config = client.config()
-  const clientId = window.location.hostname
+  const clientId =
+    typeof window !== 'undefined'
+      ? window.location.hostname
+      : config.biketag?.host?.replace(/^https?:\/\//, '') || 'localhost'
   const sharedKey = authorization || config.biketag.clientKey
   const accessToken = config.biketag.accessToken
 
