@@ -47,6 +47,7 @@ export interface CommonData {
   concise?: boolean
   cached?: boolean
   region?: string
+  reindex?: boolean
 }
 
 export type CommonPayloadData = CommonData
