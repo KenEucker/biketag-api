@@ -195,7 +195,7 @@ const loadIndexFromImages = async (
   })
 }
 
-/** Writes the given tag array to index.json */
+/** Writes the given tag array to index.json or deletes it if empty */
 export const saveIndex = async (
   client: S3Client,
   bucket: string,
@@ -203,18 +203,40 @@ export const saveIndex = async (
   tags: Tag[],
   acl: ObjectCannedACL = 'public-read'
 ) => {
+  const key = `${folder}/index.json`
+
+  if (tags.length === 0) {
+    // Delete index.json if tags array is empty
+    try {
+      await client.send(
+        new DeleteObjectCommand({
+          Bucket: bucket,
+          Key: key,
+        })
+      )
+      console.log(
+        `Deleted index.json from ${bucket}/${key} because tags array was empty.`
+      )
+    } catch (error) {
+      console.error(`Failed to delete index from ${bucket}/${key}:`, error)
+      throw error
+    }
+    return
+  }
+
+  // Otherwise save the index.json
   try {
     await client.send(
       new PutObjectCommand({
         Bucket: bucket,
-        Key: `${folder}/index.json`,
+        Key: key,
         Body: JSON.stringify(tags),
         ContentType: 'application/json',
         ACL: acl,
       })
     )
   } catch (error) {
-    console.error(`Failed to save index to ${bucket}/${folder}:`, error)
+    console.error(`Failed to save index to ${bucket}/${key}:`, error)
     throw error
   }
 }
@@ -254,60 +276,6 @@ export const isValidUploadTagImagePayload = (
   )
 }
 
-/**
- * Builds a lightweight update payload from a Tag for use with updateTag.
- */
-export const getUpdateTagPayloadFromTagData = (
-  tag: Partial<Tag>,
-  isMystery = false
-): uploadTagImagePayload => {
-  const payload: uploadTagImagePayload = {
-    game: tag.game,
-    folder: 'main',
-    tagnumber: tag.tagnumber,
-  }
-
-  if (isMystery) {
-    payload.mysteryImageUrl = tag.mysteryImageUrl
-    payload.mysteryPlayer = tag.mysteryPlayer
-    payload.hint = tag.hint
-    payload.gps = tag.gps
-  } else {
-    payload.foundImageUrl = tag.foundImageUrl
-    payload.foundPlayer = tag.foundPlayer
-    payload.foundLocation = tag.foundLocation
-  }
-
-  return payload
-}
-
-export const getUploadTagImagePayloadFromTagData = (
-  payload: uploadTagImagePayload,
-  isMystery = false
-): S3UploadPayload | null => {
-  const imageFile = isMystery ? payload.mysteryImage : payload.foundImage
-  const game = payload.game
-  const tagnumber = payload.tagnumber
-  const region = payload.region
-  const folder = payload.folder
-  const resize = payload.resize ?? true
-  const contentType = payload.contentType ?? 'image/webp'
-  const filenameSuffix = isMystery ? '--mystery' : '--found'
-
-  if (!imageFile || !game || !tagnumber || !region || !folder) return null
-
-  return {
-    image: imageFile,
-    region,
-    game,
-    folder,
-    tagnumber,
-    filenameSuffix,
-    resize,
-    contentType,
-  }
-}
-
 export const resizeAndSaveVariants = async ({
   client,
   tag,
@@ -331,10 +299,12 @@ export const resizeAndSaveVariants = async ({
   if (!match) throw new Error(`Could not extract filename from URL: ${url}`)
 
   const originalFilename = match[1] // e.g. denver-tag-369--found--abc123.jpg
-  const filenameBase = originalFilename.replace(/\.\w+$/, '') // strip extension
+  const filenameBase = originalFilename
+    .replace(/\.\w+$/, '') // strip extension
+    .replace(/_(small|medium|original)$/, '') // remove variant
   const originalExt = originalFilename.split('.').pop()?.toLowerCase() || 'jpg'
   const baseKey = `${folder}/${filenameBase}`
-  const imagekitBase = 'https://ik.imagekit.io/biketag'
+  const imagekitBase = `https://ik.imagekit.io/biketag/${tag.game}`
   const imagekitPath = originalFilename.replace(/^.*?\//, '') // remove any folders
 
   const transforms: Record<string, string> = {
@@ -358,7 +328,7 @@ export const resizeAndSaveVariants = async ({
 
   let resizedOriginalUploaded = false
 
-  for (const [variant, url] of Object.entries(transforms)) {
+  for (const [variant, transformUrl] of Object.entries(transforms)) {
     const suffix = variant === 'original' ? '.webp' : `_${variant}.webp`
     const key = `${baseKey}${suffix}`
 
@@ -378,9 +348,11 @@ export const resizeAndSaveVariants = async ({
 
     while (attempt < maxRetries && !success) {
       try {
-        const res = await fetch(url)
+        const res = await fetch(transformUrl)
         if (!res.ok)
-          throw new Error(`Failed to fetch ${variant} variant from ImageKit`)
+          throw new Error(
+            `Failed to fetch ${variant} variant from ImageKit: ${transformUrl}`
+          )
 
         const blob = await res.blob()
         await client.send(

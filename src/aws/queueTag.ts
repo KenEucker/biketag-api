@@ -6,7 +6,6 @@ import { createTagObject } from '../common/data'
 import {
   getQueueTagImagePayloadFromTagData,
   isValidUploadTagImagePayload,
-  getUpdateTagPayloadFromTagData,
   queueTagPayload,
 } from './helpers'
 import { uploadTagImage } from './uploadTagImage'
@@ -59,14 +58,11 @@ export async function queueTag(
     status = HttpStatusCode.Conflict
   } else {
     if (isCompleteQueuedTag) {
-      const mysteryTagUpdatePayload = getUpdateTagPayloadFromTagData(
-        payload,
-        true
-      )
-      const foundTagUpdatePayload = getUpdateTagPayloadFromTagData({
+      const mysteryTagUpdatePayload = payload
+      const foundTagUpdatePayload = {
         ...payload,
         tagnumber: payload.tagnumber - 1,
-      })
+      }
 
       const [mysteryTagUpdateResponse, foundTagUpdateResponse] =
         await Promise.all([

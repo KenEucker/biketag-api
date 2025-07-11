@@ -115,6 +115,7 @@ const queueTagAsync = async (pre, client, out = false, opts = {}) => {
 
 const get10TagsAsync = async (pre, client, out = false, opts = {}) => {
   opts.limit = opts.limit ? opts.limit : 10
+  opts.sort = 'old'
   const tags = await client.getTags(undefined, opts).catch(console.error)
   log(`${pre} :: successfully retrieved 10 tags data`, tags, out)
   console.log(tags[0])
@@ -227,10 +228,10 @@ const runTests = async (out = false) => {
     // await getTag1Async("Imgur", bikeTagImgurInstance, out)
     // await getTodaysTagsAsync("Imgur", bikeTagImgurInstance, out)
     // await queueTagAsync("Imgur", bikeTagImgurInstance, out)
-    await getQueueAsync("Imgur", bikeTagImgurInstance, out)
+    // await getQueueAsync("Imgur", bikeTagImgurInstance, out)
     // await getCurrentTagAsync("Imgur", bikeTagImgurInstance, out)
     await get10TagsAsync("Imgur", bikeTagImgurInstance, out)
-    await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
+    // await get10PlayersAsync("Imgur", bikeTagImgurInstance, out)
     // await getStatsAsync("Imgur", bikeTagImgurInstance, out)
   }
 

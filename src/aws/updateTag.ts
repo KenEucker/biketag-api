@@ -3,12 +3,7 @@ import { BikeTagApiResponse } from '../common/types'
 import { createTagObject } from '../common/data'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { Tag } from '../common/schema'
-import {
-  getKeyFromUrl,
-  getUpdateTagPayloadFromTagData,
-  moveImage,
-  type updateTagPayload,
-} from './helpers'
+import { resizeAndSaveVariants, type updateTagPayload } from './helpers'
 import { uploadTagImage } from './uploadTagImage'
 import TinyCache from 'tinycache'
 
@@ -17,17 +12,7 @@ export async function updateTag(
   payload: updateTagPayload,
   cache?: typeof TinyCache
 ): Promise<BikeTagApiResponse<Tag>> {
-  /// TODO: put the payload logic into getDefaultOptions?
   payload.folder = payload.folder ?? 'main'
-
-  const mysteryImagePayload = getUpdateTagPayloadFromTagData(
-    payload as Tag,
-    true
-  )
-  const foundImagePayload = getUpdateTagPayloadFromTagData(
-    payload as Tag,
-    false
-  )
 
   let success = true
   let error: any = undefined
@@ -46,109 +31,61 @@ export async function updateTag(
       ? tagExistsResponse.data[0]
       : null
 
-  const getCanonicalFilename = (
-    key: string,
-    type: 'mystery' | 'found'
-  ): string => {
-    const match = key.match(
-      new RegExp(
-        `^(?:.+/)?(.*)--${type}(?:--[a-z0-9]+)?\\.(webp|jpg|jpeg|png)$`,
-        'i'
-      )
-    )
-    if (!match)
-      throw new Error(
-        `Invalid filename pattern for canonicalization. Expected format: <base>--${type}[--<suffix>].<ext>, got: ${key}`
-      )
+  const needsMystery = !existingTag?.mysteryImageUrl?.length
+  const needsFound = !existingTag?.foundImageUrl?.length
 
-    return `${match[1]}--${type}.webp`
+  if (needsMystery || needsFound) {
+    const uploadResponse = await uploadTagImage(client, payload)
+
+    if (uploadResponse.success) {
+      payload.mysteryImageUrl = uploadResponse.data.mysteryImageUrl
+      payload.foundImageUrl = uploadResponse.data.foundImageUrl
+      payload.mysteryImage = undefined
+      payload.foundImage = undefined
+    } else {
+      success = false
+      error = uploadResponse.error
+    }
+  } else {
+    payload.mysteryImageUrl = existingTag.mysteryImageUrl
+    payload.foundImageUrl = existingTag.foundImageUrl
   }
 
-  // Handle mystery image
-  if (!existingTag?.mysteryImageUrl?.length) {
-    const currentKey = getKeyFromUrl(payload.mysteryImageUrl)
-    const canonicalFilename = getCanonicalFilename(currentKey, 'mystery')
-    const targetKey = `${payload.folder}/${canonicalFilename}`
+  // ✅ Resize variants if requested
+  if (success && payload.resize === true) {
+    let resizeErrors = []
+    const tag = createTagObject(payload)
 
-    if (
-      payload.mysteryImageUrl?.includes(`${payload.game}-biketag`) &&
-      !currentKey.startsWith(`${payload.folder}/`)
-    ) {
-      const moveResult = await moveImage(
-        client,
-        `${payload.game}-biketag`,
-        currentKey,
-        targetKey
-      )
-      if (moveResult.success) {
-        payload.mysteryImageUrl = payload.mysteryImageUrl.replace(
-          currentKey,
-          targetKey
-        )
-      } else {
+    if (payload.mysteryImageUrl) {
+      try {
+        await resizeAndSaveVariants({
+          client,
+          tag,
+          imageType: 'mystery',
+          folder: payload.folder,
+        })
+      } catch (resizeErr) {
         success = false
-        error = moveResult.error || 'Image move failed'
-      }
-    } else {
-      const mysteryUploadResponse = await uploadTagImage(client, {
-        ...mysteryImagePayload,
-        mysteryImage: payload.mysteryImageUrl,
-        mysteryImageUrl: undefined,
-        game: payload.game,
-        tagnumber: payload.tagnumber,
-        region: payload.region,
-        folder: payload.folder,
-      })
-      if (mysteryUploadResponse.success) {
-        payload.mysteryImageUrl = mysteryUploadResponse.data.mysteryImageUrl
-      } else {
-        success = false
-        error = mysteryUploadResponse.error || 'Image upload failed'
+        resizeErrors.push(`Failed to resize mystery image: ${resizeErr}`)
       }
     }
-  }
 
-  // Handle found image
-  if (!existingTag?.foundImageUrl?.length) {
-    const currentKey = getKeyFromUrl(payload.foundImageUrl)
-    const canonicalFilename = getCanonicalFilename(currentKey, 'found')
-    const targetKey = `${payload.folder}/${canonicalFilename}`
+    if (payload.foundImageUrl) {
+      try {
+        await resizeAndSaveVariants({
+          client,
+          tag,
+          imageType: 'found',
+          folder: payload.folder,
+        })
+      } catch (resizeErr) {
+        success = false
+        resizeErrors.push(`Failed to resize found image: ${resizeErr}`)
+      }
+    }
 
-    if (
-      payload.foundImageUrl?.includes(`${payload.game}-biketag`) &&
-      !currentKey.startsWith(`${payload.folder}/`)
-    ) {
-      const moveResult = await moveImage(
-        client,
-        `${payload.game}-biketag`,
-        currentKey,
-        targetKey
-      )
-      if (moveResult.success) {
-        payload.foundImageUrl = payload.foundImageUrl.replace(
-          currentKey,
-          targetKey
-        )
-      } else {
-        success = false
-        error = moveResult.error || 'Image move failed'
-      }
-    } else {
-      const foundUploadResponse = await uploadTagImage(client, {
-        ...foundImagePayload,
-        foundImage: payload.foundImageUrl,
-        foundImageUrl: undefined,
-        game: payload.game,
-        tagnumber: payload.tagnumber,
-        region: payload.region,
-        folder: payload.folder,
-      })
-      if (foundUploadResponse.success) {
-        payload.foundImageUrl = foundUploadResponse.data.foundImageUrl
-      } else {
-        success = false
-        error = foundUploadResponse.error || 'Image upload failed'
-      }
+    if (resizeErrors.length > 0) {
+      error += ' ' + resizeErrors.join('; ')
     }
   }
 
