@@ -116,7 +116,7 @@ export const isSanityCredentials = (
 }
 
 export const isAWSCredentials = (credentials: AWSCredentials): boolean => {
-  return credentials?.accessKeyId !== undefined
+  return !!credentials?.accessKeyId
 }
 
 export const isAWSApiReady = (credentials: AWSCredentials): ApiAvailability => {

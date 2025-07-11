@@ -29,7 +29,7 @@ export async function getTags(
     limit,
     time,
   } = payload
-  let { rebuildIndex } = payload
+  let { reindex } = payload
 
   const bucket = `${game}-biketag`
   let tags: Tag[] = []
@@ -37,15 +37,15 @@ export async function getTags(
   let error: string | undefined
 
   try {
-    if (!rebuildIndex) {
+    if (!reindex) {
       try {
         tags = await loadIndex(client, bucket, folder, region)
       } catch {
-        rebuildIndex = true
+        reindex = true
       }
     }
 
-    if (rebuildIndex) {
+    if (reindex) {
       const list = await listAllS3Objects(client, {
         Bucket: bucket,
         Prefix: `${folder}/`,

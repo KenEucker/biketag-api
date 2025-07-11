@@ -13,7 +13,6 @@ export type getTagsPayload = {
   sort?: SortOptions
   limit?: number
   tagnumbers?: number[]
-  rebuildIndex?: boolean
   folder?: string
 } & CommonPayloadData
 
@@ -157,7 +156,6 @@ export type getQueuePayload = {
   hash?: string
   queuehash?: string
   region?: string
-  rebuildIndex?: boolean
   handleResize?: boolean
 } & CommonPayloadData
 
@@ -171,4 +169,4 @@ export type fetchSignedUrlPayload = {
   key: string
   contentType: string
   expiresIn?: number
-}
+} & CommonPayloadData

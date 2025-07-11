@@ -3,11 +3,12 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { fetchSignedUrlPayload } from '../common/payloads'
 import { HttpStatusCode } from 'axios'
 import { AvailableApis } from '../common/enums'
+import { BikeTagApiResponse } from '../common/types'
 
-export const fetchSignedUrl = async (
+export async function fetchSignedUrl(
   client: S3Client,
   payload: fetchSignedUrlPayload
-) => {
+): Promise<BikeTagApiResponse<string>> {
   let data, error, success
 
   try {

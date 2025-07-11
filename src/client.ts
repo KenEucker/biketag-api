@@ -113,7 +113,7 @@ export class BikeTagClient {
   protected biketagConfig?: BikeTagCredentials
 
   constructor(
-    readonly configuration: Partial<Credentials> | Partial<BikeTagConfiguration>
+    readonly configuration: Credentials | PartialBikeTagConfiguration
   ) {
     this.config(configuration ?? {}, true, true)
     const headers = {
@@ -435,11 +435,23 @@ export class BikeTagClient {
   }
 
   protected getConfig(config?: BikeTagConfiguration): BikeTagConfiguration {
+    const availableApis = []
+    if (this.awsClient) {
+      availableApis.push(AvailableApis.aws)
+    }
+    if (this.imgurClient) {
+      availableApis.push(AvailableApis.imgur)
+    }
+    if (this.sanityClient) {
+      availableApis.push(AvailableApis.sanity)
+    }
+
     return {
       aws: config?.aws ?? this.awsConfig,
       biketag: config?.biketag ?? this.biketagConfig,
       sanity: config?.sanity ?? this.sanityConfig,
       imgur: config?.imgur ?? this.imgurConfig,
+      availableApis,
     } as BikeTagConfiguration
   }
 
@@ -825,6 +837,20 @@ export class BikeTagClient {
     let clientMethod = api.queueTag
 
     switch (options.source) {
+      case AvailableApis.aws:
+        clientMethod = clientMethod.bind({
+          getQueue: this.getPassthroughApiMethod(api.getQueue, client),
+          getTags: this.getPassthroughApiMethod(api.getTags, client),
+          updateTag: this.getPassthroughApiMethod(api.updateTag, client),
+          uploadTagImage: api.uploadTagImage.bind({
+            plainFetcher: this.plainFetcher,
+            fetchSignedUrl: this.getPassthroughApiMethod(
+              biketagApi.fetchSignedUrl,
+              this
+            ),
+          }),
+        })
+        break
       case AvailableApis.imgur:
         clientMethod = clientMethod.bind({
           getQueue: this.getPassthroughApiMethod(api.getQueue, client),
@@ -1006,6 +1032,10 @@ export class BikeTagClient {
         case AvailableApis.aws:
           clientMethod = clientMethod.bind({
             plainFetcher: this.plainFetcher,
+            fetchSignedUrl: this.getPassthroughApiMethod(
+              biketagApi.fetchSignedUrl,
+              this
+            ),
           })
           break
       }
@@ -1048,6 +1078,13 @@ export class BikeTagClient {
         case AvailableApis.aws:
           clientMethod = clientMethod.bind({
             getTags: this.getPassthroughApiMethod(api.getTags, client),
+            uploadTagImage: api.uploadTagImage.bind({
+              plainFetcher: this.plainFetcher,
+              fetchSignedUrl: this.getPassthroughApiMethod(
+                biketagApi.fetchSignedUrl,
+                this
+              ),
+            }),
           })
           break
       }

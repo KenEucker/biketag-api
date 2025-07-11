@@ -4,7 +4,6 @@ import { createTagObject } from '../common/data'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { Tag } from '../common/schema'
 import { resizeAndSaveVariants, type updateTagPayload } from './helpers'
-import { uploadTagImage } from './uploadTagImage'
 import TinyCache from 'tinycache'
 
 export async function updateTag(
@@ -35,7 +34,7 @@ export async function updateTag(
   const needsFound = !existingTag?.foundImageUrl?.length
 
   if (needsMystery || needsFound) {
-    const uploadResponse = await uploadTagImage(client, payload)
+    const uploadResponse = await this.uploadTagImage(client, payload)
 
     if (uploadResponse.success) {
       payload.mysteryImageUrl = uploadResponse.data.mysteryImageUrl

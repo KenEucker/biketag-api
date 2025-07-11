@@ -19,7 +19,7 @@ export async function getQueue(
 ): Promise<BikeTagApiResponse<Tag[]>> {
   const {
     game,
-    rebuildIndex: shouldForceRebuild = false,
+    reindex: shouldForceRebuild = false,
     handleResize = false,
     region,
   } = payload
