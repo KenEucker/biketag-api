@@ -3,127 +3,101 @@ import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { createTagObject } from '../common/data'
-import {
-  getQueueTagImagePayloadFromTagData,
-  isValidUploadTagImagePayload,
-  queueTagPayload,
-} from './helpers'
+import { queueTagPayload } from './helpers'
 import TinyCache from 'tinycache'
 
-/// TODO: this function is incomplete. It should be saving to a title and description field just like we do with Imgur for storing all of the tag data.
 export async function queueTag(
   client: S3Client,
   payload: queueTagPayload,
   cache?: typeof TinyCache
 ): Promise<BikeTagApiResponse<Tag>> {
-  const uploadFoundImage = payload?.foundImage && !payload?.foundImageUrl
-  const uploadFoundImageUrl = !payload?.foundImage && !!payload?.foundImageUrl
-  const isFoundQueuedTag =
-    (uploadFoundImage || uploadFoundImageUrl) &&
-    !payload?.mysteryImageUrl &&
-    !payload?.mysteryImage
-
-  const uploadMysteryImage = payload?.mysteryImage && !payload?.mysteryImageUrl
-  const uploadMysteryImageUrl =
-    !payload?.mysteryImage && !!payload?.mysteryImageUrl
-  const isMysteryQueuedTag =
-    !isFoundQueuedTag && (uploadMysteryImage || uploadMysteryImageUrl)
-
-  const isCompleteQueuedTag = uploadFoundImageUrl && uploadMysteryImageUrl
-
-  let success = false
-  let status = HttpStatusCode.Ok
-  let data: Tag | undefined
-  let error: string | undefined
+  payload.folder = 'queue'
 
   const queuedTagsResponse = await this.getQueue({ game: payload.game }, cache)
   const currentTagsResponse = await this.getTags({ game: payload.game }, cache)
   const queuedTags = queuedTagsResponse.data || []
   const currentTag = currentTagsResponse?.data?.[0]
 
+  const isCompleteQueuedTag = payload.mysteryImageUrl && payload.foundImageUrl
+
   const playerAlreadyQueuedError =
     !isCompleteQueuedTag &&
     queuedTags.some((t) => t.foundPlayer === payload.foundPlayer)
 
   if (playerAlreadyQueuedError) {
-    data = payload as Tag
-    success = false
-    error = 'player already has queued tag'
-    status = HttpStatusCode.Conflict
-  } else if (currentTag?.mysteryPlayer === payload.foundPlayer) {
-    data = payload as Tag
-    success = false
-    error = 'player created previous round'
-    status = HttpStatusCode.Conflict
+    return {
+      data: payload as Tag,
+      success: false,
+      error: 'player already has queued tag',
+      source: AvailableApis[AvailableApis.aws],
+      status: HttpStatusCode.Conflict,
+    }
+  }
+
+  const playerIsPreviousMystery =
+    currentTag?.mysteryPlayer === payload.foundPlayer
+
+  if (playerIsPreviousMystery) {
+    return {
+      data: payload as Tag,
+      success: false,
+      error: 'player created previous round',
+      source: AvailableApis[AvailableApis.aws],
+      status: HttpStatusCode.Conflict,
+    }
+  }
+
+  let success = false
+  let error: string | undefined
+  let tagData: Tag | undefined
+
+  if (isCompleteQueuedTag) {
+    const mysteryTagPayload = payload
+    const foundTagPayload = payload
+    foundTagPayload.tagnumber = payload.tagnumber - 1
+
+    const [mysteryRes, foundRes] = await Promise.all([
+      this.updateTag(client, mysteryTagPayload, cache),
+      this.updateTag(client, foundTagPayload, cache),
+    ])
+
+    success = mysteryRes.success && foundRes.success
+    error = !success
+      ? `found: ${foundRes.error}, mystery: ${mysteryRes.error}`
+      : undefined
+    tagData = success ? createTagObject(payload) : undefined
   } else {
-    if (isCompleteQueuedTag) {
-      const mysteryTagUpdatePayload = payload
-      const foundTagUpdatePayload = {
-        ...payload,
-        tagnumber: payload.tagnumber - 1,
-      }
+    const isMystery = !!payload.mysteryImage || !!payload.mysteryImageUrl
 
-      const [mysteryTagUpdateResponse, foundTagUpdateResponse] =
-        await Promise.all([
-          this.updateTag(client, mysteryTagUpdatePayload),
-          this.updateTag(client, foundTagUpdatePayload),
-        ])
+    const uploadResponse = await this.uploadTagImage(client, payload)
 
-      if (mysteryTagUpdateResponse.success && foundTagUpdateResponse.success) {
-        data = payload as Tag
-        success = true
+    if (uploadResponse.success) {
+      const uploaded = uploadResponse.data
+
+      success = true
+
+      if (isMystery && uploaded.mysteryImageUrl) {
+        payload.mysteryImage = undefined
+        payload.mysteryImageUrl = uploaded.mysteryImageUrl
+      } else if (!isMystery && uploaded.foundImageUrl) {
+        payload.foundImage = undefined
+        payload.foundImageUrl = uploaded.foundImageUrl
       } else {
         success = false
-        error = `found: ${foundTagUpdateResponse.error}, mystery: ${mysteryTagUpdateResponse.error}`
       }
-    } else if (isFoundQueuedTag || isMysteryQueuedTag) {
-      const isMystery = isMysteryQueuedTag
-      const queuedTagUploadPayload = await getQueueTagImagePayloadFromTagData(
-        payload,
-        payload.region,
-        isMystery
-      )
 
-      if (isValidUploadTagImagePayload(queuedTagUploadPayload)) {
-        const uploadResponse = await this.uploadTagImage(
-          client,
-          queuedTagUploadPayload
-        )
-
-        if (uploadResponse.success) {
-          const uploaded = uploadResponse.data
-          if (isFoundQueuedTag && uploaded.foundImageUrl) {
-            payload.foundImage = undefined
-            payload.foundImageUrl = uploaded.foundImageUrl
-          } else if (isMysteryQueuedTag && uploaded.mysteryImageUrl) {
-            payload.mysteryImage = undefined
-            payload.mysteryImageUrl = uploaded.mysteryImageUrl
-          }
-
-          data = createTagObject(payload)
-          success = true
-        } else {
-          error = uploadResponse.error
-        }
-
-        status = uploadResponse.status
-      } else {
-        success = false
-        status = HttpStatusCode.BadRequest
-        error = 'Invalid image payload'
-      }
+      tagData = createTagObject(payload)
     } else {
-      data = createTagObject(payload)
       success = false
-      status = HttpStatusCode.NoContent
+      error = uploadResponse.error
     }
   }
 
   return {
-    data,
+    data: tagData,
     success,
     error,
     source: AvailableApis[AvailableApis.aws],
-    status,
+    status: success ? HttpStatusCode.Ok : HttpStatusCode.BadRequest,
   }
 }

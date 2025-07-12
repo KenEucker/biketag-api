@@ -124,7 +124,8 @@ export async function uploadTagImage(
         })
 
         if (!signedUrlResponse.success || !signedUrlResponse.data) {
-          throw new Error(`Failed to get signed URL for ${type} image`)
+          errors.push(`Failed to get signed URL for ${type} image`)
+          return undefined
         }
 
         await this.plainFetcher(signedUrlResponse.data, {
@@ -146,11 +147,15 @@ export async function uploadTagImage(
     return fullUrl
   }
 
-  // Attempt both uploads
-  payload.mysteryImageUrl = await tryUploadImage('mystery')
-  payload.foundImageUrl = await tryUploadImage('found')
-  payload.mysteryImage = undefined
-  payload.foundImage = undefined
+  if (payload.foundImageUrl || payload.foundImage) {
+    payload.foundImageUrl = await tryUploadImage('found')
+    payload.foundImage = undefined
+  }
+
+  if (payload.mysteryImageUrl || payload.mysteryImage) {
+    payload.mysteryImageUrl = await tryUploadImage('mystery')
+    payload.mysteryImage = undefined
+  }
 
   return {
     data: createTagObject(payload),

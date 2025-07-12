@@ -294,6 +294,7 @@ export class BikeTagClient {
           }
         }
         break
+
       case DataTypes.queue:
         options.game = options.game ? options.game : this.biketagConfig?.game
         options.queuehash = options.queuehash ?? this.imgurConfig?.queuehash
@@ -327,7 +328,7 @@ export class BikeTagClient {
     options.concise =
       typeof options.concise !== 'undefined' ? options.concise : true
 
-    return { ...options, ...overrides }
+    return Object.assign({}, options, overrides)
   }
 
   protected getClientAdapter(

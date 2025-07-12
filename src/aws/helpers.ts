@@ -205,24 +205,24 @@ export const saveIndex = async (
 ) => {
   const key = `${folder}/index.json`
 
-  if (tags.length === 0) {
-    // Delete index.json if tags array is empty
-    try {
-      await client.send(
-        new DeleteObjectCommand({
-          Bucket: bucket,
-          Key: key,
-        })
-      )
-      console.log(
-        `Deleted index.json from ${bucket}/${key} because tags array was empty.`
-      )
-    } catch (error) {
-      console.error(`Failed to delete index from ${bucket}/${key}:`, error)
-      throw error
-    }
-    return
-  }
+  // if (tags.length === 0) {
+  //   // Delete index.json if tags array is empty
+  //   try {
+  //     await client.send(
+  //       new DeleteObjectCommand({
+  //         Bucket: bucket,
+  //         Key: key,
+  //       })
+  //     )
+  //     console.log(
+  //       `Deleted index.json from ${bucket}/${key} because tags array was empty.`
+  //     )
+  //   } catch (error) {
+  //     console.error(`Failed to delete index from ${bucket}/${key}:`, error)
+  //     throw error
+  //   }
+  //   return
+  // }
 
   // Otherwise save the index.json
   try {
