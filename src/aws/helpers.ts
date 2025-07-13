@@ -147,14 +147,13 @@ const loadIndexFromImages = async (
     Prefix: prefix,
   })
 
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp']
   const imagesByTag: Record<string, { mystery?: any; found?: any }> = {}
 
   for (const item of list) {
     const key = item.Key
     if (
       !key ||
-      !imageExtensions.some((ext) => key.toLowerCase().endsWith(ext))
+      !supportedImageExtensions.some((ext) => key.toLowerCase().endsWith(ext))
     ) {
       continue
     }
@@ -238,26 +237,6 @@ export const saveIndex = async (
   } catch (error) {
     console.error(`Failed to save index to ${bucket}/${key}:`, error)
     throw error
-  }
-}
-
-/**
- * Builds a valid S3UploadPayload for either mystery or found image based on Tag data.
- */
-export const getQueueTagImagePayloadFromTagData = (
-  tag: uploadTagImagePayload,
-  region: string,
-  isMystery = false
-): S3UploadPayload => {
-  return {
-    region,
-    game: tag.game,
-    folder: 'queue',
-    tagnumber: tag.tagnumber,
-    filenameSuffix: isMystery ? 'mystery' : 'found',
-    image: isMystery ? tag.mysteryImage : tag.foundImage,
-    contentType: 'image/jpeg',
-    resize: tag.resize !== false,
   }
 }
 
@@ -435,23 +414,22 @@ export const decodeMetadataValue = (value: string): string => {
 }
 
 export const normalizeUploadBody = async (
-  stream: string | Blob | ReadableStream | Uint8Array | Buffer | Readable
+  stream: string | Blob | ReadableStream | Uint8Array | Buffer | Readable | File
 ): Promise<Uint8Array | Buffer> => {
   if (!stream) throw new Error('No stream provided')
 
+  // Handle string input
   if (typeof stream === 'string') {
     return new TextEncoder().encode(stream)
   }
 
-  const isBlob =
-    typeof Blob !== 'undefined' &&
-    (stream instanceof Blob ||
-      Object.prototype.toString.call(stream) === '[object Blob]')
+  const isBlob = typeof Blob !== 'undefined' && stream instanceof Blob
+  const isFile = typeof File !== 'undefined' && stream instanceof File
 
   if (typeof window !== 'undefined') {
     // --- BROWSER ENVIRONMENT ---
-    if (stream instanceof Blob) {
-      const arrayBuffer = await stream.arrayBuffer()
+    if (isFile || isBlob) {
+      const arrayBuffer = await (stream as Blob).arrayBuffer()
       return new Uint8Array(arrayBuffer)
     }
 
@@ -461,7 +439,13 @@ export const normalizeUploadBody = async (
       return new Uint8Array(arrayBuffer)
     }
 
-    throw new Error('Unsupported input in browser')
+    if (stream instanceof Uint8Array) {
+      return stream
+    }
+
+    throw new Error(
+      `Unsupported input in browser: ${Object.prototype.toString.call(stream)}`
+    )
   } else {
     // --- NODE ENVIRONMENT ---
     const isReadable =
@@ -486,7 +470,9 @@ export const normalizeUploadBody = async (
       return Buffer.from(arrayBuffer)
     }
 
-    throw new Error('Unsupported input in Node')
+    throw new Error(
+      `Unsupported input in Node: ${Object.prototype.toString.call(stream)}`
+    )
   }
 }
 
@@ -625,7 +611,7 @@ export interface S3UploadPayload {
   game: string // e.g., 'denver' — used to build bucket name
   folder: string // e.g., 'queue' — which folder to upload to
   tagnumber: number // used in key naming
-  image: Buffer | Uint8Array | Blob | string // binary data or base64 string or remote URL
+  image: Buffer | Uint8Array | Blob | string | File // binary data or base64 string or remote URL
   filenameSuffix?: string // '--mystery' or '--found'
   contentType?: string // 'image/jpeg', 'image/png', etc.
   resize?: boolean // default true — whether to make small/medium versions
@@ -633,3 +619,10 @@ export interface S3UploadPayload {
 export type uploadTagImagePayload = Partial<Tag> & Partial<S3UploadPayload>
 export type queueTagPayload = Partial<Tag> & Partial<S3UploadPayload>
 export type updateTagPayload = Partial<Tag> & Partial<S3UploadPayload>
+export const supportedImageExtensions = [
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.webp',
+  '.gif',
+]

@@ -995,3 +995,22 @@ export const getPlayersWithHighestNumberTagsPerDayData = (
   }
   return highestTagsPerDayData
 }
+
+export const extname = (filename) => {
+  const index = filename.lastIndexOf('.')
+  return index >= 0 ? filename.slice(index) : ''
+}
+
+export const getImageExtension = (contentType) => {
+  const imageMimeToExt = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/gif': 'gif',
+    'image/webp': 'webp',
+    'image/bmp': 'bmp',
+    'image/avif': 'avif',
+    'image/tiff': 'tiff',
+  }
+
+  return imageMimeToExt[contentType.toLowerCase()]
+}

@@ -68,6 +68,8 @@ export async function queueTag(
     tagData = success ? createTagObject(payload) : undefined
   } else {
     const isMystery = !!payload.mysteryImage || !!payload.mysteryImageUrl
+    const image = isMystery ? payload.mysteryImage : payload.foundImage
+    payload.contentType = (image as File)?.type ?? 'image/jpeg'
 
     const uploadResponse = await this.uploadTagImage(client, payload)
 

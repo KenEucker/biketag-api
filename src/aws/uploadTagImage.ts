@@ -18,6 +18,7 @@ import {
   getImgurMysteryTitleFromBikeTagData,
   getImgurMysteryDescriptionFromBikeTagData,
 } from '../common/getters'
+import { getImageExtension } from '../common/methods'
 
 export async function uploadTagImage(
   client: S3Client,
@@ -49,7 +50,7 @@ export async function uploadTagImage(
       folder === 'queue'
         ? `--${await getHashedPlayerSuffix(payload.foundPlayer)}`
         : ''
-    const extension = payload.contentType?.includes('png') ? 'png' : 'jpg'
+    const extension = getImageExtension(payload.contentType)
     const key = `${folder}/${payload.game}-tag-${payload.tagnumber}${suffix}${postfix}.${extension}`
     const bucket = `${payload.game}-biketag`
     const region = payload.region ?? 'nyc3'
