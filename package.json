@@ -72,9 +72,9 @@
     "@sanity/client": "^7.6.0",
     "axios": "^1.10.0",
     "axios-cache-interceptor": "^1.8.0",
+    "dequal": "^2.0.3",
     "form-data": "^4.0.3",
     "imgur": "^2.5.0",
-    "lodash": "^4.17.21",
     "tinycache": "^1.1.2",
     "util": "^0.12.5"
   },

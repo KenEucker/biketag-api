@@ -85,7 +85,7 @@ import { createClient, SanityClient } from '@sanity/client'
 
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
 import { type AxiosCacheInstance, setupCache } from 'axios-cache-interceptor'
-import { isEqual } from 'lodash'
+import { dequal } from 'dequal'
 import { getAuthorizationHeader, getClaims } from './common/auth'
 import TinyCache from 'tinycache'
 
@@ -567,13 +567,13 @@ export class BikeTagClient {
           sanity: undefined,
         }
 
-        if (!isEqual(this.imgurConfig, imgurConfig)) {
+        if (!dequal(this.imgurConfig, imgurConfig)) {
           initializeConfig.imgur = imgurConfig
         }
-        if (!isEqual(this.sanityConfig, sanityConfig)) {
+        if (!dequal(this.sanityConfig, sanityConfig)) {
           initializeConfig.sanity = sanityConfig
         }
-        if (!isEqual(this.awsConfig, awsConfig)) {
+        if (!dequal(this.awsConfig, awsConfig)) {
           initializeConfig.aws = awsConfig
         }
 

@@ -31,7 +31,7 @@ export default defineConfig({
           imgur: 'ImgurClient',
           axios: 'axios',
           util: 'util',
-          lodash: 'lodash',
+          dequal: 'dequal',
           tinycache: 'TinyCache',
           'form-data': 'formData',
           '@aws-sdk/client-s3': 'S3Client',
