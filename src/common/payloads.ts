@@ -156,7 +156,7 @@ export type getQueuePayload = {
   hash?: string
   queuehash?: string
   region?: string
-  handleResize?: boolean
+  resize?: boolean
 } & CommonPayloadData
 
 export type queueTagPayload = {

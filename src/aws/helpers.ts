@@ -12,10 +12,6 @@ import {
 } from '@aws-sdk/client-s3'
 import { Tag } from '../common/schema'
 import {
-  getImgurMysteryTitleFromBikeTagData,
-  getImgurFoundTitleFromBikeTagData,
-  getImgurMysteryDescriptionFromBikeTagData,
-  getImgurFoundDescriptionFromBikeTagData,
   getBikeTagFromS3ImageSet,
   getPlayerFromText,
   getTagNumbersFromText,
@@ -23,6 +19,8 @@ import {
 import { Readable } from 'form-data'
 import { S3ImageMeta } from '../common/types'
 import TinyCache from 'tinycache'
+import { getApiUrl } from '../biketag/helpers'
+import { CommonPayloadData } from '../common/types'
 
 const indexCache = new TinyCache()
 /** Returns the S3 key prefix for a given tag */
@@ -259,12 +257,14 @@ export const resizeAndSaveVariants = async ({
   client,
   tag,
   imageType,
-  maxRetries = 3,
+  resizeHost,
+  maxRetries = 2,
   folder = 'queue',
 }: {
   client: S3Client
   tag: Tag
   imageType: 'mystery' | 'found'
+  resizeHost?: string
   maxRetries?: number
   folder?: string
 }): Promise<string> => {
@@ -281,65 +281,74 @@ export const resizeAndSaveVariants = async ({
     .replace(/_(small|medium|original)$/, '')
 
   const baseKey = `${folder}/${filenameBase}`
-  const resizeBackendBase = getApiUrl('resize')
+  const resizeBackendBase = getApiUrl(resizeHost, 'resize')
 
   const transforms: Record<string, number> = {
     medium: 800,
     small: 300,
-    original: 2400, // Optional large size for original replacement
+    original: 0,
+    // original: 2400, // Optional large size for original replacement
   }
 
   let resizedOriginalUploaded = false
 
-  for (const [variant, width] of Object.entries(transforms)) {
-    const suffix = variant === 'original' ? '.webp' : `_${variant}.webp`
-    const key = `${baseKey}${suffix}`
+  const variantPromises = Object.entries(transforms).map(
+    async ([variant, width]) => {
+      const suffix = variant === 'original' ? '.webp' : `_${variant}.webp`
+      const key = `${baseKey}${suffix}`
 
-    try {
-      await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
-      continue // already exists
-    } catch (err: any) {
-      if (err.$metadata?.httpStatusCode !== 404) {
-        console.warn(`Unexpected error checking ${key}:`, err)
-      }
-    }
-
-    let attempt = 0
-    let success = false
-
-    while (attempt < maxRetries && !success) {
       try {
-        const resizeUrl = `${resizeBackendBase}?url=${encodeURIComponent(url)}&width=${width}&format=webp`
-        const res = await fetch(resizeUrl)
-        if (!res.ok) throw new Error(`Resize backend failed: ${res.statusText}`)
+        await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
+        return // Already exists; skip
+      } catch (err: any) {
+        if (err.$metadata?.httpStatusCode !== 404) {
+          console.warn(`Unexpected error checking ${key}:`, err)
+          return
+        }
+      }
 
-        const arrayBuffer = await res.arrayBuffer()
-        const buffer = Buffer.from(arrayBuffer)
+      let attempt = 0
+      let success = false
 
-        await client.send(
-          new PutObjectCommand({
-            Bucket: bucket,
-            Key: key,
-            Body: buffer,
-            ContentType: 'image/webp',
-            ACL: 'public-read',
-          })
-        )
+      while (attempt < maxRetries && !success) {
+        try {
+          const resizeUrl = `${resizeBackendBase}?url=${encodeURIComponent(url)}&format=webp${width ? `&width=${width}` : ''}`
+          const res = await fetch(resizeUrl)
+          if (!res.ok)
+            throw new Error(`Resize backend failed: ${res.statusText}`)
 
-        success = true
-        if (variant === 'original') resizedOriginalUploaded = true
-      } catch (err) {
-        attempt++
-        if (attempt >= maxRetries) {
-          console.error(`Failed to save ${variant} for ${filenameBase}:`, err)
-        } else {
-          await delay(500 * attempt)
+          const arrayBuffer = await res.arrayBuffer()
+          const buffer = Buffer.from(arrayBuffer)
+
+          await client.send(
+            new PutObjectCommand({
+              Bucket: bucket,
+              Key: key,
+              Body: buffer,
+              ContentType: 'image/webp',
+              ACL: 'public-read',
+            })
+          )
+
+          success = true
+          if (variant === 'original') resizedOriginalUploaded = true
+        } catch (err) {
+          attempt++
+          if (attempt >= maxRetries) {
+            console.error(
+              `Failed to save ${variant} for ${filenameBase}: ${url}`,
+              err
+            )
+          } else {
+            await delay(500 * attempt)
+          }
         }
       }
     }
-  }
+  )
 
-  // Delete old original (non-webp) only if we just replaced it with a webp
+  await Promise.all(variantPromises)
+
   if (resizedOriginalUploaded) {
     try {
       const list = await listAllS3Objects(client, {
@@ -351,18 +360,23 @@ export const resizeAndSaveVariants = async ({
         (obj) => obj.Key && !obj.Key.endsWith('.webp')
       )
 
-      for (const obj of nonWebp) {
-        try {
-          await client.send(
-            new DeleteObjectCommand({
-              Bucket: bucket,
-              Key: obj.Key,
-            })
-          )
-        } catch (err) {
-          console.error(`Failed to delete ${obj.Key} for ${filenameBase}:`, err)
-        }
-      }
+      await Promise.all(
+        nonWebp.map(async (obj) => {
+          try {
+            await client.send(
+              new DeleteObjectCommand({
+                Bucket: bucket,
+                Key: obj.Key,
+              })
+            )
+          } catch (err) {
+            console.error(
+              `Failed to delete ${obj.Key} for ${filenameBase}:`,
+              err
+            )
+          }
+        })
+      )
     } catch (err) {
       console.error(`Failed to list/delete originals for ${filenameBase}:`, err)
     }
@@ -593,9 +607,15 @@ export interface S3UploadPayload {
   contentType?: string // 'image/jpeg', 'image/png', etc.
   resize?: boolean // default true — whether to make small/medium versions
 }
-export type uploadTagImagePayload = Partial<Tag> & Partial<S3UploadPayload>
-export type queueTagPayload = Partial<Tag> & Partial<S3UploadPayload>
-export type updateTagPayload = Partial<Tag> & Partial<S3UploadPayload>
+export type uploadTagImagePayload = Partial<Tag> &
+  Partial<S3UploadPayload> &
+  CommonPayloadData
+export type queueTagPayload = Partial<Tag> &
+  Partial<S3UploadPayload> &
+  CommonPayloadData
+export type updateTagPayload = Partial<Tag> &
+  Partial<S3UploadPayload> &
+  CommonPayloadData
 export const supportedImageExtensions = [
   '.jpg',
   '.jpeg',
@@ -603,6 +623,3 @@ export const supportedImageExtensions = [
   '.webp',
   '.gif',
 ]
-function getApiUrl(arg0: string) {
-  throw new Error('Function not implemented.')
-}

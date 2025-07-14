@@ -135,6 +135,7 @@ export async function uploadTagImage(
             'Content-Type': payload.contentType,
             'x-amz-meta-title': encodeMetadataValue(title.trim()),
             'x-amz-meta-description': encodeMetadataValue(description.trim()),
+            'x-amz-acl': 'public-read',
           },
           data: await normalizeUploadBody(payload[blobField]),
         })
