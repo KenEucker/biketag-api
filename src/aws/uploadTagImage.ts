@@ -18,6 +18,7 @@ import {
   getImgurMysteryTitleFromBikeTagData,
   getImgurMysteryDescriptionFromBikeTagData,
 } from '../common/getters'
+import { getImageExtension } from '../common/methods'
 
 export async function uploadTagImage(
   client: S3Client,
@@ -49,7 +50,7 @@ export async function uploadTagImage(
       folder === 'queue'
         ? `--${await getHashedPlayerSuffix(payload.foundPlayer)}`
         : ''
-    const extension = payload.contentType?.includes('png') ? 'png' : 'jpg'
+    const extension = getImageExtension(payload.contentType)
     const key = `${folder}/${payload.game}-tag-${payload.tagnumber}${suffix}${postfix}.${extension}`
     const bucket = `${payload.game}-biketag`
     const region = payload.region ?? 'nyc3'
@@ -124,7 +125,8 @@ export async function uploadTagImage(
         })
 
         if (!signedUrlResponse.success || !signedUrlResponse.data) {
-          throw new Error(`Failed to get signed URL for ${type} image`)
+          errors.push(`Failed to get signed URL for ${type} image`)
+          return undefined
         }
 
         await this.plainFetcher(signedUrlResponse.data, {
@@ -146,11 +148,15 @@ export async function uploadTagImage(
     return fullUrl
   }
 
-  // Attempt both uploads
-  payload.mysteryImageUrl = await tryUploadImage('mystery')
-  payload.foundImageUrl = await tryUploadImage('found')
-  payload.mysteryImage = undefined
-  payload.foundImage = undefined
+  if (payload.foundImageUrl || payload.foundImage) {
+    payload.foundImageUrl = await tryUploadImage('found')
+    payload.foundImage = undefined
+  }
+
+  if (payload.mysteryImageUrl || payload.mysteryImage) {
+    payload.mysteryImageUrl = await tryUploadImage('mystery')
+    payload.mysteryImage = undefined
+  }
 
   return {
     data: createTagObject(payload),

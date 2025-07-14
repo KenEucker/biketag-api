@@ -85,7 +85,7 @@ import { createClient, SanityClient } from '@sanity/client'
 
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
 import { type AxiosCacheInstance, setupCache } from 'axios-cache-interceptor'
-import { isEqual } from 'lodash'
+import { dequal } from 'dequal'
 import { getAuthorizationHeader, getClaims } from './common/auth'
 import TinyCache from 'tinycache'
 
@@ -230,47 +230,34 @@ export class BikeTagClient {
   protected getDefaultOptions(
     options: ApiOptions,
     dataType: DataTypes = DataTypes.tag,
-    overrides: any = {},
+    overrides: Partial<
+      Pick<ApiOptions, 'source' | 'region' | 'host' | 'cached' | 'concise'>
+    > = {},
     method?: string
   ): ApiOptions {
-    /// Data defaults
+    // Data defaults as before...
     switch (dataType) {
       case DataTypes.game:
         options.game = options.game ?? options.slug ?? this.biketagConfig?.game
         options.slug = options.slug ?? options.game?.toLowerCase() ?? undefined
         break
-
       case DataTypes.achievement:
-        options.game = options.game ?? options.slug ?? this.biketagConfig?.game
-        break
-
       case DataTypes.setting:
-        options.game = options.game ?? options.slug ?? this.biketagConfig?.game
-        break
-
       case DataTypes.stat:
         options.game = options.game ?? options.slug ?? this.biketagConfig?.game
         break
-
       case DataTypes.player:
-        options.game = options.game ? options.game : this.biketagConfig?.game
-
+        options.game = options.game ?? this.biketagConfig?.game
         if (method === 'getPlayers') {
           options.names =
             options.names ?? (options.name ? [options.name] : undefined)
         }
-
-        options.game = options.game ? options.game : this.biketagConfig?.game
-
         if (method === 'updatePlayer' || method === 'updatePlayers') {
           options.game = undefined
         }
         break
-
       case DataTypes.tag:
-        /// Set the game in the options, defaulting to the configured game
-        options.game = options.game ? options.game : this.biketagConfig?.game
-
+        options.game = options.game ?? this.biketagConfig?.game
         if (!options.slug && !options.slugs) {
           if (typeof options.tagnumber !== 'undefined') {
             options.slug = constructTagNumberSlug(
@@ -281,7 +268,6 @@ export class BikeTagClient {
             options.slug = 'current'
           }
         }
-
         if (!options.tagnumber) {
           if (options.tagnumbers?.length === 1) {
             options.tagnumber = options.tagnumbers[0]
@@ -295,39 +281,48 @@ export class BikeTagClient {
         }
         break
       case DataTypes.queue:
-        options.game = options.game ? options.game : this.biketagConfig?.game
+        options.game = options.game ?? this.biketagConfig?.game
         options.queuehash = options.queuehash ?? this.imgurConfig?.queuehash
         options.archivehash =
           options.archivehash ?? this.imgurConfig?.archivehash
         break
     }
 
-    if (typeof overrides.source !== 'undefined') {
-      options.source = overrides.source
+    // Clean overrides:
+    const cleanedOverrides = Object.fromEntries(
+      Object.entries(overrides).filter(([_, v]) => v !== undefined)
+    )
+
+    if (
+      typeof cleanedOverrides.source === 'string' &&
+      cleanedOverrides.source.length
+    ) {
+      options.source = cleanedOverrides.source
     }
 
-    /// Source defaults
     switch (options.source) {
       case AvailableApis.imgur:
-        options.hash = options.hash ?? this.imgurConfig.hash
-        options.queuehash = options.queuehash ?? this.imgurConfig.queuehash
+        options.hash = options.hash ?? this.imgurConfig?.hash
+        options.queuehash = options.queuehash ?? this.imgurConfig?.queuehash
         options.archivehash =
-          options.archivehash ?? this.imgurConfig.archivehash
+          options.archivehash ?? this.imgurConfig?.archivehash
         break
       case AvailableApis.aws:
-        options.region = options.region ?? this.awsConfig.region
+        options.region = options.region ?? this.awsConfig?.region
         break
     }
 
-    /// Host defaults
     options.host = options.host ?? this.biketagConfig?.host
     options.cached = options.cached ?? this.biketagConfig?.cached
-
-    /// default option for interfaces is to return the data from the response
     options.concise =
       typeof options.concise !== 'undefined' ? options.concise : true
 
-    return { ...options, ...overrides }
+    // SAFER: mutate options in-place instead of returning a spread
+    Object.entries(cleanedOverrides).forEach(([key, value]) => {
+      options[key] = value
+    })
+
+    return options
   }
 
   protected getClientAdapter(
@@ -572,13 +567,13 @@ export class BikeTagClient {
           sanity: undefined,
         }
 
-        if (!isEqual(this.imgurConfig, imgurConfig)) {
+        if (!dequal(this.imgurConfig, imgurConfig)) {
           initializeConfig.imgur = imgurConfig
         }
-        if (!isEqual(this.sanityConfig, sanityConfig)) {
+        if (!dequal(this.sanityConfig, sanityConfig)) {
           initializeConfig.sanity = sanityConfig
         }
-        if (!isEqual(this.awsConfig, awsConfig)) {
+        if (!dequal(this.awsConfig, awsConfig)) {
           initializeConfig.aws = awsConfig
         }
 

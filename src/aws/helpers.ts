@@ -147,14 +147,13 @@ const loadIndexFromImages = async (
     Prefix: prefix,
   })
 
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp']
   const imagesByTag: Record<string, { mystery?: any; found?: any }> = {}
 
   for (const item of list) {
     const key = item.Key
     if (
       !key ||
-      !imageExtensions.some((ext) => key.toLowerCase().endsWith(ext))
+      !supportedImageExtensions.some((ext) => key.toLowerCase().endsWith(ext))
     ) {
       continue
     }
@@ -205,24 +204,24 @@ export const saveIndex = async (
 ) => {
   const key = `${folder}/index.json`
 
-  if (tags.length === 0) {
-    // Delete index.json if tags array is empty
-    try {
-      await client.send(
-        new DeleteObjectCommand({
-          Bucket: bucket,
-          Key: key,
-        })
-      )
-      console.log(
-        `Deleted index.json from ${bucket}/${key} because tags array was empty.`
-      )
-    } catch (error) {
-      console.error(`Failed to delete index from ${bucket}/${key}:`, error)
-      throw error
-    }
-    return
-  }
+  // if (tags.length === 0) {
+  //   // Delete index.json if tags array is empty
+  //   try {
+  //     await client.send(
+  //       new DeleteObjectCommand({
+  //         Bucket: bucket,
+  //         Key: key,
+  //       })
+  //     )
+  //     console.log(
+  //       `Deleted index.json from ${bucket}/${key} because tags array was empty.`
+  //     )
+  //   } catch (error) {
+  //     console.error(`Failed to delete index from ${bucket}/${key}:`, error)
+  //     throw error
+  //   }
+  //   return
+  // }
 
   // Otherwise save the index.json
   try {
@@ -238,26 +237,6 @@ export const saveIndex = async (
   } catch (error) {
     console.error(`Failed to save index to ${bucket}/${key}:`, error)
     throw error
-  }
-}
-
-/**
- * Builds a valid S3UploadPayload for either mystery or found image based on Tag data.
- */
-export const getQueueTagImagePayloadFromTagData = (
-  tag: uploadTagImagePayload,
-  region: string,
-  isMystery = false
-): S3UploadPayload => {
-  return {
-    region,
-    game: tag.game,
-    folder: 'queue',
-    tagnumber: tag.tagnumber,
-    filenameSuffix: isMystery ? 'mystery' : 'found',
-    image: isMystery ? tag.mysteryImage : tag.foundImage,
-    contentType: 'image/jpeg',
-    resize: tag.resize !== false,
   }
 }
 
@@ -296,39 +275,23 @@ export const resizeAndSaveVariants = async ({
   if (!url) throw new Error(`Missing ${imageType}ImageUrl for tag`)
 
   const match = url.match(/\/([^\/?#]+)$/)
-  if (!match) throw new Error(`Could not extract filename from URL: ${url}`)
-
-  const originalFilename = match[1] // e.g. denver-tag-369--found--abc123.jpg
+  const originalFilename = match?.[1] ?? ''
   const filenameBase = originalFilename
-    .replace(/\.\w+$/, '') // strip extension
-    .replace(/_(small|medium|original)$/, '') // remove variant
-  const originalExt = originalFilename.split('.').pop()?.toLowerCase() || 'jpg'
+    .replace(/\.\w+$/, '')
+    .replace(/_(small|medium|original)$/, '')
+
   const baseKey = `${folder}/${filenameBase}`
-  const imagekitBase = `https://ik.imagekit.io/biketag/${tag.game}`
-  const imagekitPath = originalFilename.replace(/^.*?\//, '') // remove any folders
+  const resizeBackendBase = getApiUrl('resize')
 
-  const transforms: Record<string, string> = {
-    medium: `${imagekitBase}/tr:w-800,f-webp/${imagekitPath}`,
-    small: `${imagekitBase}/tr:w-300,f-webp/${imagekitPath}`,
+  const transforms: Record<string, number> = {
+    medium: 800,
+    small: 300,
+    original: 2400, // Optional large size for original replacement
   }
-
-  if (originalExt !== 'webp') {
-    transforms.original = `${imagekitBase}/tr:f-webp/${imagekitPath}`
-  }
-
-  const title =
-    imageType === 'mystery'
-      ? getImgurMysteryTitleFromBikeTagData(tag)
-      : getImgurFoundTitleFromBikeTagData(tag)
-
-  const description =
-    imageType === 'mystery'
-      ? getImgurMysteryDescriptionFromBikeTagData(tag)
-      : getImgurFoundDescriptionFromBikeTagData(tag)
 
   let resizedOriginalUploaded = false
 
-  for (const [variant, transformUrl] of Object.entries(transforms)) {
+  for (const [variant, width] of Object.entries(transforms)) {
     const suffix = variant === 'original' ? '.webp' : `_${variant}.webp`
     const key = `${baseKey}${suffix}`
 
@@ -336,9 +299,7 @@ export const resizeAndSaveVariants = async ({
       await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
       continue // already exists
     } catch (err: any) {
-      const isNotFound =
-        err.name === 'NotFound' || err.$metadata?.httpStatusCode === 404
-      if (!isNotFound) {
+      if (err.$metadata?.httpStatusCode !== 404) {
         console.warn(`Unexpected error checking ${key}:`, err)
       }
     }
@@ -348,30 +309,25 @@ export const resizeAndSaveVariants = async ({
 
     while (attempt < maxRetries && !success) {
       try {
-        const res = await fetch(transformUrl)
-        if (!res.ok)
-          throw new Error(
-            `Failed to fetch ${variant} variant from ImageKit: ${transformUrl}`
-          )
+        const resizeUrl = `${resizeBackendBase}?url=${encodeURIComponent(url)}&width=${width}&format=webp`
+        const res = await fetch(resizeUrl)
+        if (!res.ok) throw new Error(`Resize backend failed: ${res.statusText}`)
 
-        const blob = await res.blob()
+        const arrayBuffer = await res.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+
         await client.send(
           new PutObjectCommand({
             Bucket: bucket,
             Key: key,
-            Body: await normalizeUploadBody(blob),
+            Body: buffer,
             ContentType: 'image/webp',
             ACL: 'public-read',
-            Metadata: {
-              title: encodeMetadataValue(title.trim()),
-              description: encodeMetadataValue(description.trim()),
-            },
           })
         )
+
         success = true
-        if (variant === 'original') {
-          resizedOriginalUploaded = true
-        }
+        if (variant === 'original') resizedOriginalUploaded = true
       } catch (err) {
         attempt++
         if (attempt >= maxRetries) {
@@ -435,23 +391,22 @@ export const decodeMetadataValue = (value: string): string => {
 }
 
 export const normalizeUploadBody = async (
-  stream: string | Blob | ReadableStream | Uint8Array | Buffer | Readable
+  stream: string | Blob | ReadableStream | Uint8Array | Buffer | Readable | File
 ): Promise<Uint8Array | Buffer> => {
   if (!stream) throw new Error('No stream provided')
 
+  // Handle string input
   if (typeof stream === 'string') {
     return new TextEncoder().encode(stream)
   }
 
-  const isBlob =
-    typeof Blob !== 'undefined' &&
-    (stream instanceof Blob ||
-      Object.prototype.toString.call(stream) === '[object Blob]')
+  const isBlob = typeof Blob !== 'undefined' && stream instanceof Blob
+  const isFile = typeof File !== 'undefined' && stream instanceof File
 
   if (typeof window !== 'undefined') {
     // --- BROWSER ENVIRONMENT ---
-    if (stream instanceof Blob) {
-      const arrayBuffer = await stream.arrayBuffer()
+    if (isFile || isBlob) {
+      const arrayBuffer = await (stream as Blob).arrayBuffer()
       return new Uint8Array(arrayBuffer)
     }
 
@@ -461,7 +416,13 @@ export const normalizeUploadBody = async (
       return new Uint8Array(arrayBuffer)
     }
 
-    throw new Error('Unsupported input in browser')
+    if (stream instanceof Uint8Array) {
+      return stream
+    }
+
+    throw new Error(
+      `Unsupported input in browser: ${Object.prototype.toString.call(stream)}`
+    )
   } else {
     // --- NODE ENVIRONMENT ---
     const isReadable =
@@ -486,7 +447,9 @@ export const normalizeUploadBody = async (
       return Buffer.from(arrayBuffer)
     }
 
-    throw new Error('Unsupported input in Node')
+    throw new Error(
+      `Unsupported input in Node: ${Object.prototype.toString.call(stream)}`
+    )
   }
 }
 
@@ -625,7 +588,7 @@ export interface S3UploadPayload {
   game: string // e.g., 'denver' — used to build bucket name
   folder: string // e.g., 'queue' — which folder to upload to
   tagnumber: number // used in key naming
-  image: Buffer | Uint8Array | Blob | string // binary data or base64 string or remote URL
+  image: Buffer | Uint8Array | Blob | string | File // binary data or base64 string or remote URL
   filenameSuffix?: string // '--mystery' or '--found'
   contentType?: string // 'image/jpeg', 'image/png', etc.
   resize?: boolean // default true — whether to make small/medium versions
@@ -633,3 +596,13 @@ export interface S3UploadPayload {
 export type uploadTagImagePayload = Partial<Tag> & Partial<S3UploadPayload>
 export type queueTagPayload = Partial<Tag> & Partial<S3UploadPayload>
 export type updateTagPayload = Partial<Tag> & Partial<S3UploadPayload>
+export const supportedImageExtensions = [
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.webp',
+  '.gif',
+]
+function getApiUrl(arg0: string) {
+  throw new Error('Function not implemented.')
+}
