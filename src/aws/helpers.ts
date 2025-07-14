@@ -275,39 +275,23 @@ export const resizeAndSaveVariants = async ({
   if (!url) throw new Error(`Missing ${imageType}ImageUrl for tag`)
 
   const match = url.match(/\/([^\/?#]+)$/)
-  if (!match) throw new Error(`Could not extract filename from URL: ${url}`)
-
-  const originalFilename = match[1] // e.g. denver-tag-369--found--abc123.jpg
+  const originalFilename = match?.[1] ?? ''
   const filenameBase = originalFilename
-    .replace(/\.\w+$/, '') // strip extension
-    .replace(/_(small|medium|original)$/, '') // remove variant
-  const originalExt = originalFilename.split('.').pop()?.toLowerCase() || 'jpg'
+    .replace(/\.\w+$/, '')
+    .replace(/_(small|medium|original)$/, '')
+
   const baseKey = `${folder}/${filenameBase}`
-  const imagekitBase = `https://ik.imagekit.io/biketag/${tag.game}`
-  const imagekitPath = originalFilename.replace(/^.*?\//, '') // remove any folders
+  const resizeBackendBase = getApiUrl('resize')
 
-  const transforms: Record<string, string> = {
-    medium: `${imagekitBase}/tr:w-800,f-webp/${imagekitPath}`,
-    small: `${imagekitBase}/tr:w-300,f-webp/${imagekitPath}`,
+  const transforms: Record<string, number> = {
+    medium: 800,
+    small: 300,
+    original: 2400, // Optional large size for original replacement
   }
-
-  if (originalExt !== 'webp') {
-    transforms.original = `${imagekitBase}/tr:f-webp/${imagekitPath}`
-  }
-
-  const title =
-    imageType === 'mystery'
-      ? getImgurMysteryTitleFromBikeTagData(tag)
-      : getImgurFoundTitleFromBikeTagData(tag)
-
-  const description =
-    imageType === 'mystery'
-      ? getImgurMysteryDescriptionFromBikeTagData(tag)
-      : getImgurFoundDescriptionFromBikeTagData(tag)
 
   let resizedOriginalUploaded = false
 
-  for (const [variant, transformUrl] of Object.entries(transforms)) {
+  for (const [variant, width] of Object.entries(transforms)) {
     const suffix = variant === 'original' ? '.webp' : `_${variant}.webp`
     const key = `${baseKey}${suffix}`
 
@@ -315,9 +299,7 @@ export const resizeAndSaveVariants = async ({
       await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
       continue // already exists
     } catch (err: any) {
-      const isNotFound =
-        err.name === 'NotFound' || err.$metadata?.httpStatusCode === 404
-      if (!isNotFound) {
+      if (err.$metadata?.httpStatusCode !== 404) {
         console.warn(`Unexpected error checking ${key}:`, err)
       }
     }
@@ -327,30 +309,25 @@ export const resizeAndSaveVariants = async ({
 
     while (attempt < maxRetries && !success) {
       try {
-        const res = await fetch(transformUrl)
-        if (!res.ok)
-          throw new Error(
-            `Failed to fetch ${variant} variant from ImageKit: ${transformUrl}`
-          )
+        const resizeUrl = `${resizeBackendBase}?url=${encodeURIComponent(url)}&width=${width}&format=webp`
+        const res = await fetch(resizeUrl)
+        if (!res.ok) throw new Error(`Resize backend failed: ${res.statusText}`)
 
-        const blob = await res.blob()
+        const arrayBuffer = await res.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+
         await client.send(
           new PutObjectCommand({
             Bucket: bucket,
             Key: key,
-            Body: await normalizeUploadBody(blob),
+            Body: buffer,
             ContentType: 'image/webp',
             ACL: 'public-read',
-            Metadata: {
-              title: encodeMetadataValue(title.trim()),
-              description: encodeMetadataValue(description.trim()),
-            },
           })
         )
+
         success = true
-        if (variant === 'original') {
-          resizedOriginalUploaded = true
-        }
+        if (variant === 'original') resizedOriginalUploaded = true
       } catch (err) {
         attempt++
         if (attempt >= maxRetries) {
@@ -626,3 +603,6 @@ export const supportedImageExtensions = [
   '.webp',
   '.gif',
 ]
+function getApiUrl(arg0: string) {
+  throw new Error('Function not implemented.')
+}
