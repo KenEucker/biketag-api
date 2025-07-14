@@ -30,10 +30,13 @@ export const retrieveBiketagJwt = async (
   const rawHost =
     typeof window !== 'undefined'
       ? window.location.hostname
-      : config.biketag?.host?.replace(/^https?:\/\//, '') || 'localhost'
+      : config.biketag?.host ||
+        `${config.biketag.game ? config.biketag.game + '.' : ''}localhost`
 
-  const parts = rawHost.split('.')
-  const origin = parts.length > 1 ? parts.slice(-2).join('.') : rawHost
+  const origin = rawHost
+    .replace(/^https?:\/\//, '')
+    .replace(/\/.*$/, '')
+    .replace(/:\d+$/, '')
 
   const clientAssertion = clientAssertionOverride || config.biketag?.clientKey
 
