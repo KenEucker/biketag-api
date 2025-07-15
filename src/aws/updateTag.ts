@@ -76,6 +76,7 @@ export async function updateTag(
           client,
           tag,
           imageType: 'found',
+          resizeHost: payload.host,
           folder: payload.folder,
         })
       } catch (resizeErr) {

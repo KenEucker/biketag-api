@@ -91,14 +91,17 @@ export const loadIndex = async (
   client: S3Client,
   bucket: string,
   folder: string,
-  region: string
+  region: string,
+  cached?: boolean
 ): Promise<Tag[]> => {
   const indexKey = `${folder}/index.json`
   const cacheKey = `${region}:${bucket}:${indexKey}`
   const CACHE_TTL_MS = 5000
 
-  const cached = indexCache.get(cacheKey)
-  if (cached) return cached
+  if (cached) {
+    const cacheHit = indexCache.get(cacheKey)
+    if (cacheHit) return cacheHit
+  }
 
   try {
     const command = new GetObjectCommand({ Bucket: bucket, Key: indexKey })

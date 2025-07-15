@@ -34,7 +34,7 @@ export async function getQueue(
   try {
     if (!needsRebuild) {
       try {
-        tags = await loadIndex(client, bucket, folder, region)
+        tags = await loadIndex(client, bucket, folder, region, payload.cached)
       } catch {
         needsRebuild = true
       }

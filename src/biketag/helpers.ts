@@ -8,4 +8,3 @@ export const getApiUrl = (host = '', endpoint = '', subdomain = ''): string =>
           host.length ? host : BIKETAG_API_HOST // partial host
         }/${API_VERSION}` // version
   }/${endpoint}` // path
-1

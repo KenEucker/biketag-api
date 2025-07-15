@@ -16,7 +16,7 @@ export async function getPlayers(
   let tags: Tag[] = []
 
   try {
-    tags = await loadIndex(client, bucket, 'main', region)
+    tags = await loadIndex(client, bucket, 'main', region, payload.cached)
   } catch (err: any) {
     return {
       data: [],

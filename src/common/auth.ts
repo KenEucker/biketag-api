@@ -8,7 +8,6 @@ export async function getAuthorizationHeader(
 ): Promise<string> {
   const config = client.config()
 
-  // 🔎 1️⃣ Check if we have a valid biketag accessToken (JWT):
   if (config.biketag?.accessToken) {
     return `JWT ${config.biketag.accessToken}`
   } else if (config.biketag?.clientKey) {

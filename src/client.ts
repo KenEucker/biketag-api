@@ -508,9 +508,36 @@ export class BikeTagClient {
     reInitialize = false
   ): BikeTagConfiguration {
     if (config) {
-      const parsedConfig = assignBikeTagConfiguration(
-        config as BikeTagConfiguration
-      )
+      let parsedConfig: BikeTagConfiguration
+
+      // Case 1: Config looks like a full BikeTagConfiguration object:
+      if (
+        typeof config === 'object' &&
+        ('biketag' in config ||
+          'imgur' in config ||
+          'aws' in config ||
+          'sanity' in config)
+      ) {
+        parsedConfig = assignBikeTagConfiguration(
+          config as BikeTagConfiguration
+        )
+      }
+      // Case 2: Config is just a partial biketagConfig (like { accessToken: ... })
+      else if (
+        'accessToken' in config ||
+        'game' in config ||
+        'host' in config
+      ) {
+        parsedConfig = {
+          biketag: createBikeTagCredentials(
+            config as Partial<BikeTagCredentials>,
+            this.biketagConfig
+          ),
+        } as BikeTagConfiguration
+      } else {
+        // Defensive fallback (optional)
+        parsedConfig = {} as BikeTagConfiguration
+      }
 
       const initClientConfig = (
         type: AvailableApis,
@@ -518,7 +545,7 @@ export class BikeTagClient {
         overwrite = true
       ) => {
         const configName = `${AvailableApis[type]}Config`
-        const config = parsedConfig[AvailableApis[type]]
+        const conf = parsedConfig[AvailableApis[type]]
         let createCredentialsMethod: any = createBikeTagCredentials
 
         switch (type) {
@@ -533,9 +560,9 @@ export class BikeTagClient {
             break
         }
 
-        return !overwrite && this[configName] && config
-          ? createCredentialsMethod(config, this[configName])
-          : (config ?? this[configName])
+        return !overwrite && this[configName] && conf
+          ? createCredentialsMethod(conf, this[configName])
+          : (conf ?? this[configName])
       }
 
       const biketagConfig = initClientConfig(
