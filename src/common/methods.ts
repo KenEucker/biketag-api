@@ -1,5 +1,4 @@
 import {
-  AccessToken,
   ClientKey,
   ImgurCredentials,
   AWSCredentials,
@@ -75,8 +74,8 @@ export const createForm = (payload: string | Payload): FormData => {
   return form
 }
 
-export const hasAccessToken = (arg: unknown): arg is AccessToken => {
-  return (arg as AccessToken).accessToken !== undefined
+export const hasClientToken = (arg: unknown): arg is ClientKey => {
+  return (arg as ClientKey).clientToken !== undefined
 }
 
 export const hasClientKey = (arg: unknown): arg is ClientKey => {
@@ -162,6 +161,7 @@ export const isBikeTagConfiguration = (
 ): boolean => {
   return (
     credentials.biketag !== undefined ||
+    credentials.aws !== undefined ||
     credentials.sanity !== undefined ||
     credentials.imgur !== undefined
   )
@@ -316,9 +316,6 @@ export const createBikeTagCredentials = (
     clientToken: credentials.clientToken?.length
       ? credentials.clientToken
       : defaults.clientToken,
-    accessToken: credentials.accessToken?.length
-      ? credentials.accessToken
-      : defaults.accessToken,
   }
 }
 

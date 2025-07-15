@@ -44,7 +44,8 @@ export type archiveTagPayload = {
   archivehash?: string
   playerId?: string
   region?: string
-} & Partial<Tag>
+} & Partial<Tag> &
+  CommonPayloadData
 
 export type updateGamePayload = Partial<Game> & SanityUploadPayload
 export type updateStatPayload = Partial<Stat> & SanityUploadPayload
@@ -156,7 +157,7 @@ export type getQueuePayload = {
   hash?: string
   queuehash?: string
   region?: string
-  handleResize?: boolean
+  resize?: boolean
 } & CommonPayloadData
 
 export type queueTagPayload = {

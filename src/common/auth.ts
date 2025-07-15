@@ -8,12 +8,10 @@ export async function getAuthorizationHeader(
 ): Promise<string> {
   const config = client.config()
 
-  // 🔎 1️⃣ Check if we have a valid biketag accessToken (JWT):
-  if (config.biketag?.accessToken) {
-    return `JWT ${config.biketag.accessToken}`
+  if (config.biketag?.clientToken) {
+    return `JWT ${config.biketag.clientToken}`
   } else if (config.biketag?.clientKey) {
     const jwt = await retrieveBiketagJwt(client, config.biketag.clientKey)
-    client.config({ biketag: { accessToken: jwt } }, false, false)
     return `JWT ${jwt}`
   }
 
@@ -57,15 +55,15 @@ export const retrieveBiketagJwt = async (
     throw new Error('Failed to retrieve biketag JWT')
   }
 
-  const accessToken = response.data
+  const clientToken = response.data
 
   client.config({
     biketag: {
-      accessToken,
+      clientToken,
     },
   })
 
-  return accessToken
+  return clientToken
 }
 
 /**
@@ -79,7 +77,7 @@ export const retrieveBiketagJwt = async (
  *
  * Behavior:
  * -----------
- * - If the provided `authorization` matches the configured biketag accessToken,
+ * - If the provided `authorization` matches the configured biketag clientToken,
  *   returns the biketag adapter credentials.
  * - If it matches an imgur, aws, or sanity token, returns those credentials.
  * - If no match is found or if `authorization` is not provided, returns an empty object (`{}`).
@@ -104,7 +102,7 @@ export async function getClaims(
     return {} // 🔒 No auth provided = reject.
   }
 
-  if (config.biketag?.accessToken === authorization) {
+  if (config.biketag?.clientToken === authorization) {
     return {
       biketag: config.biketag,
     }

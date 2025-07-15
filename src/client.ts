@@ -504,7 +504,7 @@ export class BikeTagClient {
       | Partial<Credentials>
       | Partial<BikeTagConfiguration>
       | PartialBikeTagConfiguration,
-    overwrite = true,
+    overwrite = false,
     reInitialize = false
   ): BikeTagConfiguration {
     if (config) {
@@ -518,7 +518,7 @@ export class BikeTagClient {
         overwrite = true
       ) => {
         const configName = `${AvailableApis[type]}Config`
-        const config = parsedConfig[AvailableApis[type]]
+        const conf = parsedConfig[AvailableApis[type]]
         let createCredentialsMethod: any = createBikeTagCredentials
 
         switch (type) {
@@ -533,9 +533,9 @@ export class BikeTagClient {
             break
         }
 
-        return !overwrite && this[configName] && config
-          ? createCredentialsMethod(config, this[configName])
-          : (config ?? this[configName])
+        return !overwrite && this[configName] && conf
+          ? createCredentialsMethod(conf, this[configName])
+          : (conf ?? this[configName])
       }
 
       const biketagConfig = initClientConfig(

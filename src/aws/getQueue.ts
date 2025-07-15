@@ -20,7 +20,7 @@ export async function getQueue(
   const {
     game,
     reindex: shouldForceRebuild = false,
-    handleResize = false,
+    resize = false,
     region,
   } = payload
   const bucket = `${game}-biketag`
@@ -34,7 +34,7 @@ export async function getQueue(
   try {
     if (!needsRebuild) {
       try {
-        tags = await loadIndex(client, bucket, folder, region)
+        tags = await loadIndex(client, bucket, folder, region, payload.cached)
       } catch {
         needsRebuild = true
       }
@@ -77,7 +77,7 @@ export async function getQueue(
       const groupedImages = getGroupedImagesByTagnumber(metaList)
       tags = getGroupedTagsByPlayer(groupedImages, { game })
 
-      if (handleResize) {
+      if (resize) {
         for (let i = 0; i < tags.length; i++) {
           const tag = tags[i]
           const types: ('mystery' | 'found')[] = []
@@ -99,6 +99,7 @@ export async function getQueue(
                 client,
                 tag,
                 imageType: type,
+                resizeHost: payload.host,
               })
               if (type === 'mystery') tags[i].mysteryImageUrl = newUrl
               else tags[i].foundImageUrl = newUrl
