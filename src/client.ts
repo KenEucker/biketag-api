@@ -504,40 +504,13 @@ export class BikeTagClient {
       | Partial<Credentials>
       | Partial<BikeTagConfiguration>
       | PartialBikeTagConfiguration,
-    overwrite = true,
+    overwrite = false,
     reInitialize = false
   ): BikeTagConfiguration {
     if (config) {
-      let parsedConfig: BikeTagConfiguration
-
-      // Case 1: Config looks like a full BikeTagConfiguration object:
-      if (
-        typeof config === 'object' &&
-        ('biketag' in config ||
-          'imgur' in config ||
-          'aws' in config ||
-          'sanity' in config)
-      ) {
-        parsedConfig = assignBikeTagConfiguration(
-          config as BikeTagConfiguration
-        )
-      }
-      // Case 2: Config is just a partial biketagConfig (like { accessToken: ... })
-      else if (
-        'accessToken' in config ||
-        'game' in config ||
-        'host' in config
-      ) {
-        parsedConfig = {
-          biketag: createBikeTagCredentials(
-            config as Partial<BikeTagCredentials>,
-            this.biketagConfig
-          ),
-        } as BikeTagConfiguration
-      } else {
-        // Defensive fallback (optional)
-        parsedConfig = {} as BikeTagConfiguration
-      }
+      const parsedConfig = assignBikeTagConfiguration(
+        config as BikeTagConfiguration
+      )
 
       const initClientConfig = (
         type: AvailableApis,

@@ -13,6 +13,10 @@ import {
 import { Tag } from '../common/schema'
 import {
   getBikeTagFromS3ImageSet,
+  getImgurFoundDescriptionFromBikeTagData,
+  getImgurFoundTitleFromBikeTagData,
+  getImgurMysteryDescriptionFromBikeTagData,
+  getImgurMysteryTitleFromBikeTagData,
   getPlayerFromText,
   getTagNumbersFromText,
 } from '../common/getters'
@@ -297,7 +301,8 @@ export const resizeAndSaveVariants = async ({
 
   const variantPromises = Object.entries(transforms).map(
     async ([variant, width]) => {
-      const suffix = variant === 'original' ? '.webp' : `_${variant}.webp`
+      const variantIsOriginal = variant === 'original'
+      const suffix = variantIsOriginal ? '.webp' : `_${variant}.webp`
       const key = `${baseKey}${suffix}`
 
       try {
@@ -322,6 +327,22 @@ export const resizeAndSaveVariants = async ({
 
           const arrayBuffer = await res.arrayBuffer()
           const buffer = Buffer.from(arrayBuffer)
+          let Metadata
+
+          if (variantIsOriginal) {
+            const title =
+              imageType === 'mystery'
+                ? getImgurMysteryTitleFromBikeTagData(tag)
+                : getImgurFoundTitleFromBikeTagData(tag)
+            const description =
+              imageType === 'mystery'
+                ? getImgurMysteryDescriptionFromBikeTagData(tag)
+                : getImgurFoundDescriptionFromBikeTagData(tag)
+            Metadata = {
+              title: encodeMetadataValue(title.trim()),
+              description: encodeMetadataValue(description.trim()),
+            }
+          }
 
           await client.send(
             new PutObjectCommand({
@@ -330,6 +351,7 @@ export const resizeAndSaveVariants = async ({
               Body: buffer,
               ContentType: 'image/webp',
               ACL: 'public-read',
+              Metadata,
             })
           )
 

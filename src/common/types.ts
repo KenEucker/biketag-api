@@ -51,18 +51,12 @@ export interface CommonData {
 }
 
 export type CommonPayloadData = CommonData
-export interface AccessToken {
-  accessToken: string
-}
 export interface ClientKey {
   clientKey: string
   clientToken: string
 }
 
-export interface BikeTagCredentials
-  extends ClientKey,
-    AccessToken,
-    CommonData {}
+export interface BikeTagCredentials extends ClientKey, CommonData {}
 
 export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
