@@ -17,7 +17,10 @@ export async function getQueue(
   }
 
   if (payload.resize || payload.reindex) {
-    opts.url = `${opts.url}?${payload.resize ? 'resize=true&' : ''}${payload.reindex ? 'reindex=true' : ''}`
+    const params = []
+    if (payload.resize) params.push('resize=true')
+    if (payload.reindex) params.push('reindex=true')
+    opts.url = `${opts.url}?${params.join('&')}`
   }
 
   const response = await (payload.cached
