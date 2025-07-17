@@ -9,7 +9,12 @@ const decodeJwtPayload = (token: string): any => {
   if (parts.length !== 3) return null
 
   try {
-    const payload = JSON.parse(atob(parts[1]))
+    const base64 = parts[1]
+    const payload = JSON.parse(
+      typeof window !== 'undefined'
+        ? atob(base64)
+        : Buffer.from(base64, 'base64').toString('utf-8')
+    )
     return payload
   } catch {
     return null
@@ -130,34 +135,23 @@ export async function getClaims(
     return {} // 🔒 No auth provided = reject.
   }
 
-  if (authorization.startsWith('player-id ')) {
+  const getValidToken = async (): Promise<string | null> => {
     if (token && !isJwtExpired(token)) {
-      return {
-        biketag: { clientToken: token },
-      }
+      return token
     } else if (clientKey) {
-      const freshToken = await retrieveBiketagJwt(client, clientKey)
-      return {
-        biketag: { clientToken: freshToken },
-      }
-    } else {
-      return {}
+      return await retrieveBiketagJwt(client, clientKey)
     }
+    return null
+  }
+
+  if (authorization.startsWith('player-id ')) {
+    const validToken = await getValidToken()
+    return validToken ? { biketag: { clientToken: validToken } } : {}
   }
 
   if (token === authorization) {
-    if (!isJwtExpired(token)) {
-      return {
-        biketag: config.biketag,
-      }
-    } else if (clientKey) {
-      const freshToken = await retrieveBiketagJwt(client, clientKey)
-      return {
-        biketag: { clientToken: freshToken },
-      }
-    } else {
-      return {}
-    }
+    const validToken = await getValidToken()
+    return validToken ? { biketag: { clientToken: validToken } } : {}
   }
 
   if (config.aws?.secretAccessKey == authorization) {

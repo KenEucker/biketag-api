@@ -96,15 +96,7 @@ export async function deleteTag(
 
   let indexUpdateError = ''
   try {
-    const index: Tag[] = await loadIndex(
-      client,
-      bucket,
-      folder,
-      region,
-      false,
-      true
-    )
-    await saveIndex(client, bucket, folder, index)
+    await loadIndex(client, bucket, folder, region, false, true)
   } catch (indexErr: any) {
     indexUpdateError = `Index update failed: ${indexErr.message}`
   }

@@ -453,7 +453,10 @@ export const decodeMetadataValue = (value: string): string => {
     // Fail fast if not likely base64
     if (!value || !/^[A-Za-z0-9+/=]+$/.test(value)) return value
 
-    const binary = atob(value)
+    const binary =
+      typeof window !== 'undefined'
+        ? atob(value)
+        : Buffer.from(value, 'base64').toString('utf-8')
     const bytes = new Uint8Array([...binary].map((c) => c.charCodeAt(0)))
     return new TextDecoder().decode(bytes)
   } catch {

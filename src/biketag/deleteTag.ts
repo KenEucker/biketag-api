@@ -16,8 +16,6 @@ export async function deleteTag(
     data: payload,
   }
 
-  /// TODO: inject the player and validate that they are the one who has permissions to delete the tag
-
   const response = await client.request(opts)
   const success = response.status === 200
 
