@@ -3,15 +3,39 @@ import { BikeTagClient } from '../client'
 import { AUTHORIZE_ENDPOINT } from './endpoints'
 import { getApiUrl } from '../biketag/helpers'
 
+// Helper to decode payload and check exp:
+const decodeJwtPayload = (token: string): any => {
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+
+  try {
+    const payload = JSON.parse(atob(parts[1]))
+    return payload
+  } catch {
+    return null
+  }
+}
+
+const isJwtExpired = (token: string): boolean => {
+  const payload = decodeJwtPayload(token)
+  if (!payload || !payload.exp) return true // Treat malformed as expired
+  const now = Math.floor(Date.now() / 1000)
+  return payload.exp <= now
+}
+
 export async function getAuthorizationHeader(
   client: BikeTagClient
 ): Promise<string> {
   const config = client.config()
+  const token = config.biketag?.clientToken
+  const clientKey = config.biketag?.clientKey
 
-  if (config.biketag?.clientToken) {
-    return `JWT ${config.biketag.clientToken}`
-  } else if (config.biketag?.clientKey) {
-    const jwt = await retrieveBiketagJwt(client, config.biketag.clientKey)
+  if (token && !isJwtExpired(token)) {
+    return `JWT ${token}`
+  }
+
+  if (clientKey) {
+    const jwt = await retrieveBiketagJwt(client, clientKey)
     return `JWT ${jwt}`
   }
 
@@ -21,7 +45,8 @@ export async function getAuthorizationHeader(
 // Internal helper to run the biketag auth flow:
 export const retrieveBiketagJwt = async (
   client: BikeTagClient,
-  clientAssertionOverride?: string
+  clientAssertionOverride?: string,
+  clientPlayerId?: string
 ): Promise<string> => {
   const config = client.config()
 
@@ -39,6 +64,7 @@ export const retrieveBiketagJwt = async (
   const clientAssertion = clientAssertionOverride || config.biketag?.clientKey
 
   const authorizePayload = {
+    p_id: clientPlayerId,
     client_id: origin,
     client_assertion: clientAssertion,
     grant_type: 'biketag_origin_assertion',
@@ -97,14 +123,40 @@ export async function getClaims(
   authorization?: string
 ): Promise<PartialBikeTagConfiguration | Record<string, never>> {
   const config = client.config()
+  const token = config.biketag?.clientToken
+  const clientKey = config.biketag?.clientKey
 
   if (!authorization) {
     return {} // 🔒 No auth provided = reject.
   }
 
-  if (config.biketag?.clientToken === authorization) {
-    return {
-      biketag: config.biketag,
+  if (authorization.startsWith('player-id ')) {
+    if (token && !isJwtExpired(token)) {
+      return {
+        biketag: { clientToken: token },
+      }
+    } else if (clientKey) {
+      const freshToken = await retrieveBiketagJwt(client, clientKey)
+      return {
+        biketag: { clientToken: freshToken },
+      }
+    } else {
+      return {}
+    }
+  }
+
+  if (token === authorization) {
+    if (!isJwtExpired(token)) {
+      return {
+        biketag: config.biketag,
+      }
+    } else if (clientKey) {
+      const freshToken = await retrieveBiketagJwt(client, clientKey)
+      return {
+        biketag: { clientToken: freshToken },
+      }
+    } else {
+      return {}
     }
   }
 

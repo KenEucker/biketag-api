@@ -20,7 +20,7 @@ export async function fetchSignedUrl(
     })
 
     const signedUrl = await getSignedUrl(client, command, {
-      expiresIn: payload.expiresIn ?? 60,
+      expiresIn: payload.expiresIn ?? 180,
     })
 
     success = true

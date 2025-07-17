@@ -11,6 +11,7 @@ import {
   uploadTagImagePayload,
   getKeyFromUrl,
   moveImage,
+  getBikeTagImageKey,
 } from './helpers'
 import {
   getImgurFoundTitleFromBikeTagData,
@@ -44,14 +45,15 @@ export async function uploadTagImage(
     const urlField = `${type}ImageUrl` as const
     const blobField = `${type}Image` as const
 
-    const folder = payload.folder ?? 'queue'
-    const suffix = `--${type}`
-    const postfix =
-      folder === 'queue'
-        ? `--${await getHashedPlayerSuffix(payload.foundPlayer)}`
-        : ''
-    const extension = getImageExtension(payload.contentType)
-    const key = `${folder}/${payload.game}-tag-${payload.tagnumber}${suffix}${postfix}.${extension}`
+    const key = await getBikeTagImageKey(
+      type,
+      type === 'mystery' ? payload.mysteryPlayer : payload.foundPlayer,
+      payload.tagnumber,
+      payload.game,
+      payload.contentType,
+      payload.folder ?? 'queue'
+    )
+
     const bucket = `${payload.game}-biketag`
     const region = payload.region ?? 'nyc3'
     const fullUrl = `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`
@@ -121,6 +123,7 @@ export async function uploadTagImage(
         // Frontend path: signed URL upload using plainFetcher
         const signedUrlResponse = await this.fetchSignedUrl({
           key,
+          p_id: payload.playerId,
           contentType: payload.contentType,
         })
 

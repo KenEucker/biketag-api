@@ -169,5 +169,6 @@ export type fetchSignedUrlPayload = {
   bucket: string
   key: string
   contentType: string
+  p_id: string
   expiresIn?: number
 } & CommonPayloadData

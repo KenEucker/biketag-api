@@ -2,49 +2,109 @@ import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { deleteTagPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { getTagPrefix, listAllS3Objects, loadIndex, saveIndex } from './helpers'
+import {
+  getBikeTagImageKey,
+  getTagPrefix,
+  listAllS3Objects,
+  loadIndex,
+  saveIndex,
+} from './helpers'
 import { Tag } from '../common/schema'
 
 export async function deleteTag(
   client: S3Client,
-  payload: deleteTagPayload
+  payload: deleteTagPayload & { tag?: Tag }
 ): Promise<BikeTagApiResponse<boolean[]>> {
-  const { tagnumber, folder, game, region } = payload
+  const { tagnumber, folder, game, region, tag } = payload
   const bucket = `${game}-biketag`
-  const prefix = getTagPrefix(folder, game, tagnumber) // e.g. "queue/denver-tag-368"
   const deleted: boolean[] = []
 
   let success = true
   let error = ''
 
-  const list = await listAllS3Objects(client, {
-    Bucket: bucket,
-    Prefix: prefix, // Gets all files starting with the tagId
-  })
+  if (folder === 'main') {
+    // Delete everything with prefix (legacy behavior)
+    const prefix = getTagPrefix(folder, game, tagnumber)
+    const list = await listAllS3Objects(client, {
+      Bucket: bucket,
+      Prefix: prefix,
+    })
 
-  const deleteOps = list.map(async (obj) => {
-    try {
-      await client.send(
-        new DeleteObjectCommand({
-          Bucket: bucket,
-          Key: obj.Key,
-        })
+    const deleteOps = list.map(async (obj) => {
+      try {
+        await client.send(
+          new DeleteObjectCommand({
+            Bucket: bucket,
+            Key: obj.Key,
+          })
+        )
+        return true
+      } catch {
+        return false
+      }
+    })
+
+    const results = await Promise.all(deleteOps)
+    deleted.push(...results)
+  }
+
+  if (folder === 'queue' && tag) {
+    // Delete specific keys for mysteryPlayer and foundPlayer images
+    const keys: string[] = []
+
+    if (tag.mysteryPlayer) {
+      const mysteryKey = await getBikeTagImageKey(
+        'mystery',
+        tag.mysteryPlayer,
+        tagnumber,
+        game,
+        '',
+        folder
       )
-      return true
-    } catch {
-      return false
+      keys.push(mysteryKey)
     }
-  })
 
-  const results = await Promise.all(deleteOps)
-  deleted.push(...results)
+    if (tag.foundPlayer) {
+      const foundKey = await getBikeTagImageKey(
+        'found',
+        tag.foundPlayer,
+        tagnumber,
+        game,
+        '',
+        folder
+      )
+      keys.push(foundKey)
+    }
+
+    const deleteOps = keys.map(async (key) => {
+      try {
+        await client.send(
+          new DeleteObjectCommand({
+            Bucket: bucket,
+            Key: key,
+          })
+        )
+        return true
+      } catch {
+        return false
+      }
+    })
+
+    const results = await Promise.all(deleteOps)
+    deleted.push(...results)
+  }
 
   let indexUpdateError = ''
-  // Update the index.json
   try {
-    const index: Tag[] = await loadIndex(client, bucket, folder, region)
-    const updatedIndex = index.filter((tag) => tag.tagnumber !== tagnumber)
-    await saveIndex(client, bucket, folder, updatedIndex)
+    const index: Tag[] = await loadIndex(
+      client,
+      bucket,
+      folder,
+      region,
+      false,
+      true
+    )
+    await saveIndex(client, bucket, folder, index)
   } catch (indexErr: any) {
     indexUpdateError = `Index update failed: ${indexErr.message}`
   }
