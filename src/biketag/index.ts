@@ -1,6 +1,7 @@
 export { getGame } from './getGame'
 export { getTag } from './getTag'
 export { getTags } from './getTags'
+export { deleteTag } from './deleteTag'
 export { getSettings } from './getSettings'
 export { getQueue } from './getQueue'
 export { getPlayers } from './getPlayers'

@@ -25,6 +25,7 @@ import { S3ImageMeta } from '../common/types'
 import TinyCache from 'tinycache'
 import { getApiUrl } from '../biketag/helpers'
 import { CommonPayloadData } from '../common/types'
+import { getImageExtension } from '../common/methods'
 
 const indexCache = new TinyCache()
 /** Returns the S3 key prefix for a given tag */
@@ -34,6 +35,23 @@ export const getTagPrefix = (
   tagnumber: number
 ): string => {
   return `${folder}/${game}-tag-${tagnumber}`
+}
+
+export const getBikeTagImageKey = async (
+  type,
+  player,
+  tagnumber,
+  game,
+  contentType = '',
+  folder = 'queue'
+) => {
+  const suffix = `--${type}`
+  const postfix =
+    folder === 'queue' ? `--${await getHashedPlayerSuffix(player)}` : ''
+  const extension = contentType?.length ? getImageExtension(contentType) : ''
+  const key = `${folder}/${game}-tag-${tagnumber}${suffix}${postfix}${extension.length ? '.' + extension : ''}`
+
+  return key
 }
 
 export const listAllS3Objects = async (
@@ -96,11 +114,24 @@ export const loadIndex = async (
   bucket: string,
   folder: string,
   region: string,
-  cached?: boolean
+  cached?: boolean,
+  reindex?: boolean
 ): Promise<Tag[]> => {
   const indexKey = `${folder}/index.json`
   const cacheKey = `${region}:${bucket}:${indexKey}`
   const CACHE_TTL_MS = 5000
+
+  if (reindex) {
+    const reindexedData = await loadIndexFromImages(
+      client,
+      bucket,
+      folder,
+      region
+    )
+    indexCache.put(cacheKey, reindexedData, CACHE_TTL_MS)
+    await saveIndex(client, bucket, folder, reindexedData)
+    return reindexedData
+  }
 
   if (cached) {
     const cacheHit = indexCache.get(cacheKey)
@@ -132,6 +163,7 @@ export const loadIndex = async (
       region
     )
     indexCache.put(cacheKey, fallbackData, CACHE_TTL_MS)
+    await saveIndex(client, bucket, folder, fallbackData)
     return fallbackData
   }
 }
@@ -421,7 +453,10 @@ export const decodeMetadataValue = (value: string): string => {
     // Fail fast if not likely base64
     if (!value || !/^[A-Za-z0-9+/=]+$/.test(value)) return value
 
-    const binary = atob(value)
+    const binary =
+      typeof window !== 'undefined'
+        ? atob(value)
+        : Buffer.from(value, 'base64').toString('utf-8')
     const bytes = new Uint8Array([...binary].map((c) => c.charCodeAt(0)))
     return new TextDecoder().decode(bytes)
   } catch {

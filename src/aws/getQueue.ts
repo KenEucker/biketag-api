@@ -17,24 +17,19 @@ export async function getQueue(
   client: S3Client,
   payload: getQueuePayload
 ): Promise<BikeTagApiResponse<Tag[]>> {
-  const {
-    game,
-    reindex: shouldForceRebuild = false,
-    resize = false,
-    region,
-  } = payload
+  const { game, reindex, resize, cached, region } = payload
   const bucket = `${game}-biketag`
   const folder = 'queue'
 
   let tags: Tag[] = []
   let success = true
   let error: string | undefined
-  let needsRebuild = shouldForceRebuild
+  let needsRebuild = reindex
 
   try {
-    if (!needsRebuild) {
+    if (!reindex) {
       try {
-        tags = await loadIndex(client, bucket, folder, region, payload.cached)
+        tags = await loadIndex(client, bucket, folder, region, cached, reindex)
       } catch {
         needsRebuild = true
       }

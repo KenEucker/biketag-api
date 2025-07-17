@@ -30,8 +30,12 @@ export async function updateTag(
       ? tagExistsResponse.data[0]
       : null
 
-  const needsMystery = !existingTag?.mysteryImageUrl?.length
-  const needsFound = !existingTag?.foundImageUrl?.length
+  const needsMystery =
+    !existingTag?.mysteryImageUrl?.length &&
+    (!!payload.mysteryImage || !!payload.mysteryImageUrl)
+  const needsFound =
+    !existingTag?.foundImageUrl?.length &&
+    (!!payload.foundImage || !!payload.foundImageUrl)
 
   if (needsMystery || needsFound) {
     const uploadResponse = await this.uploadTagImage(client, payload)
@@ -46,8 +50,7 @@ export async function updateTag(
       error = uploadResponse.error
     }
   } else {
-    payload.mysteryImageUrl = existingTag.mysteryImageUrl
-    payload.foundImageUrl = existingTag.foundImageUrl
+    payload = { ...existingTag, ...payload }
   }
 
   // ✅ Resize variants if requested
