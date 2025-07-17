@@ -703,6 +703,8 @@ export class BikeTagClient {
     const clientMethod = api.getGame
     /// If we remove the game we are looking for, we get ALL games
     options.game = undefined
+    options.name = undefined
+    options.slug = undefined
 
     if (clientMethod) {
       return clientMethod(client, options, apiCache).catch((e) => {
