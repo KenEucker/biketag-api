@@ -1,4 +1,8 @@
-import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import {
+  S3Client,
+  DeleteObjectCommand,
+  DeleteObjectsCommand,
+} from '@aws-sdk/client-s3'
 import { deleteTagPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
@@ -7,7 +11,6 @@ import {
   getTagPrefix,
   listAllS3Objects,
   loadIndex,
-  saveIndex,
 } from './helpers'
 import { Tag } from '../common/schema'
 
@@ -15,15 +18,15 @@ export async function deleteTag(
   client: S3Client,
   payload: deleteTagPayload & { tag?: Tag }
 ): Promise<BikeTagApiResponse<boolean[]>> {
-  const { tagnumber, folder, game, region, tag } = payload
+  const { tagnumber, folder, game, region, mysteryPlayer, foundPlayer } =
+    payload
   const bucket = `${game}-biketag`
   const deleted: boolean[] = []
 
   let success = true
-  let error = ''
+  let errors = []
 
   if (folder === 'main') {
-    // Delete everything with prefix (legacy behavior)
     const prefix = getTagPrefix(folder, game, tagnumber)
     const list = await listAllS3Objects(client, {
       Bucket: bucket,
@@ -39,7 +42,8 @@ export async function deleteTag(
           })
         )
         return true
-      } catch {
+      } catch (err) {
+        errors.push(err.message)
         return false
       }
     })
@@ -48,50 +52,66 @@ export async function deleteTag(
     deleted.push(...results)
   }
 
-  if (folder === 'queue' && tag) {
-    // Delete specific keys for mysteryPlayer and foundPlayer images
-    const keys: string[] = []
+  if (folder === 'queue' && tagnumber) {
+    const keysToDelete: { Key: string }[] = []
 
-    if (tag.mysteryPlayer) {
+    if (mysteryPlayer) {
       const mysteryKey = await getBikeTagImageKey(
         'mystery',
-        tag.mysteryPlayer,
+        mysteryPlayer,
         tagnumber,
         game,
         '',
         folder
       )
-      keys.push(mysteryKey)
+
+      const mysteryObjects = await listAllS3Objects(client, {
+        Bucket: bucket,
+        Prefix: mysteryKey,
+      })
+
+      keysToDelete.push(...mysteryObjects.map((obj) => ({ Key: obj.Key! })))
     }
 
-    if (tag.foundPlayer) {
+    if (foundPlayer) {
       const foundKey = await getBikeTagImageKey(
         'found',
-        tag.foundPlayer,
+        foundPlayer,
         tagnumber,
         game,
         '',
         folder
       )
-      keys.push(foundKey)
+
+      const foundObjects = await listAllS3Objects(client, {
+        Bucket: bucket,
+        Prefix: foundKey,
+      })
+
+      keysToDelete.push(...foundObjects.map((obj) => ({ Key: obj.Key! })))
     }
 
-    const deleteOps = keys.map(async (key) => {
+    if (keysToDelete.length > 0) {
       try {
-        await client.send(
-          new DeleteObjectCommand({
+        const result = await client.send(
+          new DeleteObjectsCommand({
             Bucket: bucket,
-            Key: key,
+            Delete: { Objects: keysToDelete },
           })
         )
-        return true
-      } catch {
-        return false
-      }
-    })
 
-    const results = await Promise.all(deleteOps)
-    deleted.push(...results)
+        deleted.push(...keysToDelete.map(() => true))
+
+        if (result.Errors && result.Errors.length > 0) {
+          result.Errors.forEach((err) =>
+            errors.push(`${err.Key}: ${err.Message}`)
+          )
+        }
+      } catch (err: any) {
+        errors.push(err.message)
+        deleted.push(false)
+      }
+    }
   }
 
   let indexUpdateError = ''
@@ -104,13 +124,13 @@ export async function deleteTag(
   success = deleted.every(Boolean)
   if (indexUpdateError) {
     success = false
-    error = error ? `${error}; ${indexUpdateError}` : indexUpdateError
+    errors.push(indexUpdateError)
   }
 
   return {
     data: deleted,
     success,
-    error,
+    error: errors.join(';'),
     source: AvailableApis[AvailableApis.aws],
     status: success ? HttpStatusCode.Ok : HttpStatusCode.BadRequest,
   }

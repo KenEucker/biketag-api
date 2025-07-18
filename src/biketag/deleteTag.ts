@@ -13,6 +13,8 @@ export async function deleteTag(
   payload.source = undefined
   const opts = {
     url: getApiUrl(payload.host, DELETE_ENDPOINT, payload.game),
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     data: payload,
   }
 

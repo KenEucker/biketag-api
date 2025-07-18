@@ -19,7 +19,7 @@ export async function fetchSignedUrl(
     const opts = {
       url: getApiUrl(payload.host, TOKEN_ENDPOINT, payload.game),
       method: 'POST',
-      contentType: 'application/json',
+      headers: { 'Content-Type': 'application/json' },
       data: payload,
     }
 
