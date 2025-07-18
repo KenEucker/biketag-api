@@ -14,7 +14,6 @@ import {
   GameHighestNumberTagsPerNumberDaysData,
   PlayerHighestNumberTagsPerDayData,
 } from './types'
-import FormData from 'form-data'
 import TinyCache from 'tinycache'
 import {
   Tag,
@@ -43,35 +42,6 @@ export const getCacheIfExists = (
   if (cache) return cache.get(key)
 
   return null
-}
-
-export const isImageUrl = (payload: string | Payload): boolean => {
-  if (typeof payload === 'string') {
-    return true
-  }
-
-  return typeof payload.image !== 'undefined' && typeof payload === 'string'
-}
-
-export const createForm = (payload: string | Payload): FormData => {
-  const form = new FormData()
-
-  if (typeof payload === 'string') {
-    form.append('image', payload)
-    return form
-  }
-
-  for (const [key, value] of Object.entries(payload)) {
-    const supportedUploadObjectTypes = ['base64', 'stream']
-    if (supportedUploadObjectTypes.indexOf(key) !== -1) {
-      if (supportedUploadObjectTypes.indexOf(payload.type as string) !== -1) {
-        form.append(key, payload)
-      }
-    } else {
-      form.append(key, value)
-    }
-  }
-  return form
 }
 
 export const hasClientToken = (arg: unknown): arg is ClientKey => {
