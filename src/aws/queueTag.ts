@@ -81,9 +81,11 @@ export async function queueTag(
       if (isMystery && uploaded.mysteryImageUrl) {
         payload.mysteryImage = undefined
         payload.mysteryImageUrl = uploaded.mysteryImageUrl
+        payload.mysteryTime = uploaded.mysteryTime
       } else if (!isMystery && uploaded.foundImageUrl) {
         payload.foundImage = undefined
         payload.foundImageUrl = uploaded.foundImageUrl
+        payload.foundTime = uploaded.foundTime
       } else {
         success = false
       }
