@@ -103,6 +103,13 @@ export async function uploadTagImage(
         ? getImgurMysteryDescriptionFromBikeTagData(payload as Tag)
         : getImgurFoundDescriptionFromBikeTagData(payload as Tag)
 
+    // set fouind and mystery times as necessary
+    if (type === 'mystery') {
+      payload.mysteryTime = new Date().getTime()
+    } else if (type === 'found') {
+      payload.foundTime = new Date().getTime()
+    }
+
     try {
       if (typeof window === 'undefined') {
         // Backend path
