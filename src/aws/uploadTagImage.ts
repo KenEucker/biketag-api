@@ -6,7 +6,6 @@ import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { createTagObject } from '../common/data'
 import {
   encodeMetadataValue,
-  getHashedPlayerSuffix,
   normalizeUploadBody,
   uploadTagImagePayload,
   getKeyFromUrl,
@@ -19,7 +18,6 @@ import {
   getImgurMysteryTitleFromBikeTagData,
   getImgurMysteryDescriptionFromBikeTagData,
 } from '../common/getters'
-import { getImageExtension } from '../common/methods'
 
 export async function uploadTagImage(
   client: S3Client,
@@ -94,7 +92,7 @@ export async function uploadTagImage(
       return undefined
     }
 
-    // set fouind and mystery times as necessary
+    // set found and mystery times as necessary
     if (type === 'mystery') {
       payload.mysteryTime = new Date().getTime()
     } else if (type === 'found') {
