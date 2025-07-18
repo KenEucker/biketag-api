@@ -42,7 +42,9 @@ export async function updateTag(
 
     if (uploadResponse.success) {
       payload.mysteryImageUrl = uploadResponse.data.mysteryImageUrl
+      payload.mysteryTime = uploadResponse.data.mysteryTime
       payload.foundImageUrl = uploadResponse.data.foundImageUrl
+      payload.foundTime = uploadResponse.data.foundTime
       payload.mysteryImage = undefined
       payload.foundImage = undefined
     } else {
