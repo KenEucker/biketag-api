@@ -116,11 +116,6 @@ export class BikeTagClient {
     readonly configuration: Credentials | PartialBikeTagConfiguration
   ) {
     this.config(configuration ?? {}, true, true)
-    const headers = {
-      // 'user-agent': USERAGENT,
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Access-Control-Allow-Credentials': true,
-    }
 
     // headers['user-agent'] =
     //   typeof window !== 'undefined' ? undefined : USERAGENT
@@ -138,7 +133,6 @@ export class BikeTagClient {
     }
 
     this.fetcher = axios.create({
-      headers,
       responseType,
     })
     this.fetcher.interceptors.request.use(
@@ -148,7 +142,6 @@ export class BikeTagClient {
 
     this.cachedFetcher = setupCache(
       axios.create({
-        headers,
         responseType,
       }),
       {
@@ -598,6 +591,18 @@ export class BikeTagClient {
   }
 
   request(options: AxiosRequestConfig = {}): Promise<AxiosResponse<string>> {
+    const method = options.method ? options.method.toUpperCase() : 'GET'
+
+    // If method is GET (or null/undefined/default) and `data` is present
+    if (method === 'GET' && options.data) {
+      options.params = {
+        ...(options.params || {}),
+        ...(typeof options.data === 'object'
+          ? options.data
+          : { data: options.data }),
+      }
+      options.data = undefined
+    }
     return this.fetcher(options)
   }
 
