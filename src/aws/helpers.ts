@@ -195,8 +195,8 @@ const loadIndexFromImages = async (
       continue
     }
 
-    // Ignore --medium and --small variants
-    if (key.includes('--medium') || key.includes('--small')) {
+    // Ignore _medium and _small variants
+    if (key.includes('_medium') || key.includes('_small')) {
       continue
     }
 
@@ -262,15 +262,17 @@ export const saveIndex = async (
 
   // Otherwise save the index.json
   try {
-    await client.send(
-      new PutObjectCommand({
-        Bucket: bucket,
-        Key: key,
-        Body: JSON.stringify(tags),
-        ContentType: 'application/json',
-        ACL: acl,
-      })
-    )
+    if (typeof window === 'undefined') {
+      await client.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Body: JSON.stringify(tags),
+          ContentType: 'application/json',
+          ACL: acl,
+        })
+      )
+    }
   } catch (error) {
     console.error(`Failed to save index to ${bucket}/${key}:`, error)
     throw error
