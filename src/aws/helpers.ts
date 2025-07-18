@@ -627,7 +627,7 @@ export const moveImage = async (
   destinationKey: string,
   moveVariants: boolean = true
 ): Promise<{ success: boolean; error?: string }> => {
-  const variants = moveVariants ? ['', '--small', '--medium'] : ['']
+  const variants = moveVariants ? ['', '_small', '_medium'] : ['']
   let allSuccess = true
   const errors: string[] = []
 

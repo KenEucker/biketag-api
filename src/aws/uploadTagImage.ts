@@ -95,7 +95,11 @@ export async function uploadTagImage(
       if (moveResult.success) return expectedUrl
 
       success = false
-      errors.push(`${type} ${moveResult.error}` || ` ${type} image move failed`)
+      errors.push(
+        moveResult.error
+          ? `${type}: ${moveResult.error}`
+          : `${type} image move failed`
+      )
       return undefined
     }
 
