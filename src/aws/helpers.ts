@@ -139,7 +139,10 @@ export const loadIndex = async (
   }
 
   try {
-    const command = new GetObjectCommand({ Bucket: bucket, Key: indexKey })
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: indexKey,
+    })
     const response = await client.send(command)
     const body = await streamToString(response.Body)
     const indexData = JSON.parse(body)
@@ -270,6 +273,7 @@ export const saveIndex = async (
           Body: JSON.stringify(tags),
           ContentType: 'application/json',
           ACL: acl,
+          CacheControl: 'no-cache, no-store, must-revalidate',
         })
       )
     }
