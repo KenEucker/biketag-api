@@ -92,11 +92,11 @@ export async function uploadTagImage(
       return undefined
     }
 
-    // set found and mystery times as necessary
+    // set found and mystery times as necessary (in seconds)
     if (type === 'mystery') {
-      payload.mysteryTime = new Date().getTime()
+      payload.mysteryTime = Math.floor(Date.now() / 1000)
     } else if (type === 'found') {
-      payload.foundTime = new Date().getTime()
+      payload.foundTime = Math.floor(Date.now() / 1000)
     }
 
     const title =

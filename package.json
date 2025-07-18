@@ -1,6 +1,6 @@
 {
   "name": "biketag",
-  "version": "3.5.15",
+  "version": "3.5.16",
   "description": "The Javascript client API for BikeTag Games",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
