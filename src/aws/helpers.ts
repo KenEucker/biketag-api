@@ -451,7 +451,9 @@ export const resizeAndSaveVariants = async ({
 export const encodeMetadataValue = (value: string): string => {
   const encoder = new TextEncoder()
   const bytes = encoder.encode(value)
-  return btoa(String.fromCharCode(...bytes))
+  return typeof window !== 'undefined' && typeof btoa !== 'undefined'
+    ? btoa(String.fromCharCode(...bytes))
+    : Buffer.from(value, 'utf-8').toString('base64')
 }
 
 export const decodeMetadataValue = (value: string): string => {
