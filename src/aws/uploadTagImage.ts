@@ -1,23 +1,26 @@
-import type { S3Client } from '@aws-sdk/client-s3'
-import { PutObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { createTagObject } from '../common/data'
+import { AvailableApis, HttpStatusCode } from '../common/enums'
+import {
+  getImgurMysteryTitleFromBikeTagData,
+  getImgurFoundTitleFromBikeTagData,
+  getImgurMysteryDescriptionFromBikeTagData,
+  getImgurFoundDescriptionFromBikeTagData,
+} from '../common/getters'
 import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
-import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { createTagObject } from '../common/data'
 import {
-  encodeMetadataValue,
-  normalizeUploadBody,
   uploadTagImagePayload,
   getKeyFromUrl,
-  moveImage,
   getBikeTagImageKey,
+  moveImage,
+  normalizeUploadBody,
+  encodeMetadataValue,
 } from './helpers'
 import {
-  getImgurFoundTitleFromBikeTagData,
-  getImgurFoundDescriptionFromBikeTagData,
-  getImgurMysteryTitleFromBikeTagData,
-  getImgurMysteryDescriptionFromBikeTagData,
-} from '../common/getters'
+  getContentTypeFromExtension,
+  getExtensionFromUrl,
+} from '../common/methods'
 
 export async function uploadTagImage(
   client: S3Client,
@@ -40,29 +43,69 @@ export async function uploadTagImage(
   const tryUploadImage = async (
     type: 'mystery' | 'found'
   ): Promise<string | undefined> => {
-    const urlField = `${type}ImageUrl` as const
-    const blobField = `${type}Image` as const
-
-    const key = await getBikeTagImageKey(
-      type,
-      type === 'mystery' ? payload.mysteryPlayer : payload.foundPlayer,
-      payload.tagnumber,
-      payload.game,
-      payload.contentType,
-      payload.folder ?? 'queue'
-    )
+    const urlField = `${type}ImageUrl`
+    const blobField = `${type}Image`
 
     const bucket = `${payload.game}-biketag`
     const region = payload.region ?? 'nyc3'
-    const fullUrl = `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`
+    const folder = payload.folder ?? 'queue'
 
-    // Download if blob is missing
-    if (!payload[blobField] && payload[urlField]) {
+    const player =
+      type === 'mystery' ? payload.mysteryPlayer : payload.foundPlayer
+
+    let contentType = payload.contentType
+
+    const existingUrl = payload[urlField]
+    const currentKey = existingUrl ? getKeyFromUrl(existingUrl) : ''
+
+    const isBucketUrl = existingUrl?.includes(`${bucket}.${region}`)
+
+    if (isBucketUrl) {
+      // 🔔 Ensure inferredContentType is populated before key comparison
+      if (!contentType) {
+        const ext = getExtensionFromUrl(existingUrl)
+        if (ext) {
+          contentType = getContentTypeFromExtension(ext)
+        }
+      }
+
+      // If it's already our bucket, but wrong key (wrong folder, missing hash, etc.)
+      const expectedKey = await getBikeTagImageKey(
+        type,
+        player,
+        payload.tagnumber,
+        payload.game,
+        contentType,
+        folder
+      )
+
+      const expectedUrl = `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${expectedKey}`
+
+      if (currentKey === expectedKey) {
+        return existingUrl // Correct location → nothing to do.
+      }
+
+      // 🔧 Move it if it's not at the right key
+      const moveResult = await moveImage(
+        client,
+        bucket,
+        currentKey,
+        expectedKey
+      )
+      if (moveResult.success) return expectedUrl
+
+      success = false
+      errors.push(`${type} ${moveResult.error}` || ` ${type} image move failed`)
+      return undefined
+    }
+
+    // If not our bucket → download before inferring key
+    if (!payload[blobField] && existingUrl) {
       try {
-        const result = await maybeDownloadImage(payload[urlField])
+        const result = await maybeDownloadImage(existingUrl)
         if (result) {
           payload[blobField] = result.blob
-          payload.contentType ||= result.contentType
+          contentType ||= result.contentType
         }
       } catch {
         success = false
@@ -71,20 +114,23 @@ export async function uploadTagImage(
       }
     }
 
-    const existingUrl = payload[urlField]
-    const currentKey = existingUrl ? getKeyFromUrl(existingUrl) : ''
-
-    if (existingUrl?.includes(bucket)) {
-      if (currentKey === key) {
-        return existingUrl // Already correct
+    if (!contentType && existingUrl) {
+      const ext = getExtensionFromUrl(existingUrl)
+      if (ext) {
+        contentType = getContentTypeFromExtension(ext)
       }
-      // Move if possible
-      const moveResult = await moveImage(client, bucket, currentKey, key)
-      if (moveResult.success) return fullUrl
-      success = false
-      errors.push(`${type} ${moveResult.error}` || ` ${type} image move failed`)
-      return undefined
     }
+
+    const key = await getBikeTagImageKey(
+      type,
+      player,
+      payload.tagnumber,
+      payload.game,
+      contentType,
+      folder
+    )
+
+    const fullUrl = `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`
 
     if (!payload[blobField]) {
       success = false
@@ -92,7 +138,6 @@ export async function uploadTagImage(
       return undefined
     }
 
-    // set found and mystery times as necessary (in seconds)
     if (type === 'mystery') {
       payload.mysteryTime = Math.floor(Date.now() / 1000)
     } else if (type === 'found') {
@@ -103,6 +148,7 @@ export async function uploadTagImage(
       type === 'mystery'
         ? getImgurMysteryTitleFromBikeTagData(payload as Tag)
         : getImgurFoundTitleFromBikeTagData(payload as Tag)
+
     const description =
       type === 'mystery'
         ? getImgurMysteryDescriptionFromBikeTagData(payload as Tag)
@@ -110,13 +156,12 @@ export async function uploadTagImage(
 
     try {
       if (typeof window === 'undefined') {
-        // Backend path
         await client.send(
           new PutObjectCommand({
             Bucket: bucket,
             Key: key,
             Body: await normalizeUploadBody(payload[blobField]),
-            ContentType: payload.contentType,
+            ContentType: contentType,
             ACL: 'public-read',
             Metadata: {
               title: encodeMetadataValue(title.trim()),
@@ -125,11 +170,10 @@ export async function uploadTagImage(
           })
         )
       } else if (this.fetchSignedUrl && this.plainFetcher) {
-        // Frontend path: signed URL upload using plainFetcher
         const signedUrlResponse = await this.fetchSignedUrl({
           key,
           p_id: payload.playerId,
-          contentType: payload.contentType,
+          contentType: contentType,
         })
 
         if (!signedUrlResponse.success || !signedUrlResponse.data) {
@@ -140,7 +184,7 @@ export async function uploadTagImage(
         await this.plainFetcher(signedUrlResponse.data, {
           method: 'PUT',
           headers: {
-            'Content-Type': payload.contentType,
+            'Content-Type': contentType,
             'x-amz-meta-title': encodeMetadataValue(title.trim()),
             'x-amz-meta-description': encodeMetadataValue(description.trim()),
             'x-amz-acl': 'public-read',

@@ -5,7 +5,6 @@ import {
   SanityCredentials,
   Credentials,
   BikeTagCredentials,
-  Payload,
   BikeTagConfiguration,
   CommonData,
   gameLongestTimeBetweenTagsData,
@@ -963,9 +962,9 @@ export const getPlayersWithHighestNumberTagsPerDayData = (
   return highestTagsPerDayData
 }
 
-export const extname = (filename) => {
-  const index = filename.lastIndexOf('.')
-  return index >= 0 ? filename.slice(index) : ''
+export const getExtensionFromUrl = (url: string): string | undefined => {
+  const match = url.match(/\.([a-zA-Z0-9]+)(?:\?|#|$)/)
+  return match ? match[1].toLowerCase() : undefined
 }
 
 export const getImageExtension = (contentType) => {
@@ -980,4 +979,19 @@ export const getImageExtension = (contentType) => {
   }
 
   return imageMimeToExt[contentType.toLowerCase()]
+}
+
+export const getContentTypeFromExtension = (ext: string): string => {
+  const extToMime = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    gif: 'image/gif',
+    webp: 'image/webp',
+    bmp: 'image/bmp',
+    avif: 'image/avif',
+    tiff: 'image/tiff',
+  }
+
+  return extToMime[ext.toLowerCase()] ?? 'application/octet-stream'
 }
