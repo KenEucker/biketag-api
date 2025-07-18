@@ -1,9 +1,17 @@
 import type { S3Client } from '@aws-sdk/client-s3'
+import { CopyObjectCommand } from '@aws-sdk/client-s3'
 import { BikeTagApiResponse } from '../common/types'
 import { createTagObject } from '../common/data'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { Tag } from '../common/schema'
 import { resizeAndSaveVariants, type updateTagPayload } from './helpers'
+import { getKeyFromUrl, encodeMetadataValue } from './helpers'
+import {
+  getImgurFoundTitleFromBikeTagData,
+  getImgurFoundDescriptionFromBikeTagData,
+  getImgurMysteryTitleFromBikeTagData,
+  getImgurMysteryDescriptionFromBikeTagData,
+} from '../common/getters'
 import TinyCache from 'tinycache'
 
 export async function updateTag(
@@ -14,7 +22,7 @@ export async function updateTag(
   payload.folder = payload.folder ?? 'main'
 
   let success = true
-  let error: any = undefined
+  let error: string | undefined
 
   const tagExistsResponse = await this.getTags(
     {
@@ -30,12 +38,10 @@ export async function updateTag(
       ? tagExistsResponse.data[0]
       : null
 
-  const needsMystery =
-    !existingTag?.mysteryImageUrl?.length &&
-    (!!payload.mysteryImage || !!payload.mysteryImageUrl)
-  const needsFound =
-    !existingTag?.foundImageUrl?.length &&
-    (!!payload.foundImage || !!payload.foundImageUrl)
+  const needsMystery = !!(
+    payload.mysteryImageUrl?.length || payload.mysteryImage
+  )
+  const needsFound = !!(payload.foundImageUrl?.length || payload.foundImage)
 
   if (needsMystery || needsFound) {
     const uploadResponse = await this.uploadTagImage(client, payload)
@@ -51,13 +57,76 @@ export async function updateTag(
       success = false
       error = uploadResponse.error
     }
-  } else {
+  } else if (existingTag) {
+    // Metadata-only update
     payload = { ...existingTag, ...payload }
+
+    const bucket = `${payload.game}-biketag`
+
+    // Explicit metadata refresh for mystery image
+    if (existingTag.mysteryImageUrl) {
+      const mysteryKey = getKeyFromUrl(existingTag.mysteryImageUrl)
+      try {
+        await client.send(
+          new CopyObjectCommand({
+            Bucket: bucket,
+            CopySource: `${bucket}/${mysteryKey}`,
+            Key: mysteryKey,
+            ACL: 'public-read',
+            MetadataDirective: 'REPLACE',
+            Metadata: {
+              title: encodeMetadataValue(
+                getImgurMysteryTitleFromBikeTagData(payload as Tag).trim()
+              ),
+              description: encodeMetadataValue(
+                getImgurMysteryDescriptionFromBikeTagData(payload as Tag).trim()
+              ),
+            },
+          })
+        )
+      } catch (err: any) {
+        success = false
+        error =
+          (error ?? '') +
+          ` Failed to update metadata for mystery image: ${err.message || err}`
+      }
+    }
+
+    // Explicit metadata refresh for found image
+    if (existingTag.foundImageUrl) {
+      const foundKey = getKeyFromUrl(existingTag.foundImageUrl)
+      try {
+        await client.send(
+          new CopyObjectCommand({
+            Bucket: bucket,
+            CopySource: `${bucket}/${foundKey}`,
+            Key: foundKey,
+            ACL: 'public-read',
+            MetadataDirective: 'REPLACE',
+            Metadata: {
+              title: encodeMetadataValue(
+                getImgurFoundTitleFromBikeTagData(payload as Tag).trim()
+              ),
+              description: encodeMetadataValue(
+                getImgurFoundDescriptionFromBikeTagData(payload as Tag).trim()
+              ),
+            },
+          })
+        )
+      } catch (err: any) {
+        success = false
+        error =
+          (error ?? '') +
+          ` Failed to update metadata for found image: ${err.message || err}`
+      }
+    }
+  } else {
+    success = false
+    error = `Tag ${payload.tagnumber} not found in folder ${payload.folder}`
   }
 
-  // ✅ Resize variants if requested
   if (success && payload.resize === true) {
-    let resizeErrors = []
+    let resizeErrors: string[] = []
     const tag = createTagObject(payload)
 
     if (payload.mysteryImageUrl) {
@@ -69,9 +138,11 @@ export async function updateTag(
           resizeHost: payload.host,
           folder: payload.folder,
         })
-      } catch (resizeErr) {
+      } catch (resizeErr: any) {
         success = false
-        resizeErrors.push(`Failed to resize mystery image: ${resizeErr}`)
+        resizeErrors.push(
+          `Failed to resize mystery image: ${resizeErr.message || resizeErr}`
+        )
       }
     }
 
@@ -84,14 +155,16 @@ export async function updateTag(
           resizeHost: payload.host,
           folder: payload.folder,
         })
-      } catch (resizeErr) {
+      } catch (resizeErr: any) {
         success = false
-        resizeErrors.push(`Failed to resize found image: ${resizeErr}`)
+        resizeErrors.push(
+          `Failed to resize found image: ${resizeErr.message || resizeErr}`
+        )
       }
     }
 
     if (resizeErrors.length > 0) {
-      error += ' ' + resizeErrors.join('; ')
+      error = (error ?? '') + ' ' + resizeErrors.join('; ')
     }
   }
 
