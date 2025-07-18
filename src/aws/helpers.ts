@@ -624,31 +624,52 @@ export const moveImage = async (
   client: S3Client,
   bucket: string,
   sourceKey: string,
-  destinationKey: string
+  destinationKey: string,
+  moveVariants: boolean = true
 ): Promise<{ success: boolean; error?: string }> => {
-  try {
-    // Copy with metadata preserved
-    await client.send(
-      new CopyObjectCommand({
-        Bucket: bucket,
-        CopySource: `${bucket}/${sourceKey}`,
-        Key: destinationKey,
-        ACL: 'public-read',
-        MetadataDirective: 'COPY', // Ensures original metadata is preserved
-      })
-    )
+  const variants = moveVariants ? ['', '_small', '_medium'] : ['']
+  let allSuccess = true
+  const errors: string[] = []
 
-    // Delete original
-    await client.send(
-      new DeleteObjectCommand({
-        Bucket: bucket,
-        Key: sourceKey,
-      })
-    )
+  // Extract basename and extension from sourceKey:
+  const match = sourceKey.match(/^(.*?)(\.\w+)$/)
+  const baseSource = match ? match[1] : sourceKey
+  const extension = match ? match[2] : ''
 
-    return { success: true }
-  } catch (err: any) {
-    return { success: false, error: err.message || String(err) }
+  const matchDest = destinationKey.match(/^(.*?)(\.\w+)$/)
+  const baseDest = matchDest ? matchDest[1] : destinationKey
+  const extDest = matchDest ? matchDest[2] : ''
+
+  for (const variant of variants) {
+    const src = `${baseSource}${variant}${extension}`
+    const dest = `${baseDest}${variant}${extDest}`
+
+    try {
+      await client.send(
+        new CopyObjectCommand({
+          Bucket: bucket,
+          CopySource: `${bucket}/${src}`,
+          Key: dest,
+          ACL: 'public-read',
+          MetadataDirective: 'COPY',
+        })
+      )
+
+      await client.send(
+        new DeleteObjectCommand({
+          Bucket: bucket,
+          Key: src,
+        })
+      )
+    } catch (err: any) {
+      allSuccess = false
+      errors.push(`${variant || 'original'}: ${err.message || String(err)}`)
+    }
+  }
+
+  return {
+    success: allSuccess,
+    error: allSuccess ? undefined : errors.join('; '),
   }
 }
 
