@@ -11,6 +11,7 @@ import {
   getTagPrefix,
   listAllS3Objects,
   loadIndex,
+  saveIndex,
 } from './helpers'
 import { Tag } from '../common/schema'
 
@@ -26,7 +27,12 @@ export async function deleteTag(
   let success = true
   let errors = []
 
-  if (folder === 'main') {
+  if (!tagnumber) {
+    success = false
+    errors.push('tagnumber not set')
+  }
+
+  if (folder === 'main' && tagnumber) {
     const prefix = getTagPrefix(folder, game, tagnumber)
     const list = await listAllS3Objects(client, {
       Bucket: bucket,
@@ -115,13 +121,17 @@ export async function deleteTag(
   }
 
   let indexUpdateError = ''
-  try {
-    await loadIndex(client, bucket, folder, region, false, true)
-  } catch (indexErr: any) {
-    indexUpdateError = `Index update failed: ${indexErr.message}`
+  if (success && tagnumber) {
+    try {
+      const index = await loadIndex(client, bucket, folder, region)
+      const newIndex = index.filter((t) => t.tagnumber !== tagnumber)
+      await saveIndex(client, bucket, folder, newIndex)
+    } catch (indexErr: any) {
+      indexUpdateError = `Index update failed: ${indexErr.message}`
+    }
   }
 
-  success = deleted.every(Boolean)
+  success = success && deleted.every(Boolean)
   if (indexUpdateError) {
     success = false
     errors.push(indexUpdateError)
