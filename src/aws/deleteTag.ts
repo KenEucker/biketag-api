@@ -2,6 +2,7 @@ import {
   S3Client,
   DeleteObjectCommand,
   DeleteObjectsCommand,
+  CopyObjectCommand,
 } from '@aws-sdk/client-s3'
 import { deleteTagPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
@@ -12,8 +13,14 @@ import {
   listAllS3Objects,
   loadIndex,
   saveIndex,
+  getKeyFromUrl,
+  encodeMetadataValue,
 } from './helpers'
 import { Tag } from '../common/schema'
+import {
+  getImgurMysteryTitleFromBikeTagData,
+  getImgurMysteryDescriptionFromBikeTagData,
+} from '../common/getters'
 
 export async function deleteTag(
   client: S3Client,
@@ -24,9 +31,8 @@ export async function deleteTag(
     payload
   const bucket = `${game}-biketag`
   const deleted: boolean[] = []
-
   let success = true
-  let errors = []
+  let errors: string[] = []
 
   if (!tagnumber) {
     success = false
@@ -43,10 +49,7 @@ export async function deleteTag(
     const deleteOps = list.map(async (obj) => {
       try {
         await client.send(
-          new DeleteObjectCommand({
-            Bucket: bucket,
-            Key: obj.Key,
-          })
+          new DeleteObjectCommand({ Bucket: bucket, Key: obj.Key })
         )
         return true
       } catch (err) {
@@ -71,12 +74,10 @@ export async function deleteTag(
         '',
         folder
       )
-
       const mysteryObjects = await listAllS3Objects(client, {
         Bucket: bucket,
         Prefix: mysteryKey,
       })
-
       keysToDelete.push(...mysteryObjects.map((obj) => ({ Key: obj.Key! })))
     }
 
@@ -89,12 +90,10 @@ export async function deleteTag(
         '',
         folder
       )
-
       const foundObjects = await listAllS3Objects(client, {
         Bucket: bucket,
         Prefix: foundKey,
       })
-
       keysToDelete.push(...foundObjects.map((obj) => ({ Key: obj.Key! })))
     }
 
@@ -106,7 +105,6 @@ export async function deleteTag(
             Delete: { Objects: keysToDelete },
           })
         )
-
         deleted.push(...keysToDelete.map(() => true))
 
         if (result.Errors && result.Errors.length > 0) {
@@ -124,8 +122,52 @@ export async function deleteTag(
   let indexUpdateError = ''
   if (success && tagnumber) {
     try {
-      const index = await loadIndex(client, bucket, folder, region)
+      let index = await loadIndex(client, bucket, folder, region)
       const newIndex = index.filter((t) => t.tagnumber !== tagnumber)
+
+      if (folder === 'main' && newIndex.length > 0) {
+        const idx = newIndex.findIndex((t) => t.tagnumber === tagnumber - 1)
+        const latestTag = { ...newIndex[idx] }
+
+        // Reset fields to mystery state
+        latestTag.gps = { lat: 0, long: 0, alt: 0 }
+        latestTag.foundPlayer = ''
+        latestTag.foundImageUrl = ''
+        latestTag.foundTime = 0
+        latestTag.foundLocation = ''
+
+        // Refresh metadata on mystery image
+        if (latestTag.mysteryImageUrl) {
+          const mysteryKey = getKeyFromUrl(latestTag.mysteryImageUrl)
+          try {
+            await client.send(
+              new CopyObjectCommand({
+                Bucket: bucket,
+                CopySource: `${bucket}/${mysteryKey}`,
+                Key: mysteryKey,
+                ACL: 'public-read',
+                MetadataDirective: 'REPLACE',
+                Metadata: {
+                  title: encodeMetadataValue(
+                    getImgurMysteryTitleFromBikeTagData(latestTag).trim()
+                  ),
+                  description: encodeMetadataValue(
+                    getImgurMysteryDescriptionFromBikeTagData(latestTag).trim()
+                  ),
+                },
+              })
+            )
+          } catch (err: any) {
+            success = false
+            errors.push(
+              `Failed to refresh metadata for mystery image: ${err.message}`
+            )
+          }
+        }
+
+        newIndex[idx] = latestTag
+      }
+
       await saveIndex(client, bucket, folder, newIndex)
     } catch (indexErr: any) {
       indexUpdateError = `Index update failed: ${indexErr.message}`
@@ -141,7 +183,7 @@ export async function deleteTag(
   return {
     data: deleted,
     success,
-    error: errors.join(';'),
+    error: errors.join('; '),
     source: AvailableApis[AvailableApis.aws],
     status: success ? HttpStatusCode.Ok : HttpStatusCode.BadRequest,
   }
