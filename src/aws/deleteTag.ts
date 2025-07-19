@@ -127,45 +127,53 @@ export async function deleteTag(
 
       if (folder === 'main' && newIndex.length > 0) {
         const idx = newIndex.findIndex((t) => t.tagnumber === tagnumber - 1)
-        const latestTag = { ...newIndex[idx] }
 
-        // Reset fields to mystery state
-        latestTag.gps = { lat: 0, long: 0, alt: 0 }
-        latestTag.foundPlayer = ''
-        latestTag.foundImageUrl = ''
-        latestTag.foundTime = 0
-        latestTag.foundLocation = ''
+        if (idx === -1) {
+          errors.push(`Previous tag ${tagnumber - 1} not found in index`)
+          success = false
+        } else {
+          const latestTag = { ...newIndex[idx] }
 
-        // Refresh metadata on mystery image
-        if (latestTag.mysteryImageUrl) {
-          const mysteryKey = getKeyFromUrl(latestTag.mysteryImageUrl)
-          try {
-            await client.send(
-              new CopyObjectCommand({
-                Bucket: bucket,
-                CopySource: `${bucket}/${mysteryKey}`,
-                Key: mysteryKey,
-                ACL: 'public-read',
-                MetadataDirective: 'REPLACE',
-                Metadata: {
-                  title: encodeMetadataValue(
-                    getImgurMysteryTitleFromBikeTagData(latestTag).trim()
-                  ),
-                  description: encodeMetadataValue(
-                    getImgurMysteryDescriptionFromBikeTagData(latestTag).trim()
-                  ),
-                },
-              })
-            )
-          } catch (err: any) {
-            success = false
-            errors.push(
-              `Failed to refresh metadata for mystery image: ${err.message}`
-            )
+          // Reset fields to mystery state
+          latestTag.gps = { lat: 0, long: 0, alt: 0 }
+          latestTag.foundPlayer = ''
+          latestTag.foundImageUrl = ''
+          latestTag.foundTime = 0
+          latestTag.foundLocation = ''
+
+          // Refresh metadata on mystery image
+          if (latestTag.mysteryImageUrl) {
+            const mysteryKey = getKeyFromUrl(latestTag.mysteryImageUrl)
+            try {
+              await client.send(
+                new CopyObjectCommand({
+                  Bucket: bucket,
+                  CopySource: `${bucket}/${mysteryKey}`,
+                  Key: mysteryKey,
+                  ACL: 'public-read',
+                  MetadataDirective: 'REPLACE',
+                  Metadata: {
+                    title: encodeMetadataValue(
+                      getImgurMysteryTitleFromBikeTagData(latestTag).trim()
+                    ),
+                    description: encodeMetadataValue(
+                      getImgurMysteryDescriptionFromBikeTagData(
+                        latestTag
+                      ).trim()
+                    ),
+                  },
+                })
+              )
+            } catch (err: any) {
+              success = false
+              errors.push(
+                `Failed to refresh metadata for mystery image: ${err.message}`
+              )
+            }
           }
-        }
 
-        newIndex[idx] = latestTag
+          newIndex[idx] = latestTag
+        }
       }
 
       await saveIndex(client, bucket, folder, newIndex)
