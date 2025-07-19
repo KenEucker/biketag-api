@@ -55,10 +55,15 @@ export async function queueTag(
     const mysteryTagPayload = payload
     const foundTagPayload = payload
     foundTagPayload.tagnumber = payload.tagnumber - 1
+    const isBrowserRequest = typeof window !== 'undefined'
 
     const [mysteryRes, foundRes] = await Promise.all([
-      this.updateTag(client, mysteryTagPayload, cache),
-      this.updateTag(client, foundTagPayload, cache),
+      isBrowserRequest
+        ? this.biketagUpdate(mysteryTagPayload, cache)
+        : this.updateTag(mysteryTagPayload, cache),
+      isBrowserRequest
+        ? this.biketagUpdate(foundTagPayload, cache)
+        : this.updateTag(foundTagPayload, cache),
     ])
 
     success = mysteryRes.success && foundRes.success
@@ -71,7 +76,7 @@ export async function queueTag(
     const image = isMystery ? payload.mysteryImage : payload.foundImage
     payload.contentType = (image as File)?.type ?? 'image/jpeg'
 
-    const uploadResponse = await this.uploadTagImage(client, payload)
+    const uploadResponse = await this.uploadTagImage(payload)
 
     if (uploadResponse.success) {
       const uploaded = uploadResponse.data

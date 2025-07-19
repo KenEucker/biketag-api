@@ -53,7 +53,7 @@ export type updatePlayerPayload = Partial<Player> & SanityUploadPayload
 export type updateTagPayload = Partial<Tag> &
   SanityUploadPayload & {
     resize?: boolean
-  }
+  } & CommonPayloadData
 
 export type uploadTagImagePayload = {
   tagnumber: number

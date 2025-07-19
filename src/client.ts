@@ -406,7 +406,7 @@ export class BikeTagClient {
 
   protected getPassthroughApiMethod(
     method: any,
-    client: ImgurClient | BikeTagClient | SanityClient,
+    client: ImgurClient | BikeTagClient | SanityClient | S3Client,
     dataType: DataTypes = DataTypes.tag,
     binding?: any
   ): any {
@@ -840,17 +840,36 @@ export class BikeTagClient {
 
     switch (options.source) {
       case AvailableApis.aws:
-        clientMethod = clientMethod.bind({
-          getQueue: this.getPassthroughApiMethod(api.getQueue, client),
-          getTags: this.getPassthroughApiMethod(api.getTags, client),
-          updateTag: this.getPassthroughApiMethod(api.updateTag, client),
-          uploadTagImage: api.uploadTagImage.bind({
+        const getTags = this.getPassthroughApiMethod(api.getTags, client)
+        const uploadTagImage = this.getPassthroughApiMethod(
+          api.uploadTagImage,
+          client,
+          DataTypes.tag,
+          {
             plainFetcher: this.plainFetcher,
             fetchSignedUrl: this.getPassthroughApiMethod(
               biketagApi.fetchSignedUrl,
               this
             ),
-          }),
+          }
+        )
+        clientMethod = clientMethod.bind({
+          getQueue: this.getPassthroughApiMethod(api.getQueue, client),
+          getTags,
+          biketagUpdate: this.getPassthroughApiMethod(
+            biketagApi.updateTag,
+            this
+          ),
+          updateTag: this.getPassthroughApiMethod(
+            api.updateTag,
+            client,
+            DataTypes.tag,
+            {
+              getTags,
+              uploadTagImage,
+            }
+          ),
+          uploadTagImage,
         })
         break
       case AvailableApis.imgur:
