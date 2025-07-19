@@ -839,7 +839,7 @@ export class BikeTagClient {
     let clientMethod = api.queueTag
 
     switch (options.source) {
-      case AvailableApis.aws:
+      case AvailableApis.aws: {
         const getTags = this.getPassthroughApiMethod(api.getTags, client)
         const uploadTagImage = this.getPassthroughApiMethod(
           api.uploadTagImage,
@@ -872,6 +872,7 @@ export class BikeTagClient {
           uploadTagImage,
         })
         break
+      }
       case AvailableApis.imgur:
         clientMethod = clientMethod.bind({
           getQueue: this.getPassthroughApiMethod(api.getQueue, client),
