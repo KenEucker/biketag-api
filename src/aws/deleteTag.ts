@@ -19,6 +19,7 @@ export async function deleteTag(
   client: S3Client,
   payload: deleteTagPayload & { tag?: Tag }
 ): Promise<BikeTagApiResponse<boolean[]>> {
+  payload.folder = payload.folder ?? 'queue'
   const { tagnumber, folder, game, region, mysteryPlayer, foundPlayer } =
     payload
   const bucket = `${game}-biketag`
