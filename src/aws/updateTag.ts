@@ -4,7 +4,12 @@ import { BikeTagApiResponse } from '../common/types'
 import { createTagObject } from '../common/data'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { Tag } from '../common/schema'
-import { resizeAndSaveVariants, type updateTagPayload } from './helpers'
+import {
+  loadIndex,
+  resizeAndSaveVariants,
+  saveIndex,
+  type updateTagPayload,
+} from './helpers'
 import { getKeyFromUrl, encodeMetadataValue } from './helpers'
 import {
   getImgurFoundTitleFromBikeTagData,
@@ -24,6 +29,7 @@ export async function updateTag(
   let success = true
   let error: string | undefined
 
+  const bucket = `${payload.game}-biketag`
   const tagExistsResponse = await this.getTags(
     {
       game: payload.game,
@@ -60,8 +66,6 @@ export async function updateTag(
   } else if (existingTag) {
     // Metadata-only update
     payload = { ...existingTag, ...payload }
-
-    const bucket = `${payload.game}-biketag`
 
     // Explicit metadata refresh for mystery image
     if (existingTag.mysteryImageUrl) {
@@ -123,6 +127,37 @@ export async function updateTag(
   } else {
     success = false
     error = `Tag ${payload.tagnumber} not found in folder ${payload.folder}`
+  }
+
+  if (success) {
+    try {
+      // 1️⃣ Load current index
+      let index: Tag[] = await loadIndex(
+        client,
+        bucket,
+        payload.folder,
+        payload.region
+      )
+      const updatedTag = createTagObject(payload)
+
+      // 2️⃣ Replace or add tag
+      const existingIndex = index.findIndex(
+        (t) => t.tagnumber === updatedTag.tagnumber
+      )
+      if (existingIndex !== -1) {
+        index[existingIndex] = updatedTag
+      } else {
+        index.push(updatedTag)
+      }
+
+      // 3️⃣ Save new index.json atomically
+      await saveIndex(client, bucket, payload.folder, index)
+    } catch (err: any) {
+      success = false
+      error =
+        (error ?? '') +
+        ` Failed to atomically update index: ${err.message || err}`
+    }
   }
 
   if (success && payload.resize === true) {
