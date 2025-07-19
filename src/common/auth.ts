@@ -58,13 +58,19 @@ export const retrieveBiketagJwt = async (
   const rawHost =
     typeof window !== 'undefined'
       ? window.location.hostname
-      : config.biketag?.host ||
-        `${config.biketag.game ? config.biketag.game + '.' : ''}localhost`
+      : config.biketag?.host || 'localhost'
 
-  const origin = rawHost
+  const baseHost = rawHost
     .replace(/^https?:\/\//, '')
     .replace(/\/.*$/, '')
     .replace(/:\d+$/, '')
+
+  const stripFirstSubdomain = (host: string) => {
+    const parts = host.split('.')
+    return parts.length > 2 ? parts.slice(1).join('.') : host
+  }
+
+  const origin = stripFirstSubdomain(baseHost)
 
   const clientAssertion = clientAssertionOverride || config.biketag?.clientKey
 
@@ -89,9 +95,7 @@ export const retrieveBiketagJwt = async (
   const clientToken = response.data
 
   client.config({
-    biketag: {
-      clientToken,
-    },
+    biketag: { clientToken },
   })
 
   return clientToken
