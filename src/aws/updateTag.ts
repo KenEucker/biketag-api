@@ -198,6 +198,8 @@ export async function updateTag(
       }
     }
 
+    /// TODO: needs to get the updated tag image urls and then update the index
+
     if (resizeErrors.length > 0) {
       error = (error ?? '') + ' ' + resizeErrors.join('; ')
     }
