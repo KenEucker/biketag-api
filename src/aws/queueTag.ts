@@ -52,24 +52,13 @@ export async function queueTag(
   let tagData: Tag | undefined
 
   if (isCompleteQueuedTag) {
-    const mysteryTagPayload = payload
-    const foundTagPayload = payload
-    foundTagPayload.tagnumber = payload.tagnumber - 1
     const isBrowserRequest = typeof window !== 'undefined'
+    const updateResponse = isBrowserRequest
+      ? this.biketagUpdate(payload, cache)
+      : this.updateTag(payload, cache)
 
-    const [mysteryRes, foundRes] = await Promise.all([
-      isBrowserRequest
-        ? this.biketagUpdate(mysteryTagPayload, cache)
-        : this.updateTag(mysteryTagPayload, cache),
-      isBrowserRequest
-        ? this.biketagUpdate(foundTagPayload, cache)
-        : this.updateTag(foundTagPayload, cache),
-    ])
-
-    success = mysteryRes.success && foundRes.success
-    error = !success
-      ? `found: ${foundRes.error}, mystery: ${mysteryRes.error}`
-      : undefined
+    success = updateResponse.success
+    error = !success ? `update tag error: ${updateResponse.error}` : undefined
     tagData = success ? createTagObject(payload) : undefined
   } else {
     const isMystery = !!payload.mysteryImage || !!payload.mysteryImageUrl
