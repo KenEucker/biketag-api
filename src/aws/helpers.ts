@@ -21,11 +21,12 @@ import {
   getTagNumbersFromText,
 } from '../common/getters'
 import { Readable } from 'form-data'
-import { S3ImageMeta } from '../common/types'
+import { ImgurImage, S3ImageMeta } from '../common/types'
 import TinyCache from 'tinycache'
 import { getApiUrl } from '../biketag/helpers'
 import { CommonPayloadData } from '../common/types'
 import { getImageExtension } from '../common/methods'
+import { isFoundImage, isMysteryImage } from '../imgur/helpers'
 
 const indexCache = new TinyCache()
 /** Returns the S3 key prefix for a given tag */
@@ -537,7 +538,8 @@ export const normalizeUploadBody = async (
 
 export const getGroupedTagsByPlayer = (
   groupedImages: S3ImageMeta[][] = [],
-  appendToTagData = {}
+  appendToTagData = {},
+  cache?: typeof TinyCache
 ) => {
   if (!groupedImages.length) return []
 
@@ -551,14 +553,14 @@ export const getGroupedTagsByPlayer = (
 
   // Group player images from the current and previous round
   for (const image of groupedImages[highestTagnumber] ?? []) {
-    const player = getPlayerFromText(image.description)
+    const player = getPlayerFromText(image.description, undefined, cache)
     if (!player) continue
     playerGroupedImages[player] = playerGroupedImages[player] ?? []
     playerGroupedImages[player].push(image)
   }
 
   for (const image of groupedImages[highestTagnumber - 1] ?? []) {
-    const player = getPlayerFromText(image.description)
+    const player = getPlayerFromText(image.description, undefined, cache)
     if (!player) continue
     playerGroupedImages[player] = playerGroupedImages[player] ?? []
     playerGroupedImages[player].push(image)
@@ -571,16 +573,14 @@ export const getGroupedTagsByPlayer = (
     if (images.length === 1) {
       playerGroupedTags.push(
         getBikeTagFromS3ImageSet(
-          images[0].description.includes('tag') ? images[0] : undefined,
-          images[0].description.includes('proof found') ? images[0] : undefined,
+          isMysteryImage(images[0] as ImgurImage) ? images[0] : undefined,
+          isFoundImage(images[0] as ImgurImage) ? images[0] : undefined,
           appendToTagData
         )
       )
     } else if (images.length === 2) {
-      const mysteryImage = images.find((img) => img.description.includes('tag'))
-      const foundImage = images.find((img) =>
-        img.description.includes('proof found')
-      )
+      const mysteryImage = images.find(isMysteryImage)
+      const foundImage = images.find(isFoundImage)
 
       playerGroupedTags.push(
         getBikeTagFromS3ImageSet(mysteryImage, foundImage, appendToTagData)
@@ -594,12 +594,13 @@ export const getGroupedTagsByPlayer = (
 }
 
 export const getGroupedImagesByTagnumber = (
-  ungroupedImages: S3ImageMeta[] = []
+  ungroupedImages: S3ImageMeta[] = [],
+  cache?: typeof TinyCache
 ): S3ImageMeta[][] => {
   const groupedImages: S3ImageMeta[][] = []
 
   ungroupedImages.forEach((image) => {
-    const tagnumbers = getTagNumbersFromText(image.description)
+    const tagnumbers = getTagNumbersFromText(image.description, [], cache)
     const tagnumber = tagnumbers[0] // Assume the first is primary
 
     if (typeof tagnumber === 'number') {

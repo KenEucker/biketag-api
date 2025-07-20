@@ -50,7 +50,7 @@ export async function updateTag(
   const needsFound = !!(payload.foundImageUrl?.length || payload.foundImage)
 
   if (needsMystery || needsFound) {
-    const uploadResponse = await this.uploadTagImage(client, payload)
+    const uploadResponse = await this.uploadTagImage(payload)
 
     if (uploadResponse.success) {
       payload.mysteryImageUrl = uploadResponse.data.mysteryImageUrl
