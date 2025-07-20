@@ -139,8 +139,11 @@ export async function getClaims(
     return {} // 🔒 No auth provided = reject.
   }
 
-  const getValidToken = async (p_id?: string): Promise<string | null> => {
-    if (token && !isJwtExpired(token)) {
+  const getValidToken = async (
+    p_id?: string,
+    forceNew = false
+  ): Promise<string | null> => {
+    if (!forceNew && token && !isJwtExpired(token)) {
       return token
     } else if (clientKey) {
       return await retrieveBiketagJwt(client, clientKey, p_id)
@@ -150,7 +153,7 @@ export async function getClaims(
 
   if (authorization.startsWith('player-id ')) {
     const playerId = authorization.replace('player-id ', '')
-    const validToken = await getValidToken(playerId)
+    const validToken = await getValidToken(playerId, true)
     return validToken ? { biketag: { clientToken: validToken } } : {}
   }
 
