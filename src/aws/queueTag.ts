@@ -53,9 +53,10 @@ export async function queueTag(
 
   if (isCompleteQueuedTag) {
     const isBrowserRequest = typeof window !== 'undefined'
+    payload.tagnumber = payload.tagnumber - 1
     const updateResponse = isBrowserRequest
-      ? this.biketagUpdate(payload, cache)
-      : this.updateTag(payload, cache)
+      ? await this.biketagUpdate(payload, cache)
+      : await this.updateTag(payload, cache)
 
     success = updateResponse.success
     error = !success ? `update tag error: ${updateResponse.error}` : undefined
