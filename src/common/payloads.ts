@@ -147,12 +147,6 @@ export type getAmbassadorPayload = {
   slug?: string
 } & CommonPayloadData
 
-export type importTagPayload = Pick<
-  Tag,
-  'discussionUrl' | 'mysteryImageUrl' | 'foundImageUrl' | 'mentionUrl'
-> &
-  CommonPayloadData
-
 export type getQueuePayload = {
   hash?: string
   queuehash?: string

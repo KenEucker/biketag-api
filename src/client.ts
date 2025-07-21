@@ -34,7 +34,6 @@ import {
   uploadTagImagePayload,
   deleteTagPayload,
   deleteTagsPayload,
-  importTagPayload,
   getPlayersPayload,
   getPlayerPayload,
   getSettingPayload,
@@ -220,6 +219,16 @@ export class BikeTagClient {
     return payload
   }
 
+  /**
+   * Applies defaults and overrides to an API options object based on the data
+   * type being requested.
+   *
+   * @param options - Existing API options
+   * @param dataType - The type of data the request is for
+   * @param overrides - Optional values that override configuration defaults
+   * @param method - Name of the method requesting options
+   * @returns Normalized API options
+   */
   protected getDefaultOptions(
     options: ApiOptions,
     dataType: DataTypes = DataTypes.tag,
@@ -318,6 +327,16 @@ export class BikeTagClient {
     return options
   }
 
+  /**
+   * Determines which API client and adapter should handle a request based on
+   * provided options.
+   *
+   * @param payload - Incoming payload or options
+   * @param overrides - Optional configuration overrides
+   * @param dataType - Type of data being requested
+   * @param method - Name of the method being invoked
+   * @returns Client, api adapter and normalized options
+   */
   protected getClientAdapter(
     payload: any,
     overrides: any = {},
@@ -358,6 +377,12 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Determines which API is currently capable of handling a particular method.
+   *
+   * @param method - Method name to check for availability
+   * @returns The most appropriate API source or null if none are available
+   */
   protected getMostAvailableClient(method?: string): AvailableApis {
     if (
       this.imgurConfig &&
@@ -404,6 +429,16 @@ export class BikeTagClient {
     return null
   }
 
+  /**
+   * Creates a wrapper that forwards a call to another API method while
+   * normalizing payload and options for that method.
+   *
+   * @param method - Method to invoke on the underlying API
+   * @param client - Client instance used to execute the method
+   * @param dataType - Data type of the request
+   * @param binding - Optional binding context for the method
+   * @returns A callable function that forwards arguments to the target method
+   */
   protected getPassthroughApiMethod(
     method: any,
     client: ImgurClient | BikeTagClient | SanityClient | S3Client,
@@ -422,6 +457,13 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Retrieves the current configuration with any supplied overrides and a list
+   * of available API clients.
+   *
+   * @param config - Optional partial configuration to merge with defaults
+   * @returns Complete configuration information
+   */
   protected getConfig(config?: BikeTagConfiguration): BikeTagConfiguration {
     const availableApis = []
     if (this.awsClient) {
@@ -443,6 +485,12 @@ export class BikeTagClient {
     } as BikeTagConfiguration
   }
 
+  /**
+   * Instantiates API client wrappers based on the provided configuration.
+   *
+   * @param config - Configuration describing credentials for each API
+   * @returns The configuration used to initialize the clients
+   */
   protected initializeClients(
     config?: BikeTagConfiguration
   ): BikeTagConfiguration {
@@ -478,6 +526,15 @@ export class BikeTagClient {
 
   /// ****************************  Generic Methods   ************************************** ///
 
+  /**
+   * Helper for generating normalized API options from arbitrary input.
+   *
+   * @param opts - Incoming payload or options
+   * @param dataType - Optional data type the request targets
+   * @param overrides - Optional overrides for configuration values
+   * @param method - Name of the calling method
+   * @returns Normalized API options
+   */
   options(
     opts: any = {},
     dataType?: DataTypes,
@@ -492,6 +549,14 @@ export class BikeTagClient {
     )
   }
 
+  /**
+   * Updates the client configuration and optionally reinitializes API clients.
+   *
+   * @param config - Partial configuration or credentials to merge
+   * @param overwrite - When true, new values overwrite existing ones
+   * @param reInitialize - Recreate underlying API clients when true
+   * @returns The resulting configuration
+   */
   config(
     config?:
       | Partial<Credentials>
@@ -582,14 +647,33 @@ export class BikeTagClient {
     return this.getConfig()
   }
 
+  /**
+   * Performs a request using an Axios instance without authentication or cache.
+   *
+   * @param options - Axios request options
+   * @returns The Axios response promise
+   */
   plainRequest(options: AxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
     return this.plainFetcher(options)
   }
 
+  /**
+   * Performs a request using the caching Axios instance.
+   *
+   * @param options - Axios request options
+   * @returns The Axios response promise
+   */
   cachedRequest(options: AxiosRequestConfig = {}): Promise<AxiosResponse<any>> {
     return this.cachedFetcher(options)
   }
 
+  /**
+   * Performs an authenticated request using the main Axios instance.
+   * Normalizes GET requests so payload data becomes query parameters.
+   *
+   * @param options - Axios request options
+   * @returns The Axios response promise
+   */
   request(options: AxiosRequestConfig = {}): Promise<AxiosResponse<string>> {
     const method = options.method ? options.method.toUpperCase() : 'GET'
 
@@ -608,6 +692,12 @@ export class BikeTagClient {
 
   /// ****************************  Authentication Methods   ******************************* ///
 
+  /**
+   * Requests a signed URL from the configured API for direct uploads.
+   *
+   * @param payload - Data describing the object to upload
+   * @param opts - Optional credentials overriding default configuration
+   */
   fetchSignedUrl(
     payload: fetchSignedUrlPayload,
     opts?: RequireAtLeastOne<Credentials>
@@ -627,6 +717,12 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Retrieves credential claims using an authorization header.
+   *
+   * @param authorization - Optional bearer token to decode
+   * @returns Decoded credential claims
+   */
   fetchCredentials(authorization?: string) {
     return getClaims(this, authorization)
   }
@@ -650,6 +746,13 @@ export class BikeTagClient {
     })
   }
 
+  /**
+   * Retrieves a single BikeTag `Game` from the configured API.
+   *
+   * @param payload - Options identifying the game
+   * @param opts - Optional credentials for the request
+   * @returns A response containing the game data
+   */
   getGame(
     payload?: RequireAtLeastOne<getGamePayload> | string,
     opts?: RequireAtLeastOne<Credentials>
@@ -797,6 +900,13 @@ export class BikeTagClient {
     )
   }
 
+  /**
+   * Retrieves the current queue of tags awaiting approval.
+   *
+   * @param payload - Options for retrieving queued tags
+   * @param opts - Credentials for the request
+   * @returns A response containing queued tags
+   */
   getQueue(
     payload?: RequireAtLeastOne<getQueuePayload>,
     opts?: RequireAtLeastOne<Credentials>
@@ -840,6 +950,13 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Queues a new tag image to be approved by game moderators.
+   *
+   * @param payload - Tag information and image data to queue
+   * @param opts - Credentials for the request
+   * @returns A response containing the queued tag
+   */
   queueTag(
     payload?: RequireAtLeastOne<queueTagPayload>,
     opts?: RequireAtLeastOne<Credentials>
@@ -1162,14 +1279,6 @@ export class BikeTagClient {
     }
   }
 
-  importTag(
-    payload: RequireAtLeastOne<importTagPayload>,
-    opts?: RequireAtLeastOne<Credentials>
-  ): Promise<BikeTagApiResponse<Tag>> {
-    const { source } = this.getClientAdapter(payload, opts)
-    return Promise.reject(`updateTag ${Errors.NotImplemented} ${source}`)
-  }
-
   /**
    * Deletes a single tag for a game.
    *
@@ -1275,6 +1384,13 @@ export class BikeTagClient {
     )
   }
 
+  /**
+   * Retrieves a single player from the configured API.
+   *
+   * @param payload - Player identifier
+   * @param opts - Credentials for the request
+   * @returns The player information
+   */
   getPlayer(
     payload: RequireAtLeastOne<getPlayerPayload> | string,
     opts?: RequireAtLeastOne<Credentials>
@@ -1316,6 +1432,13 @@ export class BikeTagClient {
     })
   }
 
+  /**
+   * Retrieves multiple players from the configured API.
+   *
+   * @param payload - Filtering options or player names
+   * @param opts - Credentials for the request
+   * @returns A response containing player data
+   */
   getPlayers(
     payload?: RequireAtLeastOne<getPlayersPayload> | string[],
     opts?: RequireAtLeastOne<Credentials>
@@ -1421,6 +1544,13 @@ export class BikeTagClient {
     )
   }
 
+  /**
+   * Retrieves a single ambassador.
+   *
+   * @param payload - Ambassador identifier
+   * @param opts - Credentials for the request
+   * @returns Ambassador information
+   */
   getAmbassador(
     payload: RequireAtLeastOne<getAmbassadorPayload> | string,
     opts?: RequireAtLeastOne<Credentials>
@@ -1463,6 +1593,13 @@ export class BikeTagClient {
     })
   }
 
+  /**
+   * Retrieves multiple ambassadors.
+   *
+   * @param payload - Ambassador filter or identifiers
+   * @param opts - Credentials for the request
+   * @returns A response containing ambassadors
+   */
   getAmbassadors(
     payload?: RequireAtLeastOne<getAmbassadorsPayload> | string[],
     opts?: RequireAtLeastOne<Credentials>
@@ -1530,6 +1667,13 @@ export class BikeTagClient {
     )
   }
 
+  /**
+   * Retrieves a single application setting.
+   *
+   * @param payload - Setting identifier
+   * @param opts - Credentials for the request
+   * @returns The requested setting
+   */
   getSetting(
     payload: RequireAtLeastOne<getSettingPayload> | string,
     opts?: RequireAtLeastOne<Credentials>
@@ -1584,6 +1728,13 @@ export class BikeTagClient {
     })
   }
 
+  /**
+   * Retrieves multiple application settings.
+   *
+   * @param payload - Setting identifiers or filters
+   * @param opts - Credentials for the request
+   * @returns A response containing settings
+   */
   getSettings(
     payload?: RequireAtLeastOne<getSettingsPayload> | string[],
     opts?: RequireAtLeastOne<Credentials>
@@ -1634,6 +1785,13 @@ export class BikeTagClient {
     )
   }
 
+  /**
+   * Retrieves a single stat entry.
+   *
+   * @param payload - Stat identifier
+   * @param opts - Credentials for the request
+   * @returns The stat data
+   */
   getStat(
     payload: RequireAtLeastOne<getStatPayload> | string,
     opts?: RequireAtLeastOne<Credentials>
@@ -1688,6 +1846,13 @@ export class BikeTagClient {
     })
   }
 
+  /**
+   * Retrieves multiple stat entries from the API.
+   *
+   * @param payload - Stat identifiers or filters
+   * @param opts - Credentials for the request
+   * @returns A response containing stats
+   */
   getStats(
     payload?: RequireAtLeastOne<getStatsPayload> | string[],
     opts?: RequireAtLeastOne<Credentials>
@@ -1743,6 +1908,13 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Updates a single stat entry.
+   *
+   * @param payload - Stat update data
+   * @param opts - Credentials for the request
+   * @returns Updated stat information
+   */
   updateStat(
     payload?: RequireAtLeastOne<updateStatPayload> | string[],
     opts?: RequireAtLeastOne<Credentials>
@@ -1840,6 +2012,13 @@ export class BikeTagClient {
     )
   }
 
+  /**
+   * Retrieves a single achievement.
+   *
+   * @param payload - Achievement identifier
+   * @param opts - Credentials for the request
+   * @returns The achievement data
+   */
   getAchievement(
     payload: RequireAtLeastOne<getAchievementsPayload> | string,
     opts?: RequireAtLeastOne<Credentials>
@@ -1894,6 +2073,13 @@ export class BikeTagClient {
     })
   }
 
+  /**
+   * Retrieves multiple achievements.
+   *
+   * @param payload - Achievement identifiers or filters
+   * @param opts - Credentials for the request
+   * @returns A response containing achievements
+   */
   getAchievements(
     payload?: RequireAtLeastOne<getAchievementsPayload> | string[],
     opts?: RequireAtLeastOne<Credentials>
@@ -1937,23 +2123,21 @@ export class BikeTagClient {
 
   /// ****************************  Client Instance Methods   ****************************** ///
 
-  /// Data provided by Gun Client
-  // data(opts: any = {}): BikeTagGunClient {
-  //   const options = opts ?? this.biketagConfig
+  /**
+   * Instantiates and returns a configured S3Client instance.
+   *
+   * @param opts - Configuration or credentials for the S3 client
+   * @returns A S3Client instance
+   */
+  objects(opts: any = {}): S3Client {
+    const options = opts ?? this.awsConfig
 
-  //   if (isBikeTagCredentials(options)) {
-  //     if (options.game) {
-  //       return this.biketagClient.get(
-  //         options.game
-  //       ) as unknown as BikeTagGunClient
-  //     } else {
-  //       return new Gun<BikeTagGameState>(options)
-  //     }
-  //   }
+    if (isAWSCredentials(options)) {
+      return new S3Client(options)
+    }
 
-  //   /// Always return a valid gun client, because we can
-  //   return new Gun<BikeTagGameState>(options)
-  // }
+    throw new Error('options are invalid for creating an aws-sdk/s3 client')
+  }
 
   /**
    * Instantiates and returns a configured SanityClient instance.
