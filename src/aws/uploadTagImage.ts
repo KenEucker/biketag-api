@@ -142,9 +142,9 @@ export async function uploadTagImage(
       return undefined
     }
 
-    if (type === 'mystery') {
+    if (type === 'mystery' && !payload.mysteryTime) {
       payload.mysteryTime = Math.floor(Date.now() / 1000)
-    } else if (type === 'found') {
+    } else if (type === 'found' && !payload.foundTime) {
       payload.foundTime = Math.floor(Date.now() / 1000)
     }
 
