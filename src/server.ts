@@ -5,7 +5,6 @@ import {
   getTagsPayload,
   uploadTagImagePayload,
   updateTagPayload,
-  importTagPayload,
   deleteTagsPayload,
   getPlayersPayload,
   getAmbassadorsPayload,
@@ -112,22 +111,6 @@ export class BikeTagServer extends BikeTagClient {
     ) as Promise<BikeTagApiResponse<Tag>>
   }
 
-  @Patch('queue/{game}')
-  // @ts-ignore
-  submitRoute(
-    // @ts-ignore
-    @Body() payload: queueTagPayload,
-    // @ts-ignore
-    @Path('game') game?: string,
-    opts?: Credentials
-  ): Promise<BikeTagApiResponse<Tag>> {
-    payload.game = game ?? payload.game
-    return this.submitQueuedTag(
-      payload,
-      opts as unknown as RequireAtLeastOne<Credentials>
-    ) as Promise<BikeTagApiResponse<Tag>>
-  }
-
   /// ****************************  Tag Route Methods   ************************************ ///
 
   @Post('tags/{game}')
@@ -176,22 +159,6 @@ export class BikeTagServer extends BikeTagClient {
       payload,
       opts as unknown as RequireAtLeastOne<Credentials>
     ) as Promise<BikeTagApiResponse<boolean>>
-  }
-
-  @Put('tags/{game}')
-  // @ts-ignore
-  importRoute(
-    // @ts-ignore
-    @Body() payload: importTagPayload,
-    // @ts-ignore
-    @Path('game') game?: string,
-    opts?: Credentials
-  ): Promise<BikeTagApiResponse<Tag>> {
-    payload.game = game ?? payload.game
-    return this.importTag(
-      payload,
-      opts as unknown as RequireAtLeastOne<Credentials>
-    ) as Promise<BikeTagApiResponse<Tag>>
   }
 
   @Delete('tags/{game}')
