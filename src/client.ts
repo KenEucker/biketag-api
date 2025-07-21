@@ -1100,13 +1100,18 @@ export class BikeTagClient {
         case AvailableApis.aws:
           clientMethod = clientMethod.bind({
             getTags: this.getPassthroughApiMethod(api.getTags, client),
-            uploadTagImage: api.uploadTagImage.bind({
-              plainFetcher: this.plainFetcher,
-              fetchSignedUrl: this.getPassthroughApiMethod(
-                biketagApi.fetchSignedUrl,
-                this
-              ),
-            }),
+            uploadTagImage: this.getPassthroughApiMethod(
+              api.uploadTagImage,
+              client,
+              DataTypes.tag,
+              {
+                plainFetcher: this.plainFetcher,
+                fetchSignedUrl: this.getPassthroughApiMethod(
+                  biketagApi.fetchSignedUrl,
+                  this
+                ),
+              }
+            ),
           })
           break
       }
