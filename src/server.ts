@@ -112,22 +112,6 @@ export class BikeTagServer extends BikeTagClient {
     ) as Promise<BikeTagApiResponse<Tag>>
   }
 
-  @Patch('queue/{game}')
-  // @ts-ignore
-  submitRoute(
-    // @ts-ignore
-    @Body() payload: queueTagPayload,
-    // @ts-ignore
-    @Path('game') game?: string,
-    opts?: Credentials
-  ): Promise<BikeTagApiResponse<Tag>> {
-    payload.game = game ?? payload.game
-    return this.submitQueuedTag(
-      payload,
-      opts as unknown as RequireAtLeastOne<Credentials>
-    ) as Promise<BikeTagApiResponse<Tag>>
-  }
-
   /// ****************************  Tag Route Methods   ************************************ ///
 
   @Post('tags/{game}')

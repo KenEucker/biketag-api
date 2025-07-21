@@ -695,6 +695,13 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Retrieves all BikeTag `Game` entries regardless of game name provided.
+   *
+   * @param payload - The getGamePayload for retrieving BikeTag `Game` data
+   * @param opts - Credentials and other options for retrieving BikeTag `Game` data
+   * @returns A promise that resolves to an array of `Game` objects
+   */
   getAllGames(
     payload?: RequireAtLeastOne<getGamePayload> | string,
     opts?: RequireAtLeastOne<Credentials>
@@ -726,6 +733,13 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Updates BikeTag `Game` data based on the provided payload.
+   *
+   * @param payload - The updateGamePayload containing new game data
+   * @param opts - Credentials and other options for updating the game
+   * @returns A promise that resolves to success status
+   */
   updateGame(
     payload: RequireAtLeastOne<updateGamePayload>,
     opts?: RequireAtLeastOne<Credentials>
@@ -898,34 +912,6 @@ export class BikeTagClient {
     }
   }
 
-  submitQueuedTag(
-    payload?: RequireAtLeastOne<queueTagPayload>,
-    opts?: RequireAtLeastOne<Credentials>
-  ): Promise<BikeTagApiResponse<Tag>> {
-    /// using the player information and the tag number, send the submit tag request to the biketag server
-    const { client, options, api, source } = this.getClientAdapter(
-      payload,
-      opts,
-      DataTypes.queue
-    )
-    const clientMethod = api.submitQueuedTag
-
-    /// If the client adapter implements the method
-    if (clientMethod) {
-      return clientMethod(client, options).catch((e) => {
-        return {
-          status: HttpStatusCode.InternalServerError,
-          data: null,
-          error: e.code ?? e,
-          success: false,
-          source,
-        }
-      })
-    } else {
-      throw `submitQueuedTag ${Errors.NotImplemented} ${source}`
-    }
-  }
-
   /// ****************************  Tag Data Methods   ************************************ ///
 
   /**
@@ -1036,6 +1022,13 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Uploads a tag image (mystery or found) for a game.
+   *
+   * @param payload - The uploadTagImagePayload or array of payloads
+   * @param opts - Credentials for image upload
+   * @returns A promise that resolves when upload completes
+   */
   uploadTagImage(
     payload:
       | RequireAtLeastOne<uploadTagImagePayload>
@@ -1076,6 +1069,13 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Updates an existing tag for a game.
+   *
+   * @param payload - The updateTagPayload containing updates
+   * @param opts - Credentials and other options for update
+   * @returns A promise that resolves to success status
+   */
   updateTag(
     payload: RequireAtLeastOne<updateTagPayload>,
     opts?: RequireAtLeastOne<Credentials>
@@ -1130,6 +1130,13 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Archives a tag in a game.
+   *
+   * @param payload - The archiveTagPayload identifying the tag
+   * @param opts - Credentials for archiving
+   * @returns A promise that resolves to success status
+   */
   archiveTag(
     payload: RequireAtLeastOne<archiveTagPayload>,
     opts?: RequireAtLeastOne<Credentials>
@@ -1163,6 +1170,13 @@ export class BikeTagClient {
     return Promise.reject(`updateTag ${Errors.NotImplemented} ${source}`)
   }
 
+  /**
+   * Deletes a single tag for a game.
+   *
+   * @param payload - The deleteTagPayload identifying the tag
+   * @param opts - Credentials for deletion
+   * @returns A promise that resolves when deletion completes
+   */
   deleteTag(
     payload: RequireAtLeastOne<deleteTagPayload> | number,
     opts?: RequireAtLeastOne<Credentials>
@@ -1196,6 +1210,13 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Deletes multiple tags for a game.
+   *
+   * @param payload - The deleteTagsPayload identifying tags
+   * @param opts - Credentials for deletion
+   * @returns A promise that resolves when deletions complete
+   */
   deleteTags(
     payload: RequireAtLeastOne<deleteTagsPayload> | number[],
     opts?: RequireAtLeastOne<Credentials>
@@ -1233,6 +1254,13 @@ export class BikeTagClient {
 
   /// ****************************  Player Data Methods   ********************************** ///
 
+  /**
+   * Retrieves BikeTag `Player` records for a game.
+   *
+   * @param payload - The getPlayerPayload or getPlayersPayload
+   * @param opts - Credentials and other options for player retrieval
+   * @returns A promise that resolves to array of players
+   */
   players(
     payload?:
       | RequireAtLeastOne<getPlayerPayload>
@@ -1323,6 +1351,13 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Updates a player record for a game.
+   *
+   * @param payload - The getPlayersPayload or player names
+   * @param opts - Credentials and other options for update
+   * @returns A promise that resolves to array of updated players
+   */
   updatePlayer(
     payload?: RequireAtLeastOne<getPlayersPayload> | string[],
     opts?: RequireAtLeastOne<Credentials>
@@ -1360,6 +1395,13 @@ export class BikeTagClient {
 
   /// ****************************  Ambassador Data Methods   ****************************** ///
 
+  /**
+   * Retrieves BikeTag `Ambassador` records for a game.
+   *
+   * @param payload - The getAmbassadorPayload or getAmbassadorsPayload
+   * @param opts - Credentials and other options for retrieval
+   * @returns A promise that resolves to array of ambassadors
+   */
   ambassadors(
     payload?:
       | RequireAtLeastOne<getAmbassadorPayload>
@@ -1462,6 +1504,13 @@ export class BikeTagClient {
 
   /// ****************************  Setting Data Methods   ********************************* ///
 
+  /**
+   * Retrieves BikeTag `Setting` records for a game.
+   *
+   * @param payload - The getSettingPayload or getSettingsPayload
+   * @param opts - Credentials and other options for retrieval
+   * @returns A promise that resolves to array of settings
+   */
   settings(
     payload?:
       | RequireAtLeastOne<getSettingPayload>
@@ -1564,6 +1613,13 @@ export class BikeTagClient {
 
   /// ****************************  Stats Data Methods   ********************************* ///
 
+  /**
+   * Retrieves BikeTag `Stat` records for a game.
+   *
+   * @param payload - The getStatPayload or getStatsPayload
+   * @param opts - Credentials and other options for retrieval
+   * @returns A promise that resolves to array of stats
+   */
   stats(
     payload?:
       | RequireAtLeastOne<getStatPayload>
@@ -1714,6 +1770,13 @@ export class BikeTagClient {
     }
   }
 
+  /**
+   * Updates one or more `Stat` records for a game.
+   *
+   * @param payload - The updateStatPayload or array of payloads
+   * @param opts - Credentials for updating stats
+   * @returns A promise that resolves to array of updated stats
+   */
   updateStats(
     payload?: RequireAtLeastOne<updateStatPayload[]> | string[],
     opts?: RequireAtLeastOne<Credentials>
@@ -1751,6 +1814,13 @@ export class BikeTagClient {
 
   /// ****************************  Achievement Data Methods   ********************************* ///
 
+  /**
+   * Retrieves BikeTag `Achievement` records for a game.
+   *
+   * @param payload - The getAchievementsPayload or achievement names
+   * @param opts - Credentials and other options for retrieval
+   * @returns A promise that resolves to array of achievements
+   */
   achievements(
     payload?:
       | RequireAtLeastOne<getAchievementsPayload>
@@ -1885,7 +1955,12 @@ export class BikeTagClient {
   //   return new Gun<BikeTagGameState>(options)
   // }
 
-  /// Content powered by Sanity IO Client
+  /**
+   * Instantiates and returns a configured SanityClient instance.
+   *
+   * @param opts - Configuration or credentials for the Sanity client
+   * @returns A SanityClient instance
+   */
   content(opts?: any): SanityClient {
     const options = opts ?? this.sanityConfig
 
@@ -1896,7 +1971,12 @@ export class BikeTagClient {
     throw new Error('options are invalid for creating a sanity client')
   }
 
-  /// Images powered by Imgur Client
+  /**
+   * Instantiates and returns a configured ImgurClient instance.
+   *
+   * @param opts - Configuration or credentials for the Imgur client
+   * @returns An ImgurClient instance
+   */
   images(opts?: any): ImgurClient {
     const options = opts ?? this.imgurConfig
     if (isImgurCredentials(options)) {
