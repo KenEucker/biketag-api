@@ -88,7 +88,7 @@ export async function getStats(
     data: success ? data : undefined,
     success,
     error,
-    source: AvailableApis[AvailableApis.imgur],
+    source: AvailableApis[AvailableApis.aws],
     status: success ? HttpStatusCode.Ok : HttpStatusCode.BadRequest,
   }
 }
