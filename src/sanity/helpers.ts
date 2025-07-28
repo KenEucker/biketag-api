@@ -292,17 +292,28 @@ export function constructGameFromSanityObject(
       if (gameData[f] && typeof gameData[f] !== 'undefined') {
         const fieldMap = gameDataCustomFields[f]
         if (fieldMap) {
-          if (gameDataArrayFields.indexOf(f) !== -1) {
+          if (gameDataArrayFields.includes(f)) {
             const customFieldProperties = fieldMap
               .replace('[]->{', '')
               .replace('}', '')
-            const arrayFieldKeys = customFieldProperties.split(',')
-            const key = arrayFieldKeys[0]
-            const value = arrayFieldKeys[1]
-            gameData[f] = gameData[f].reduce((o: any, kv: any) => {
-              o[kv[key]] = kv[value]
-              return o
-            }, [])
+            const [key, value] = customFieldProperties.split(',')
+
+            const isKeyValueArray =
+              Array.isArray(gameData[f]) &&
+              gameData[f].every(
+                (item) =>
+                  item &&
+                  typeof item === 'object' &&
+                  key in item &&
+                  value in item
+              )
+
+            if (isKeyValueArray) {
+              gameData[f] = gameData[f].reduce((o: any, kv: any) => {
+                o[kv[key]] = kv[value]
+                return o
+              }, {})
+            }
           } else {
             const customFieldNames = fieldMap.split(',')
 

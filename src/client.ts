@@ -1867,7 +1867,22 @@ export class BikeTagClient {
 
     if (clientMethod) {
       switch (options.source) {
-        case AvailableApis.sanity:
+        case AvailableApis.aws: {
+          clientMethod = clientMethod.bind({
+            getTags: this.getPassthroughApiMethod(
+              api.getTags,
+              client,
+              DataTypes.tag
+            ),
+            getPlayers: this.getPassthroughApiMethod(
+              api.getPlayers,
+              client,
+              DataTypes.player
+            ),
+          })
+          break
+        }
+        case AvailableApis.sanity: {
           clientMethod = clientMethod.bind({
             getGame: this.getPassthroughApiMethod(
               api.getGame,
@@ -1876,7 +1891,8 @@ export class BikeTagClient {
             ),
           })
           break
-        case AvailableApis.imgur:
+        }
+        case AvailableApis.imgur: {
           const getTags = this.getPassthroughApiMethod(
             api.getTags,
             client,
@@ -1892,6 +1908,7 @@ export class BikeTagClient {
             ),
           })
           break
+        }
       }
 
       return clientMethod(client, options).catch((e) => {
