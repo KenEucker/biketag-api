@@ -641,22 +641,23 @@ export const getBikeTagFromS3ImageSet = (
     mentionUrl = mysteryImage.data?.mentionUrl ?? ''
     shareUrl = mysteryImage.data?.shareUrl ?? ''
   } else if (foundImage.data?.tagnumber) {
+    tagnumber = foundImage.data.tagnumber ?? 0
     foundImageUrl = foundImage.url
-    foundPlayer = foundImage.data?.foundPlayer ?? ''
-    foundTime = foundImage.data?.foundTime ?? 0
-    foundLocation = foundImage.data?.foundLocation ?? ''
-    confirmedBoundary = foundImage.data?.confirmedBoundary ?? false
-    hint = mysteryImage.data?.hint ?? ''
-    gps = foundImage.data?.gps ?? { lat: 0, long: 0, alt: 0 }
+    foundPlayer = foundImage.data.foundPlayer ?? ''
+    foundTime = foundImage.data.foundTime ?? 0
+    foundLocation = foundImage.data.foundLocation ?? ''
+    confirmedBoundary = foundImage.data.confirmedBoundary ?? false
+    gps = foundImage.data.gps ?? { lat: 0, long: 0, alt: 0 }
   } else if (mysteryImage.data?.tagnumber) {
-    tagnumber = mysteryImage.data.tagnumber ?? foundImage.data.tagnumber ?? 0
+    tagnumber = mysteryImage.data.tagnumber ?? 0
     mysteryImageUrl = mysteryImage.url
-    mysteryPlayer = mysteryImage.data?.mysteryPlayer ?? ''
-    mysteryTime = mysteryImage.data?.mysteryTime ?? 0
-    discussionUrl = mysteryImage.data?.discussionUrl ?? ''
-    mentionUrl = mysteryImage.data?.mentionUrl ?? ''
-    shareUrl = mysteryImage.data?.shareUrl ?? ''
-    playerId = foundImage.data?.playerId ?? mysteryImage.data?.playerId
+    mysteryPlayer = mysteryImage.data.mysteryPlayer ?? ''
+    mysteryTime = mysteryImage.data.mysteryTime ?? 0
+    hint = mysteryImage.data.hint ?? ''
+    discussionUrl = mysteryImage.data.discussionUrl ?? ''
+    mentionUrl = mysteryImage.data.mentionUrl ?? ''
+    shareUrl = mysteryImage.data.shareUrl ?? ''
+    playerId = mysteryImage.data.playerId
   }
 
   if (foundImage && !foundImageUrl) {

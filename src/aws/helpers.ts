@@ -774,6 +774,7 @@ export const getTagMetadata = (
     foundTime: found.ft || 0,
     foundLocation: found.fl || '',
     gps: found.g || {},
+    confirmedBoundary: found.c || false,
     ...metadataOverrides,
   }
 

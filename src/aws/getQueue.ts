@@ -104,7 +104,6 @@ export async function getQueue(
 
             if (!hasVariants) {
               logVerbose(
-                verbose,
                 `Resizing ${type} image for tag #${tag.tagnumber} (${base})`
               )
               const newUrl = await resizeAndSaveVariants({
