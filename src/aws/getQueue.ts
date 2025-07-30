@@ -18,7 +18,7 @@ export async function getQueue(
   client: S3Client,
   payload: getQueuePayload
 ): Promise<BikeTagApiResponse<Tag[]>> {
-  const { game, reindex, resize, cached, region, verbose } = payload
+  const { game, reindex, resize, cached, region } = payload
   const bucket = `${game}-biketag`
   const folder = 'queue'
 
