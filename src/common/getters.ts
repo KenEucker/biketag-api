@@ -680,10 +680,11 @@ export const getBikeTagFromS3ImageSet = (
     mysteryPlayer = getPlayerFromText(mysteryImageDescription)
   }
 
-  tagnumber =
-    tagnumber !== 0 && mysteryImageDescription
+  if (tagnumber === 0) {
+    tagnumber = mysteryImageDescription
       ? getTagNumbersFromText(mysteryImageDescription)[0]
       : getTagNumbersFromText(foundImageDescription)[0]
+  }
   slug = constructTagNumberSlug(tagnumber, game)
 
   playerId =
