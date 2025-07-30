@@ -3,6 +3,7 @@ export { Payload } from 'imgur/dist/common/types'
 import { AvailableApis, Errors } from '../common/enums'
 import { ImgurCredentials as ImgurApiCredentials } from 'imgur'
 import { S3Client } from '@aws-sdk/client-s3'
+import { Tag } from './schema'
 
 export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>
@@ -48,6 +49,7 @@ export interface CommonData {
   cached?: boolean
   region?: string
   reindex?: boolean
+  verbose?: boolean
 }
 
 export type CommonPayloadData = CommonData
@@ -91,6 +93,7 @@ export type ApiOptions = RequireAtLeastOne<{
   account?: string
   concise?: boolean
   cached?: boolean
+  verbose?: boolean
   region?: string
 }>
 
@@ -166,8 +169,10 @@ export interface StatsReportData {
   gameLongestTimeBetweenTags: gameLongestTimeBetweenTagsData
 }
 
+/// TODO: remove the image and description from the S3ImageMeta interface
 export interface S3ImageMeta {
   url?: string
   title?: string
   description?: string
+  data?: Partial<Tag>
 }

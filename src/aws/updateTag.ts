@@ -5,18 +5,14 @@ import { createTagObject } from '../common/data'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { Tag } from '../common/schema'
 import {
+  getFoundMetadata,
+  getMysteryMetadata,
   loadIndex,
   resizeAndSaveVariants,
   saveIndex,
   type updateTagPayload,
 } from './helpers'
-import { getKeyFromUrl, encodeMetadataValue } from './helpers'
-import {
-  getImgurFoundTitleFromBikeTagData,
-  getImgurFoundDescriptionFromBikeTagData,
-  getImgurMysteryTitleFromBikeTagData,
-  getImgurMysteryDescriptionFromBikeTagData,
-} from '../common/getters'
+import { getKeyFromUrl } from './helpers'
 import TinyCache from 'tinycache'
 
 export async function updateTag(
@@ -26,10 +22,14 @@ export async function updateTag(
 ): Promise<BikeTagApiResponse<Tag>> {
   payload.folder = payload.folder ?? 'main'
 
+  const logVerbose = payload.verbose ? console.log : () => {}
+
   let success = true
   let error: string | undefined
 
   const bucket = `${payload.game}-biketag`
+  logVerbose('[updateTag] Checking for existing tag in', payload.folder)
+
   const tagExistsResponse = await this.getTags(
     {
       game: payload.game,
@@ -50,9 +50,11 @@ export async function updateTag(
   const needsFound = !!(payload.foundImageUrl?.length || payload.foundImage)
 
   if (needsMystery || needsFound) {
+    logVerbose('[updateTag] Uploading new images...')
     const uploadResponse = await this.uploadTagImage(payload)
 
     if (uploadResponse.success) {
+      logVerbose('[updateTag] Image upload successful.')
       payload.mysteryImageUrl = uploadResponse.data.mysteryImageUrl
       payload.mysteryTime = uploadResponse.data.mysteryTime
       payload.foundImageUrl = uploadResponse.data.foundImageUrl
@@ -62,15 +64,16 @@ export async function updateTag(
     } else {
       success = false
       error = uploadResponse.error
+      logVerbose('[updateTag] Upload failed:', error)
     }
   } else if (existingTag) {
-    // Metadata-only update
+    logVerbose('[updateTag] Performing metadata-only update...')
     payload = { ...existingTag, ...payload }
 
-    // Explicit metadata refresh for mystery image
     if (existingTag.mysteryImageUrl) {
       const mysteryKey = getKeyFromUrl(existingTag.mysteryImageUrl)
       try {
+        logVerbose('[updateTag] Updating metadata for mystery image...')
         await client.send(
           new CopyObjectCommand({
             Bucket: bucket,
@@ -79,12 +82,7 @@ export async function updateTag(
             ACL: 'public-read',
             MetadataDirective: 'REPLACE',
             Metadata: {
-              title: encodeMetadataValue(
-                getImgurMysteryTitleFromBikeTagData(payload as Tag).trim()
-              ),
-              description: encodeMetadataValue(
-                getImgurMysteryDescriptionFromBikeTagData(payload as Tag).trim()
-              ),
+              data: getMysteryMetadata(payload as Tag),
             },
           })
         )
@@ -93,13 +91,14 @@ export async function updateTag(
         error =
           (error ?? '') +
           ` Failed to update metadata for mystery image: ${err.message || err}`
+        logVerbose('[updateTag] Mystery metadata update failed:', err)
       }
     }
 
-    // Explicit metadata refresh for found image
     if (existingTag.foundImageUrl) {
       const foundKey = getKeyFromUrl(existingTag.foundImageUrl)
       try {
+        logVerbose('[updateTag] Updating metadata for found image...')
         await client.send(
           new CopyObjectCommand({
             Bucket: bucket,
@@ -108,12 +107,7 @@ export async function updateTag(
             ACL: 'public-read',
             MetadataDirective: 'REPLACE',
             Metadata: {
-              title: encodeMetadataValue(
-                getImgurFoundTitleFromBikeTagData(payload as Tag).trim()
-              ),
-              description: encodeMetadataValue(
-                getImgurFoundDescriptionFromBikeTagData(payload as Tag).trim()
-              ),
+              data: getFoundMetadata(payload as Tag),
             },
           })
         )
@@ -122,16 +116,18 @@ export async function updateTag(
         error =
           (error ?? '') +
           ` Failed to update metadata for found image: ${err.message || err}`
+        logVerbose('[updateTag] Found metadata update failed:', err)
       }
     }
   } else {
     success = false
     error = `Tag ${payload.tagnumber} not found in folder ${payload.folder}`
+    logVerbose('[updateTag] Tag not found for metadata update.')
   }
 
   if (success) {
     try {
-      // 1️⃣ Load current index
+      logVerbose('[updateTag] Loading existing index...')
       let index: Tag[] = await loadIndex(
         client,
         bucket,
@@ -140,32 +136,35 @@ export async function updateTag(
       )
       const updatedTag = createTagObject(payload)
 
-      // 2️⃣ Replace or add tag
       const existingIndex = index.findIndex(
         (t) => t.tagnumber === updatedTag.tagnumber
       )
       if (existingIndex !== -1) {
         index[existingIndex] = updatedTag
+        logVerbose('[updateTag] Replacing existing tag in index.')
       } else {
         index.push(updatedTag)
+        logVerbose('[updateTag] Adding new tag to index.')
       }
 
-      // 3️⃣ Save new index.json atomically
+      logVerbose('[updateTag] Saving updated index...')
       await saveIndex(client, bucket, payload.folder, index)
     } catch (err: any) {
       success = false
       error =
         (error ?? '') +
         ` Failed to atomically update index: ${err.message || err}`
+      logVerbose('[updateTag] Index update failed:', err)
     }
   }
 
   if (success && payload.resize === true) {
-    let resizeErrors: string[] = []
     const tag = createTagObject(payload)
+    let resizeErrors: string[] = []
 
     if (payload.mysteryImageUrl) {
       try {
+        logVerbose('[updateTag] Resizing mystery image...')
         await resizeAndSaveVariants({
           client,
           tag,
@@ -178,11 +177,13 @@ export async function updateTag(
         resizeErrors.push(
           `Failed to resize mystery image: ${resizeErr.message || resizeErr}`
         )
+        logVerbose('[updateTag] Resize failed for mystery image:', resizeErr)
       }
     }
 
     if (payload.foundImageUrl) {
       try {
+        logVerbose('[updateTag] Resizing found image...')
         await resizeAndSaveVariants({
           client,
           tag,
@@ -195,6 +196,7 @@ export async function updateTag(
         resizeErrors.push(
           `Failed to resize found image: ${resizeErr.message || resizeErr}`
         )
+        logVerbose('[updateTag] Resize failed for found image:', resizeErr)
       }
     }
 
