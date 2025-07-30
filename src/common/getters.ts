@@ -624,7 +624,7 @@ export const getBikeTagFromS3ImageSet = (
     foundLocation,
     confirmedBoundary
 
-  if (foundImage.data?.tagnumber && mysteryImage.data?.tagnumber) {
+  if (foundImage.data?.tagnumber && mysteryImage?.data?.tagnumber) {
     tagnumber = mysteryImage.data.tagnumber ?? foundImage.data.tagnumber ?? 0
     playerId = foundImage.data.playerId ?? mysteryImage.data.playerId
     mysteryImageUrl = mysteryImage.url
@@ -640,7 +640,7 @@ export const getBikeTagFromS3ImageSet = (
     discussionUrl = mysteryImage.data.discussionUrl ?? ''
     mentionUrl = mysteryImage.data.mentionUrl ?? ''
     shareUrl = mysteryImage.data.shareUrl ?? ''
-  } else if (foundImage.data.tagnumber) {
+  } else if (foundImage?.data?.tagnumber) {
     tagnumber = foundImage.data.tagnumber ?? 0
     foundImageUrl = foundImage.url
     foundPlayer = foundImage.data.foundPlayer ?? ''
@@ -648,7 +648,7 @@ export const getBikeTagFromS3ImageSet = (
     foundLocation = foundImage.data.foundLocation ?? ''
     confirmedBoundary = foundImage.data.confirmedBoundary ?? false
     gps = foundImage.data.gps ?? { lat: 0, long: 0, alt: 0 }
-  } else if (mysteryImage.data?.tagnumber) {
+  } else if (mysteryImage?.data?.tagnumber) {
     tagnumber = mysteryImage.data.tagnumber ?? 0
     mysteryImageUrl = mysteryImage.url
     mysteryPlayer = mysteryImage.data.mysteryPlayer ?? ''
