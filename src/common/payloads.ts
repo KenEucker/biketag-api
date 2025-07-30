@@ -38,7 +38,8 @@ export type deleteTagPayload = {
   hash?: string
   folder?: string
   region?: string
-} & Partial<Tag>
+} & Partial<Tag> &
+  CommonPayloadData
 
 export type archiveTagPayload = {
   archivehash?: string

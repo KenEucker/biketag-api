@@ -274,6 +274,7 @@ export const createBikeTagCredentials = (
   return {
     game: credentials.game?.length ? credentials.game : defaults.game,
     host: credentials.host?.length ? credentials.host : defaults.host,
+    verbose: credentials.verbose,
     cached:
       typeof credentials.cached !== 'undefined'
         ? credentials.cached

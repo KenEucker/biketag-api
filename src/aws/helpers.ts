@@ -13,10 +13,6 @@ import {
 import { Tag } from '../common/schema'
 import {
   getBikeTagFromS3ImageSet,
-  getImgurFoundDescriptionFromBikeTagData,
-  getImgurFoundTitleFromBikeTagData,
-  getImgurMysteryDescriptionFromBikeTagData,
-  getImgurMysteryTitleFromBikeTagData,
   getPlayerFromText,
   getTagNumbersFromText,
 } from '../common/getters'
@@ -26,7 +22,11 @@ import TinyCache from 'tinycache'
 import { getApiUrl } from '../biketag/helpers'
 import { CommonPayloadData } from '../common/types'
 import { getImageExtension } from '../common/methods'
-import { isFoundImage, isMysteryImage } from '../imgur/helpers'
+import {
+  isFoundImage as isImugrFoundImage,
+  isMysteryImage as isImgurMysteryImage,
+} from '../imgur/helpers'
+import { createTagObject } from '../common/data'
 
 const indexCache = new TinyCache()
 /** Returns the S3 key prefix for a given tag */
@@ -219,6 +219,7 @@ const loadIndexFromImages = async (
         url,
         title: decodeMetadataValue(metadata.title),
         description: decodeMetadataValue(metadata.description),
+        data: getTagMetadata(metadata.data),
       }
 
       const entry = imagesByTag[slug] || {}
@@ -369,17 +370,21 @@ export const resizeAndSaveVariants = async ({
           let Metadata
 
           if (variantIsOriginal) {
-            const title =
-              imageType === 'mystery'
-                ? getImgurMysteryTitleFromBikeTagData(tag)
-                : getImgurFoundTitleFromBikeTagData(tag)
-            const description =
-              imageType === 'mystery'
-                ? getImgurMysteryDescriptionFromBikeTagData(tag)
-                : getImgurFoundDescriptionFromBikeTagData(tag)
+            // const title =
+            //   imageType === 'mystery'
+            //     ? getImgurMysteryTitleFromBikeTagData(tag)
+            //     : getImgurFoundTitleFromBikeTagData(tag)
+            // const description =
+            //   imageType === 'mystery'
+            //     ? getImgurMysteryDescriptionFromBikeTagData(tag)
+            //     : getImgurFoundDescriptionFromBikeTagData(tag)
             Metadata = {
-              title: encodeMetadataValue(title.trim()),
-              description: encodeMetadataValue(description.trim()),
+              // title: encodeMetadataValue(title.trim()),
+              // description: encodeMetadataValue(description.trim()),
+              data:
+                imageType === 'mystery'
+                  ? getMysteryMetadata(tag)
+                  : getFoundMetadata(tag),
             }
           }
 
@@ -553,14 +558,26 @@ export const getGroupedTagsByPlayer = (
 
   // Group player images from the current and previous round
   for (const image of groupedImages[highestTagnumber] ?? []) {
-    const player = getPlayerFromText(image.description, undefined, cache)
+    const player = getPlayerFromText(
+      image.description,
+      image.data?.foundPlayer?.length
+        ? image.data.foundPlayer
+        : image.data?.mysteryPlayer,
+      cache
+    )
     if (!player) continue
     playerGroupedImages[player] = playerGroupedImages[player] ?? []
     playerGroupedImages[player].push(image)
   }
 
   for (const image of groupedImages[highestTagnumber - 1] ?? []) {
-    const player = getPlayerFromText(image.description, undefined, cache)
+    const player = getPlayerFromText(
+      image.description,
+      image.data?.foundPlayer?.length
+        ? image.data.foundPlayer
+        : image.data?.mysteryPlayer,
+      cache
+    )
     if (!player) continue
     playerGroupedImages[player] = playerGroupedImages[player] ?? []
     playerGroupedImages[player].push(image)
@@ -573,8 +590,8 @@ export const getGroupedTagsByPlayer = (
     if (images.length === 1) {
       playerGroupedTags.push(
         getBikeTagFromS3ImageSet(
-          isMysteryImage(images[0] as ImgurImage) ? images[0] : undefined,
-          isFoundImage(images[0] as ImgurImage) ? images[0] : undefined,
+          isMysteryImage(images[0]) ? images[0] : undefined,
+          isFoundImage(images[0]) ? images[0] : undefined,
           appendToTagData
         )
       )
@@ -600,7 +617,11 @@ export const getGroupedImagesByTagnumber = (
   const groupedImages: S3ImageMeta[][] = []
 
   ungroupedImages.forEach((image) => {
-    const tagnumbers = getTagNumbersFromText(image.description, [], cache)
+    const tagnumbers = getTagNumbersFromText(
+      image.description,
+      [image.data?.tagnumber],
+      cache
+    )
     const tagnumber = tagnumbers[0] // Assume the first is primary
 
     if (typeof tagnumber === 'number') {
@@ -687,6 +708,105 @@ export const getHashedPlayerSuffix = async (
     .slice(0, 6)
 }
 
+export const getMysteryMetadata = (
+  tag: Tag,
+  metadataOverrides: Record<string, any> = {}
+): string => {
+  const base = {
+    t: tag.tagnumber,
+    p: tag.playerId,
+    mp: tag.mysteryPlayer,
+    mt: tag.mysteryTime,
+    h: tag.hint,
+    d: tag.discussionUrl,
+    s: tag.shareUrl,
+    m: tag.mentionUrl,
+  }
+
+  const merged = { ...base, ...metadataOverrides }
+  return encodeMetadataValue(JSON.stringify(merged))
+}
+
+export const getFoundMetadata = (
+  tag: Tag,
+  metadataOverrides: Record<string, any> = {}
+): string => {
+  const base = {
+    t: tag.tagnumber,
+    p: tag.playerId,
+    fp: tag.foundPlayer,
+    ft: tag.foundTime,
+    fl: tag.foundLocation,
+    g: tag.gps,
+    c: tag.confirmedBoundary,
+  }
+
+  const merged = { ...base, ...metadataOverrides }
+  return encodeMetadataValue(JSON.stringify(merged))
+}
+
+export const getTagMetadata = (
+  mysteryMeta: string | undefined,
+  foundMeta?: string | undefined,
+  metadataOverrides: Record<string, any> = {}
+): Tag => {
+  const decodeJson = (meta?: string): Record<string, any> => {
+    if (!meta) return {}
+    try {
+      return JSON.parse(decodeMetadataValue(meta)) || {}
+    } catch {
+      return {}
+    }
+  }
+
+  const mystery = decodeJson(mysteryMeta)
+  const found = decodeJson(foundMeta)
+  const merged = {
+    tagnumber: mystery.t || found.t,
+    playerId: mystery.p || found.p,
+    mysteryPlayer: mystery.mp || '',
+    mysteryTime: mystery.mt || 0,
+    hint: mystery.h || '',
+    discussionUrl: mystery.d || '',
+    shareUrl: mystery.s || '',
+    mentionUrl: mystery.m || '',
+    foundPlayer: found.fp || '',
+    foundTime: found.ft || 0,
+    foundLocation: found.fl || '',
+    gps: found.g || {},
+    confirmedBoundary: found.c || false,
+    ...metadataOverrides,
+  }
+
+  if (typeof merged.tagnumber !== 'number') {
+    return null
+  }
+
+  return createTagObject(merged)
+}
+
+export const isMysteryImage = (image: S3ImageMeta): boolean => {
+  if (image?.data) {
+    return !!(
+      image.data.mysteryPlayer ||
+      image.data.mysteryTime ||
+      image.data.hint
+    )
+  }
+  return isImgurMysteryImage(image as ImgurImage)
+}
+
+export const isFoundImage = (image: S3ImageMeta): boolean => {
+  if (image?.data) {
+    return !!(
+      image.data.foundPlayer ||
+      image.data.foundTime ||
+      image.data.foundLocation
+    )
+  }
+  return isImugrFoundImage(image as ImgurImage)
+}
+
 export interface S3UploadPayload {
   region: string
   game: string // e.g., 'denver' — used to build bucket name
@@ -706,6 +826,7 @@ export type queueTagPayload = Partial<Tag> &
 export type updateTagPayload = Partial<Tag> &
   Partial<S3UploadPayload> &
   CommonPayloadData
+
 export const supportedImageExtensions = [
   '.jpg',
   '.jpeg',

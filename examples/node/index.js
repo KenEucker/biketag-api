@@ -13,6 +13,7 @@ const host = process.env.BIKETAG_API_HOST
 
 const biketagDefaultInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
+  verbose: true,
   host,
   cached: false,
   clientToken: process.env.BIKETAG_CLIENT_TOKEN,
@@ -21,6 +22,7 @@ const biketagDefaultInstance = host ? new BikeTagClient(biketagDefaultInstanceOp
 
 const imgurInstanceOpts = {
   game: process.env.BIKETAG_GAME ? process.env.BIKETAG_GAME : 'test',
+  verbose: true,
   host,
   imgur: {
     hash: process.env.IMGUR_HASH,
@@ -36,6 +38,7 @@ const bikeTagImgurInstance = imgurInstanceOpts.imgur && imgurInstanceOpts.imgur.
 
 const sanityInstanceOpts = {
   game: process.env.BIKETAG_GAME,
+  verbose: true,
   host,
   sanity: {
     projectId: process.env.SANITY_PROJECT_ID,
@@ -48,6 +51,7 @@ const bikeTagSanityInstance = sanityInstanceOpts.sanity && sanityInstanceOpts.sa
 
 const awsInstanceOpts = {
   game: process.env.BIKETAG_GAME,
+  verbose: true,
   host,
   aws: {
     accessKeyId: process.env.S3_ACCESS_ID,
@@ -252,15 +256,15 @@ const runTests = async (out = false) => {
     // await getPlayerAchievementsAsync("Sanity", bikeTagSanityInstance, out)
   }
 
-  if (false) {
-  // if (bikeTagAWSInstance) {
+  // if (false) {
+  if (bikeTagAWSInstance) {
     console.log(pretty("AWS BikeTag Client Instantiated"), bikeTagAWSInstance.config())
     // await getTag1Async("AWS", bikeTagAWSInstance, out)
     await get10TagsAsync("AWS", bikeTagAWSInstance, out)
-    await getQueueAsync("AWS", bikeTagAWSInstance, out) //, {reindex: true, handleResize: true})
+    await getQueueAsync("AWS", bikeTagAWSInstance, out, { reindex: true })
     // await getGameAsync("AWS", bikeTagAWSInstance, out)
     // await getAllGamesAsync("AWS", bikeTagAWSInstance, out)
-    await get10PlayersAsync("AWS", bikeTagAWSInstance, out)
+    // await get10PlayersAsync("AWS", bikeTagAWSInstance, out)
     // await get1PlayerAsync("AWS", bikeTagAWSInstance, out)
     // await get10AchievementsAsync("AWS", bikeTagAWSInstance, out)
     // await get10AmbassadorsAsync("AWS", bikeTagAWSInstance, out)

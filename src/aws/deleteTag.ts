@@ -14,19 +14,18 @@ import {
   loadIndex,
   saveIndex,
   getKeyFromUrl,
-  encodeMetadataValue,
+  getMysteryMetadata,
 } from './helpers'
 import { Tag } from '../common/schema'
-import {
-  getImgurMysteryTitleFromBikeTagData,
-  getImgurMysteryDescriptionFromBikeTagData,
-} from '../common/getters'
 
 export async function deleteTag(
   client: S3Client,
   payload: deleteTagPayload & { tag?: Tag }
 ): Promise<BikeTagApiResponse<boolean[]>> {
   payload.folder = payload.folder ?? 'queue'
+
+  const logVerbose = payload.verbose ? console.log : () => {}
+
   const { tagnumber, folder, game, region, mysteryPlayer, foundPlayer } =
     payload
   const bucket = `${game}-biketag`
@@ -37,22 +36,27 @@ export async function deleteTag(
   if (!tagnumber) {
     success = false
     errors.push('tagnumber not set')
+    logVerbose('[deleteTag] Missing tagnumber.')
   }
 
   if (folder === 'main' && tagnumber) {
+    logVerbose(`[deleteTag] Deleting tag #${tagnumber} from main folder...`)
     const prefix = getTagPrefix(folder, game, tagnumber)
     const list = await listAllS3Objects(client, {
       Bucket: bucket,
       Prefix: prefix,
     })
+    logVerbose(`[deleteTag] Found ${list.length} object(s) to delete.`)
 
     const deleteOps = list.map(async (obj) => {
       try {
         await client.send(
           new DeleteObjectCommand({ Bucket: bucket, Key: obj.Key })
         )
+        logVerbose(`[deleteTag] Deleted: ${obj.Key}`)
         return true
       } catch (err) {
+        logVerbose(`[deleteTag] Failed to delete ${obj.Key}:`, err.message)
         errors.push(err.message)
         return false
       }
@@ -63,6 +67,7 @@ export async function deleteTag(
   }
 
   if (folder === 'queue' && tagnumber) {
+    logVerbose(`[deleteTag] Deleting tag #${tagnumber} from queue folder...`)
     const keysToDelete: { Key: string }[] = []
 
     if (mysteryPlayer) {
@@ -78,6 +83,9 @@ export async function deleteTag(
         Bucket: bucket,
         Prefix: mysteryKey,
       })
+      logVerbose(
+        `[deleteTag] Found ${mysteryObjects.length} mystery objects to delete.`
+      )
       keysToDelete.push(...mysteryObjects.map((obj) => ({ Key: obj.Key! })))
     }
 
@@ -94,11 +102,15 @@ export async function deleteTag(
         Bucket: bucket,
         Prefix: foundKey,
       })
+      logVerbose(
+        `[deleteTag] Found ${foundObjects.length} found objects to delete.`
+      )
       keysToDelete.push(...foundObjects.map((obj) => ({ Key: obj.Key! })))
     }
 
     if (keysToDelete.length > 0) {
       try {
+        logVerbose(`[deleteTag] Deleting ${keysToDelete.length} object(s)...`)
         const result = await client.send(
           new DeleteObjectsCommand({
             Bucket: bucket,
@@ -108,13 +120,17 @@ export async function deleteTag(
         deleted.push(...keysToDelete.map(() => true))
 
         if (result.Errors && result.Errors.length > 0) {
-          result.Errors.forEach((err) =>
+          result.Errors.forEach((err) => {
+            logVerbose(
+              `[deleteTag] Failed to delete ${err.Key}: ${err.Message}`
+            )
             errors.push(`${err.Key}: ${err.Message}`)
-          )
+          })
         }
       } catch (err: any) {
         errors.push(err.message)
         deleted.push(false)
+        logVerbose('[deleteTag] DeleteObjectsCommand failed:', err.message)
       }
     }
   }
@@ -122,6 +138,7 @@ export async function deleteTag(
   let indexUpdateError = ''
   if (success && tagnumber) {
     try {
+      logVerbose('[deleteTag] Loading current index...')
       let index = await loadIndex(client, bucket, folder, region)
       const newIndex = index.filter((t) => t.tagnumber !== tagnumber)
 
@@ -129,22 +146,23 @@ export async function deleteTag(
         const idx = newIndex.findIndex((t) => t.tagnumber === tagnumber - 1)
 
         if (idx === -1) {
-          errors.push(`Previous tag ${tagnumber - 1} not found in index`)
+          const errMsg = `Previous tag ${tagnumber - 1} not found in index`
+          logVerbose('[deleteTag] ' + errMsg)
+          errors.push(errMsg)
           success = false
         } else {
+          logVerbose('[deleteTag] Resetting latest tag to mystery state...')
           const latestTag = { ...newIndex[idx] }
-
-          // Reset fields to mystery state
           latestTag.gps = { lat: 0, long: 0, alt: 0 }
           latestTag.foundPlayer = ''
           latestTag.foundImageUrl = ''
           latestTag.foundTime = 0
           latestTag.foundLocation = ''
 
-          // Refresh metadata on mystery image
           if (latestTag.mysteryImageUrl) {
             const mysteryKey = getKeyFromUrl(latestTag.mysteryImageUrl)
             try {
+              logVerbose('[deleteTag] Refreshing mystery metadata...')
               await client.send(
                 new CopyObjectCommand({
                   Bucket: bucket,
@@ -153,22 +171,15 @@ export async function deleteTag(
                   ACL: 'public-read',
                   MetadataDirective: 'REPLACE',
                   Metadata: {
-                    title: encodeMetadataValue(
-                      getImgurMysteryTitleFromBikeTagData(latestTag).trim()
-                    ),
-                    description: encodeMetadataValue(
-                      getImgurMysteryDescriptionFromBikeTagData(
-                        latestTag
-                      ).trim()
-                    ),
+                    data: getMysteryMetadata(latestTag),
                   },
                 })
               )
             } catch (err: any) {
               success = false
-              errors.push(
-                `Failed to refresh metadata for mystery image: ${err.message}`
-              )
+              const errMsg = `Failed to refresh metadata for mystery image: ${err.message}`
+              logVerbose('[deleteTag] ' + errMsg)
+              errors.push(errMsg)
             }
           }
 
@@ -176,9 +187,11 @@ export async function deleteTag(
         }
       }
 
+      logVerbose('[deleteTag] Saving updated index...')
       await saveIndex(client, bucket, folder, newIndex)
     } catch (indexErr: any) {
       indexUpdateError = `Index update failed: ${indexErr.message}`
+      logVerbose('[deleteTag] ' + indexUpdateError)
     }
   }
 

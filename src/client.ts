@@ -314,6 +314,10 @@ export class BikeTagClient {
         break
     }
 
+    options.verbose =
+      options.verbose !== undefined
+        ? options.verbose
+        : this.biketagConfig?.verbose
     options.host = options.host ?? this.biketagConfig?.host
     options.cached = options.cached ?? this.biketagConfig?.cached
     options.concise =

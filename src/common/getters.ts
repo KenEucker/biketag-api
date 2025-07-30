@@ -603,17 +603,65 @@ export const getBikeTagFromS3ImageSet = (
 ): Tag => {
   if (!foundImage && !mysteryImage) return null as Tag
 
-  let foundImageLink, foundImageDescription, foundImageTitle, foundTime
-  let mysteryImageLink, mysteryImageDescription, mysteryImageTitle, mysteryTime
+  /// TODO: remove the image and description from the S3ImageMeta interface
+  let foundImageDescription, foundImageTitle
+  let mysteryImageDescription, mysteryImageTitle
+  let game = opts?.game ?? '',
+    tagnumber = 0,
+    slug
   let hint,
+    foundTime,
+    mysteryTime,
+    mysteryImageUrl,
+    foundImageUrl,
+    playerId,
+    gps,
+    mentionUrl,
+    shareUrl,
     discussionUrl,
     mysteryPlayer,
     foundPlayer,
     foundLocation,
     confirmedBoundary
 
-  if (foundImage) {
-    foundImageLink = foundImage.url
+  if (foundImage.data?.tagnumber && mysteryImage.data?.tagnumber) {
+    tagnumber = mysteryImage.data.tagnumber ?? foundImage.data.tagnumber ?? 0
+    playerId = foundImage.data.playerId ?? mysteryImage.data.playerId
+    mysteryImageUrl = mysteryImage.url
+    mysteryPlayer = mysteryImage.data.mysteryPlayer ?? ''
+    mysteryTime = mysteryImage.data.mysteryTime ?? 0
+    foundImageUrl = foundImage.url
+    foundPlayer = foundImage.data.foundPlayer ?? ''
+    foundTime = foundImage.data.foundTime ?? 0
+    foundLocation = foundImage.data.foundLocation ?? ''
+    confirmedBoundary = foundImage.data.confirmedBoundary ?? false
+    hint = mysteryImage.data.hint ?? ''
+    gps = foundImage.data.gps ?? { lat: 0, long: 0, alt: 0 }
+    discussionUrl = mysteryImage.data.discussionUrl ?? ''
+    mentionUrl = mysteryImage.data.mentionUrl ?? ''
+    shareUrl = mysteryImage.data.shareUrl ?? ''
+  } else if (foundImage.data.tagnumber) {
+    tagnumber = foundImage.data.tagnumber ?? 0
+    foundImageUrl = foundImage.url
+    foundPlayer = foundImage.data.foundPlayer ?? ''
+    foundTime = foundImage.data.foundTime ?? 0
+    foundLocation = foundImage.data.foundLocation ?? ''
+    confirmedBoundary = foundImage.data.confirmedBoundary ?? false
+    gps = foundImage.data.gps ?? { lat: 0, long: 0, alt: 0 }
+  } else if (mysteryImage.data?.tagnumber) {
+    tagnumber = mysteryImage.data.tagnumber ?? 0
+    mysteryImageUrl = mysteryImage.url
+    mysteryPlayer = mysteryImage.data.mysteryPlayer ?? ''
+    mysteryTime = mysteryImage.data.mysteryTime ?? 0
+    hint = mysteryImage.data.hint ?? ''
+    discussionUrl = mysteryImage.data.discussionUrl ?? ''
+    mentionUrl = mysteryImage.data.mentionUrl ?? ''
+    shareUrl = mysteryImage.data.shareUrl ?? ''
+    playerId = mysteryImage.data.playerId
+  }
+
+  if (foundImage && !foundImageUrl) {
+    foundImageUrl = foundImage.url
     foundImageDescription = foundImage.description
     foundImageTitle = foundImage.title
     foundTime = getTimeFromText(foundImageDescription)
@@ -622,8 +670,8 @@ export const getBikeTagFromS3ImageSet = (
     confirmedBoundary = getConfirmedBoundaryFromText(foundImageTitle)
   }
 
-  if (mysteryImage) {
-    mysteryImageLink = mysteryImage.url
+  if (mysteryImage && !mysteryImageUrl) {
+    mysteryImageUrl = mysteryImage.url
     mysteryImageDescription = mysteryImage.description
     mysteryImageTitle = mysteryImage.title
     mysteryTime = getTimeFromText(mysteryImageDescription)
@@ -632,21 +680,23 @@ export const getBikeTagFromS3ImageSet = (
     mysteryPlayer = getPlayerFromText(mysteryImageDescription)
   }
 
-  const game = opts?.game || ''
-  const tagnumber = mysteryImageDescription
-    ? getTagNumbersFromText(mysteryImageDescription)[0]
-    : getTagNumbersFromText(foundImageDescription)[0]
+  tagnumber =
+    tagnumber !== 0 && mysteryImageDescription
+      ? getTagNumbersFromText(mysteryImageDescription)[0]
+      : getTagNumbersFromText(foundImageDescription)[0]
+  slug = constructTagNumberSlug(tagnumber, game)
 
-  const slug = constructTagNumberSlug(tagnumber, game)
-  const playerId =
-    getPlayerIdFromText(mysteryImageTitle) ||
+  playerId =
+    playerId ??
+    getPlayerIdFromText(mysteryImageTitle) ??
     getPlayerIdFromText(foundImageTitle)
 
-  let gps = foundImageDescription
-    ? getGPSLocationFromText(foundImageDescription)
-    : getGPSLocationFromText(mysteryImageTitle)
+  gps =
+    (gps ?? foundImageDescription)
+      ? getGPSLocationFromText(foundImageDescription)
+      : getGPSLocationFromText(mysteryImageTitle)
 
-  if (gps.lat === 0 && gps.long === 0 && foundImageTitle) {
+  if (gps.lat === 0 && gps.long === 0 && foundImageTitle?.length) {
     gps = getGPSLocationFromText(foundImageTitle)
   }
 
@@ -663,6 +713,8 @@ export const getBikeTagFromS3ImageSet = (
     slug,
     game,
     discussionUrl,
+    shareUrl,
+    mentionUrl,
     foundLocation,
     mysteryPlayer,
     foundPlayer,
@@ -671,8 +723,8 @@ export const getBikeTagFromS3ImageSet = (
     hint,
     playerId,
     confirmedBoundary,
-    mysteryImageUrl: mysteryImageLink,
-    foundImageUrl: foundImageLink,
+    mysteryImageUrl,
+    foundImageUrl,
     gps,
   }
 }
