@@ -626,21 +626,21 @@ export const getBikeTagFromS3ImageSet = (
 
   if (foundImage.data?.tagnumber && mysteryImage.data?.tagnumber) {
     tagnumber = mysteryImage.data.tagnumber ?? foundImage.data.tagnumber ?? 0
-    playerId = foundImage.data?.playerId ?? mysteryImage.data?.playerId
+    playerId = foundImage.data.playerId ?? mysteryImage.data.playerId
     mysteryImageUrl = mysteryImage.url
-    mysteryPlayer = mysteryImage.data?.mysteryPlayer ?? ''
-    mysteryTime = mysteryImage.data?.mysteryTime ?? 0
+    mysteryPlayer = mysteryImage.data.mysteryPlayer ?? ''
+    mysteryTime = mysteryImage.data.mysteryTime ?? 0
     foundImageUrl = foundImage.url
-    foundPlayer = foundImage.data?.foundPlayer ?? ''
-    foundTime = foundImage.data?.foundTime ?? 0
-    foundLocation = foundImage.data?.foundLocation ?? ''
-    confirmedBoundary = foundImage.data?.confirmedBoundary ?? false
-    hint = mysteryImage.data?.hint ?? ''
-    gps = foundImage.data?.gps ?? { lat: 0, long: 0, alt: 0 }
-    discussionUrl = mysteryImage.data?.discussionUrl ?? ''
-    mentionUrl = mysteryImage.data?.mentionUrl ?? ''
-    shareUrl = mysteryImage.data?.shareUrl ?? ''
-  } else if (foundImage.data?.tagnumber) {
+    foundPlayer = foundImage.data.foundPlayer ?? ''
+    foundTime = foundImage.data.foundTime ?? 0
+    foundLocation = foundImage.data.foundLocation ?? ''
+    confirmedBoundary = foundImage.data.confirmedBoundary ?? false
+    hint = mysteryImage.data.hint ?? ''
+    gps = foundImage.data.gps ?? { lat: 0, long: 0, alt: 0 }
+    discussionUrl = mysteryImage.data.discussionUrl ?? ''
+    mentionUrl = mysteryImage.data.mentionUrl ?? ''
+    shareUrl = mysteryImage.data.shareUrl ?? ''
+  } else if (foundImage.data.tagnumber) {
     tagnumber = foundImage.data.tagnumber ?? 0
     foundImageUrl = foundImage.url
     foundPlayer = foundImage.data.foundPlayer ?? ''
