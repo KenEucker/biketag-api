@@ -746,8 +746,7 @@ export const getFoundMetadata = (
 }
 
 export const getTagMetadata = (
-  mysteryMeta: string | undefined,
-  foundMeta?: string | undefined,
+  metadata: string | undefined,
   metadataOverrides: Record<string, any> = {}
 ): Tag => {
   const decodeJson = (meta?: string): Record<string, any> => {
@@ -759,22 +758,21 @@ export const getTagMetadata = (
     }
   }
 
-  const mystery = decodeJson(mysteryMeta)
-  const found = decodeJson(foundMeta)
+  const tag = decodeJson(metadata)
   const merged = {
-    tagnumber: mystery.t || found.t,
-    playerId: mystery.p || found.p,
-    mysteryPlayer: mystery.mp || '',
-    mysteryTime: mystery.mt || 0,
-    hint: mystery.h || '',
-    discussionUrl: mystery.d || '',
-    shareUrl: mystery.s || '',
-    mentionUrl: mystery.m || '',
-    foundPlayer: found.fp || '',
-    foundTime: found.ft || 0,
-    foundLocation: found.fl || '',
-    gps: found.g || {},
-    confirmedBoundary: found.c || false,
+    tagnumber: tag.t,
+    playerId: tag.p,
+    mysteryPlayer: tag.mp,
+    mysteryTime: tag.mt,
+    hint: tag.h,
+    discussionUrl: tag.d,
+    shareUrl: tag.s,
+    mentionUrl: tag.m,
+    foundPlayer: tag.fp,
+    foundTime: tag.ft,
+    foundLocation: tag.fl,
+    gps: tag.g,
+    confirmedBoundary: tag.c,
     ...metadataOverrides,
   }
 
