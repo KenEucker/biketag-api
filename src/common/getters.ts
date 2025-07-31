@@ -624,7 +624,7 @@ export const getBikeTagFromS3ImageSet = (
     foundLocation,
     confirmedBoundary
 
-  if (foundImage.data?.tagnumber && mysteryImage?.data?.tagnumber) {
+  if (foundImage?.data?.tagnumber && mysteryImage?.data?.tagnumber) {
     tagnumber = mysteryImage.data.tagnumber ?? foundImage.data.tagnumber ?? 0
     playerId = foundImage.data.playerId ?? mysteryImage.data.playerId
     mysteryImageUrl = mysteryImage.url
