@@ -690,8 +690,8 @@ export const getBikeTagFromS3ImageSet = (
 
   playerId =
     playerId ??
-    getPlayerIdFromText(mysteryImageTitle) ??
-    getPlayerIdFromText(foundImageTitle)
+    getPlayerIdFromText(foundImageTitle) ??
+    getPlayerIdFromText(mysteryImageTitle)
 
   gps =
     (gps ?? foundImageDescription)
