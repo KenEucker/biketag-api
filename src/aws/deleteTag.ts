@@ -140,7 +140,7 @@ export async function deleteTag(
     try {
       logVerbose('[deleteTag] Loading current index...')
       let index = await loadIndex(client, bucket, folder, region)
-      const newIndex = index.filter((t) => t.tagnumber !== tagnumber)
+      let newIndex = index.filter((t) => t.tagnumber !== tagnumber)
 
       if (folder === 'main' && newIndex.length > 0) {
         const idx = newIndex.findIndex((t) => t.tagnumber === tagnumber - 1)
@@ -185,6 +185,9 @@ export async function deleteTag(
 
           newIndex[idx] = latestTag
         }
+      } else {
+        logVerbose('[deleteTag] Removing tag from queue index...')
+        newIndex = newIndex.filter((t) => t.foundPlayer !== foundPlayer)
       }
 
       logVerbose('[deleteTag] Saving updated index...')
