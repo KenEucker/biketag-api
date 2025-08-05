@@ -13,6 +13,7 @@ import {
   decodeMetadataValue,
   getTagMetadata,
 } from './helpers'
+import { sortTags } from '../common/methods'
 
 export async function getQueue(
   client: S3Client,
@@ -24,7 +25,7 @@ export async function getQueue(
 
   const logVerbose = payload.verbose ? console.log : () => {}
 
-  let tags: Tag[] = []
+  let queuedTags: Tag[] = []
   let success = true
   let error: string | undefined
   let needsRebuild = reindex
@@ -33,8 +34,15 @@ export async function getQueue(
     if (!reindex) {
       try {
         logVerbose('[getQueue] Attempting to load index...')
-        tags = await loadIndex(client, bucket, folder, region, cached, reindex)
-        logVerbose(`[getQueue] Loaded ${tags.length} tags from index.`)
+        queuedTags = await loadIndex(
+          client,
+          bucket,
+          folder,
+          region,
+          cached,
+          reindex
+        )
+        logVerbose(`[getQueue] Loaded ${queuedTags.length} tags from index.`)
       } catch (err) {
         logVerbose('[getQueue] Failed to load index. Rebuilding...')
         needsRebuild = true
@@ -81,13 +89,13 @@ export async function getQueue(
 
       logVerbose(`[getQueue] Collected metadata for ${metaList.length} images`)
       const groupedImages = getGroupedImagesByTagnumber(metaList)
-      tags = getGroupedTagsByPlayer(groupedImages, { game })
-      logVerbose(`[getQueue] Grouped into ${tags.length} tag(s)`)
+      queuedTags = getGroupedTagsByPlayer(groupedImages, { game })
+      logVerbose(`[getQueue] Grouped into ${queuedTags.length} tag(s)`)
 
       if (resize) {
         logVerbose('[getQueue] Resizing missing image variants...')
-        for (let i = 0; i < tags.length; i++) {
-          const tag = tags[i]
+        for (let i = 0; i < queuedTags.length; i++) {
+          const tag = queuedTags[i]
           const types: ('mystery' | 'found')[] = []
           if (tag.mysteryImageUrl) types.push('mystery')
           if (tag.foundImageUrl) types.push('found')
@@ -112,15 +120,15 @@ export async function getQueue(
                 imageType: type,
                 resizeHost: payload.host,
               })
-              if (type === 'mystery') tags[i].mysteryImageUrl = newUrl
-              else tags[i].foundImageUrl = newUrl
+              if (type === 'mystery') queuedTags[i].mysteryImageUrl = newUrl
+              else queuedTags[i].foundImageUrl = newUrl
             }
           }
         }
       }
 
       logVerbose('[getQueue] Saving index...')
-      await saveIndex(client, bucket, folder, tags)
+      await saveIndex(client, bucket, folder, queuedTags)
     }
   } catch (err: any) {
     success = false
@@ -129,7 +137,7 @@ export async function getQueue(
   }
 
   return {
-    data: tags,
+    data: sortTags(queuedTags, 'relevance'),
     success,
     error,
     source: AvailableApis[AvailableApis.aws],
