@@ -648,6 +648,7 @@ export const getBikeTagFromS3ImageSet = (
     foundLocation = foundImage.data.foundLocation ?? ''
     confirmedBoundary = foundImage.data.confirmedBoundary ?? false
     gps = foundImage.data.gps ?? { lat: 0, long: 0, alt: 0 }
+    playerId = foundImage.data.playerId
   } else if (mysteryImage?.data?.tagnumber) {
     tagnumber = mysteryImage.data.tagnumber ?? 0
     mysteryImageUrl = mysteryImage.url
