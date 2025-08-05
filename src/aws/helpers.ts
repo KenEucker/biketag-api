@@ -455,11 +455,17 @@ export const resizeAndSaveVariants = async ({
 }
 
 export const encodeMetadataValue = (value: string): string => {
-  const encoder = new TextEncoder()
-  const bytes = encoder.encode(value)
-  return typeof window !== 'undefined' && typeof btoa !== 'undefined'
-    ? btoa(String.fromCharCode(...bytes))
-    : Buffer.from(value, 'utf-8').toString('base64')
+  if (typeof window !== 'undefined' && typeof btoa !== 'undefined') {
+    const encoder = new TextEncoder()
+    const bytes = encoder.encode(value)
+    let binary = ''
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i])
+    }
+    return btoa(binary)
+  } else {
+    return Buffer.from(value, 'utf-8').toString('base64')
+  }
 }
 
 export const decodeMetadataValue = (value: string): string => {
@@ -467,12 +473,13 @@ export const decodeMetadataValue = (value: string): string => {
     // Fail fast if not likely base64
     if (!value || !/^[A-Za-z0-9+/=]+$/.test(value)) return value
 
-    const binary =
-      typeof window !== 'undefined'
-        ? atob(value)
-        : Buffer.from(value, 'base64').toString('utf-8')
-    const bytes = new Uint8Array([...binary].map((c) => c.charCodeAt(0)))
-    return new TextDecoder().decode(bytes)
+    if (typeof window !== 'undefined') {
+      const binary = atob(value)
+      const bytes = new Uint8Array([...binary].map((c) => c.charCodeAt(0)))
+      return new TextDecoder().decode(bytes)
+    } else {
+      return Buffer.from(value, 'base64').toString('utf-8')
+    }
   } catch {
     return value // fallback to raw input if decoding fails
   }
