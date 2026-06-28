@@ -24,7 +24,7 @@ export async function queueTag(
   const playerIdentity = getTagPlayerIdentity(payload)
 
   const playerAlreadyQueuedError =
-    !isCompleteQueuedTag &&
+    isCompleteQueuedTag &&
     !!playerIdentity &&
     queuedTags.some((t) => getTagPlayerIdentity(t) === playerIdentity)
 
@@ -105,7 +105,7 @@ export async function queueTag(
   }
 
   return {
-    data: tagData,
+    data: tagData!,
     success,
     error,
     source: AvailableApis[AvailableApis.aws],
