@@ -1,6 +1,6 @@
 {
   "name": "biketag",
-  "version": "3.5.38",
+  "version": "3.5.39",
   "description": "The Javascript client API for BikeTag Games",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -103,7 +103,7 @@
     "msw": "^2.10.2",
     "prettier": "^3.6.2",
     "rollup-plugin-polyfill-node": "^0.13.0",
-    "semantic-release": "^24.2.5",
+    "semantic-release": "^25.0.5",
     "simple-git-hooks": "^2.13.0",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",

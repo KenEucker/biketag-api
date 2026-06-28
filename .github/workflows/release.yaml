@@ -1,38 +1,43 @@
-name: Release
-
+name: Verify and Release
 on:
   push:
     branches:
-      - production
+      - main # or master
+
+permissions:
+  contents: read # for checkout
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for trusted publishing and npm provenance
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
-      - name: Reconfigure git to use HTTP authentication
-        run: >
-          git config --global url."https://github.com/".insteadOf
-          ssh://git@github.com/
-      - name: Install Dependencies
-        run: npm ci --ignore-scripts
-      - name: Run Linters
-        run: npm run lint
-      - name: Run Build
-        run: npm run build:prod
-      - name: Run Tests
-        run: npm run test:ci
-      - name: Run Release
+          node-version: "lts/*"
+      - name: Install dependencies
+        run: npm clean-install
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
+      # - name: Debug npm identity
+      #   run: |
+      #     echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+      #     echo "GITHUB_WORKFLOW=$GITHUB_WORKFLOW"
+      #     echo "GITHUB_WORKFLOW_REF=$GITHUB_WORKFLOW_REF"
+      #     echo "GITHUB_REF=$GITHUB_REF"
+      #     node -p "'package=' + require('./package.json').name"
+      #     npm view "$(node -p "require('./package.json').name")" version --registry=https://registry.npmjs.org/
+      - name: Release
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release # <- The Run Commnand      
