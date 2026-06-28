@@ -3,10 +3,6 @@ import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { createTagObject } from '../common/data'
-import {
-  getFoundPlayerIdentity,
-  getMysteryPlayerIdentity,
-} from '../common/getters'
 import { queueTagPayload } from './helpers'
 import TinyCache from 'tinycache'
 
@@ -23,24 +19,10 @@ export async function queueTag(
   const currentTag = currentTagsResponse?.data?.[0]
 
   const isCompleteQueuedTag = payload.mysteryImageUrl && payload.foundImageUrl
-  const isMysteryUpload = !!(payload.mysteryImage || payload.mysteryImageUrl)
-  const isFoundUpload = !!(payload.foundImage || payload.foundImageUrl)
 
   const playerAlreadyQueuedError =
-    !isCompleteQueuedTag &&
-    ((isFoundUpload &&
-      !!payload.foundPlayer &&
-      queuedTags.some(
-        (t) => getFoundPlayerIdentity(t) === payload.foundPlayer
-      )) ||
-      (isMysteryUpload &&
-        queuedTags.some(
-          (t) =>
-            (!!payload.playerId &&
-              getMysteryPlayerIdentity(t) === payload.playerId) ||
-            (!!payload.mysteryPlayer &&
-              getMysteryPlayerIdentity(t) === payload.mysteryPlayer)
-        )))
+    isCompleteQueuedTag &&
+    queuedTags.some((t) => t.foundPlayer === payload.foundPlayer)
 
   if (playerAlreadyQueuedError) {
     return {
@@ -53,11 +35,7 @@ export async function queueTag(
   }
 
   const playerIsPreviousMystery =
-    isFoundUpload &&
-    !!payload.foundPlayer &&
-    !!currentTag &&
-    (payload.foundPlayer === currentTag.mysteryPlayer ||
-      (!!payload.playerId && payload.playerId === currentTag.playerId))
+    currentTag?.mysteryPlayer === payload.foundPlayer
 
   if (playerIsPreviousMystery) {
     return {

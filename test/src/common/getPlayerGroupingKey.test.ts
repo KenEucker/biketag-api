@@ -1,67 +1,41 @@
 import { describe, expect, test } from 'vitest'
-import {
-  getBikeTagFromS3ImageSet,
-  getFoundPlayerIdentity,
-  getMysteryPlayerIdentity,
-  getQueueSubmitterKey,
-} from '../../../src/common/getters'
+import { getBikeTagFromS3ImageSet } from '../../../src/common/getters'
 import {
   getGroupedTagsByPlayer,
+  getQueueImageGroupKey,
   parseTagnumberFromQueueKey,
 } from '../../../src/aws/helpers'
 import { S3ImageMeta } from '../../../src/common/types'
 
-describe('getMysteryPlayerIdentity', () => {
-  test('uses playerId for mystery images', () => {
+describe('getQueueImageGroupKey', () => {
+  test('uses playerId for mystery images and foundPlayer for proof images', () => {
     const playerId = 'did:plc:abc123'
 
     expect(
-      getMysteryPlayerIdentity({
-        playerId,
-        mysteryPlayer: 'Alice',
+      getQueueImageGroupKey({
+        description: '#100 tag (hint: tree) by Alice on [1/1/24@10:00:00]',
+        data: {
+          tagnumber: 100,
+          playerId,
+          mysteryPlayer: 'Alice',
+          mysteryTime: 1,
+          hint: 'tree',
+        },
       })
-    ).toBe(playerId)
-  })
-})
+    ).toBe('Alice')
 
-describe('getFoundPlayerIdentity', () => {
-  test('uses foundPlayer and ignores playerId', () => {
     expect(
-      getFoundPlayerIdentity({
-        playerId: 'did:plc:abc123',
-        foundPlayer: 'alice.bsky.social',
+      getQueueImageGroupKey({
+        description:
+          '#99 proof found at (Park) by alice.bsky.social on [1/1/24@09:00:00]',
+        data: {
+          tagnumber: 99,
+          foundPlayer: 'alice.bsky.social',
+          foundTime: 1,
+          foundLocation: 'Park',
+        },
       })
     ).toBe('alice.bsky.social')
-  })
-})
-
-describe('getQueueSubmitterKey', () => {
-  test('uses playerId for mystery uploads and foundPlayer for proof uploads', () => {
-    const playerId = 'did:plc:abc123'
-
-    const mystery: S3ImageMeta = {
-      description: '#100 tag (hint: tree) by Alice on [1/1/24@10:00:00]',
-      title: `[${playerId}]`,
-      data: {
-        tagnumber: 100,
-        playerId,
-        mysteryPlayer: 'Alice',
-      },
-    }
-
-    const found: S3ImageMeta = {
-      description:
-        '#99 proof found at (Park) by alice.bsky.social on [1/1/24@09:00:00]',
-      data: {
-        tagnumber: 99,
-        foundPlayer: 'alice.bsky.social',
-        foundTime: 1,
-        foundLocation: 'Park',
-      },
-    }
-
-    expect(getQueueSubmitterKey(mystery)).toBe(playerId)
-    expect(getQueueSubmitterKey(found)).toBe('alice.bsky.social')
   })
 })
 
@@ -105,8 +79,44 @@ describe('getGroupedTagsByPlayer', () => {
     expect(tags[0].playerId).toBe(playerId)
     expect(tags[0].mysteryPlayer).toBe(submitter)
     expect(tags[0].foundPlayer).toBe(submitter)
-    expect(tags[0].mysteryImageUrl).toContain('mystery')
-    expect(tags[0].foundImageUrl).toContain('found')
+  })
+
+  test('pairs mystery and found images when playerId links different display names', () => {
+    const playerId = 'did:plc:shared-player'
+    const groupedImages: S3ImageMeta[][] = []
+
+    groupedImages[99] = [
+      {
+        url: 'https://example.com/found.webp',
+        data: {
+          tagnumber: 99,
+          playerId,
+          foundPlayer: 'alice.bsky.social',
+          foundTime: 1,
+          foundLocation: 'Park',
+        },
+      },
+    ]
+
+    groupedImages[100] = [
+      {
+        url: 'https://example.com/mystery.webp',
+        data: {
+          tagnumber: 100,
+          playerId,
+          mysteryPlayer: 'Alice',
+          mysteryTime: 2,
+          hint: 'tree',
+        },
+      },
+    ]
+
+    const tags = getGroupedTagsByPlayer(groupedImages, { game: 'test' })
+
+    expect(tags).toHaveLength(1)
+    expect(tags[0].playerId).toBe(playerId)
+    expect(tags[0].mysteryPlayer).toBe('Alice')
+    expect(tags[0].foundPlayer).toBe('alice.bsky.social')
   })
 })
 

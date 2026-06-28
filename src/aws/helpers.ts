@@ -14,7 +14,6 @@ import { Tag } from '../common/schema'
 import {
   getBikeTagFromS3ImageSet,
   getPlayerFromText,
-  getQueueSubmitterKey,
   getTagNumbersFromText,
 } from '../common/getters'
 import { Readable } from 'form-data'
@@ -628,31 +627,67 @@ export const normalizeUploadBody = async (
   }
 }
 
-export const queueSubmissionsMatch = (
-  mysteryImage: S3ImageMeta,
-  foundImage: S3ImageMeta,
+export const getQueueImageGroupKey = (
+  image: S3ImageMeta,
   cache?: typeof TinyCache
-): boolean => {
-  const mysteryKey = getQueueSubmitterKey(mysteryImage, cache)
-  const foundKey = getQueueSubmitterKey(foundImage, cache)
-  if (mysteryKey && foundKey && mysteryKey === foundKey) return true
-
-  const mysteryName =
-    mysteryImage.data?.mysteryPlayer ||
-    getPlayerFromText(
-      mysteryImage.description ?? '',
-      mysteryImage.data?.mysteryPlayer,
-      cache
+): string | null => {
+  if (isMysteryImage(image)) {
+    return (
+      image.data?.mysteryPlayer ||
+      image.data?.playerId ||
+      getPlayerFromText(
+        image.description ?? '',
+        image.data?.mysteryPlayer,
+        cache
+      ) ||
+      null
     )
-  const foundName =
-    foundImage.data?.foundPlayer ||
-    getPlayerFromText(
-      foundImage.description ?? '',
-      foundImage.data?.foundPlayer,
-      cache
-    )
+  }
 
-  return !!(mysteryName && foundName && mysteryName === foundName)
+  if (isFoundImage(image)) {
+    return (
+      image.data?.foundPlayer ||
+      getPlayerFromText(
+        image.description ?? '',
+        image.data?.foundPlayer,
+        cache
+      ) ||
+      null
+    )
+  }
+
+  return getPlayerFromText(
+    image.description ?? '',
+    image.data?.foundPlayer || image.data?.mysteryPlayer,
+    cache
+  )
+}
+
+const addQueueImageToPlayerGroup = (
+  image: S3ImageMeta,
+  playerGroupedImages: Record<string, S3ImageMeta[]>,
+  playerIdToGroupKey: Record<string, string>,
+  cache?: typeof TinyCache
+) => {
+  let key = getQueueImageGroupKey(image, cache)
+  if (!key) return
+
+  const playerId = image.data?.playerId
+  if (playerId?.length) {
+    const linkedKey = playerIdToGroupKey[playerId]
+    if (linkedKey) {
+      key = linkedKey
+    } else {
+      playerIdToGroupKey[playerId] = key
+    }
+  }
+
+  playerGroupedImages[key] = playerGroupedImages[key] ?? []
+  playerGroupedImages[key].push(image)
+
+  if (playerId?.length) {
+    playerIdToGroupKey[playerId] = key
+  }
 }
 
 export const getGroupedTagsByPlayer = (
@@ -662,40 +697,53 @@ export const getGroupedTagsByPlayer = (
 ) => {
   if (!groupedImages.length) return []
 
+  const playerGroupedImages: Record<string, S3ImageMeta[]> = {}
+  const playerIdToGroupKey: Record<string, string> = {}
+  const playerGroupedTags: Tag[] = []
+
   const highestTagnumber = groupedImages.reduce((max, group, index) => {
     return group?.length ? Math.max(max, index) : max
   }, 0)
 
-  const roundImages = [
-    ...(groupedImages[highestTagnumber] ?? []),
-    ...(groupedImages[highestTagnumber - 1] ?? []),
-  ]
-
-  const mysteries = roundImages.filter(isMysteryImage)
-  const founds = roundImages.filter(isFoundImage)
-  const pairedFounds = new Set<S3ImageMeta>()
-  const playerGroupedTags: Tag[] = []
-
-  for (const mysteryImage of mysteries) {
-    const foundImage = founds.find(
-      (image) =>
-        !pairedFounds.has(image) &&
-        queueSubmissionsMatch(mysteryImage, image, cache)
-    )
-
-    if (foundImage) pairedFounds.add(foundImage)
-
-    playerGroupedTags.push(
-      getBikeTagFromS3ImageSet(mysteryImage, foundImage, appendToTagData)
+  for (const image of groupedImages[highestTagnumber] ?? []) {
+    addQueueImageToPlayerGroup(
+      image,
+      playerGroupedImages,
+      playerIdToGroupKey,
+      cache
     )
   }
 
-  for (const foundImage of founds) {
-    if (pairedFounds.has(foundImage)) continue
-
-    playerGroupedTags.push(
-      getBikeTagFromS3ImageSet(undefined, foundImage, appendToTagData)
+  for (const image of groupedImages[highestTagnumber - 1] ?? []) {
+    addQueueImageToPlayerGroup(
+      image,
+      playerGroupedImages,
+      playerIdToGroupKey,
+      cache
     )
+  }
+
+  for (const player of Object.keys(playerGroupedImages)) {
+    const images = playerGroupedImages[player]
+
+    if (images.length === 1) {
+      playerGroupedTags.push(
+        getBikeTagFromS3ImageSet(
+          isMysteryImage(images[0]) ? images[0] : undefined,
+          isFoundImage(images[0]) ? images[0] : undefined,
+          appendToTagData
+        )
+      )
+    } else if (images.length === 2) {
+      const mysteryImage = images.find(isMysteryImage)
+      const foundImage = images.find(isFoundImage)
+
+      playerGroupedTags.push(
+        getBikeTagFromS3ImageSet(mysteryImage, foundImage, appendToTagData)
+      )
+    } else {
+      console.warn('Unexpected image count for player:', player, images)
+    }
   }
 
   return playerGroupedTags
