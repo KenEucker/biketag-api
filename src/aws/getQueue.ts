@@ -1,6 +1,6 @@
-import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { S3Client } from '@aws-sdk/client-s3'
 import { getQueuePayload } from '../common/payloads'
-import { BikeTagApiResponse, S3ImageMeta } from '../common/types'
+import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import {
@@ -8,10 +8,7 @@ import {
   saveIndex,
   resizeAndSaveVariants,
   listAllS3Objects,
-  getGroupedImagesByTagnumber,
-  getGroupedTagsByPlayer,
-  decodeMetadataValue,
-  getTagMetadata,
+  loadQueueTagsFromImages,
 } from './helpers'
 import { sortTags } from '../common/methods'
 
@@ -38,7 +35,7 @@ export async function getQueue(
           client,
           bucket,
           folder,
-          region,
+          region!,
           cached,
           reindex
         )
@@ -58,38 +55,13 @@ export async function getQueue(
       const files = list.map((obj) => obj.Key).filter(Boolean) as string[]
       logVerbose(`[getQueue] Found ${files.length} files in ${folder}/`)
 
-      const metaList: S3ImageMeta[] = []
-
-      for (const key of files) {
-        // Skip variants
-        if (/_medium\.webp$|_small\.webp$/i.test(key)) continue
-
-        const match = key.match(
-          new RegExp(
-            `${folder}/(.+?)--(mystery|found)--([a-z0-9]+)\\.(webp|jpg|jpeg|png)$`,
-            'i'
-          )
-        )
-        if (!match) continue
-
-        logVerbose('[getQueue] Getting metadata for', key)
-        const head = await client.send(
-          new HeadObjectCommand({ Bucket: bucket, Key: key })
-        )
-
-        const meta: S3ImageMeta = {
-          url: `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`,
-          title: decodeMetadataValue(head.Metadata?.title || ''),
-          description: decodeMetadataValue(head.Metadata?.description || ''),
-          data: getTagMetadata(head.Metadata?.data),
-        }
-
-        metaList.push(meta)
-      }
-
-      logVerbose(`[getQueue] Collected metadata for ${metaList.length} images`)
-      const groupedImages = getGroupedImagesByTagnumber(metaList)
-      queuedTags = getGroupedTagsByPlayer(groupedImages, { game })
+      logVerbose('[getQueue] Rebuilding queue tags from images...')
+      queuedTags = await loadQueueTagsFromImages(
+        client,
+        bucket,
+        folder,
+        region!
+      )
       logVerbose(`[getQueue] Grouped into ${queuedTags.length} tag(s)`)
 
       if (resize) {

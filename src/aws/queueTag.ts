@@ -3,6 +3,7 @@ import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { createTagObject } from '../common/data'
+import { getTagPlayerIdentity } from '../common/getters'
 import { queueTagPayload } from './helpers'
 import TinyCache from 'tinycache'
 
@@ -20,9 +21,12 @@ export async function queueTag(
 
   const isCompleteQueuedTag = payload.mysteryImageUrl && payload.foundImageUrl
 
+  const playerIdentity = getTagPlayerIdentity(payload)
+
   const playerAlreadyQueuedError =
     !isCompleteQueuedTag &&
-    queuedTags.some((t) => t.foundPlayer === payload.foundPlayer)
+    !!playerIdentity &&
+    queuedTags.some((t) => getTagPlayerIdentity(t) === playerIdentity)
 
   if (playerAlreadyQueuedError) {
     return {
@@ -34,8 +38,17 @@ export async function queueTag(
     }
   }
 
+  const previousMysteryIdentity = currentTag
+    ? getTagPlayerIdentity({
+        playerId: currentTag.playerId,
+        mysteryPlayer: currentTag.mysteryPlayer,
+      })
+    : null
+
   const playerIsPreviousMystery =
-    currentTag?.mysteryPlayer === payload.foundPlayer
+    !!playerIdentity &&
+    !!previousMysteryIdentity &&
+    playerIdentity === previousMysteryIdentity
 
   if (playerIsPreviousMystery) {
     return {

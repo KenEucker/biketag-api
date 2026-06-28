@@ -11,6 +11,7 @@ import {
   getImgurMysteryDescriptionFromBikeTagData,
   getImgurMysteryImageHashFromBikeTagData,
   getImgurMysteryTitleFromBikeTagData,
+  getPlayerGroupingKey,
 } from '../common/getters'
 import { cacheKeys, createGameObject, createPlayerObject } from '../common/data'
 
@@ -782,7 +783,8 @@ export const getGroupedTagsByTagnumber = (
 
 export const getGroupedTagsByPlayer = (
   groupedImages: ImgurImage[][] = [],
-  appendToTagData = {}
+  appendToTagData = {},
+  cache?: typeof TinyCache
 ) => {
   if (!groupedImages.length) {
     return []
@@ -796,13 +798,15 @@ export const getGroupedTagsByPlayer = (
   }, 0)
 
   groupedImages[highestTagnumber].forEach((i: ImgurImage) => {
-    const player = getPlayerFromText(i.description)
+    const player = getPlayerGroupingKey(i, cache)
+    if (!player) return
     playerGroupedImages[player] = playerGroupedImages[player] ?? []
     playerGroupedImages[player].push(i)
   })
   if (groupedImages[highestTagnumber - 1]) {
     groupedImages[highestTagnumber - 1].forEach((i: ImgurImage) => {
-      const player = getPlayerFromText(i.description)
+      const player = getPlayerGroupingKey(i, cache)
+      if (!player) return
       playerGroupedImages[player] = playerGroupedImages[player] ?? []
       playerGroupedImages[player].push(i)
     })

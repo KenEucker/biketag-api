@@ -13,7 +13,7 @@ import {
 import { Tag } from '../common/schema'
 import {
   getBikeTagFromS3ImageSet,
-  getPlayerFromText,
+  getPlayerGroupingKey,
   getTagNumbersFromText,
 } from '../common/getters'
 import { Readable } from 'form-data'
@@ -110,6 +110,81 @@ export const streamToString = async (stream: any): Promise<string> => {
   throw new Error('Unsupported stream type')
 }
 
+export const parseTagnumberFromQueueKey = (key: string): number | undefined => {
+  const match = key.match(/-tag-(\d+)--(?:mystery|found)--/i)
+  return match ? parseInt(match[1], 10) : undefined
+}
+
+export const collectQueueImageMetaList = async (
+  client: S3Client,
+  bucket: string,
+  folder: string,
+  region: string
+): Promise<S3ImageMeta[]> => {
+  const list = await listAllS3Objects(client, {
+    Bucket: bucket,
+    Prefix: `${folder}/`,
+  })
+
+  const metaList: S3ImageMeta[] = []
+
+  for (const obj of list) {
+    const key = obj.Key
+    if (!key) continue
+    if (/_medium\.webp$|_small\.webp$/i.test(key)) continue
+
+    const match = key.match(
+      new RegExp(
+        `${folder}/(.+?)--(mystery|found)--([a-z0-9]+)\\.(webp|jpg|jpeg|png)$`,
+        'i'
+      )
+    )
+    if (!match) continue
+
+    const head = await client.send(
+      new HeadObjectCommand({ Bucket: bucket, Key: key })
+    )
+
+    const parsed = getTagMetadata(head.Metadata?.data)
+    const tagnumberFromKey = parseTagnumberFromQueueKey(key)
+    const data =
+      parsed ??
+      (typeof tagnumberFromKey === 'number'
+        ? ({ tagnumber: tagnumberFromKey } as Partial<Tag>)
+        : undefined)
+
+    if (!data) continue
+
+    metaList.push({
+      url: `https://${bucket}.${region}.cdn.digitaloceanspaces.com/${key}`,
+      title: decodeMetadataValue(head.Metadata?.title || ''),
+      description: decodeMetadataValue(head.Metadata?.description || ''),
+      data,
+    })
+  }
+
+  return metaList
+}
+
+/** Rebuild queue tags by pairing submitter images across adjacent tag numbers. */
+export const loadQueueTagsFromImages = async (
+  client: S3Client,
+  bucket: string,
+  folder: string,
+  region: string,
+  cache?: typeof TinyCache
+): Promise<Tag[]> => {
+  const game = bucket.replace(/-biketag$/i, '')
+  const metaList = await collectQueueImageMetaList(
+    client,
+    bucket,
+    folder,
+    region
+  )
+  const groupedImages = getGroupedImagesByTagnumber(metaList, cache)
+  return getGroupedTagsByPlayer(groupedImages, { game }, cache)
+}
+
 export const loadIndex = async (
   client: S3Client,
   bucket: string,
@@ -180,6 +255,10 @@ const loadIndexFromImages = async (
 ): Promise<Tag[]> => {
   if (!region) {
     throw new Error('Missing or invalid region when calling loadIndex')
+  }
+
+  if (folder === 'queue') {
+    return loadQueueTagsFromImages(client, bucket, folder, region)
   }
 
   const prefix = `${folder}/`
@@ -565,26 +644,14 @@ export const getGroupedTagsByPlayer = (
 
   // Group player images from the current and previous round
   for (const image of groupedImages[highestTagnumber] ?? []) {
-    const player = getPlayerFromText(
-      image.description,
-      image.data?.foundPlayer?.length
-        ? image.data.foundPlayer
-        : image.data?.mysteryPlayer,
-      cache
-    )
+    const player = getPlayerGroupingKey(image, cache)
     if (!player) continue
     playerGroupedImages[player] = playerGroupedImages[player] ?? []
     playerGroupedImages[player].push(image)
   }
 
   for (const image of groupedImages[highestTagnumber - 1] ?? []) {
-    const player = getPlayerFromText(
-      image.description,
-      image.data?.foundPlayer?.length
-        ? image.data.foundPlayer
-        : image.data?.mysteryPlayer,
-      cache
-    )
+    const player = getPlayerGroupingKey(image, cache)
     if (!player) continue
     playerGroupedImages[player] = playerGroupedImages[player] ?? []
     playerGroupedImages[player].push(image)
@@ -625,8 +692,8 @@ export const getGroupedImagesByTagnumber = (
 
   ungroupedImages.forEach((image) => {
     const tagnumbers = getTagNumbersFromText(
-      image.description,
-      [image.data?.tagnumber],
+      image.description!,
+      [image.data?.tagnumber!],
       cache
     )
     const tagnumber = tagnumbers[0] // Assume the first is primary
