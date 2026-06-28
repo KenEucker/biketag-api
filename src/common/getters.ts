@@ -132,29 +132,113 @@ export const getPlayerFromText = (
   return player
 }
 
-/** Stable key for pairing queue images from the same submitter. */
-export const getPlayerGroupingKey = (
-  image: { title?: string; description?: string; data?: Partial<Tag> },
+/** Whether image metadata describes a mystery (not proof) upload. */
+export const isQueueMysteryImage = (image: {
+  description?: string
+  data?: Partial<Tag>
+}): boolean => {
+  if (image?.data) {
+    const {
+      mysteryPlayer,
+      mysteryTime,
+      hint,
+      foundPlayer,
+      foundTime,
+      foundLocation,
+    } = image.data
+    if (mysteryPlayer || mysteryTime || hint) {
+      return !(foundPlayer || foundTime || foundLocation)
+    }
+    if (foundPlayer || foundTime || foundLocation) return false
+  }
+  return /^#\d+\s+tag\s/i.test(image.description ?? '')
+}
+
+/** Whether image metadata describes a found proof upload. */
+export const isQueueFoundImage = (image: {
+  description?: string
+  data?: Partial<Tag>
+}): boolean => {
+  if (image?.data) {
+    const {
+      foundPlayer,
+      foundTime,
+      foundLocation,
+      mysteryPlayer,
+      mysteryTime,
+      hint,
+    } = image.data
+    if (foundPlayer || foundTime || foundLocation) {
+      return !(mysteryPlayer || mysteryTime || hint)
+    }
+    if (mysteryPlayer || mysteryTime || hint) return false
+  }
+  return /^#\d+\s+proof\s/i.test(image.description ?? '')
+}
+
+/** Identity of the mystery player; playerId always refers to this player. */
+export const getMysteryPlayerIdentity = (
+  source: Partial<Pick<Tag, 'playerId' | 'mysteryPlayer'>> & {
+    title?: string
+    description?: string
+    data?: Partial<Tag>
+  },
   cache?: typeof TinyCache
 ): string | null => {
   const playerId =
-    image.data?.playerId ||
-    getPlayerIdFromText(image.title!, '', cache) ||
-    getPlayerIdFromText(image.description!, '', cache)
+    source.playerId ||
+    source.data?.playerId ||
+    getPlayerIdFromText(source.title ?? '', '', cache) ||
+    getPlayerIdFromText(source.description ?? '', '', cache)
 
   if (playerId?.length) return playerId
 
-  const fallback = image.data?.foundPlayer || image.data?.mysteryPlayer
-  const player = getPlayerFromText(image.description!, fallback, cache)
-  return player?.length ? player : null
+  const name =
+    source.mysteryPlayer ||
+    source.data?.mysteryPlayer ||
+    getPlayerFromText(
+      source.description ?? '',
+      source.data?.mysteryPlayer,
+      cache
+    )
+
+  return name?.length ? name : null
 }
 
-/** Stable player identity for tag payloads (prefers playerId). */
-export const getTagPlayerIdentity = (
-  tag: Partial<Pick<Tag, 'playerId' | 'foundPlayer' | 'mysteryPlayer'>>
+/** Identity of the player who found a tag. */
+export const getFoundPlayerIdentity = (
+  source: Partial<Pick<Tag, 'foundPlayer'>> & {
+    title?: string
+    description?: string
+    data?: Partial<Tag>
+  },
+  cache?: typeof TinyCache
 ): string | null => {
-  if (tag.playerId?.length) return tag.playerId
-  return tag.foundPlayer || tag.mysteryPlayer || null
+  const name =
+    source.foundPlayer ||
+    source.data?.foundPlayer ||
+    getPlayerFromText(source.description ?? '', source.data?.foundPlayer, cache)
+
+  return name?.length ? name : null
+}
+
+/** Stable key for pairing queue images submitted by the same player. */
+export const getQueueSubmitterKey = (
+  image: { title?: string; description?: string; data?: Partial<Tag> },
+  cache?: typeof TinyCache
+): string | null => {
+  if (isQueueMysteryImage(image)) {
+    return getMysteryPlayerIdentity(image, cache)
+  }
+
+  if (isQueueFoundImage(image)) {
+    return getFoundPlayerIdentity(image, cache)
+  }
+
+  return (
+    getMysteryPlayerIdentity(image, cache) ||
+    getFoundPlayerIdentity(image, cache)
+  )
 }
 
 export const getFoundLocationFromText = (
@@ -629,8 +713,10 @@ export const getBikeTagFromS3ImageSet = (
   if (!foundImage && !mysteryImage) return null as Tag
 
   /// TODO: remove the image and description from the S3ImageMeta interface
-  let foundImageDescription, foundImageTitle
-  let mysteryImageDescription, mysteryImageTitle
+  let foundImageDescription = ''
+  let foundImageTitle = ''
+  let mysteryImageDescription = ''
+  let mysteryImageTitle = ''
   let game = opts?.game ?? '',
     tagnumber = 0,
     slug
@@ -651,7 +737,8 @@ export const getBikeTagFromS3ImageSet = (
 
   if (foundImage?.data?.tagnumber && mysteryImage?.data?.tagnumber) {
     tagnumber = mysteryImage.data.tagnumber ?? foundImage.data.tagnumber ?? 0
-    playerId = foundImage.data.playerId ?? mysteryImage.data.playerId
+    // playerId is the mystery player's id; mystery metadata is authoritative
+    playerId = mysteryImage.data.playerId ?? foundImage.data.playerId
     mysteryImageUrl = mysteryImage.url
     mysteryPlayer = mysteryImage.data.mysteryPlayer ?? ''
     mysteryTime = mysteryImage.data.mysteryTime ?? 0
@@ -673,6 +760,7 @@ export const getBikeTagFromS3ImageSet = (
     foundLocation = foundImage.data.foundLocation ?? ''
     confirmedBoundary = foundImage.data.confirmedBoundary ?? false
     gps = foundImage.data.gps ?? { lat: 0, long: 0, alt: 0 }
+    // Found images may carry the tag's mystery playerId in metadata (see getFoundMetadata)
     playerId = foundImage.data.playerId
   } else if (mysteryImage?.data?.tagnumber) {
     tagnumber = mysteryImage.data.tagnumber ?? 0
@@ -688,8 +776,8 @@ export const getBikeTagFromS3ImageSet = (
 
   if (foundImage && !foundImageUrl) {
     foundImageUrl = foundImage.url
-    foundImageDescription = foundImage.description
-    foundImageTitle = foundImage.title
+    foundImageDescription = foundImage.description ?? ''
+    foundImageTitle = foundImage.title ?? ''
     foundTime = getTimeFromText(foundImageDescription)
     foundPlayer = getPlayerFromText(foundImageDescription)
     foundLocation = getFoundLocationFromText(foundImageDescription)
@@ -698,8 +786,8 @@ export const getBikeTagFromS3ImageSet = (
 
   if (mysteryImage && !mysteryImageUrl) {
     mysteryImageUrl = mysteryImage.url
-    mysteryImageDescription = mysteryImage.description
-    mysteryImageTitle = mysteryImage.title
+    mysteryImageDescription = mysteryImage.description ?? ''
+    mysteryImageTitle = mysteryImage.title ?? ''
     mysteryTime = getTimeFromText(mysteryImageDescription)
     hint = getHintFromText(mysteryImageDescription)
     discussionUrl = getDiscussionUrlFromText(mysteryImageTitle)
@@ -715,8 +803,8 @@ export const getBikeTagFromS3ImageSet = (
 
   playerId =
     playerId ??
-    getPlayerIdFromText(foundImageTitle) ??
-    getPlayerIdFromText(mysteryImageTitle)
+    getPlayerIdFromText(mysteryImageTitle) ??
+    getPlayerIdFromText(foundImageTitle)
 
   gps =
     (gps ?? foundImageDescription)

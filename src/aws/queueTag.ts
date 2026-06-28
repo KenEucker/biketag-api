@@ -3,7 +3,10 @@ import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { createTagObject } from '../common/data'
-import { getTagPlayerIdentity } from '../common/getters'
+import {
+  getFoundPlayerIdentity,
+  getMysteryPlayerIdentity,
+} from '../common/getters'
 import { queueTagPayload } from './helpers'
 import TinyCache from 'tinycache'
 
@@ -20,13 +23,24 @@ export async function queueTag(
   const currentTag = currentTagsResponse?.data?.[0]
 
   const isCompleteQueuedTag = payload.mysteryImageUrl && payload.foundImageUrl
-
-  const playerIdentity = getTagPlayerIdentity(payload)
+  const isMysteryUpload = !!(payload.mysteryImage || payload.mysteryImageUrl)
+  const isFoundUpload = !!(payload.foundImage || payload.foundImageUrl)
 
   const playerAlreadyQueuedError =
-    isCompleteQueuedTag &&
-    !!playerIdentity &&
-    queuedTags.some((t) => getTagPlayerIdentity(t) === playerIdentity)
+    !isCompleteQueuedTag &&
+    ((isFoundUpload &&
+      !!payload.foundPlayer &&
+      queuedTags.some(
+        (t) => getFoundPlayerIdentity(t) === payload.foundPlayer
+      )) ||
+      (isMysteryUpload &&
+        queuedTags.some(
+          (t) =>
+            (!!payload.playerId &&
+              getMysteryPlayerIdentity(t) === payload.playerId) ||
+            (!!payload.mysteryPlayer &&
+              getMysteryPlayerIdentity(t) === payload.mysteryPlayer)
+        )))
 
   if (playerAlreadyQueuedError) {
     return {
@@ -38,17 +52,12 @@ export async function queueTag(
     }
   }
 
-  const previousMysteryIdentity = currentTag
-    ? getTagPlayerIdentity({
-        playerId: currentTag.playerId,
-        mysteryPlayer: currentTag.mysteryPlayer,
-      })
-    : null
-
   const playerIsPreviousMystery =
-    !!playerIdentity &&
-    !!previousMysteryIdentity &&
-    playerIdentity === previousMysteryIdentity
+    isFoundUpload &&
+    !!payload.foundPlayer &&
+    !!currentTag &&
+    (payload.foundPlayer === currentTag.mysteryPlayer ||
+      (!!payload.playerId && payload.playerId === currentTag.playerId))
 
   if (playerIsPreviousMystery) {
     return {

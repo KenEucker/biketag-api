@@ -13,7 +13,8 @@ import {
 import { Tag } from '../common/schema'
 import {
   getBikeTagFromS3ImageSet,
-  getPlayerGroupingKey,
+  getPlayerFromText,
+  getQueueSubmitterKey,
   getTagNumbersFromText,
 } from '../common/getters'
 import { Readable } from 'form-data'
@@ -627,6 +628,33 @@ export const normalizeUploadBody = async (
   }
 }
 
+export const queueSubmissionsMatch = (
+  mysteryImage: S3ImageMeta,
+  foundImage: S3ImageMeta,
+  cache?: typeof TinyCache
+): boolean => {
+  const mysteryKey = getQueueSubmitterKey(mysteryImage, cache)
+  const foundKey = getQueueSubmitterKey(foundImage, cache)
+  if (mysteryKey && foundKey && mysteryKey === foundKey) return true
+
+  const mysteryName =
+    mysteryImage.data?.mysteryPlayer ||
+    getPlayerFromText(
+      mysteryImage.description ?? '',
+      mysteryImage.data?.mysteryPlayer,
+      cache
+    )
+  const foundName =
+    foundImage.data?.foundPlayer ||
+    getPlayerFromText(
+      foundImage.description ?? '',
+      foundImage.data?.foundPlayer,
+      cache
+    )
+
+  return !!(mysteryName && foundName && mysteryName === foundName)
+}
+
 export const getGroupedTagsByPlayer = (
   groupedImages: S3ImageMeta[][] = [],
   appendToTagData = {},
@@ -634,51 +662,40 @@ export const getGroupedTagsByPlayer = (
 ) => {
   if (!groupedImages.length) return []
 
-  const playerGroupedImages: Record<string, S3ImageMeta[]> = {}
-  const playerGroupedTags: any[] = []
-
-  // Determine the highest tagnumber (assumes array index = tagnumber)
   const highestTagnumber = groupedImages.reduce((max, group, index) => {
     return group?.length ? Math.max(max, index) : max
   }, 0)
 
-  // Group player images from the current and previous round
-  for (const image of groupedImages[highestTagnumber] ?? []) {
-    const player = getPlayerGroupingKey(image, cache)
-    if (!player) continue
-    playerGroupedImages[player] = playerGroupedImages[player] ?? []
-    playerGroupedImages[player].push(image)
+  const roundImages = [
+    ...(groupedImages[highestTagnumber] ?? []),
+    ...(groupedImages[highestTagnumber - 1] ?? []),
+  ]
+
+  const mysteries = roundImages.filter(isMysteryImage)
+  const founds = roundImages.filter(isFoundImage)
+  const pairedFounds = new Set<S3ImageMeta>()
+  const playerGroupedTags: Tag[] = []
+
+  for (const mysteryImage of mysteries) {
+    const foundImage = founds.find(
+      (image) =>
+        !pairedFounds.has(image) &&
+        queueSubmissionsMatch(mysteryImage, image, cache)
+    )
+
+    if (foundImage) pairedFounds.add(foundImage)
+
+    playerGroupedTags.push(
+      getBikeTagFromS3ImageSet(mysteryImage, foundImage, appendToTagData)
+    )
   }
 
-  for (const image of groupedImages[highestTagnumber - 1] ?? []) {
-    const player = getPlayerGroupingKey(image, cache)
-    if (!player) continue
-    playerGroupedImages[player] = playerGroupedImages[player] ?? []
-    playerGroupedImages[player].push(image)
-  }
+  for (const foundImage of founds) {
+    if (pairedFounds.has(foundImage)) continue
 
-  // Generate merged tags
-  for (const player of Object.keys(playerGroupedImages)) {
-    const images = playerGroupedImages[player]
-
-    if (images.length === 1) {
-      playerGroupedTags.push(
-        getBikeTagFromS3ImageSet(
-          isMysteryImage(images[0]) ? images[0] : undefined,
-          isFoundImage(images[0]) ? images[0] : undefined,
-          appendToTagData
-        )
-      )
-    } else if (images.length === 2) {
-      const mysteryImage = images.find(isMysteryImage)
-      const foundImage = images.find(isFoundImage)
-
-      playerGroupedTags.push(
-        getBikeTagFromS3ImageSet(mysteryImage, foundImage, appendToTagData)
-      )
-    } else {
-      console.warn('Unexpected image count for player:', player, images)
-    }
+    playerGroupedTags.push(
+      getBikeTagFromS3ImageSet(undefined, foundImage, appendToTagData)
+    )
   }
 
   return playerGroupedTags
@@ -807,6 +824,7 @@ export const getFoundMetadata = (
 ): string => {
   const base = {
     t: tag.tagnumber,
+    // Tag-level mystery player id; duplicated on found images for metadata round-trip
     p: tag.playerId,
     fp: tag.foundPlayer,
     ft: tag.foundTime,
