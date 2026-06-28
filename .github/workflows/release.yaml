@@ -1,8 +1,8 @@
-name: Verify and Release
+name: Release
 on:
   push:
     branches:
-      - main # or master
+      - production
 
 permissions:
   contents: read # for checkout
