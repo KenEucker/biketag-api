@@ -11,7 +11,7 @@ import {
   getImgurMysteryDescriptionFromBikeTagData,
   getImgurMysteryImageHashFromBikeTagData,
   getImgurMysteryTitleFromBikeTagData,
-  getPlayerGroupingKey,
+  getQueueSubmitterKey,
 } from '../common/getters'
 import { cacheKeys, createGameObject, createPlayerObject } from '../common/data'
 
@@ -785,12 +785,12 @@ export const getGroupedTagsByPlayer = (
   groupedImages: ImgurImage[][] = [],
   appendToTagData = {},
   cache?: typeof TinyCache
-) => {
+): Tag[] => {
   if (!groupedImages.length) {
     return []
   }
-  const playerGroupedImages = []
-  const playerGroupedTags = []
+  const playerGroupedImages: Record<string, ImgurImage[]> = {}
+  const playerGroupedTags: Tag[] = []
   /// TODO: change this as it assumes the tags are ordered by tagnumber
   const highestTagnumber = groupedImages.reduce((o, i, n) => {
     o = o > n ? o : n
@@ -798,14 +798,14 @@ export const getGroupedTagsByPlayer = (
   }, 0)
 
   groupedImages[highestTagnumber].forEach((i: ImgurImage) => {
-    const player = getPlayerGroupingKey(i, cache)
+    const player = getQueueSubmitterKey(i, cache)
     if (!player) return
     playerGroupedImages[player] = playerGroupedImages[player] ?? []
     playerGroupedImages[player].push(i)
   })
   if (groupedImages[highestTagnumber - 1]) {
     groupedImages[highestTagnumber - 1].forEach((i: ImgurImage) => {
-      const player = getPlayerGroupingKey(i, cache)
+      const player = getQueueSubmitterKey(i, cache)
       if (!player) return
       playerGroupedImages[player] = playerGroupedImages[player] ?? []
       playerGroupedImages[player].push(i)
