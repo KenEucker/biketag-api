@@ -29,7 +29,7 @@ export async function getQueue(
     albumInfo?.data?.images ?? [],
     cache
   )
-  const queuedTags = getGroupedTagsByPlayer(images, payload)
+  const queuedTags = getGroupedTagsByPlayer(images, payload, cache)
 
   return {
     data: sortTags(queuedTags, 'relevance'),

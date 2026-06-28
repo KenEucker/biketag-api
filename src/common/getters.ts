@@ -132,12 +132,37 @@ export const getPlayerFromText = (
   return player
 }
 
+/** Stable key for pairing queue images from the same submitter. */
+export const getPlayerGroupingKey = (
+  image: { title?: string; description?: string; data?: Partial<Tag> },
+  cache?: typeof TinyCache
+): string | null => {
+  const playerId =
+    image.data?.playerId ||
+    getPlayerIdFromText(image.title!, '', cache) ||
+    getPlayerIdFromText(image.description!, '', cache)
+
+  if (playerId?.length) return playerId
+
+  const fallback = image.data?.foundPlayer || image.data?.mysteryPlayer
+  const player = getPlayerFromText(image.description!, fallback, cache)
+  return player?.length ? player : null
+}
+
+/** Stable player identity for tag payloads (prefers playerId). */
+export const getTagPlayerIdentity = (
+  tag: Partial<Pick<Tag, 'playerId' | 'foundPlayer' | 'mysteryPlayer'>>
+): string | null => {
+  if (tag.playerId?.length) return tag.playerId
+  return tag.foundPlayer || tag.mysteryPlayer || null
+}
+
 export const getFoundLocationFromText = (
   inputText: string,
   fallback?: string,
   cache?: typeof TinyCache
 ): string => {
-  if (!inputText?.length) return fallback
+  if (!inputText?.length) return fallback!
 
   const cacheKey = `${cacheKeys.locationText}${inputText}`
   const existingParsed = getCacheIfExists(cacheKey, cache)
@@ -148,7 +173,7 @@ export const getFoundLocationFromText = (
   if (!foundLocationText) {
     fallback = fallback ?? null
     putCacheIfExists(cacheKey, fallback, cache)
-    return fallback
+    return fallback!
   }
 
   const foundLocation = (
