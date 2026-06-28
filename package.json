@@ -22,12 +22,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/keneucker/biketag-api.git"
+    "url": "https://github.com/KenEucker/biketag-api"
   },
   "author": "Ken Eucker",
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/keneucker/biketag-api/issues"
+    "url": "https://github.com/KenEucker/biketag-api/issues"
   },
   "engines": {
     "node": ">=18"
