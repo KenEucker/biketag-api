@@ -21,7 +21,7 @@ export async function queueTag(
   const isCompleteQueuedTag = payload.mysteryImageUrl && payload.foundImageUrl
 
   const playerAlreadyQueuedError =
-    isCompleteQueuedTag &&
+    !isCompleteQueuedTag &&
     queuedTags.some((t) => t.foundPlayer === payload.foundPlayer)
 
   if (playerAlreadyQueuedError) {
