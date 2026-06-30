@@ -102,6 +102,7 @@ describe('aws uploadTagImage', () => {
     )
 
     expect(foundMetadataUpdate).toBeDefined()
+    expect(foundMetadataUpdate!.ContentType).toBe('image/jpeg')
     expect(getTagMetadata(foundMetadataUpdate!.Metadata.data)?.tagnumber).toBe(
       100
     )

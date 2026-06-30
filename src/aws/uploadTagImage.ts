@@ -79,6 +79,7 @@ export async function uploadTagImage(
           ? getMysteryMetadata(metadataPayload)
           : getFoundMetadata(metadataPayload),
     }
+    let contentType = payload.contentType
     const replaceExistingImageMetadata = async (key: string) => {
       try {
         await client.send(
@@ -87,6 +88,7 @@ export async function uploadTagImage(
             CopySource: `${bucket}/${key}`,
             Key: key,
             ACL: 'public-read',
+            ContentType: contentType,
             MetadataDirective: 'REPLACE',
             Metadata: metadata,
           })
@@ -99,7 +101,6 @@ export async function uploadTagImage(
       }
     }
 
-    let contentType = payload.contentType
     const existingUrl = payload[urlField]
     const currentKey = existingUrl ? getKeyFromUrl(existingUrl) : ''
     const isBucketUrl = existingUrl?.includes(`${bucket}.${region}`)
