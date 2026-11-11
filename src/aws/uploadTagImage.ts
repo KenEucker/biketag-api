@@ -1,4 +1,8 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import {
+  S3Client,
+  CopyObjectCommand,
+  PutObjectCommand,
+} from '@aws-sdk/client-s3'
 import { createTagObject } from '../common/data'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { BikeTagApiResponse } from '../common/types'
@@ -51,8 +55,52 @@ export async function uploadTagImage(
     const folder = payload.folder ?? 'queue'
     const player =
       type === 'mystery' ? payload.mysteryPlayer : payload.foundPlayer
+    const isCompleteQueuedTag =
+      folder === 'queue' &&
+      !!(payload.mysteryImageUrl || payload.mysteryImage) &&
+      !!(payload.foundImageUrl || payload.foundImage)
+    const imageTagnumber =
+      type === 'found' &&
+      isCompleteQueuedTag &&
+      typeof payload.tagnumber === 'number'
+        ? payload.tagnumber - 1
+        : payload.tagnumber
 
+    if (type === 'mystery' && !payload.mysteryTime) {
+      payload.mysteryTime = Math.floor(Date.now() / 1000)
+    } else if (type === 'found' && !payload.foundTime) {
+      payload.foundTime = Math.floor(Date.now() / 1000)
+    }
+
+    const metadataPayload = { ...payload, tagnumber: imageTagnumber } as Tag
+    const metadata = {
+      data:
+        type === 'mystery'
+          ? getMysteryMetadata(metadataPayload)
+          : getFoundMetadata(metadataPayload),
+    }
     let contentType = payload.contentType
+    const replaceExistingImageMetadata = async (key: string) => {
+      try {
+        await client.send(
+          new CopyObjectCommand({
+            Bucket: bucket,
+            CopySource: `${bucket}/${key}`,
+            Key: key,
+            ACL: 'public-read',
+            ContentType: contentType,
+            MetadataDirective: 'REPLACE',
+            Metadata: metadata,
+          })
+        )
+        return true
+      } catch (err: any) {
+        success = false
+        errors.push(`Failed to update ${type} image metadata: ${err.message}`)
+        return false
+      }
+    }
+
     const existingUrl = payload[urlField]
     const currentKey = existingUrl ? getKeyFromUrl(existingUrl) : ''
     const isBucketUrl = existingUrl?.includes(`${bucket}.${region}`)
@@ -68,7 +116,7 @@ export async function uploadTagImage(
       const expectedKey = await getBikeTagImageKey(
         type,
         player,
-        payload.tagnumber,
+        imageTagnumber,
         payload.game,
         contentType,
         folder
@@ -79,6 +127,8 @@ export async function uploadTagImage(
         logVerbose(
           `[uploadTagImage] ${type} image already in correct location.`
         )
+        const metadataUpdated = await replaceExistingImageMetadata(expectedKey)
+        if (!metadataUpdated) return undefined
         return existingUrl
       }
 
@@ -91,6 +141,8 @@ export async function uploadTagImage(
       )
       if (moveResult.success) {
         logVerbose(`[uploadTagImage] Moved ${type} image successfully.`)
+        const metadataUpdated = await replaceExistingImageMetadata(expectedKey)
+        if (!metadataUpdated) return undefined
         return expectedUrl
       }
 
@@ -128,7 +180,7 @@ export async function uploadTagImage(
     const key = await getBikeTagImageKey(
       type,
       player,
-      payload.tagnumber,
+      imageTagnumber,
       payload.game,
       contentType,
       folder
@@ -141,12 +193,6 @@ export async function uploadTagImage(
       return undefined
     }
 
-    if (type === 'mystery' && !payload.mysteryTime) {
-      payload.mysteryTime = Math.floor(Date.now() / 1000)
-    } else if (type === 'found' && !payload.foundTime) {
-      payload.foundTime = Math.floor(Date.now() / 1000)
-    }
-
     try {
       if (typeof window === 'undefined') {
         logVerbose(`[uploadTagImage] Uploading ${type} image to S3 (Node)...`)
@@ -157,12 +203,7 @@ export async function uploadTagImage(
             Body: await normalizeUploadBody(payload[blobField]),
             ContentType: contentType,
             ACL: 'public-read',
-            Metadata: {
-              data:
-                type === 'mystery'
-                  ? getMysteryMetadata(payload as Tag)
-                  : getFoundMetadata(payload as Tag),
-            },
+            Metadata: metadata,
           })
         )
       } else if (this.fetchSignedUrl && this.plainFetcher) {
@@ -184,10 +225,7 @@ export async function uploadTagImage(
           method: 'PUT',
           headers: {
             'Content-Type': contentType,
-            'x-amz-meta-data':
-              type === 'mystery'
-                ? getMysteryMetadata(payload as Tag)
-                : getFoundMetadata(payload as Tag),
+            'x-amz-meta-data': metadata.data,
             'x-amz-acl': 'public-read',
           },
           data: await normalizeUploadBody(payload[blobField]),
