@@ -20,37 +20,44 @@ export async function getTags(
   let error
   let success = true
 
-  const albumInfo = await getGameAlbumFromCache(
-    payload.hash,
-    cache,
-    () => client.getAlbum(payload.hash),
-    payload.cached
-  )
-
-  if (payload.tagnumbers?.length) {
-    albumImages = albumInfo.data?.images?.filter(
-      (image: any) =>
-        payload.tagnumbers.indexOf(getBikeTagNumberFromImage(image, cache)) !==
-        -1
+  if (payload.slugs?.length && !payload.tagnumbers?.length) {
+    const imageResponses = await Promise.all(
+      payload.slugs.map((slug) => client.getImage(slug))
     )
-  } else if (payload.slugs?.length) {
-    const imagePromises: Promise<Tag>[] = []
-    let success = true
-    const addToArray = (image: any) => {
-      if (image?.data) albumImages.push(image.data)
-      success = image.success && success
-    }
-    payload.slugs.forEach(async (slug: string) =>
-      imagePromises.push(client.getImage(slug).then(addToArray) as any)
+    const failedImageIndex = imageResponses.findIndex(
+      (imageResponse) => !imageResponse.success
     )
 
-    albumImages = await Promise.all(imagePromises)
+    success = failedImageIndex === -1
+    error =
+      failedImageIndex === -1
+        ? undefined
+        : `failed to fetch image ${payload.slugs[failedImageIndex]}`
+    albumImages = imageResponses.flatMap((imageResponse) =>
+      imageResponse.success && imageResponse.data ? [imageResponse.data] : []
+    )
   } else {
-    if (albumInfo.success) {
-      albumImages = albumInfo.data?.images ?? []
+    const albumInfo = await getGameAlbumFromCache(
+      payload.hash,
+      cache,
+      () => client.getAlbum(payload.hash),
+      payload.cached
+    )
+
+    if (payload.tagnumbers?.length) {
+      albumImages = albumInfo.data?.images?.filter(
+        (image: any) =>
+          payload.tagnumbers.indexOf(
+            getBikeTagNumberFromImage(image, cache)
+          ) !== -1
+      )
     } else {
-      success = false
-      error = albumInfo.data
+      if (albumInfo.success) {
+        albumImages = albumInfo.data?.images ?? []
+      } else {
+        success = false
+        error = albumInfo.data
+      }
     }
   }
 
