@@ -45,14 +45,22 @@ export async function queueTag(
     !isCompleteQueuedTag &&
     queuedTags.data?.find((t) => t.foundPlayer === payload.foundPlayer)
   const currentTags = await this.getTags(undefined, cache)
-  const currentTag = currentTags?.data?.length ? currentTags.data[0] : undefined
+  const currentTagsData = currentTags?.data ?? []
+  const currentTag = currentTagsData[0]
+  const previousTag = currentTag
+    ? currentTagsData.find((tag) => tag.tagnumber === currentTag.tagnumber - 1)
+    : undefined
 
   if (playerAlreadyQueuedError) {
     data = payload
     success = false
     error = 'player already has queued tag'
     status = HttpStatusCode.Conflict
-  } else if (currentTag.mysteryPlayer === payload.foundPlayer) {
+  } else if (
+    previousTag?.foundPlayer &&
+    payload.foundPlayer &&
+    previousTag.foundPlayer === payload.foundPlayer
+  ) {
     data = payload
     success = false
     error = 'player created previous round'

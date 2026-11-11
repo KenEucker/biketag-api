@@ -16,7 +16,11 @@ export async function queueTag(
   const queuedTagsResponse = await this.getQueue({ game: payload.game }, cache)
   const currentTagsResponse = await this.getTags({ game: payload.game }, cache)
   const queuedTags = queuedTagsResponse.data || []
-  const currentTag = currentTagsResponse?.data?.[0]
+  const currentTags = currentTagsResponse?.data || []
+  const currentTag = currentTags[0]
+  const previousTag = currentTag
+    ? currentTags.find((tag) => tag.tagnumber === currentTag.tagnumber - 1)
+    : undefined
 
   const isCompleteQueuedTag = payload.mysteryImageUrl && payload.foundImageUrl
 
@@ -35,7 +39,9 @@ export async function queueTag(
   }
 
   const playerIsPreviousMystery =
-    currentTag?.mysteryPlayer === payload.foundPlayer
+    !!previousTag?.foundPlayer &&
+    !!payload.foundPlayer &&
+    previousTag.foundPlayer === payload.foundPlayer
 
   if (playerIsPreviousMystery) {
     return {
