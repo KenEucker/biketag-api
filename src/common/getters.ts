@@ -697,10 +697,12 @@ export const getBikeTagFromS3ImageSet = (
     getPlayerIdFromText(mysteryImageTitle) ??
     getPlayerIdFromText(foundImageTitle)
 
+  // Preserve structured GPS; parse text only for legacy image metadata.
   gps =
-    (gps ?? foundImageDescription)
+    gps ??
+    (foundImageDescription
       ? getGPSLocationFromText(foundImageDescription)
-      : getGPSLocationFromText(mysteryImageTitle)
+      : getGPSLocationFromText(mysteryImageTitle))
 
   if (gps.lat === 0 && gps.long === 0 && foundImageTitle?.length) {
     gps = getGPSLocationFromText(foundImageTitle)
