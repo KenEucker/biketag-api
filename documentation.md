@@ -173,7 +173,8 @@ You can get tags one by one or all at once for a given game using the `getTag` a
 const biketagPortland = await client.getGame('portland')
 
 // The client stores the retrieved game and resolves its configured storage provider.
-// Subsequent tag and player reads use that provider unless explicitly overridden.
+// Storage operations prefer that provider when its adapter is configured.
+// Browser clients without storage credentials can use the BikeTag API adapter.
 console.log(client.gameContext?.imageSource)
 
 // retrieves the latest BikeTag posted for the 'portland' game from the configured provider
