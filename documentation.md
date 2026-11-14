@@ -172,7 +172,11 @@ You can get tags one by one or all at once for a given game using the `getTag` a
 // retrieves the BikeTag game data 'portland' game
 const biketagPortland = await client.getGame('portland')
 
-// retrieves the latest BikeTag posted for the 'portland' game from the most available API
+// The client stores the retrieved game and resolves its configured storage provider.
+// Subsequent tag and player reads use that provider unless explicitly overridden.
+console.log(client.gameContext?.imageSource)
+
+// retrieves the latest BikeTag posted for the 'portland' game from the configured provider
 const biketagPortlandCurrent = await client.getTag()
 
 // retrieves the BikeTag #1 for the 'portland' game from imgur adapter

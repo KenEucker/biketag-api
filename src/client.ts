@@ -18,6 +18,7 @@ import type {
   BikeTagConfiguration,
   PartialBikeTagConfiguration,
   ApiOptions,
+  BikeTagGameContext,
 } from './common/types'
 import {
   AvailableApis,
@@ -64,6 +65,7 @@ import {
   createImgurCredentials,
   createAWSCredentials,
   createSanityCredentials,
+  getGameImageSource,
 } from './common/methods'
 import {
   createGameObject,
@@ -90,6 +92,18 @@ import TinyCache from 'tinycache'
 
 const apiCache = new TinyCache()
 
+const gameStorageMethods = new Set([
+  'getTags',
+  'getPlayers',
+  'getQueue',
+  'queueTag',
+  'uploadTagImage',
+  'updateTag',
+  'archiveTag',
+  'deleteTag',
+  'deleteTags',
+])
+
 // export const USERAGENT =
 //   'biketag-api (https://github.com/keneucker/biketag-api)'
 export class BikeTagClient {
@@ -110,6 +124,9 @@ export class BikeTagClient {
   protected sanityConfig?: SanityCredentials
   protected imgurConfig?: ImgurCredentials
   protected biketagConfig?: BikeTagCredentials
+
+  /** Game metadata and the storage provider resolved from that metadata. */
+  gameContext?: BikeTagGameContext
 
   constructor(
     readonly configuration: Credentials | PartialBikeTagConfiguration
@@ -388,7 +405,43 @@ export class BikeTagClient {
    * @returns The most appropriate API source or null if none are available
    */
   protected getMostAvailableClient(method?: string): AvailableApis {
+    // Once a game is loaded, its configured storage provider takes precedence
+    // over the generic adapter-availability order. Explicit request overrides
+    // are still handled by getDefaultOptions().
     if (
+      this.gameContext?.imageSource &&
+      gameStorageMethods.has(method ?? '')
+    ) {
+      if (
+        this.gameContext.imageSource === AvailableApis.aws &&
+        this.awsClient &&
+        !!awsApi[method ?? '']
+      ) {
+        return AvailableApis.aws
+      }
+
+      if (
+        this.gameContext.imageSource === AvailableApis.imgur &&
+        this.imgurClient &&
+        !!imgurApi[method ?? '']
+      ) {
+        return AvailableApis.imgur
+      }
+
+      // Browser clients without storage credentials should use the BikeTag
+      // API adapter for reads instead of selecting a different storage provider.
+      if (
+        this.biketagConfig &&
+        isBikeTagCredentials(this.biketagConfig) &&
+        isBikeTagApiReady(this.biketagConfig) &&
+        !!biketagApi[method ?? '']
+      ) {
+        return AvailableApis.biketag
+      }
+
+      // Do not silently read from a different provider than the game uses.
+      return this.gameContext.imageSource
+    } else if (
       this.imgurConfig &&
       this.imgurClient &&
       (!method || !!imgurApi[method])
@@ -734,6 +787,40 @@ export class BikeTagClient {
   /// ****************************  Game Data Methods   ************************************ ///
 
   /**
+   * Sets the current game context and configures the provider-specific values
+   * already maintained by this client.
+   *
+   * The game context intentionally contains only game metadata and its resolved
+   * storage provider; credentials and adapter clients remain in the existing
+   * configuration properties.
+   */
+  setGameContext(game: Game): BikeTagGameContext {
+    const gameContext: BikeTagGameContext = {
+      game,
+      imageSource: getGameImageSource(game),
+    }
+
+    this.gameContext = gameContext
+    this.config(
+      {
+        game: game.name,
+        imgur: {
+          hash: game.mainhash,
+          queuehash: game.queuehash,
+          archivehash: game.archivehash,
+        },
+        aws: {
+          region: game.awsRegion,
+        },
+      },
+      false,
+      true
+    )
+
+    return gameContext
+  }
+
+  /**
    * Retrieves BikeTag `Game` data based on the provided payload and options
    *
    * @param payload - The getGamePayload for retrieving BikeTag `Game` data
@@ -772,19 +859,12 @@ export class BikeTagClient {
     if (clientMethod) {
       return clientMethod(client, options, apiCache)
         .then((retrievedGameResponse) => {
-          if (retrievedGameResponse.success && retrievedGameResponse.data) {
-            /// Set the most important game data (hash, etc)
-            this.config(
-              {
-                game: retrievedGameResponse.data.name,
-                imgur: {
-                  hash: retrievedGameResponse.data.mainhash,
-                  queuehash: retrievedGameResponse.data.queuehash,
-                  archivehash: retrievedGameResponse.data.archivehash,
-                },
-              },
-              false
-            )
+          if (
+            retrievedGameResponse.success &&
+            retrievedGameResponse.data &&
+            !Array.isArray(retrievedGameResponse.data)
+          ) {
+            this.setGameContext(retrievedGameResponse.data as Game)
           }
           return retrievedGameResponse
         })
@@ -918,7 +998,8 @@ export class BikeTagClient {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
       opts,
-      DataTypes.queue
+      DataTypes.queue,
+      'getQueue'
     )
     let clientMethod = api.getQueue
 
@@ -969,7 +1050,8 @@ export class BikeTagClient {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
       opts,
-      DataTypes.queue
+      DataTypes.queue,
+      'queueTag'
     )
     let clientMethod = api.queueTag
 
@@ -1069,7 +1151,9 @@ export class BikeTagClient {
   ): Promise<BikeTagApiResponse<Tag>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
-      opts
+      opts,
+      DataTypes.tag,
+      'getTags'
     )
     const clientMethod = api.getTag
 
@@ -1158,7 +1242,9 @@ export class BikeTagClient {
   ): Promise<BikeTagApiResponse<any | any[]>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
-      opts
+      opts,
+      DataTypes.tag,
+      'uploadTagImage'
     )
     let clientMethod = api.uploadTagImage
 
@@ -1203,7 +1289,9 @@ export class BikeTagClient {
   ): Promise<BikeTagApiResponse<boolean>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
-      opts
+      opts,
+      DataTypes.tag,
+      'updateTag'
     )
     let clientMethod = api.updateTag
 
@@ -1264,7 +1352,9 @@ export class BikeTagClient {
   ): Promise<BikeTagApiResponse<boolean>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
-      opts
+      opts,
+      DataTypes.tag,
+      'archiveTag'
     )
     const clientMethod = api.archiveTag
 
@@ -1296,7 +1386,9 @@ export class BikeTagClient {
   ): Promise<BikeTagApiResponse<any>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
-      opts
+      opts,
+      DataTypes.tag,
+      'deleteTag'
     )
     let clientMethod = api.deleteTag
 
@@ -1401,7 +1493,9 @@ export class BikeTagClient {
   ): Promise<BikeTagApiResponse<Player>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
-      opts
+      opts,
+      DataTypes.player,
+      'getPlayers'
     )
     const clientMethod = api.getPlayer
 

@@ -22,13 +22,13 @@ export async function getGame(
 
   return response
     .then((response) => {
-      const success = response?.status !== 200
+      const success = response?.status === 200
       return {
         data: response.data as unknown as Game[],
         success,
-        error: success ? response.statusText : undefined,
+        error: success ? undefined : response.statusText,
         source: AvailableApis[AvailableApis.biketag],
-        status: success ? HttpStatusCode.Ok : response.status,
+        status: response.status,
       }
     })
     .catch((error) => {
