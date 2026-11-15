@@ -3,7 +3,7 @@ import { getTagsPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
-import { loadIndex } from './helpers'
+import { loadIndex, getAwsBucketName } from './helpers'
 import { sortTags } from '../common/methods'
 
 export async function getTags(
@@ -23,7 +23,7 @@ export async function getTags(
     cached,
   } = payload
 
-  const bucket = `${game}-biketag`
+  const bucket = getAwsBucketName(game)
   let tags: Tag[] = []
   let success = true
   let error: string | undefined
