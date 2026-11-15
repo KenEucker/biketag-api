@@ -1,3 +1,4 @@
+import { getAwsBucketName } from './helpers'
 import { S3Client } from '@aws-sdk/client-s3'
 import { getPlayersPayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
@@ -12,7 +13,7 @@ export async function getPlayers(
   payload: getPlayersPayload
 ): Promise<BikeTagApiResponse<Player[]>> {
   const { game, slugs = [], sort, limit, region } = payload
-  const bucket = `${game}-biketag`
+  const bucket = getAwsBucketName(game)
   let tags: Tag[] = []
 
   try {
