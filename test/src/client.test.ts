@@ -27,7 +27,7 @@ describe(`Built Module`, () => {
 
     expect(result.status).toBe(200)
     expect(result.success).toBe(true)
-    expect(result.data.slug).toBe('test')
+    expect(result.data).toEqual([{ slug: 'test' }])
   })
 
   // test(`Import from ESM gets API Response`, async () => {
