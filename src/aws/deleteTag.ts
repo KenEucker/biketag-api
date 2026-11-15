@@ -1,3 +1,4 @@
+import { getAwsBucketName } from './helpers'
 import {
   S3Client,
   DeleteObjectCommand,
@@ -28,7 +29,7 @@ export async function deleteTag(
 
   const { tagnumber, folder, game, region, mysteryPlayer, foundPlayer } =
     payload
-  const bucket = `${game}-biketag`
+  const bucket = getAwsBucketName(game)
   const deleted: boolean[] = []
   let success = true
   let errors: string[] = []

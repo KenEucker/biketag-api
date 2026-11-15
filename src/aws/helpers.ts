@@ -28,6 +28,10 @@ import {
 } from '../imgur/helpers'
 import { createTagObject } from '../common/data'
 
+/** Normalize game names at the S3 bucket boundary. Display names may be mixed case. */
+export const getAwsBucketName = (game: string): string =>
+  `${game.toLowerCase()}-biketag`
+
 const indexCache = new TinyCache()
 /** Returns the S3 key prefix for a given tag */
 export const getTagPrefix = (

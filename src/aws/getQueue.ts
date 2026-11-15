@@ -1,3 +1,4 @@
+import { getAwsBucketName } from './helpers'
 import { S3Client } from '@aws-sdk/client-s3'
 import { getQueuePayload } from '../common/payloads'
 import { BikeTagApiResponse } from '../common/types'
@@ -17,7 +18,7 @@ export async function getQueue(
   payload: getQueuePayload
 ): Promise<BikeTagApiResponse<Tag[]>> {
   const { game, reindex, resize, cached, region } = payload
-  const bucket = `${game}-biketag`
+  const bucket = getAwsBucketName(game)
   const folder = 'queue'
 
   const logVerbose = payload.verbose ? console.log : () => {}

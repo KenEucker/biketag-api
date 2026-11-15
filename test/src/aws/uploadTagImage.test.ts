@@ -1,15 +1,20 @@
 import { CopyObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { describe, expect, test, vi } from 'vitest'
 import { uploadTagImage } from '../../../src/aws/uploadTagImage'
-import { getBikeTagImageKey, getTagMetadata } from '../../../src/aws/helpers'
+import { getAwsBucketName, getBikeTagImageKey, getTagMetadata } from '../../../src/aws/helpers'
 
 describe('aws uploadTagImage', () => {
+  test('normalizes mixed-case game names for S3 buckets', () => {
+    expect(getAwsBucketName('Portland')).toBe('portland-biketag')
+    expect(getAwsBucketName('PORTLAND')).toBe('portland-biketag')
+  })
+
   test('keys complete queued found images at the current round', async () => {
     const send = vi.fn().mockResolvedValue({})
     const client = { send }
 
     const response = await uploadTagImage.call({}, client as any, {
-      game: 'portland',
+      game: 'Portland',
       folder: 'queue',
       region: 'nyc3',
       tagnumber: 101,
@@ -24,6 +29,7 @@ describe('aws uploadTagImage', () => {
 
     expect(response.success).toBe(true)
     expect(send).toHaveBeenCalledTimes(2)
+    expect(send.mock.calls.every(([command]) => command.input.Bucket === 'portland-biketag')).toBe(true)
 
     const commands = send.mock.calls.map(([command]) => command)
     expect(
@@ -34,10 +40,10 @@ describe('aws uploadTagImage', () => {
     const mysteryInput = commands[1].input
 
     expect(foundInput.Key).toMatch(
-      /^queue\/portland-tag-100--found--[a-f0-9]{6}\.jpg$/
+      /^queue\/[Pp]ortland-tag-100--found--[a-f0-9]{6}\.jpg$/
     )
     expect(mysteryInput.Key).toMatch(
-      /^queue\/portland-tag-101--mystery--[a-f0-9]{6}\.jpg$/
+      /^queue\/[Pp]ortland-tag-101--mystery--[a-f0-9]{6}\.jpg$/
     )
     expect(getTagMetadata(foundInput.Metadata.data)?.tagnumber).toBe(100)
     expect(getTagMetadata(mysteryInput.Metadata.data)?.tagnumber).toBe(101)
