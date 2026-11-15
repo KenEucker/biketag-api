@@ -405,66 +405,37 @@ export class BikeTagClient {
    * @returns The most appropriate API source or null if none are available
    */
   protected getMostAvailableClient(method?: string): AvailableApis {
-    // Once a game is loaded, its configured storage provider takes precedence
-    // over the generic adapter-availability order. Explicit request overrides
-    // are still handled by getDefaultOptions().
-    if (
-      this.gameContext?.imageSource &&
-      gameStorageMethods.has(method ?? '')
-    ) {
-      if (
-        this.gameContext.imageSource === AvailableApis.aws &&
-        this.awsClient &&
-        !!awsApi[method ?? '']
-      ) {
+    // Game metadata is publicly available through the BikeTag API by default.
+    // An explicit source override is handled by the request options.
+    if (method === 'getGame' || method === 'getAllGames') {
+      return AvailableApis.biketag
+    }
+
+    if (gameStorageMethods.has(method ?? '')) {
+      const provider = this.gameContext?.imageSource
+      if (provider === AvailableApis.aws && this.awsClient && awsApi[method ?? '']) {
         return AvailableApis.aws
       }
-
-      if (
-        this.gameContext.imageSource === AvailableApis.imgur &&
-        this.imgurClient &&
-        !!imgurApi[method ?? '']
-      ) {
+      if (provider === AvailableApis.imgur && this.imgurClient && imgurApi[method ?? '']) {
         return AvailableApis.imgur
       }
-
-      // Browser clients without storage credentials should use the BikeTag
-      // API adapter for reads instead of selecting a different storage provider.
-      if (
-        this.biketagConfig &&
-        isBikeTagCredentials(this.biketagConfig) &&
-        isBikeTagApiReady(this.biketagConfig) &&
-        !!biketagApi[method ?? '']
-      ) {
+      // Never select a different direct storage provider merely because it
+      // happens to be configured. Public reads use the BikeTag API instead.
+      if (biketagApi[method ?? '']) {
         return AvailableApis.biketag
       }
+      // Unsupported API operations remain with the configured provider, if any.
+      return provider ?? AvailableApis.biketag
+    }
 
-      // Do not silently read from a different provider than the game uses.
-      return this.gameContext.imageSource
-    } else if (
-      this.imgurConfig &&
-      this.imgurClient &&
-      (!method || !!imgurApi[method])
-    ) {
+    // Other operations retain their existing adapter availability ordering.
+    if (this.imgurClient && (!method || !!imgurApi[method])) {
       return AvailableApis.imgur
-    } else if (
-      this.awsConfig &&
-      this.awsClient &&
-      (!method || !!awsApi[method])
-    ) {
+    } else if (this.awsClient && (!method || !!awsApi[method])) {
       return AvailableApis.aws
-    } else if (
-      this.sanityConfig &&
-      this.sanityClient &&
-      (!method || !!sanityApi[method])
-    ) {
+    } else if (this.sanityClient && (!method || !!sanityApi[method])) {
       return AvailableApis.sanity
-    } else if (
-      this.biketagConfig &&
-      isBikeTagCredentials(this.biketagConfig) &&
-      isBikeTagApiReady(this.biketagConfig) &&
-      (!method || !!biketagApi[method])
-    ) {
+    } else if (!method || !!biketagApi[method]) {
       return AvailableApis.biketag
     }
     // const sanityApiAvailability =
