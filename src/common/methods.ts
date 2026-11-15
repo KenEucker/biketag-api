@@ -75,9 +75,8 @@ export const getGameImageSource = (
 
 export const isImgurCredentials = (credentials: ImgurCredentials): boolean => {
   return (
-    credentials?.clientId !== undefined ||
-    credentials?.clientSecret !== undefined ||
-    (credentials?.clientId !== undefined && credentials?.hash !== undefined)
+    !!credentials?.clientId?.trim() ||
+    !!credentials?.clientSecret?.trim()
   )
 }
 
@@ -98,16 +97,16 @@ export const isImgurApiReady = (
 export const isSanityCredentials = (
   credentials: SanityCredentials
 ): boolean => {
-  return credentials?.projectId !== undefined
+  return !!credentials?.projectId?.trim() && !!credentials?.dataset?.trim()
 }
 
 export const isAWSCredentials = (credentials: AWSCredentials): boolean => {
-  return !!credentials?.accessKeyId
+  return !!credentials?.accessKeyId?.trim()
 }
 
 export const isAWSApiReady = (credentials: AWSCredentials): ApiAvailability => {
-  if (credentials.accessKeyId !== undefined) {
-    return credentials.secretAccessKey !== undefined ? 3 : 1
+  if (credentials?.accessKeyId?.trim()) {
+    return credentials.secretAccessKey?.trim() ? 3 : 1
   }
 
   return 0
@@ -117,11 +116,11 @@ export const isSanityApiReady = (
   credentials: SanityCredentials
 ): ApiAvailability => {
   if (
-    credentials.projectId !== undefined &&
-    credentials.dataset !== undefined &&
-    credentials.apiVersion !== undefined
+    credentials?.projectId?.trim() &&
+    credentials?.dataset?.trim() &&
+    credentials?.apiVersion?.trim()
   ) {
-    return credentials.token !== undefined ? 3 : 1
+    return credentials.token?.trim() ? 3 : 1
   }
 
   return 0
