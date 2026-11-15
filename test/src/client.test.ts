@@ -1,4 +1,4 @@
-import { apiCredentials, testPath, packagePath } from './config'
+import { testPath, packagePath } from './config'
 import { describe, test, expect } from 'vitest'
 import * as path from 'path'
 
@@ -16,15 +16,18 @@ describe(`Built Module`, () => {
 
   test(`Import from CommonJS gets API Response`, async () => {
     const BikeTagClient = require(packagePath).default
-    const client = new BikeTagClient({
-      game: 'test',
-      hash: 'QjnikOm',
-      ...apiCredentials,
-    })
+    const client = new BikeTagClient({ game: 'test', cached: false })
+    // Exercise the built CommonJS entrypoint without depending on a live
+    // external API, whose response time can exceed CI's test timeout.
+    const response = { status: 200, statusText: 'OK', data: [{ slug: 'test' }] }
+    client.request = async () => response
+    client.cachedRequest = async () => response
 
-    const latestTag = await client.getTag()
+    const result = await client.getGame({ game: 'test' })
 
-    expect(typeof latestTag?.status).toBe('number')
+    expect(result.status).toBe(200)
+    expect(result.success).toBe(true)
+    expect(result.data.slug).toBe('test')
   })
 
   // test(`Import from ESM gets API Response`, async () => {
