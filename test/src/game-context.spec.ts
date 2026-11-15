@@ -68,6 +68,26 @@ describe('game context', () => {
     })
   })
 
+  test('retains credentials across additive configuration and reinitialization', () => {
+    const client = new TestBikeTagClient({
+      game: 'portland',
+      aws: { accessKeyId: 'aws-key', secretAccessKey: 'aws-secret', region: 'nyc3' },
+    } as any)
+    expect(client.getAdapterState().aws).toBe(true)
+
+    client.config({ aws: { region: 'sfo3' } } as any, false, true)
+    expect(client.getAdapterState().aws).toBe(true)
+    expect((client.config() as any).aws.accessKeyId).toBe('aws-key')
+    expect((client.config() as any).aws.region).toBe('sfo3')
+
+    client.config({ sanity: { projectId: '', dataset: '' } } as any, false, true)
+    expect(client.getAdapterState()).toEqual({
+      sanity: false,
+      imgur: false,
+      aws: true,
+    })
+  })
+
   test('does not select Sanity for tags when Sanity is configured but AWS is unavailable', () => {
     const client = new TestBikeTagClient({
       game: 'portland',
