@@ -213,7 +213,7 @@ export class BikeTagClient {
         break
 
       case 'undefined':
-        payload.source = this.getMostAvailableClient(method)
+        payload.source = payload.source ?? this.getMostAvailableClient(method)
         break
 
       default:
@@ -411,11 +411,8 @@ export class BikeTagClient {
       return AvailableApis.imgur
     }
 
-    // Sanity is also usable for other methods it implements.
-    if (this.sanityClient && (!method || !!sanityApi[method])) {
-      return AvailableApis.sanity
-    }
-
+    // Sanity is only the default for game metadata. Tag and other game
+    // requests fall back to BikeTag when their image provider is unavailable.
     // Without a usable configured provider, use the BikeTag API. Unsupported
     // operations will fail through the existing not-implemented/error path.
     if (!method || !!biketagApi[method]) {
@@ -491,6 +488,12 @@ export class BikeTagClient {
     config?: BikeTagConfiguration
   ): BikeTagConfiguration {
     config = config ?? this.config()
+
+    // Reinitialization must not retain a previously configured provider.
+    // In particular, removing environment credentials must disable the adapter.
+    this.imgurClient = undefined
+    this.awsClient = undefined
+    this.sanityClient = undefined
 
     if (
       config.imgur &&
@@ -614,24 +617,14 @@ export class BikeTagClient {
       )
 
       if (reInitialize) {
-        const initializeConfig: BikeTagConfiguration = {
-          biketag: undefined,
-          aws: undefined,
-          imgur: undefined,
-          sanity: undefined,
-        }
-
-        if (!dequal(this.imgurConfig, imgurConfig)) {
-          initializeConfig.imgur = imgurConfig
-        }
-        if (!dequal(this.sanityConfig, sanityConfig)) {
-          initializeConfig.sanity = sanityConfig
-        }
-        if (!dequal(this.awsConfig, awsConfig)) {
-          initializeConfig.aws = awsConfig
-        }
-
-        this.initializeClients(initializeConfig)
+        // Rebuild all adapters from the complete effective configuration,
+        // rather than a partial diff that can leave clients stale or missing.
+        this.initializeClients({
+          biketag: biketagConfig,
+          imgur: imgurConfig,
+          sanity: sanityConfig,
+          aws: awsConfig,
+        })
       }
 
       this.biketagConfig = biketagConfig

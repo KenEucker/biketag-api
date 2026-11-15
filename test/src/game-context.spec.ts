@@ -1,7 +1,14 @@
 import { describe, expect, test, vi } from 'vitest'
 import { BikeTagClient } from '../../src/client'
 import { AvailableApis } from '../../src/common/enums'
-import { getGameImageSource } from '../../src/common/methods'
+import {
+  getGameImageSource,
+  isSanityCredentials,
+  isSanityApiReady,
+  isImgurCredentials,
+  isAWSCredentials,
+  isAWSApiReady,
+} from '../../src/common/methods'
 import { getGame } from '../../src/biketag/getGame'
 import type { Game } from '../../src/common/schema'
 
@@ -17,9 +24,98 @@ class TestBikeTagClient extends BikeTagClient {
   getDefaultDataSource(method: string) {
     return this.getMostAvailableClient(method)
   }
+
+  getAdapterState() {
+    return {
+      sanity: !!this.sanityClient,
+      imgur: !!this.imgurClient,
+      aws: !!this.awsClient,
+    }
+  }
 }
 
 describe('game context', () => {
+  test('does not initialize adapters from empty environment credentials', () => {
+    const client = new TestBikeTagClient({
+      game: 'portland',
+      host: 'http://portland.localhost:7200/.netlify/functions',
+      cached: true,
+      verbose: true,
+      clientKey: null,
+      clientToken: null,
+      aws: { accessKeyId: null, secretAccessKey: null },
+      imgur: { clientId: null, rapidApiKey: null },
+      sanity: { projectId: '', dataset: '' },
+    } as any)
+
+    expect(client.getAdapterState()).toEqual({
+      sanity: false,
+      imgur: false,
+      aws: false,
+    })
+    client.setGameContext(game({
+      name: 'portland',
+      awsRegion: 'nyc3',
+      settings: { 'data::aws': 'true' },
+    }))
+    expect(client.gameContext?.imageSource).toBe(AvailableApis.aws)
+    expect(client.getDefaultDataSource('getTags')).toBe(AvailableApis.biketag)
+    expect(client.getDefaultDataSource('getGame')).toBe(AvailableApis.biketag)
+    expect(client.getAdapterState()).toEqual({
+      sanity: false,
+      imgur: false,
+      aws: false,
+    })
+  })
+
+  test('retains credentials across additive configuration and reinitialization', () => {
+    const client = new TestBikeTagClient({
+      game: 'portland',
+      aws: { accessKeyId: 'aws-key', secretAccessKey: 'aws-secret', region: 'nyc3' },
+    } as any)
+    expect(client.getAdapterState().aws).toBe(true)
+
+    client.config({ aws: { region: 'sfo3' } } as any, false, true)
+    expect(client.getAdapterState().aws).toBe(true)
+    expect((client.config() as any).aws.accessKeyId).toBe('aws-key')
+    expect((client.config() as any).aws.region).toBe('sfo3')
+
+    client.config({ sanity: { projectId: '', dataset: '' } } as any, false, true)
+    expect(client.getAdapterState()).toEqual({
+      sanity: false,
+      imgur: false,
+      aws: true,
+    })
+  })
+
+  test('does not select Sanity for tags when Sanity is configured but AWS is unavailable', () => {
+    const client = new TestBikeTagClient({
+      game: 'portland',
+      sanity: { projectId: 'project', dataset: 'production' },
+    } as any)
+    client.setGameContext(game({
+      name: 'portland',
+      awsRegion: 'nyc3',
+      settings: { 'data::aws': 'true' },
+    }))
+    expect(client.getDefaultDataSource('getGame')).toBe(AvailableApis.sanity)
+    expect(client.getDefaultDataSource('getTags')).toBe(AvailableApis.biketag)
+  })
+
+  test('preserves explicitly requested tag source', () => {
+    const client = new TestBikeTagClient({ game: 'portland' })
+    expect(client.options({ game: 'portland', source: AvailableApis.biketag }).source)
+      .toBe(AvailableApis.biketag)
+  })
+
+  test('rejects empty or null provider credentials', () => {
+    expect(isSanityCredentials({ projectId: '', dataset: '' } as any)).toBe(false)
+    expect(isSanityApiReady({ projectId: '', dataset: '', apiVersion: '2021-10-21' } as any)).toBe(0)
+    expect(isImgurCredentials({ clientId: null, clientSecret: null } as any)).toBe(false)
+    expect(isAWSCredentials({ accessKeyId: null } as any)).toBe(false)
+    expect(isAWSApiReady({ accessKeyId: null, secretAccessKey: null } as any)).toBe(0)
+  })
+
   test('resolves AWS when AWS is enabled and a region is configured', () => {
     expect(
       getGameImageSource(
