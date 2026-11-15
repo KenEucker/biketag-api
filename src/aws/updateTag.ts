@@ -1,3 +1,4 @@
+import { getAwsBucketName } from './helpers'
 import type { S3Client } from '@aws-sdk/client-s3'
 import { CopyObjectCommand } from '@aws-sdk/client-s3'
 import { BikeTagApiResponse } from '../common/types'
@@ -27,7 +28,7 @@ export async function updateTag(
   let success = true
   let error: string | undefined
 
-  const bucket = `${payload.game}-biketag`
+  const bucket = getAwsBucketName(payload.game)
   logVerbose('[updateTag] Checking for existing tag in', payload.folder)
 
   const tagExistsResponse = await this.getTags(

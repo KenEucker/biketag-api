@@ -6,7 +6,7 @@ import { AvailableApis, HttpStatusCode } from '../common/enums'
 import { getCacheIfExists, putCacheIfExists } from '../common/methods'
 import { cacheKeys } from '../common/data'
 import TinyCache from 'tinycache'
-import { streamToString } from './helpers'
+import { streamToString, getAwsBucketName } from './helpers'
 
 export async function getGame(
   client: S3Client,
@@ -14,7 +14,7 @@ export async function getGame(
   cache?: typeof TinyCache
 ): Promise<BikeTagApiResponse<Game>> {
   const slug = payload.slug ?? payload.name ?? 'biketag'
-  const bucket = `${slug}-biketag`
+  const bucket = getAwsBucketName(slug)
   const cacheKey = `aws::${cacheKeys.gameIdText}${slug}`
 
   let game: Game | null = payload.cached

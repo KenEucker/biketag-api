@@ -1,3 +1,4 @@
+import { getAwsBucketName } from './helpers'
 import { S3Client } from '@aws-sdk/client-s3'
 import { BikeTagApiResponse } from '../common/types'
 import { Tag } from '../common/schema'
@@ -16,7 +17,7 @@ export async function archiveTag(
   client: S3Client,
   payload: archiveTagPayload
 ): Promise<BikeTagApiResponse<Tag>> {
-  const bucket = `${payload.game}-biketag`
+  const bucket = getAwsBucketName(payload.game)
   const folderFrom = 'queue'
   const folderTo = 'archive'
 
