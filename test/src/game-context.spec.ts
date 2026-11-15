@@ -93,12 +93,12 @@ describe('game context', () => {
     expect(client.getDefaultDataSource('getTags')).toBe(AvailableApis.imgur)
   })
 
-  test('uses BikeTag API for game metadata even when Sanity credentials exist', () => {
+  test('prefers Sanity for game metadata when Sanity credentials exist', () => {
     const client = new TestBikeTagClient({
       game: 'test',
       sanity: { projectId: 'project', dataset: 'production' },
     } as any)
-    expect(client.getDefaultDataSource('getGame')).toBe(AvailableApis.biketag)
+    expect(client.getDefaultDataSource('getGame')).toBe(AvailableApis.sanity)
   })
 
   test('does not use unrelated provider credentials for an AWS game', () => {
