@@ -1,3 +1,4 @@
+import { getAwsBucketName } from './helpers'
 import {
   S3Client,
   CopyObjectCommand,
@@ -50,7 +51,7 @@ export async function uploadTagImage(
     const urlField = `${type}ImageUrl`
     const blobField = `${type}Image`
 
-    const bucket = `${payload.game}-biketag`
+    const bucket = getAwsBucketName(payload.game)
     const region = payload.region ?? 'nyc3'
     const folder = payload.folder ?? 'queue'
     const player =
