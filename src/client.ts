@@ -617,24 +617,14 @@ export class BikeTagClient {
       )
 
       if (reInitialize) {
-        const initializeConfig: BikeTagConfiguration = {
-          biketag: undefined,
-          aws: undefined,
-          imgur: undefined,
-          sanity: undefined,
-        }
-
-        if (!dequal(this.imgurConfig, imgurConfig)) {
-          initializeConfig.imgur = imgurConfig
-        }
-        if (!dequal(this.sanityConfig, sanityConfig)) {
-          initializeConfig.sanity = sanityConfig
-        }
-        if (!dequal(this.awsConfig, awsConfig)) {
-          initializeConfig.aws = awsConfig
-        }
-
-        this.initializeClients(initializeConfig)
+        // Rebuild all adapters from the complete effective configuration,
+        // rather than a partial diff that can leave clients stale or missing.
+        this.initializeClients({
+          biketag: biketagConfig,
+          imgur: imgurConfig,
+          sanity: sanityConfig,
+          aws: awsConfig,
+        })
       }
 
       this.biketagConfig = biketagConfig
