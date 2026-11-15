@@ -93,6 +93,30 @@ describe('game context', () => {
     expect(client.getDefaultDataSource('getTags')).toBe(AvailableApis.imgur)
   })
 
+  test('uses BikeTag API for game metadata even when Sanity credentials exist', () => {
+    const client = new TestBikeTagClient({
+      game: 'test',
+      sanity: { projectId: 'project', dataset: 'production' },
+    } as any)
+    expect(client.getDefaultDataSource('getGame')).toBe(AvailableApis.biketag)
+  })
+
+  test('does not use unrelated provider credentials for an AWS game', () => {
+    const client = new TestBikeTagClient({
+      game: 'test',
+      clientId: 'imgur-client',
+      clientSecret: 'imgur-secret',
+    })
+    client.setGameContext(game({ awsRegion: 'nyc3', settings: { 'data::aws': 'true' } }))
+    expect(client.getDefaultDataSource('getTags')).toBe(AvailableApis.biketag)
+  })
+
+  test('uses BikeTag API for reads when no game context has been loaded', () => {
+    const client = new TestBikeTagClient({ game: 'test' })
+    expect(client.getDefaultDataSource('getTags')).toBe(AvailableApis.biketag)
+    expect(client.getDefaultDataSource('getGame')).toBe(AvailableApis.biketag)
+  })
+
   test('does not use the storage provider to retrieve game metadata', () => {
     const client = new TestBikeTagClient({ game: 'test' })
     client.setGameContext(
