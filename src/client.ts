@@ -131,8 +131,13 @@ export class BikeTagClient {
     })
 
     const authenticationInterceptor = async (config) => {
-      config.headers = config.headers ? config.headers : {}
-      config.headers.authorization = await getAuthorizationHeader(this)
+      // Public BikeTag reads must work without a client token or key.
+      // When credentials are configured, preserve the existing JWT flow.
+      const { clientToken, clientKey } = this.config().biketag ?? {}
+      if (clientToken || clientKey) {
+        config.headers = config.headers ? config.headers : {}
+        config.headers.authorization = await getAuthorizationHeader(this)
+      }
       return config
     }
 
