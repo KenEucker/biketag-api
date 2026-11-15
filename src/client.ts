@@ -830,12 +830,11 @@ export class BikeTagClient {
     if (clientMethod) {
       return clientMethod(client, options, apiCache)
         .then((retrievedGameResponse) => {
-          if (
-            retrievedGameResponse.success &&
-            retrievedGameResponse.data &&
-            !Array.isArray(retrievedGameResponse.data)
-          ) {
-            this.setGameContext(retrievedGameResponse.data as Game)
+          if (retrievedGameResponse.success && retrievedGameResponse.data) {
+            const data = retrievedGameResponse.data
+            // The BikeTag HTTP endpoint can return a one-game array.
+            const game = Array.isArray(data) ? (data.length === 1 ? data[0] : undefined) : data
+            if (game) this.setGameContext(game as Game)
           }
           return retrievedGameResponse
         })
