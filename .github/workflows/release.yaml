@@ -42,12 +42,15 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          persist-credentials: true
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "lts/*"
       - name: Install dependencies
         run: npm clean-install
+      - name: Install release Git plugin
+        run: npm install --no-save --package-lock=false --ignore-scripts @semantic-release/git@10.0.1
       - name: Build
         run: npm run build
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
