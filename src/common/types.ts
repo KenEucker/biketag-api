@@ -3,7 +3,7 @@ export { Payload } from 'imgur/dist/common/types'
 import { AvailableApis, Errors } from '../common/enums'
 import { ImgurCredentials as ImgurApiCredentials } from 'imgur'
 import { S3Client } from '@aws-sdk/client-s3'
-import { Tag } from './schema'
+import { Game, Tag } from './schema'
 
 export type RequireAtLeastOne<T> = {
   [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>>
@@ -64,6 +64,12 @@ export type Credentials = Partial<BikeTagCredentials> &
   Partial<SanityCredentials> &
   Partial<AWSCredentials> &
   Partial<ImgurCredentials>
+
+/// ****************************  BikeTag Game Context   ******************************* ///
+export interface BikeTagGameContext {
+  game: Game
+  imageSource?: AvailableApis.aws | AvailableApis.imgur
+}
 
 /// ****************************  BikeTag API Objects   ******************************** ///
 export interface BikeTagApiResponse<

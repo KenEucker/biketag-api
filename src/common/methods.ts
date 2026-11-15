@@ -23,7 +23,7 @@ import {
   Achievement,
   Stat,
 } from './schema'
-import { ApiAvailability } from './enums'
+import { ApiAvailability, AvailableApis } from './enums'
 import { awsRegions, cacheKeys } from './data'
 
 export const putCacheIfExists = (
@@ -53,6 +53,24 @@ export const hasClientKey = (arg: unknown): arg is ClientKey => {
 
 export const constructTagNumberSlug = (number: number, game = ''): string => {
   return `${game}-tag-${number}`
+}
+
+/**
+ * Resolves the storage provider configured for a BikeTag game.
+ * Returns undefined when the game metadata does not identify a provider.
+ */
+export const getGameImageSource = (
+  game: Game
+): AvailableApis.aws | AvailableApis.imgur | undefined => {
+  if (game.awsRegion?.length && game.settings?.['data::aws'] === 'true') {
+    return AvailableApis.aws
+  }
+
+  if (game.mainhash?.length) {
+    return AvailableApis.imgur
+  }
+
+  return undefined
 }
 
 export const isImgurCredentials = (credentials: ImgurCredentials): boolean => {

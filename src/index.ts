@@ -3,7 +3,7 @@ export { BikeTagClient }
 
 export type { BikeTagConfiguration, BikeTagCredentials } from './client'
 
-export type { BikeTagApiResponse } from './common/types'
+export type { BikeTagApiResponse, BikeTagGameContext } from './common/types'
 
 export type {
   Tag,

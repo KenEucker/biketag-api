@@ -172,7 +172,14 @@ You can get tags one by one or all at once for a given game using the `getTag` a
 // retrieves the BikeTag game data 'portland' game
 const biketagPortland = await client.getGame('portland')
 
-// retrieves the latest BikeTag posted for the 'portland' game from the most available API
+// The client stores the retrieved game and resolves its configured storage provider.
+// Game metadata uses Sanity when configured, otherwise the BikeTag API.
+// Game data uses the selected direct provider when credentials are available,
+// then a supported Sanity adapter, then the BikeTag API. A region or album
+// hash alone is not a credential.
+console.log(client.gameContext?.imageSource)
+
+// retrieves the latest tag through BikeTag API unless a matching direct provider is configured
 const biketagPortlandCurrent = await client.getTag()
 
 // retrieves the BikeTag #1 for the 'portland' game from imgur adapter
