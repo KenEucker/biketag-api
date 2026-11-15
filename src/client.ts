@@ -18,6 +18,7 @@ import type {
   BikeTagConfiguration,
   PartialBikeTagConfiguration,
   ApiOptions,
+  BikeTagGameContext,
 } from './common/types'
 import {
   AvailableApis,
@@ -64,6 +65,7 @@ import {
   createImgurCredentials,
   createAWSCredentials,
   createSanityCredentials,
+  getGameImageSource,
 } from './common/methods'
 import {
   createGameObject,
@@ -110,6 +112,9 @@ export class BikeTagClient {
   protected sanityConfig?: SanityCredentials
   protected imgurConfig?: ImgurCredentials
   protected biketagConfig?: BikeTagCredentials
+
+  /** Game metadata and the storage provider resolved from that metadata. */
+  gameContext?: BikeTagGameContext
 
   constructor(
     readonly configuration: Credentials | PartialBikeTagConfiguration
@@ -388,47 +393,34 @@ export class BikeTagClient {
    * @returns The most appropriate API source or null if none are available
    */
   protected getMostAvailableClient(method?: string): AvailableApis {
-    if (
-      this.imgurConfig &&
-      this.imgurClient &&
-      (!method || !!imgurApi[method])
-    ) {
-      return AvailableApis.imgur
-    } else if (
-      this.awsConfig &&
-      this.awsClient &&
-      (!method || !!awsApi[method])
-    ) {
-      return AvailableApis.aws
-    } else if (
-      this.sanityConfig &&
-      this.sanityClient &&
-      (!method || !!sanityApi[method])
-    ) {
+    // Prefer Sanity for game metadata when its client is configured.
+    if ((method === 'getGame' || method === 'getAllGames') &&
+        this.sanityClient && (!method || !!sanityApi[method])) {
       return AvailableApis.sanity
-    } else if (
-      this.biketagConfig &&
-      isBikeTagCredentials(this.biketagConfig) &&
-      isBikeTagApiReady(this.biketagConfig) &&
-      (!method || !!biketagApi[method])
-    ) {
+    }
+
+    // A game's storage setting only selects a direct provider when its
+    // credentials initialized the matching client.
+    const provider = this.gameContext?.imageSource
+    if (provider === AvailableApis.aws && this.awsClient &&
+        (!method || !!awsApi[method])) {
+      return AvailableApis.aws
+    }
+    if (provider === AvailableApis.imgur && this.imgurClient &&
+        (!method || !!imgurApi[method])) {
+      return AvailableApis.imgur
+    }
+
+    // Sanity is also usable for other methods it implements.
+    if (this.sanityClient && (!method || !!sanityApi[method])) {
+      return AvailableApis.sanity
+    }
+
+    // Without a usable configured provider, use the BikeTag API. Unsupported
+    // operations will fail through the existing not-implemented/error path.
+    if (!method || !!biketagApi[method]) {
       return AvailableApis.biketag
     }
-    // const sanityApiAvailability =
-    //   this.sanityConfig && this.sanityClient && (!method || !!sanityApi[method])
-    //     ? isSanityApiReady(this.sanityConfig)
-    //     : 0
-    // const imgurApiAvailability =
-    //   this.imgurConfig && this.imgurClient && (!method || !!imgurApi[method])
-    //     ? isImgurApiReady(this.imgurConfig)
-    //     : 0
-    // const bikeTagApiAvilability =
-    //   this.biketagConfig &&
-    //   isBikeTagCredentials(this.biketagConfig) &&
-    //   isBikeTagApiReady(this.biketagConfig) &&
-    //   (!method || !!biketagApi[method])
-    //     ? isBikeTagApiReady(this.biketagConfig)
-    //     : 0
 
     return null
   }
@@ -734,6 +726,40 @@ export class BikeTagClient {
   /// ****************************  Game Data Methods   ************************************ ///
 
   /**
+   * Sets the current game context and configures the provider-specific values
+   * already maintained by this client.
+   *
+   * The game context intentionally contains only game metadata and its resolved
+   * storage provider; credentials and adapter clients remain in the existing
+   * configuration properties.
+   */
+  setGameContext(game: Game): BikeTagGameContext {
+    const gameContext: BikeTagGameContext = {
+      game,
+      imageSource: getGameImageSource(game),
+    }
+
+    this.gameContext = gameContext
+    this.config(
+      {
+        game: game.name,
+        imgur: {
+          hash: game.mainhash,
+          queuehash: game.queuehash,
+          archivehash: game.archivehash,
+        },
+        aws: {
+          region: game.awsRegion,
+        },
+      },
+      false,
+      true
+    )
+
+    return gameContext
+  }
+
+  /**
    * Retrieves BikeTag `Game` data based on the provided payload and options
    *
    * @param payload - The getGamePayload for retrieving BikeTag `Game` data
@@ -773,18 +799,10 @@ export class BikeTagClient {
       return clientMethod(client, options, apiCache)
         .then((retrievedGameResponse) => {
           if (retrievedGameResponse.success && retrievedGameResponse.data) {
-            /// Set the most important game data (hash, etc)
-            this.config(
-              {
-                game: retrievedGameResponse.data.name,
-                imgur: {
-                  hash: retrievedGameResponse.data.mainhash,
-                  queuehash: retrievedGameResponse.data.queuehash,
-                  archivehash: retrievedGameResponse.data.archivehash,
-                },
-              },
-              false
-            )
+            const data = retrievedGameResponse.data
+            // The BikeTag HTTP endpoint can return a one-game array.
+            const game = Array.isArray(data) ? (data.length === 1 ? data[0] : undefined) : data
+            if (game) this.setGameContext(game as Game)
           }
           return retrievedGameResponse
         })
@@ -918,7 +936,8 @@ export class BikeTagClient {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
       opts,
-      DataTypes.queue
+      DataTypes.queue,
+      'getQueue'
     )
     let clientMethod = api.getQueue
 
@@ -969,7 +988,8 @@ export class BikeTagClient {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
       opts,
-      DataTypes.queue
+      DataTypes.queue,
+      'queueTag'
     )
     let clientMethod = api.queueTag
 
@@ -1069,7 +1089,9 @@ export class BikeTagClient {
   ): Promise<BikeTagApiResponse<Tag>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
-      opts
+      opts,
+      DataTypes.tag,
+      'getTags'
     )
     const clientMethod = api.getTag
 
@@ -1158,7 +1180,9 @@ export class BikeTagClient {
   ): Promise<BikeTagApiResponse<any | any[]>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
-      opts
+      opts,
+      DataTypes.tag,
+      'uploadTagImage'
     )
     let clientMethod = api.uploadTagImage
 
@@ -1203,7 +1227,9 @@ export class BikeTagClient {
   ): Promise<BikeTagApiResponse<boolean>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
-      opts
+      opts,
+      DataTypes.tag,
+      'updateTag'
     )
     let clientMethod = api.updateTag
 
@@ -1264,7 +1290,9 @@ export class BikeTagClient {
   ): Promise<BikeTagApiResponse<boolean>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
-      opts
+      opts,
+      DataTypes.tag,
+      'archiveTag'
     )
     const clientMethod = api.archiveTag
 
@@ -1296,7 +1324,9 @@ export class BikeTagClient {
   ): Promise<BikeTagApiResponse<any>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
-      opts
+      opts,
+      DataTypes.tag,
+      'deleteTag'
     )
     let clientMethod = api.deleteTag
 
@@ -1401,7 +1431,9 @@ export class BikeTagClient {
   ): Promise<BikeTagApiResponse<Player>> {
     const { client, options, api, source } = this.getClientAdapter(
       payload,
-      opts
+      opts,
+      DataTypes.player,
+      'getPlayers'
     )
     const clientMethod = api.getPlayer
 
