@@ -69,29 +69,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
-      - name: Sync published version to develop
+      - name: Merge released production into develop
         run: |
           set -euo pipefail
           git fetch origin production develop
           AFTER_RELEASE_SHA=$(git rev-parse origin/production)
           if [ "$AFTER_RELEASE_SHA" = "$BEFORE_RELEASE_SHA" ]; then
-            echo 'No release commit was created; skipping develop synchronization.'
+            echo 'No release commit was created; skipping develop merge.'
             exit 0
           fi
           RELEASE_COMMIT_SUBJECT=$(git log -1 --format=%s origin/production)
           if [[ ! "$RELEASE_COMMIT_SUBJECT" =~ ^chore\(release\):[[:space:]] ]]; then
-            echo 'Production advanced without an expected release commit; refusing to synchronize.' >&2
+            echo 'Production advanced without an expected release commit; refusing to merge.'
             exit 1
-          fi
-          RELEASE_VERSION=$(git show origin/production:package.json | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version")
-          git switch -C develop origin/develop
-          npm version "$RELEASE_VERSION" --no-git-tag-version --allow-same-version --ignore-scripts
-          if git diff --quiet -- package.json package-lock.json; then
-            echo 'Develop manifests already match the released version.'
-            exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add package.json package-lock.json
-          git commit -m "chore(release): sync ${RELEASE_VERSION} to develop [skip ci]"
+          git switch -C develop origin/develop
+          git merge --no-ff --no-edit origin/production
           git push origin HEAD:develop
