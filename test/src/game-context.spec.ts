@@ -263,3 +263,60 @@ describe('BikeTag getGame()', () => {
     expect(response.error).toBe('Not Found')
   })
 })
+
+describe('BikeTag HTTP authorization', () => {
+  test.each(['request', 'cachedRequest'] as const)(
+    '%s sends credential-free requests without an Authorization header',
+    async (method) => {
+      const client = new BikeTagClient({
+        game: 'portland',
+        host: 'https://biketag.org/api',
+        cached: method === 'cachedRequest',
+        clientKey: null,
+        clientToken: null,
+      } as any)
+      const adapter = vi.fn(async (config: any) => ({
+        data: { ok: true },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config,
+      }))
+
+      const response = await client[method]({
+        url: 'https://biketag.org/api/games/portland',
+        method: 'GET',
+        adapter,
+      })
+
+      expect(response.status).toBe(200)
+      expect(adapter).toHaveBeenCalledOnce()
+      const requestConfig = adapter.mock.calls[0][0]
+      expect(requestConfig.headers.get('Authorization')).toBeUndefined()
+    }
+  )
+
+  test('preserves the Authorization header for a configured valid JWT', async () => {
+    const token = [
+      'eyJhbGciOiJub25lIn0',
+      'eyJleHAiOjQxMDI0NDQ4MDB9',
+      'signature',
+    ].join('.')
+    const client = new BikeTagClient({
+      game: 'portland',
+      clientToken: token,
+    } as any)
+    const adapter = vi.fn(async (config: any) => ({
+      data: {},
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config,
+    }))
+
+    await client.request({ url: 'https://biketag.org/api/games/portland', adapter })
+    expect(adapter).toHaveBeenCalledOnce()
+    expect(adapter.mock.calls[0][0].headers.get('Authorization')).toBe(`JWT ${token}`)
+  })
+})
+
