@@ -300,6 +300,10 @@ export class BikeTagClient {
         break
     }
 
+    // Game identifiers in API routes and storage are canonical lowercase slugs.
+    // The original Game metadata (including its display name) remains unchanged.
+    if (typeof options.game === 'string') options.game = options.game.toLowerCase()
+
     // Clean overrides:
     const cleanedOverrides = Object.fromEntries(
       Object.entries(overrides).filter(([_, v]) => v !== undefined)
@@ -740,7 +744,7 @@ export class BikeTagClient {
     this.gameContext = gameContext
     this.config(
       {
-        game: game.name,
+        game: (game.slug || game.name).toLowerCase(),
         imgur: {
           hash: game.mainhash,
           queuehash: game.queuehash,
