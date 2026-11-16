@@ -117,6 +117,14 @@ export const updateStoredTagMetadata = async (
     for (const field of [...mysteryFields, ...foundFields]) {
       if (patch[field] !== undefined) (changes as any)[field] = patch[field]
     }
+    // General tag metadata remains editable through updateTag; this helper
+    // limits image metadata copies to the fields belonging to each image.
+    for (const field of [
+      'slug', 'name', 'playerId', 'discussionUrl', 'mentionUrl',
+      'shareUrl', 'confirmedBoundary',
+    ] as const) {
+      if (patch[field] !== undefined) (changes as any)[field] = patch[field]
+    }
     const updated: Tag = { ...existing, ...changes }
     const bucket = getAwsBucketName(patch.game)
     const copies: Array<{
