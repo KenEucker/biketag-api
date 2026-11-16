@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { GetObjectCommand, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand, CopyObjectCommand, type S3Client } from '@aws-sdk/client-s3'
 import { Readable } from 'node:stream'
 import { getTag } from '../../../src/aws/getTag'
+import { updateTag } from '../../../src/aws/updateTag'
 import { getTags } from '../../../src/aws/getTags'
 import { updateMainTagMetadata, repairMainFoundIndex } from '../../../src/aws/mainTagPatches'
 import { saveIndex, getMainIndexPage, getMainIndexKey } from '../../../src/aws/helpers'
@@ -77,6 +78,36 @@ describe('AWS historical index pages', () => {
     await saveIndex(client, 'test-biketag', 'main', [tag(2000)])
     expect(objects.has('main/index-2.json')).toBe(false)
     expect(JSON.parse(objects.get('main/index-0.json')!).tagnumber).toBe(2000)
+  })
+
+  test('found-only image update cannot erase the existing mystery half', async () => {
+    const original = {
+      ...tag(42), mysteryPlayer: 'mystery-author', hint: 'keep',
+      mysteryImageUrl: 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-42--mystery.webp',
+      mysteryTime: 100,
+      foundImageUrl: '', foundPlayer: '',
+    } as Tag
+    const { client, objects } = clientWithObjects({
+      'main/index-0.json': original, 'main/index.json': [original],
+    })
+    const newFound = 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-42--found.webp'
+    const response = await (updateTag as any).call({
+      getTags: async () => ({ success: true, data: [original] }),
+      uploadTagImage: async () => ({
+        success: true,
+        data: {
+          mysteryImageUrl: '', mysteryTime: 0,
+          foundImageUrl: newFound, foundTime: 200,
+        },
+      }),
+    }, client, { game: 'test', tagnumber: 42, folder: 'main', region: 'sfo2', foundImageUrl: newFound })
+    expect(response.success).toBe(true)
+    const stored = JSON.parse(objects.get('main/index.json')!)[0]
+    expect(stored.mysteryImageUrl).toBe(original.mysteryImageUrl)
+    expect(stored.mysteryTime).toBe(100)
+    expect(stored.foundImageUrl).toBe(newFound)
+    expect(response.data.mysteryImageUrl).toBe(original.mysteryImageUrl)
+    expect(JSON.parse(objects.get('main/index-0.json')!).mysteryImageUrl).toBe(original.mysteryImageUrl)
   })
 
   test('metadata-only mystery edits preserve found information and update current pointer', async () => {
