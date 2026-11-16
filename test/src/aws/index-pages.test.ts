@@ -4,7 +4,7 @@ import { Readable } from 'node:stream'
 import { getTag } from '../../../src/aws/getTag'
 import { updateTag } from '../../../src/aws/updateTag'
 import { getTags } from '../../../src/aws/getTags'
-import { updateMainTagMetadata, repairMainFoundIndex } from '../../../src/aws/mainTagPatches'
+import { updateTagMetadata, repairTagFoundIndex } from '../../../src/aws/mainTagPatches'
 import { saveIndex, getMainIndexPage, getMainIndexKey } from '../../../src/aws/helpers'
 import type { Tag } from '../../../src/common/schema'
 
@@ -123,7 +123,7 @@ describe('AWS historical index pages', () => {
       'main/index-0.json': current,
       'main/test-tag-1700--mystery.webp': tag(1700),
     })
-    const response = await updateMainTagMetadata(client, {
+    const response = await updateTagMetadata(client, {
       game: 'test', tagnumber: 1700, hint: 'updated',
     })
     expect(response.success).toBe(true)
@@ -149,7 +149,7 @@ describe('AWS historical index pages', () => {
       'main/index.json': [original],
       'main/test-tag-88--found.webp': tag(88),
     })
-    const response = await updateMainTagMetadata(client, {
+    const response = await updateTagMetadata(client, {
       game: 'test', tagnumber: 88, foundLocation: '', gps: { lat: 0, long: 0, alt: 0 },
     })
     expect(response.success).toBe(true)
@@ -181,7 +181,7 @@ describe('AWS historical index pages', () => {
       }
       return originalSend(cmd)
     }) as any
-    const response = await updateMainTagMetadata(client, {
+    const response = await updateTagMetadata(client, {
       game: 'test', tagnumber: 12, hint: 'corrected',
     })
     expect(response.success).toBe(true)
@@ -202,7 +202,7 @@ describe('AWS historical index pages', () => {
       'main/index-0.json': damaged,
       'main/test-tag-99--mystery.webp': tag(99),
     })
-    const response = await updateMainTagMetadata(client, {
+    const response = await updateTagMetadata(client, {
       game: 'test', tagnumber: 100, hint: 'should fail',
     })
     expect(response.success).toBe(false)
@@ -219,7 +219,7 @@ describe('AWS historical index pages', () => {
       'main/index.json': [prior],
       'main/index-2.json': [current],
     })
-    const response = await repairMainFoundIndex(client, {
+    const response = await repairTagFoundIndex(client, {
       game: 'test', tagnumber: 2000, region: 'sfo2',
       foundPlayer: 'winner', foundImageUrl: 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-2000--found.webp',
     })
@@ -240,7 +240,7 @@ describe('AWS historical index pages', () => {
     const { client, objects } = clientWithObjects({
       'main/index-0.json': inQueue, 'main/index.json': [inQueue],
     })
-    const repaired = await repairMainFoundIndex(client, { game: 'test', tagnumber: 12, foundImageUrl: target })
+    const repaired = await repairTagFoundIndex(client, { game: 'test', tagnumber: 12, foundImageUrl: target })
     expect(repaired.success).toBe(true)
     expect(JSON.parse(objects.get('main/index.json')!)[0].foundImageUrl).toBe(target)
 
@@ -248,7 +248,7 @@ describe('AWS historical index pages', () => {
     const { client: other } = clientWithObjects({
       'main/index-0.json': conflicting, 'main/index.json': [conflicting],
     })
-    const refused = await repairMainFoundIndex(other, { game: 'test', tagnumber: 12, foundImageUrl: target })
+    const refused = await repairTagFoundIndex(other, { game: 'test', tagnumber: 12, foundImageUrl: target })
     expect(refused.success).toBe(false)
   })
 
