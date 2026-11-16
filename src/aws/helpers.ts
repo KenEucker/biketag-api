@@ -33,6 +33,63 @@ export const getAwsBucketName = (game: string): string =>
   `${game.toLowerCase()}-biketag`
 
 const indexCache = new TinyCache()
+export const MAIN_INDEX_PAGE_SIZE = 2000
+
+/** The original index.json is page one; subsequent pages are numbered. */
+export const getMainIndexKey = (page: number): string =>
+  page === 0 ? 'main/index-0.json' : page === 1 ? 'main/index.json' : `main/index-${page}.json`
+
+/** Map a positive tag number to its stable historical index page. */
+export const getMainIndexPage = (tagNumber: number): number =>
+  Math.max(1, Math.ceil(tagNumber / MAIN_INDEX_PAGE_SIZE))
+
+/** Read exactly one main index page. Does not create or repair objects. */
+export const loadMainIndexPage = async (
+  client: S3Client,
+  bucket: string,
+  page: number
+): Promise<Tag[]> => {
+  const key = getMainIndexKey(page)
+  const response = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }))
+  const tags = JSON.parse(await streamToString(response.Body))
+  if (!Array.isArray(tags)) throw new Error(`Invalid index format in ${key}`)
+  return tags as Tag[]
+}
+
+/** Return the current tag pointer without requiring write permissions. */
+export const loadCurrentMainTag = async (
+  client: S3Client,
+  bucket: string
+): Promise<Tag | undefined> => {
+  const tags = await loadMainIndexPage(client, bucket, 0)
+  return tags[0]
+}
+
+/** Read all historical pages; the current pointer is duplicated and intentionally omitted. */
+const loadAllMainIndexPages = async (
+  client: S3Client,
+  bucket: string
+): Promise<Tag[]> => {
+  let current: Tag | undefined
+  try {
+    current = await loadCurrentMainTag(client, bucket)
+  } catch (err: any) {
+    if (!isMissingAwsIndex(err)) throw err
+    // Existing games have index.json but will not have index-0 until their next update.
+    return loadMainIndexPage(client, bucket, 1)
+  }
+  if (!current?.tagnumber) return loadMainIndexPage(client, bucket, 1)
+  const count = getMainIndexPage(current.tagnumber)
+  const pages = await Promise.all(
+    Array.from({ length: count }, (_, i) => loadMainIndexPage(client, bucket, i + 1))
+  )
+  return pages.flat()
+}
+
+export const isMissingAwsIndex = (err: any): boolean =>
+  err?.name === 'NoSuchKey' || err?.name === 'NotFound' ||
+  err?.$metadata?.httpStatusCode === 404
+
 /** Returns the S3 key prefix for a given tag */
 export const getTagPrefix = (
   folder: string,
@@ -197,6 +254,10 @@ export const loadIndex = async (
   cached?: boolean,
   reindex?: boolean
 ): Promise<Tag[]> => {
+  if (folder === 'main' && !reindex) {
+    // A legacy game without index-0 reads its existing index.json unchanged.
+    return loadAllMainIndexPages(client, bucket)
+  }
   const indexKey = `${folder}/index.json`
   const cacheKey = `${region}:${bucket}:${indexKey}`
   const CACHE_TTL_MS = 5000
@@ -327,6 +388,39 @@ export const saveIndex = async (
   tags: Tag[],
   acl: ObjectCannedACL = 'public-read'
 ) => {
+  if (folder === 'main') {
+    if (typeof window !== 'undefined') return
+    const ordered = [...tags].sort((a, b) => b.tagnumber - a.tagnumber)
+    const grouped = new Map<number, Tag[]>()
+    for (const tag of ordered) {
+      const page = getMainIndexPage(tag.tagnumber)
+      const existing = grouped.get(page) ?? []
+      existing.push(tag)
+      grouped.set(page, existing)
+    }
+    // Publish historical pages first; index-0 is the current-tag pointer and is written last.
+    for (const [page, records] of grouped) {
+      await client.send(new PutObjectCommand({
+        Bucket: bucket,
+        Key: getMainIndexKey(page),
+        Body: JSON.stringify(records),
+        ContentType: 'application/json',
+        ACL: acl,
+        CacheControl: 'no-cache, no-store, must-revalidate',
+      }))
+    }
+    if (ordered.length) {
+      await client.send(new PutObjectCommand({
+        Bucket: bucket,
+        Key: getMainIndexKey(0),
+        Body: JSON.stringify([ordered[0]]),
+        ContentType: 'application/json',
+        ACL: acl,
+        CacheControl: 'no-cache, no-store, must-revalidate',
+      }))
+    }
+    return
+  }
   const key = `${folder}/index.json`
 
   // if (tags.length === 0) {
