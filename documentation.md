@@ -325,16 +325,17 @@ can use the existing `updateTag` method with two narrowly scoped modes:
 // Edit only explicitly provided mystery/found metadata on an existing tag.
 // A mystery edit doesn't touch its found image, and vice versa.
 await client.updateTag(
-  { game: 'portland', tagnumber: 1700, hint: 'Updated hint' },
-  { source: 'aws', folder: 'main', metadataOnly: true },
+  { game: 'portland', tagnumber: 1700, hint: 'Updated hint', metadataOnly: true },
+  { source: 'aws', folder: 'main' },
 )
 
 // Repair the found portion of an existing main tag without moving images.
 // The supplied image URL must match this tag's main/ found-image key.
 await client.updateTag(
   { game: 'portland', tagnumber: 1699, foundPlayer: 'Finder',
-    foundImageUrl: 'https://portland-biketag.sfo2.cdn.digitaloceanspaces.com/main/portland-tag-1699--found.webp' },
-  { source: 'aws', folder: 'main', indexOnlyFoundRepair: true },
+    foundImageUrl: 'https://portland-biketag.sfo2.cdn.digitaloceanspaces.com/main/portland-tag-1699--found.webp',
+    indexOnlyFoundRepair: true },
+  { source: 'aws', folder: 'main' },
 )
 ```
 
