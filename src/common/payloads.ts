@@ -58,24 +58,6 @@ export type updateTagPayload = Partial<Tag> &
     resize?: boolean
   } & CommonPayloadData
 
-/** An existing main tag's editable fields; no images, identity changes or uploads. */
-export type updateTagMetadataPayload = Pick<Tag, 'game' | 'tagnumber'> &
-  Partial<Pick<Tag,
-    'mysteryPlayer' | 'mysteryTime' | 'hint' |
-    'foundPlayer' | 'foundTime' | 'foundLocation' | 'gps'
-  >> & Pick<CommonPayloadData, 'region'>
-
-/** Index-only found metadata repair. Image movement and repair validation are external. */
-export type repairTagFoundIndexPayload = Pick<Tag, 'game' | 'tagnumber'> &
-  Partial<Pick<Tag,
-    'foundImageUrl' | 'foundPlayer' | 'playerId' | 'foundTime' |
-    'foundLocation' | 'gps'
-  >> & {
-    title?: string
-    description?: string
-    region?: string
-  }
-
 export type uploadTagImagePayload = {
   tagnumber: number
   type: 'found' | 'mystery'
