@@ -112,5 +112,5 @@ export const patchStoredTagFoundFields = (client: S3Client, patch: Patch) =>
       }
       changes[field] = value
     }
-    return changes
+    return changes as Partial<Tag>
   })
