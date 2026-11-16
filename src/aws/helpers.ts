@@ -33,6 +33,71 @@ export const getAwsBucketName = (game: string): string =>
   `${game.toLowerCase()}-biketag`
 
 const indexCache = new TinyCache()
+export const MAIN_INDEX_PAGE_SIZE = 2000
+
+/** The original index.json is page one; subsequent pages are numbered. */
+export const getMainIndexKey = (page: number): string =>
+  page === 0 ? 'main/index-0.json' : page === 1 ? 'main/index.json' : `main/index-${page}.json`
+
+/** Map a positive tag number to its stable historical index page. */
+export const getMainIndexPage = (tagNumber: number): number =>
+  Math.max(1, Math.ceil(tagNumber / MAIN_INDEX_PAGE_SIZE))
+
+/** Read exactly one main index page. Does not create or repair objects. */
+export const loadMainIndexPage = async (
+  client: S3Client,
+  bucket: string,
+  page: number
+): Promise<Tag[]> => {
+  const key = getMainIndexKey(page)
+  const response = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }))
+  const tags = JSON.parse(await streamToString(response.Body))
+  if (!Array.isArray(tags)) throw new Error(`Invalid index format in ${key}`)
+  return tags as Tag[]
+}
+
+/** Return the current tag pointer without requiring write permissions. */
+export const loadCurrentMainTag = async (
+  client: S3Client,
+  bucket: string
+): Promise<Tag | undefined> => {
+  const response = await client.send(new GetObjectCommand({
+    Bucket: bucket,
+    Key: getMainIndexKey(0),
+  }))
+  const tag = JSON.parse(await streamToString(response.Body))
+  if (!tag || Array.isArray(tag) || typeof tag !== 'object' ||
+      typeof tag.tagnumber !== 'number') {
+    throw new Error('Invalid current tag format in main/index-0.json')
+  }
+  return tag as Tag
+}
+
+/** Read all historical pages; the current pointer is duplicated and intentionally omitted. */
+const loadAllMainIndexPages = async (
+  client: S3Client,
+  bucket: string
+): Promise<Tag[]> => {
+  let current: Tag | undefined
+  try {
+    current = await loadCurrentMainTag(client, bucket)
+  } catch (err: any) {
+    if (!isMissingAwsIndex(err)) throw err
+    // Existing games have index.json but will not have index-0 until their next update.
+    return loadMainIndexPage(client, bucket, 1)
+  }
+  if (!current?.tagnumber) return loadMainIndexPage(client, bucket, 1)
+  const count = getMainIndexPage(current.tagnumber)
+  const pages = await Promise.all(
+    Array.from({ length: count }, (_, i) => loadMainIndexPage(client, bucket, i + 1))
+  )
+  return pages.flat()
+}
+
+export const isMissingAwsIndex = (err: any): boolean =>
+  err?.name === 'NoSuchKey' || err?.name === 'NotFound' ||
+  err?.$metadata?.httpStatusCode === 404
+
 /** Returns the S3 key prefix for a given tag */
 export const getTagPrefix = (
   folder: string,
@@ -197,6 +262,10 @@ export const loadIndex = async (
   cached?: boolean,
   reindex?: boolean
 ): Promise<Tag[]> => {
+  if (folder === 'main' && !reindex) {
+    // A legacy game without index-0 reads its existing index.json unchanged.
+    return loadAllMainIndexPages(client, bucket)
+  }
   const indexKey = `${folder}/index.json`
   const cacheKey = `${region}:${bucket}:${indexKey}`
   const CACHE_TTL_MS = 5000
@@ -327,6 +396,69 @@ export const saveIndex = async (
   tags: Tag[],
   acl: ObjectCannedACL = 'public-read'
 ) => {
+  if (folder === 'main') {
+    if (typeof window !== 'undefined') return
+    const ordered = [...tags].sort((a, b) => b.tagnumber - a.tagnumber)
+    const grouped = new Map<number, Tag[]>()
+    for (const tag of ordered) {
+      const page = getMainIndexPage(tag.tagnumber)
+      const records = grouped.get(page) ?? []
+      records.push(tag)
+      grouped.set(page, records)
+    }
+
+    // Record the old range so a deleted last tag cannot leave an orphan page.
+    // Reads require no additional permissions beyond existing index access.
+    let oldPageCount = 1
+    try {
+      const previous = await loadCurrentMainTag(client, bucket)
+      if (previous) oldPageCount = getMainIndexPage(previous.tagnumber)
+    } catch (err: any) {
+      if (!isMissingAwsIndex(err)) throw err
+    }
+
+    const pageCount = ordered.length ? getMainIndexPage(ordered[0].tagnumber) : 1
+    // Save all pages in the current range, including empty pages resulting from
+    // deletions, so inference by tag number remains reliable.
+    for (let page = 1; page <= pageCount; page++) {
+      await client.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: getMainIndexKey(page),
+          Body: JSON.stringify(grouped.get(page) ?? []),
+          ContentType: 'application/json',
+          ACL: acl,
+          CacheControl: 'no-cache, no-store, must-revalidate',
+        })
+      )
+    }
+    for (let page = pageCount + 1; page <= oldPageCount; page++) {
+      await client.send(new DeleteObjectCommand({
+        Bucket: bucket,
+        Key: getMainIndexKey(page),
+      }))
+    }
+
+    // Publish the newest tag last, after all historical pages are durable.
+    if (ordered.length) {
+      await client.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: getMainIndexKey(0),
+          Body: JSON.stringify(ordered[0]),
+          ContentType: 'application/json',
+          ACL: acl,
+          CacheControl: 'no-cache, no-store, must-revalidate',
+        })
+      )
+    } else {
+      await client.send(new DeleteObjectCommand({
+        Bucket: bucket,
+        Key: getMainIndexKey(0),
+      }))
+    }
+    return
+  }
   const key = `${folder}/index.json`
 
   // if (tags.length === 0) {

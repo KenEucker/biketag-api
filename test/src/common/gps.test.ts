@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
@@ -131,6 +132,12 @@ function storage(
           .filter((key) => key.startsWith(Prefix))
           .map((Key) => ({ Key })),
       }
+    }
+    if (command instanceof GetObjectCommand) {
+      if (!objects.has(Key)) {
+        throw Object.assign(new Error('NoSuchKey'), { name: 'NoSuchKey' })
+      }
+      return { Body: { async *[Symbol.asyncIterator]() { yield objects.get(Key)?.Body } } }
     }
     if (command instanceof HeadObjectCommand) {
       if (objects.has(Key)) return objects.get(Key)
