@@ -113,4 +113,64 @@ describe('aws uploadTagImage', () => {
       100
     )
   })
+  test('shows a safe token authorization reason instead of a generic 403', async () => {
+    vi.stubGlobal('window', {})
+    try {
+      const signedUrl = vi.fn().mockRejectedValue({
+        message: 'Request failed with status code 403',
+        response: { status: 403, data: 'Game does not match' },
+      })
+      const result = await uploadTagImage.call(
+        { fetchSignedUrl: signedUrl, plainFetcher: vi.fn() },
+        {} as any,
+        {
+          game: 'portland',
+          tagnumber: 101,
+          folder: 'queue',
+          region: 'sfo3',
+          playerId: 'player-id',
+          foundPlayer: 'Rider',
+          foundImage: new Blob(['image'], { type: 'image/jpeg' }),
+          contentType: 'image/jpeg',
+        } as any
+      )
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('Failed to upload found image: Game does not match')
+      expect(signedUrl).toHaveBeenCalledOnce()
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
+  test('does not expose unexpected server response bodies', async () => {
+    vi.stubGlobal('window', {})
+    try {
+      const signedUrl = vi.fn().mockRejectedValue({
+        message: 'Request failed with status code 403',
+        response: { status: 403, data: 'PRIVATE_SECRET' },
+      })
+      const result = await uploadTagImage.call(
+        { fetchSignedUrl: signedUrl, plainFetcher: vi.fn() },
+        {} as any,
+        {
+          game: 'portland',
+          tagnumber: 101,
+          folder: 'queue',
+          region: 'sfo3',
+          playerId: 'player-id',
+          foundPlayer: 'Rider',
+          foundImage: new Blob(['image'], { type: 'image/jpeg' }),
+          contentType: 'image/jpeg',
+        } as any
+      )
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('Failed to upload found image: Request failed with status code 403')
+      expect(result.error).not.toContain('PRIVATE_SECRET')
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
 })
