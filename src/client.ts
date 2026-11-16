@@ -696,7 +696,7 @@ export class BikeTagClient {
     payload: fetchSignedUrlPayload,
     opts?: RequireAtLeastOne<Credentials>
   ) {
-    const { client, api, source } = this.getClientAdapter(
+    const { client, api, source, options } = this.getClientAdapter(
       payload,
       opts,
       undefined,
@@ -705,7 +705,7 @@ export class BikeTagClient {
     const clientMethod = api.fetchSignedUrl
 
     if (clientMethod) {
-      return clientMethod(client, payload)
+      return clientMethod(client, options)
     } else {
       return Promise.reject(`fetchSignedUrl ${Errors.NotImplemented} ${source}`)
     }
