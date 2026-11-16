@@ -212,6 +212,9 @@ export class BikeTagClient {
         break
     }
 
+    // Normalize external game identifiers once as they enter client request handling.
+    if (typeof payload.game === 'string') payload = { ...payload, game: payload.game.toLowerCase() }
+
     switch (typeof source) {
       case 'string':
         payload.source = AvailableApis[source]
@@ -247,20 +250,18 @@ export class BikeTagClient {
     > = {},
     method?: string
   ): ApiOptions {
-    // Normalize identifiers before deriving slugs or storage keys.
-    if (typeof options.game === 'string') options.game = options.game.toLowerCase()
     switch (dataType) {
       case DataTypes.game:
-        options.game = options.game ?? options.slug ?? this.biketagConfig?.game?.toLowerCase()
+        options.game = options.game ?? options.slug ?? this.biketagConfig?.game
         options.slug = options.slug ?? options.game?.toLowerCase() ?? undefined
         break
       case DataTypes.achievement:
       case DataTypes.setting:
       case DataTypes.stat:
-        options.game = options.game ?? options.slug ?? this.biketagConfig?.game?.toLowerCase()
+        options.game = options.game ?? options.slug ?? this.biketagConfig?.game
         break
       case DataTypes.player:
-        options.game = options.game ?? this.biketagConfig?.game?.toLowerCase()
+        options.game = options.game ?? this.biketagConfig?.game
         if (method === 'getPlayers') {
           options.names =
             options.names ?? (options.name ? [options.name] : undefined)
@@ -270,7 +271,7 @@ export class BikeTagClient {
         }
         break
       case DataTypes.tag:
-        options.game = options.game ?? this.biketagConfig?.game?.toLowerCase()
+        options.game = options.game ?? this.biketagConfig?.game
         if (!options.slug && !options.slugs) {
           if (typeof options.tagnumber !== 'undefined') {
             options.slug = constructTagNumberSlug(
@@ -294,7 +295,7 @@ export class BikeTagClient {
         }
         break
       case DataTypes.queue:
-        options.game = options.game ?? this.biketagConfig?.game?.toLowerCase()
+        options.game = options.game ?? this.biketagConfig?.game
         options.queuehash = options.queuehash ?? this.imgurConfig?.queuehash
         options.archivehash =
           options.archivehash ?? this.imgurConfig?.archivehash
@@ -706,11 +707,10 @@ export class BikeTagClient {
     const clientMethod = api.fetchSignedUrl
 
     if (clientMethod) {
-      // Pass the signing payload, not unrelated normalized API options.
-      // Only fill its configured game/host when missing and normalize the game slug.
+      // Keep the signing payload scoped to its own fields; the client owns the canonical game slug.
       return clientMethod(client, {
         ...payload,
-        game: (payload.game ?? options.game)?.toLowerCase(),
+        game: options.game,
         host: payload.host ?? options.host,
       })
     } else {
