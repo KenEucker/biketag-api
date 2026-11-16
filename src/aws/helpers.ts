@@ -61,8 +61,16 @@ export const loadCurrentMainTag = async (
   client: S3Client,
   bucket: string
 ): Promise<Tag | undefined> => {
-  const tags = await loadMainIndexPage(client, bucket, 0)
-  return tags[0]
+  const response = await client.send(new GetObjectCommand({
+    Bucket: bucket,
+    Key: getMainIndexKey(0),
+  }))
+  const tag = JSON.parse(await streamToString(response.Body))
+  if (!tag || Array.isArray(tag) || typeof tag !== 'object' ||
+      typeof tag.tagnumber !== 'number') {
+    throw new Error('Invalid current tag format in main/index-0.json')
+  }
+  return tag as Tag
 }
 
 /** Read all historical pages; the current pointer is duplicated and intentionally omitted. */
@@ -417,7 +425,7 @@ export const saveIndex = async (
       await client.send(new PutObjectCommand({
         Bucket: bucket,
         Key: getMainIndexKey(0),
-        Body: JSON.stringify([ordered[0]]),
+        Body: JSON.stringify(ordered[0]),
         ContentType: 'application/json',
         ACL: acl,
         CacheControl: 'no-cache, no-store, must-revalidate',
