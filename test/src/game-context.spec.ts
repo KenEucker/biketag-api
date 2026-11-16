@@ -47,6 +47,38 @@ describe('game context', () => {
     expect(client.options({ game: 'Portland' }, undefined, {}, 'fetchSignedUrl').game).toBe('portland')
   })
 
+  test('signs with the configured slug without forwarding unrelated API options', async () => {
+    const client = new TestBikeTagClient({
+      game: 'Portland',
+      host: 'https://portland.biketag.dev/api',
+    })
+    client.setGameContext(game({ name: 'Portland', slug: 'portland' }))
+    const adapter = vi.fn(async (config: any) => ({
+      config,
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      data: 'signed-url',
+    }))
+    client.fetcher.defaults.adapter = adapter
+    const signed = await client.fetchSignedUrl(
+      {
+        key: 'queue/portland-tag-1393--found--c3328c.jpg',
+        bucket: 'portland-biketag',
+        p_id: 'test-player',
+        contentType: 'image/jpeg',
+      },
+      { source: 'biketag' } as any
+    )
+    expect(signed.success).toBe(true)
+    expect(adapter).toHaveBeenCalledOnce()
+    const signingRequest = JSON.parse(adapter.mock.calls[0][0].data)
+    expect(signingRequest.game).toBe('portland')
+    expect(signingRequest.key).toBe('queue/portland-tag-1393--found--c3328c.jpg')
+    expect(signingRequest).not.toHaveProperty('source')
+    expect(signingRequest).not.toHaveProperty('cached')
+  })
+
   test('does not initialize adapters from empty environment credentials', () => {
     const client = new TestBikeTagClient({
       game: 'portland',
