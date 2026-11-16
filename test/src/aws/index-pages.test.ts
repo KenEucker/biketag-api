@@ -103,6 +103,53 @@ describe('AWS historical index pages', () => {
     expect(send.mock.calls.filter(([c]) => c instanceof CopyObjectCommand)).toHaveLength(1)
   })
 
+  test('found metadata edit touches only the found image and preserves mystery fields', async () => {
+    const original = {
+      ...tag(88),
+      mysteryPlayer: 'mystery-author',
+      mysteryImageUrl: 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-88--mystery.webp',
+      hint: 'preserve this',
+      foundPlayer: 'finder',
+      foundLocation: 'old location',
+      foundImageUrl: 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-88--found.webp',
+    } as Tag
+    const { client, send, objects } = clientWithObjects({
+      'main/index-0.json': original,
+      'main/index.json': [original],
+      'main/test-tag-88--found.webp': tag(88),
+    })
+    const response = await updateMainTagMetadata(client, {
+      game: 'test', tagnumber: 88, foundLocation: '', gps: { lat: 0, long: 0, alt: 0 },
+    })
+    expect(response.success).toBe(true)
+    const updated = JSON.parse(objects.get('main/index.json')!)[0]
+    expect(updated.foundLocation).toBe('')
+    expect(updated.hint).toBe('preserve this')
+    expect(updated.mysteryImageUrl).toBe(original.mysteryImageUrl)
+    const copies = send.mock.calls.filter(([cmd]) => cmd instanceof CopyObjectCommand)
+    expect(copies).toHaveLength(1)
+    expect(copies[0][0].input.Key).toBe('main/test-tag-88--found.webp')
+    expect(JSON.parse(Buffer.from(copies[0][0].input.Metadata.data, 'base64').toString()).fl).toBe('')
+  })
+
+  test('metadata edit never follows a stale mystery URL into another round', async () => {
+    const damaged = {
+      ...tag(100), hint: 'unchanged',
+      mysteryImageUrl: 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-99--mystery.webp',
+    } as Tag
+    const { client, send, objects } = clientWithObjects({
+      'main/index.json': [damaged],
+      'main/index-0.json': damaged,
+      'main/test-tag-99--mystery.webp': tag(99),
+    })
+    const response = await updateMainTagMetadata(client, {
+      game: 'test', tagnumber: 100, hint: 'should fail',
+    })
+    expect(response.success).toBe(false)
+    expect(send.mock.calls.some(([cmd]) => cmd instanceof CopyObjectCommand)).toBe(false)
+    expect(JSON.parse(objects.get('main/index.json')!)[0].hint).toBe('unchanged')
+  })
+
   test('found-side repair updates one tag without losing mystery information', async () => {
     const current = { ...tag(2001), mysteryPlayer: 'active' } as Tag
     const prior = { ...tag(2000), mysteryPlayer: 'prior', hint: 'keep',
