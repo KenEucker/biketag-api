@@ -1,6 +1,7 @@
 export { deleteTag } from './deleteTag'
 export { deleteTags } from './deleteTags'
 export { getTags } from './getTags'
+export { getTag } from './getTag'
 export { getPlayers } from './getPlayers'
 export { fetchSignedUrl } from './fetchSignedUrl'
 export { updateTag } from './updateTag'
