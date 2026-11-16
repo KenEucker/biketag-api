@@ -132,6 +132,35 @@ describe('AWS historical index pages', () => {
     expect(JSON.parse(Buffer.from(copies[0][0].input.Metadata.data, 'base64').toString()).fl).toBe('')
   })
 
+  test('metadata edits retain rounds published during image metadata copies', async () => {
+    const first = {
+      ...tag(12), hint: 'old',
+      mysteryImageUrl: 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-12--mystery.webp',
+    } as Tag
+    const next = { ...tag(13), hint: 'next round' } as Tag
+    const { client, objects } = clientWithObjects({
+      'main/index-0.json': first,
+      'main/index.json': [first],
+      'main/test-tag-12--mystery.webp': first,
+    })
+    const originalSend = client.send.bind(client)
+    client.send = (async (cmd: any) => {
+      if (cmd instanceof CopyObjectCommand) {
+        objects.set('main/index.json', JSON.stringify([next, first]))
+      }
+      return originalSend(cmd)
+    }) as any
+    const response = await updateMainTagMetadata(client, {
+      game: 'test', tagnumber: 12, hint: 'corrected',
+    })
+    expect(response.success).toBe(true)
+    const saved = JSON.parse(objects.get('main/index.json')!)
+    expect(saved.map((t: Tag) => t.tagnumber)).toEqual([13, 12])
+    expect(saved[0].hint).toBe('next round')
+    expect(saved[1].hint).toBe('corrected')
+    expect(JSON.parse(objects.get('main/index-0.json')!).tagnumber).toBe(13)
+  })
+
   test('metadata edit never follows a stale mystery URL into another round', async () => {
     const damaged = {
       ...tag(100), hint: 'unchanged',
