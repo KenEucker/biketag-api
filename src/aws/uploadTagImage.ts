@@ -234,7 +234,21 @@ export async function uploadTagImage(
       }
     } catch (uploadError: any) {
       success = false
-      errors.push(`Failed to upload ${type} image: ${uploadError.message}`)
+      // Show only known, player-safe authorization reasons from the BikeTag token endpoint.
+      // Do not surface arbitrary response bodies (which may contain signed URLs or secrets).
+      const authorizationReasons = [
+        'Game does not match',
+        'Player id does not match',
+        'Invalid key prefix',
+      ]
+      const responseReason = uploadError.response?.data
+      const reason =
+        uploadError.response?.status === 403 &&
+        typeof responseReason === 'string' &&
+        authorizationReasons.includes(responseReason)
+          ? responseReason
+          : uploadError.message
+      errors.push(`Failed to upload ${type} image: ${reason}`)
       return undefined
     }
 
