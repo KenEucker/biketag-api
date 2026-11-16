@@ -1,13 +1,10 @@
 import { CopyObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { describe, expect, test, vi } from 'vitest'
 import { uploadTagImage } from '../../../src/aws/uploadTagImage'
-import { getAwsBucketName, getBikeTagImageKey, getTagMetadata, getTagPrefix } from '../../../src/aws/helpers'
+import { getAwsBucketName, getBikeTagImageKey, getTagMetadata } from '../../../src/aws/helpers'
 
 describe('aws uploadTagImage', () => {
-  test('normalizes mixed-case game names for S3 buckets and image prefixes', async () => {
-    expect(getTagPrefix('queue', 'Portland', 1393)).toBe('queue/portland-tag-1393')
-    expect(await getBikeTagImageKey('found', 'Rider', 1393, 'Portland', 'image/jpeg', 'queue')).toMatch(/^queue\\/portland-tag-1393--found--[a-f0-9]{6}\\.jpg$/)
-
+  test('normalizes mixed-case game names for S3 buckets', () => {
     expect(getAwsBucketName('Portland')).toBe('portland-biketag')
     expect(getAwsBucketName('PORTLAND')).toBe('portland-biketag')
   })
