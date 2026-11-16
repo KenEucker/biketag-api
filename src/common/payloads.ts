@@ -56,11 +56,25 @@ export type updatePlayerPayload = Partial<Player> & SanityUploadPayload
 export type updateTagPayload = Partial<Tag> &
   SanityUploadPayload & {
     resize?: boolean
-    /** Change only explicitly editable metadata on an existing AWS main tag. */
-    metadataOnly?: boolean
-    /** Repair the found portion of an existing AWS main index entry without moving images. */
-    indexOnlyFoundRepair?: boolean
   } & CommonPayloadData
+
+/** An existing main tag's editable fields; no images, identity changes or uploads. */
+export type updateTagMetadataPayload = Pick<Tag, 'game' | 'tagnumber'> &
+  Partial<Pick<Tag,
+    'mysteryPlayer' | 'mysteryTime' | 'hint' |
+    'foundPlayer' | 'foundTime' | 'foundLocation' | 'gps'
+  >> & Pick<CommonPayloadData, 'region'>
+
+/** Index-only found metadata repair. Image movement and repair validation are external. */
+export type repairTagFoundIndexPayload = Pick<Tag, 'game' | 'tagnumber'> &
+  Partial<Pick<Tag,
+    'foundImageUrl' | 'foundPlayer' | 'playerId' | 'foundTime' |
+    'foundLocation' | 'gps'
+  >> & {
+    title?: string
+    description?: string
+    region?: string
+  }
 
 export type uploadTagImagePayload = {
   tagnumber: number
