@@ -4,8 +4,7 @@ import { Readable } from 'node:stream'
 import { getTag } from '../../../src/aws/getTag'
 import { updateTag } from '../../../src/aws/updateTag'
 import { getTags } from '../../../src/aws/getTags'
-import { updateStoredTagMetadata, patchStoredTagFoundFields } from '../../../src/aws/mainTagPatches'
-import { saveIndex, getMainIndexPage, getMainIndexKey } from '../../../src/aws/helpers'
+import { saveIndex, getMainIndexPage, getMainIndexKey, updateStoredTagMetadata, patchStoredTagFoundFields } from '../../../src/aws/helpers'
 import type { Tag } from '../../../src/common/schema'
 
 const tag = (n: number) => ({ game: 'test', tagnumber: n, slug: `test-tag-${n}` }) as Tag
