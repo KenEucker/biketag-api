@@ -199,10 +199,10 @@ export const repairMainFoundIndex = async (
       if (field === 'foundImageUrl') {
         const newKey = assertSameTagUrl(String(value), patch.game, patch.tagnumber, 'found')
         if (existing.foundImageUrl) {
-          const oldKey = assertSameTagUrl(
-            existing.foundImageUrl, patch.game, patch.tagnumber, 'found'
-          )
-          if (oldKey !== newKey) {
+          const oldKey = getKeyFromUrl(existing.foundImageUrl)
+          // A queue URL is still repairable. Only a conflicting main/ URL
+          // indicates that the tag was already completed with another image.
+          if (oldKey.startsWith('main/') && oldKey !== newKey) {
             throw new Error(`Tag #${patch.tagnumber} already points to a different found image`)
           }
         }
