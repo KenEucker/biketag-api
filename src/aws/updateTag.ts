@@ -24,6 +24,24 @@ export async function updateTag(
 ): Promise<BikeTagApiResponse<Tag>> {
   payload.folder = payload.folder ?? 'main'
 
+  if (payload.metadataOnly || payload.indexOnlyFoundRepair) {
+    if (payload.folder !== 'main' ||
+        !Number.isSafeInteger(payload.tagnumber) ||
+        payload.metadataOnly === payload.indexOnlyFoundRepair ||
+        payload.mysteryImage || payload.foundImage || payload.resize) {
+      return {
+        data: null,
+        success: false,
+        error: 'An AWS main index update requires a tag number, a single mode and no image uploads',
+        source: AvailableApis[AvailableApis.aws],
+        status: HttpStatusCode.BadRequest,
+      }
+    }
+    return payload.metadataOnly
+      ? updateStoredTagMetadata(client, payload)
+      : patchStoredTagFoundFields(client, payload)
+  }
+
   const logVerbose = payload.verbose ? console.log : () => {}
 
   let success = true
@@ -45,33 +63,6 @@ export async function updateTag(
     tagExistsResponse.success && tagExistsResponse.data.length
       ? tagExistsResponse.data[0]
       : null
-
-  // Updates to an existing tag can be applied directly when no image move
-  // or upload is requested. This is ordinary updateTag behavior, not a mode.
-  const hasImageBytes = !!(payload.mysteryImage || payload.foundImage)
-  const mysteryUrlChanged = payload.mysteryImageUrl !== undefined &&
-    payload.mysteryImageUrl !== existingTag?.mysteryImageUrl
-  const foundUrlChanged = payload.foundImageUrl !== undefined &&
-    payload.foundImageUrl !== existingTag?.foundImageUrl
-
-  if (existingTag && payload.folder === 'main' && !hasImageBytes &&
-      payload.resize !== true && !mysteryUrlChanged && !foundUrlChanged) {
-    return updateStoredTagMetadata(client, {
-      ...payload, game: payload.game, tagnumber: payload.tagnumber,
-    })
-  }
-
-  // A repair may link an already existing main/ found image to its tag.
-  // The storage helper checks its round-specific key and protects a distinct
-  // existing main/ image. Queue URL changes still use the upload/move path.
-  if (existingTag && payload.folder === 'main' && !hasImageBytes &&
-      payload.resize !== true && !mysteryUrlChanged && foundUrlChanged &&
-      payload.foundImageUrl &&
-      getKeyFromUrl(payload.foundImageUrl).startsWith('main/')) {
-    return patchStoredTagFoundFields(client, {
-      ...payload, game: payload.game, tagnumber: payload.tagnumber,
-    })
-  }
 
   const needsMystery = !!(
     payload.mysteryImageUrl?.length || payload.mysteryImage
