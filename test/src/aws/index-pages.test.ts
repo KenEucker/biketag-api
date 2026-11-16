@@ -1,8 +1,9 @@
 import { describe, expect, test, vi } from 'vitest'
-import { GetObjectCommand, PutObjectCommand, DeleteObjectCommand, type S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand, CopyObjectCommand, type S3Client } from '@aws-sdk/client-s3'
 import { Readable } from 'node:stream'
 import { getTag } from '../../../src/aws/getTag'
 import { getTags } from '../../../src/aws/getTags'
+import { updateMainTagMetadata, repairMainFoundIndex } from '../../../src/aws/mainTagPatches'
 import { saveIndex, getMainIndexPage, getMainIndexKey } from '../../../src/aws/helpers'
 import type { Tag } from '../../../src/common/schema'
 
@@ -15,6 +16,11 @@ const clientWithObjects = (initial: Record<string, Tag[] | Tag> = {}) => {
       if (!objects.has(key)) throw Object.assign(new Error('NoSuchKey'), { name: 'NoSuchKey' })
       return { Body: Readable.from([objects.get(key)!]) }
     }
+    if (command instanceof HeadObjectCommand) {
+      if (!objects.has(key)) throw Object.assign(new Error('Not found'), { name: 'NotFound' })
+      return { Metadata: { data: Buffer.from('{}').toString('base64'), keep: 'yes' }, ContentType: 'image/webp' }
+    }
+    if (command instanceof CopyObjectCommand) return {}
     if (command instanceof DeleteObjectCommand) {
       objects.delete(key)
       return {}
@@ -71,6 +77,51 @@ describe('AWS historical index pages', () => {
     await saveIndex(client, 'test-biketag', 'main', [tag(2000)])
     expect(objects.has('main/index-2.json')).toBe(false)
     expect(JSON.parse(objects.get('main/index-0.json')!).tagnumber).toBe(2000)
+  })
+
+  test('metadata-only mystery edits preserve found information and update current pointer', async () => {
+    const current = {
+      ...tag(1700), hint: 'original', mysteryPlayer: 'mystery-rider',
+      mysteryImageUrl: 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-1700--mystery.webp',
+      foundPlayer: 'finder', foundTime: 123, foundLocation: 'park',
+      foundImageUrl: 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-1700--found.webp',
+      gps: { lat: 1, long: 2, alt: 0 },
+    } as Tag
+    const { client, objects, send } = clientWithObjects({
+      'main/index.json': [current],
+      'main/index-0.json': current,
+      'main/test-tag-1700--mystery.webp': tag(1700),
+    })
+    const response = await updateMainTagMetadata(client, {
+      game: 'test', tagnumber: 1700, hint: 'updated',
+    })
+    expect(response.success).toBe(true)
+    expect(response.data?.foundPlayer).toBe('finder')
+    expect(response.data?.gps).toEqual({ lat: 1, long: 2, alt: 0 })
+    expect(JSON.parse(objects.get('main/index-0.json')!).hint).toBe('updated')
+    expect(JSON.parse(objects.get('main/index.json')!)[0].foundImageUrl).toBe(current.foundImageUrl)
+    expect(send.mock.calls.filter(([c]) => c instanceof CopyObjectCommand)).toHaveLength(1)
+  })
+
+  test('found-side repair updates one tag without losing mystery information', async () => {
+    const current = { ...tag(2001), mysteryPlayer: 'active' } as Tag
+    const prior = { ...tag(2000), mysteryPlayer: 'prior', hint: 'keep',
+      foundImageUrl: '', foundPlayer: '' } as Tag
+    const { client, objects } = clientWithObjects({
+      'main/index-0.json': current,
+      'main/index.json': [prior],
+      'main/index-2.json': [current],
+    })
+    const response = await repairMainFoundIndex(client, {
+      game: 'test', tagnumber: 2000, region: 'sfo2',
+      foundPlayer: 'winner', foundImageUrl: 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-2000--found.webp',
+    })
+    expect(response.success).toBe(true)
+    const repaired = JSON.parse(objects.get('main/index.json')!)[0]
+    expect(repaired.mysteryPlayer).toBe('prior')
+    expect(repaired.hint).toBe('keep')
+    expect(repaired.foundPlayer).toBe('winner')
+    expect(JSON.parse(objects.get('main/index-0.json')!).mysteryPlayer).toBe('active')
   })
 
   test('all tags omit duplicate pointer and limited reads load only newest page', async () => {
