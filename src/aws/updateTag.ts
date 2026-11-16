@@ -15,6 +15,7 @@ import {
 } from './helpers'
 import { getKeyFromUrl } from './helpers'
 import TinyCache from 'tinycache'
+import { updateStoredTagMetadata, patchStoredTagFoundFields } from './mainTagPatches'
 
 export async function updateTag(
   client: S3Client,
@@ -44,6 +45,33 @@ export async function updateTag(
     tagExistsResponse.success && tagExistsResponse.data.length
       ? tagExistsResponse.data[0]
       : null
+
+  // Updates to an existing tag can be applied directly when no image move
+  // or upload is requested. This is ordinary updateTag behavior, not a mode.
+  const hasImageBytes = !!(payload.mysteryImage || payload.foundImage)
+  const mysteryUrlChanged = payload.mysteryImageUrl !== undefined &&
+    payload.mysteryImageUrl !== existingTag?.mysteryImageUrl
+  const foundUrlChanged = payload.foundImageUrl !== undefined &&
+    payload.foundImageUrl !== existingTag?.foundImageUrl
+
+  if (existingTag && payload.folder === 'main' && !hasImageBytes &&
+      payload.resize !== true && !mysteryUrlChanged && !foundUrlChanged) {
+    return updateStoredTagMetadata(client, {
+      ...payload, game: payload.game, tagnumber: payload.tagnumber,
+    })
+  }
+
+  // A repair may link an already existing main/ found image to its tag.
+  // The storage helper checks its round-specific key and protects a distinct
+  // existing main/ image. Queue URL changes still use the upload/move path.
+  if (existingTag && payload.folder === 'main' && !hasImageBytes &&
+      payload.resize !== true && !mysteryUrlChanged && foundUrlChanged &&
+      payload.foundImageUrl &&
+      getKeyFromUrl(payload.foundImageUrl).startsWith('main/')) {
+    return patchStoredTagFoundFields(client, {
+      ...payload, game: payload.game, tagnumber: payload.tagnumber,
+    })
+  }
 
   const needsMystery = !!(
     payload.mysteryImageUrl?.length || payload.mysteryImage
