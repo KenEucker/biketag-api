@@ -16,12 +16,11 @@ export async function fetchSignedUrl(
   if (!payload.key) {
     error = 'Missing key for signed URL request'
   } else {
-    const game = payload.game?.toLowerCase()
     const opts = {
-      url: getApiUrl(payload.host, TOKEN_ENDPOINT, game),
+      url: getApiUrl(payload.host, TOKEN_ENDPOINT, payload.game),
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      data: { ...payload, game },
+      data: payload,
     }
 
     const response = await client.request(opts)
