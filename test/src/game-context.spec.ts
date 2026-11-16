@@ -35,6 +35,18 @@ class TestBikeTagClient extends BikeTagClient {
 }
 
 describe('game context', () => {
+  test('keeps display name in metadata but uses the lowercase slug for requests and keys', () => {
+    const client = new TestBikeTagClient({ game: 'portland' })
+    const metadata = game({ name: 'Portland', slug: 'portland', awsRegion: 'sfo2' })
+    client.setGameContext(metadata)
+    expect(client.gameContext?.game.name).toBe('Portland')
+    expect(client.config().biketag.game).toBe('portland')
+    expect(client.options({ game: 'Portland' }).game).toBe('portland')
+    expect(client.options({ game: 'PORTLAND' }).game).toBe('portland')
+    expect(client.options({ game: 'portland' }).game).toBe('portland')
+    expect(client.options({ game: 'Portland' }, undefined, {}, 'fetchSignedUrl').game).toBe('portland')
+  })
+
   test('does not initialize adapters from empty environment credentials', () => {
     const client = new TestBikeTagClient({
       game: 'portland',
