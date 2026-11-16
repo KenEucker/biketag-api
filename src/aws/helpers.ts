@@ -1097,9 +1097,13 @@ export type uploadTagImagePayload = Partial<Tag> &
 export type queueTagPayload = Partial<Tag> &
   Partial<S3UploadPayload> &
   CommonPayloadData
+/** AWS-only update options; not part of the shared BikeTag updateTag payload. */
 export type updateTagPayload = Partial<Tag> &
   Partial<S3UploadPayload> &
-  CommonPayloadData
+  CommonPayloadData & {
+    metadataOnly?: boolean
+    indexOnlyFoundRepair?: boolean
+  }
 
 export const supportedImageExtensions = [
   '.jpg',
