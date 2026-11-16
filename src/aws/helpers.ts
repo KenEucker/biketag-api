@@ -402,33 +402,59 @@ export const saveIndex = async (
     const grouped = new Map<number, Tag[]>()
     for (const tag of ordered) {
       const page = getMainIndexPage(tag.tagnumber)
-      const existing = grouped.get(page) ?? []
-      existing.push(tag)
-      grouped.set(page, existing)
+      const records = grouped.get(page) ?? []
+      records.push(tag)
+      grouped.set(page, records)
     }
-    // Publish historical pages first; index-0 is the current-tag pointer and is written last.
-    for (const [page, records] of grouped) {
-      await client.send(new PutObjectCommand({
+
+    // Record the old range so a deleted last tag cannot leave an orphan page.
+    // Reads require no additional permissions beyond existing index access.
+    let oldPageCount = 1
+    try {
+      const previous = await loadCurrentMainTag(client, bucket)
+      if (previous) oldPageCount = getMainIndexPage(previous.tagnumber)
+    } catch (err: any) {
+      if (!isMissingAwsIndex(err)) throw err
+    }
+
+    const pageCount = ordered.length ? getMainIndexPage(ordered[0].tagnumber) : 1
+    // Save all pages in the current range, including empty pages resulting from
+    // deletions, so inference by tag number remains reliable.
+    for (let page = 1; page <= pageCount; page++) {
+      await client.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: getMainIndexKey(page),
+          Body: JSON.stringify(grouped.get(page) ?? []),
+          ContentType: 'application/json',
+          ACL: acl,
+          CacheControl: 'no-cache, no-store, must-revalidate',
+        })
+      )
+    }
+    for (let page = pageCount + 1; page <= oldPageCount; page++) {
+      await client.send(new DeleteObjectCommand({
         Bucket: bucket,
         Key: getMainIndexKey(page),
-        Body: JSON.stringify(records),
-        ContentType: 'application/json',
-        ACL: acl,
-        CacheControl: 'no-cache, no-store, must-revalidate',
       }))
     }
-    if (!ordered.length) {
-      await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: getMainIndexKey(0) }))
-      return
-    }
+
+    // Publish the newest tag last, after all historical pages are durable.
     if (ordered.length) {
-      await client.send(new PutObjectCommand({
+      await client.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: getMainIndexKey(0),
+          Body: JSON.stringify(ordered[0]),
+          ContentType: 'application/json',
+          ACL: acl,
+          CacheControl: 'no-cache, no-store, must-revalidate',
+        })
+      )
+    } else {
+      await client.send(new DeleteObjectCommand({
         Bucket: bucket,
         Key: getMainIndexKey(0),
-        Body: JSON.stringify(ordered[0]),
-        ContentType: 'application/json',
-        ACL: acl,
-        CacheControl: 'no-cache, no-store, must-revalidate',
       }))
     }
     return
