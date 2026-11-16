@@ -247,7 +247,8 @@ export class BikeTagClient {
     > = {},
     method?: string
   ): ApiOptions {
-    // Data defaults as before...
+    // Normalize identifiers before deriving slugs or storage keys.
+    if (typeof options.game === 'string') options.game = options.game.toLowerCase()
     switch (dataType) {
       case DataTypes.game:
         options.game = options.game ?? options.slug ?? this.biketagConfig?.game
@@ -299,10 +300,6 @@ export class BikeTagClient {
           options.archivehash ?? this.imgurConfig?.archivehash
         break
     }
-
-    // Game identifiers in API routes and storage are canonical lowercase slugs.
-    // The original Game metadata (including its display name) remains unchanged.
-    if (typeof options.game === 'string') options.game = options.game.toLowerCase()
 
     // Clean overrides:
     const cleanedOverrides = Object.fromEntries(
@@ -709,7 +706,13 @@ export class BikeTagClient {
     const clientMethod = api.fetchSignedUrl
 
     if (clientMethod) {
-      return clientMethod(client, options)
+      // Pass the signing payload, not unrelated normalized API options.
+      // Only fill its configured game/host when missing and normalize the game slug.
+      return clientMethod(client, {
+        ...payload,
+        game: (payload.game ?? options.game)?.toLowerCase(),
+        host: payload.host ?? options.host,
+      })
     } else {
       return Promise.reject(`fetchSignedUrl ${Errors.NotImplemented} ${source}`)
     }
