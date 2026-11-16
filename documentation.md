@@ -319,28 +319,29 @@ never stored as a second, found-only record, and history reads exclude the
 duplicate current pointer.
 
 Server-side callers that have already authorized an Ambassador or repair action
-can use the existing `updateTag` method with two narrowly scoped modes:
+can use two explicit data operations. Neither operation adds round-creation behavior:
 
 ```ts
 // Edit only explicitly provided mystery/found metadata on an existing tag.
 // A mystery edit doesn't touch its found image, and vice versa.
-await client.updateTag(
-  { game: 'portland', tagnumber: 1700, hint: 'Updated hint', metadataOnly: true },
+await client.updateTagMetadata(
+  { game: 'portland', tagnumber: 1700, hint: 'Updated hint' },
   { source: 'aws', folder: 'main' },
 )
 
 // Repair the found portion of an existing main tag without moving images.
 // The supplied image URL must match this tag's main/ found-image key.
-await client.updateTag(
+await client.repairTagFoundIndex(
   { game: 'portland', tagnumber: 1699, foundPlayer: 'Finder',
     foundImageUrl: 'https://portland-biketag.sfo2.cdn.digitaloceanspaces.com/main/portland-tag-1699--found.webp',
-    indexOnlyFoundRepair: true },
+  },
   { source: 'aws', folder: 'main' },
 )
 ```
 
-Neither mode accepts new tag creation; the metadata mode copies metadata only
+Neither method accepts new tag creation; the metadata method copies metadata only
 on the affected existing image and merges fields with the existing complete tag.
-The found-repair mode patches index metadata without copying or moving images.
+The found-repair method patches index metadata without copying or moving images.
 Caller authorization and queue repair validation remain the application's
-responsibility. Do not use these modes for normal new-round publishing.
+responsibility. Do not use these methods for normal new-round publishing. The generic
+`updateTagPayload` is unchanged: it does not contain metadata/repair mode flags.
