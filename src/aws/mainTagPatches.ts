@@ -54,11 +54,23 @@ const patchIndexRecord = async (
     const tags = await loadIndex(client, bucket, 'main', patch.region ?? '')
     const index = tags.findIndex((tag) => tag.tagnumber === patch.tagnumber)
     if (index < 0) throw new Error(`Tag #${patch.tagnumber} not found in main`)
-    const updated = await merge(tags[index])
-    // One canonical record per tag number; preserve fields not included in the patch.
-    tags[index] = updated
-    await saveIndex(client, bucket, 'main', tags)
-    return result(true, updated)
+    const original = tags[index]
+    const updated = await merge(original)
+
+    // Another round may have been published while image metadata was copied.
+    // Reload immediately before writing and apply only fields that changed.
+    const latest = await loadIndex(client, bucket, 'main', patch.region ?? '')
+    const latestIndex = latest.findIndex((tag) => tag.tagnumber === patch.tagnumber)
+    if (latestIndex < 0) throw new Error(`Tag #${patch.tagnumber} disappeared from main`)
+    const changed = Object.fromEntries(
+      Object.keys(updated)
+        .filter((key) => JSON.stringify((updated as any)[key]) !== JSON.stringify((original as any)[key]))
+        .map((key) => [key, (updated as any)[key]])
+    )
+    const finalTag = { ...latest[latestIndex], ...changed } as Tag
+    latest[latestIndex] = finalTag
+    await saveIndex(client, bucket, 'main', latest)
+    return result(true, finalTag)
   } catch (err: any) {
     return result(false, null, err?.message ?? String(err))
   }
