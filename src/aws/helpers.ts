@@ -409,6 +409,10 @@ export const saveIndex = async (
         CacheControl: 'no-cache, no-store, must-revalidate',
       }))
     }
+    if (!ordered.length) {
+      await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: getMainIndexKey(0) }))
+      return
+    }
     if (ordered.length) {
       await client.send(new PutObjectCommand({
         Bucket: bucket,
