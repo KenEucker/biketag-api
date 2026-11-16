@@ -38,8 +38,8 @@ export async function updateTag(
       }
     }
     return payload.metadataOnly
-      ? updateStoredTagMetadata(client, payload)
-      : patchStoredTagFoundFields(client, payload)
+      ? updateStoredTagMetadata(client, { ...payload, tagnumber: payload.tagnumber! })
+      : patchStoredTagFoundFields(client, { ...payload, tagnumber: payload.tagnumber! })
   }
 
   const logVerbose = payload.verbose ? console.log : () => {}
