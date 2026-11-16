@@ -5,6 +5,8 @@ import { SanityUploadPayload } from '../common/data'
 export type SortOptions = 'new' | 'relevance' | 'hot' | 'top' | 'comments'
 
 export type getTagsPayload = {
+  /** AWS main history page (1 = index.json, 2 = index-2.json, etc). */
+  page?: number
   fields?: string[]
   slugs?: string[]
   hash?: string

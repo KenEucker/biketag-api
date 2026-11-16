@@ -277,3 +277,72 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
   [imgur-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/imgur-logo.png
   [sanity-image]: https://raw.githubusercontent.com/keneucker/biketag-website/production/public/img/sanity-logo.png
 </div>
+
+### AWS tag indexes and pagination
+
+The AWS adapter uses `main/index-0.json` as a small, read-only single-tag JSON object (rather than an array).
+The current tag is also included in its historical index file. `getTag()` reads
+`index-0.json` directly and, when that file has not yet been created for a legacy
+game, falls back to `getTags({ limit: 1 })` without writing storage objects.
+The pointer is created during the next normal tag-index update.
+
+Historical `main/index.json` stores tag numbers 1–2000 (page 1). Subsequent
+pages are `main/index-2.json` for 2001–4000, `main/index-3.json` for
+4001–6000, and so on. Each page holds **at most 2,000 tags**. The page
+assignment is based on tag **numbers**, not the number of records currently
+present, so deletions do not shift other pages. Historical pages include the
+current tag; full-history reads do not need to fetch `index-0.json` as data.
+
+- `getTags()` with no limit or page returns **all tags** (as before). When the
+  current pointer is present, numbered page reads run concurrently.
+- `getTags({ limit: 20 })` loads only as many newest historical pages as
+  necessary for the default newest-first sort. Limits combined with filters or
+  other sort orders may require reading more pages to preserve correct results.
+- `getTags({ page: 1 })` reads only `main/index.json` (tags 1–2000);
+  `getTags({ page: 2 })` reads only `main/index-2.json`. A `limit` can
+  additionally restrict the results returned from the selected page.
+- `getTag(1500)` reads its single historical page, while `getTag()` reads
+  only `main/index-0.json` when available.
+
+Only the AWS **main** collection uses paginated indexes. Queue and archive
+continue using their existing single `index.json`. The current pointer is
+optional for existing games; no bulk migration or extra write permissions are
+required for reading tags. Full-history queries may involve more than one
+storage request, while current-tag requests require only one small object read.
+
+### AWS main tag edits and queue-found repairs
+
+The AWS adapter keeps `main/index.json`, numbered history pages, and
+`main/index-0.json` synchronized. The current pointer is a copy of the same
+complete `Tag` record that exists in its historical page.
+
+The public SDK continues exposing `updateTag()`. The AWS adapter alone
+understands two optional storage-specific flags on its **local**
+`src/aws/helpers.ts` `updateTagPayload` type. Neither flag belongs to
+the shared `src/common/payloads.ts` `updateTagPayload`.
+
+```ts
+// Existing main tag metadata; no uploaded or moved images.
+await client.updateTag(
+  { game: 'portland', tagnumber: 1700, hint: 'Updated hint',
+    metadataOnly: true },
+  { source: 'aws', folder: 'main' },
+)
+
+// Only patch the found half of an existing tag after the application
+// has validated and placed the orphaned image in main/.
+await client.updateTag(
+  { game: 'portland', tagnumber: 1699, foundPlayer: 'Finder',
+    foundImageUrl: 'https://portland-biketag.sfo2.cdn.digitaloceanspaces.com/main/portland-tag-1699--found.webp',
+    indexOnlyFoundRepair: true },
+  { source: 'aws', folder: 'main' },
+)
+```
+
+These AWS-specific flags are passed through by the SDK at runtime, but
+are not defined on the generic public payload. Regular `updateTag()`
+remains flexible and retains existing upload/move behavior. In both
+restricted modes the tag must already exist; the metadata mode updates
+only the relevant image metadata, and the repair mode updates the index
+without moving or copying images. No round creation or approval logic
+is introduced in the API.
