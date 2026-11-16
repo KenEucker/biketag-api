@@ -7,7 +7,7 @@ import { saveIndex, getMainIndexPage, getMainIndexKey } from '../../../src/aws/h
 import type { Tag } from '../../../src/common/schema'
 
 const tag = (n: number) => ({ game: 'test', tagnumber: n, slug: `test-tag-${n}` }) as Tag
-const clientWithObjects = (initial: Record<string, Tag[]> = {}) => {
+const clientWithObjects = (initial: Record<string, Tag[] | Tag> = {}) => {
   const objects = new Map(Object.entries(initial).map(([key, data]) => [key, JSON.stringify(data)]))
   const send = vi.fn(async (command: any) => {
     const key = command.input.Key
@@ -34,7 +34,7 @@ describe('AWS historical index pages', () => {
   })
 
   test('current lookup performs exactly one read when pointer exists', async () => {
-    const { client, send } = clientWithObjects({ 'main/index-0.json': [tag(2001)] })
+    const { client, send } = clientWithObjects({ 'main/index-0.json': tag(2001) })
     const response = await getTag(client, { game: 'test', region: 'nyc3', slug: 'current' } as any)
     expect(response.success).toBe(true)
     expect(response.data.tagnumber).toBe(2001)
@@ -53,7 +53,7 @@ describe('AWS historical index pages', () => {
     await saveIndex(client, 'test-biketag', 'main', [tag(2001), tag(2000), tag(1)])
     expect(JSON.parse(objects.get('main/index.json')!)).toHaveLength(2)
     expect(JSON.parse(objects.get('main/index-2.json')!)[0].tagnumber).toBe(2001)
-    expect(JSON.parse(objects.get('main/index-0.json')!)[0].tagnumber).toBe(2001)
+    expect(JSON.parse(objects.get('main/index-0.json')!).tagnumber).toBe(2001)
     const keys = send.mock.calls.map(([command]) => command.input.Key)
     expect(keys.at(-1)).toBe('main/index-0.json')
   })
