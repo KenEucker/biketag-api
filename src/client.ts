@@ -212,9 +212,6 @@ export class BikeTagClient {
         break
     }
 
-    // Normalize external game identifiers once as they enter client request handling.
-    if (typeof payload.game === 'string') payload = { ...payload, game: payload.game.toLowerCase() }
-
     switch (typeof source) {
       case 'string':
         payload.source = AvailableApis[source]
@@ -250,6 +247,7 @@ export class BikeTagClient {
     > = {},
     method?: string
   ): ApiOptions {
+    // Data defaults as before...
     switch (dataType) {
       case DataTypes.game:
         options.game = options.game ?? options.slug ?? this.biketagConfig?.game
@@ -707,12 +705,7 @@ export class BikeTagClient {
     const clientMethod = api.fetchSignedUrl
 
     if (clientMethod) {
-      // Keep the signing payload scoped to its own fields; the client owns the canonical game slug.
-      return clientMethod(client, {
-        ...payload,
-        game: options.game,
-        host: payload.host ?? options.host,
-      })
+      return clientMethod(client, { ...payload, game: payload.game ?? options.game })
     } else {
       return Promise.reject(`fetchSignedUrl ${Errors.NotImplemented} ${source}`)
     }
