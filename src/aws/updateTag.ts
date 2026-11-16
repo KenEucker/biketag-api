@@ -12,10 +12,11 @@ import {
   resizeAndSaveVariants,
   saveIndex,
   type updateTagPayload,
+  updateStoredTagMetadata,
+  patchStoredTagFoundFields,
 } from './helpers'
 import { getKeyFromUrl } from './helpers'
 import TinyCache from 'tinycache'
-import { updateStoredTagMetadata, patchStoredTagFoundFields } from './mainTagPatches'
 
 export async function updateTag(
   client: S3Client,
