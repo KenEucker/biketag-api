@@ -171,6 +171,27 @@ describe('AWS historical index pages', () => {
     expect(JSON.parse(objects.get('main/index-0.json')!).mysteryPlayer).toBe('active')
   })
 
+  test('found repair replaces a stale queue URL but refuses conflicting main URL', async () => {
+    const inQueue = {
+      ...tag(12), mysteryPlayer: 'preserve',
+      foundImageUrl: 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/queue/test-tag-12--found--abc.webp',
+    } as Tag
+    const target = 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-12--found.webp'
+    const { client, objects } = clientWithObjects({
+      'main/index-0.json': inQueue, 'main/index.json': [inQueue],
+    })
+    const repaired = await repairMainFoundIndex(client, { game: 'test', tagnumber: 12, foundImageUrl: target })
+    expect(repaired.success).toBe(true)
+    expect(JSON.parse(objects.get('main/index.json')!)[0].foundImageUrl).toBe(target)
+
+    const conflicting = { ...inQueue, foundImageUrl: 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-12--found.jpg' }
+    const { client: other } = clientWithObjects({
+      'main/index-0.json': conflicting, 'main/index.json': [conflicting],
+    })
+    const refused = await repairMainFoundIndex(other, { game: 'test', tagnumber: 12, foundImageUrl: target })
+    expect(refused.success).toBe(false)
+  })
+
   test('all tags omit duplicate pointer and limited reads load only newest page', async () => {
     const { client, send } = clientWithObjects({
       'main/index-0.json': tag(2001),
