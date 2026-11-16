@@ -12,6 +12,8 @@ import {
   resizeAndSaveVariants,
   saveIndex,
   type updateTagPayload,
+  updateStoredTagMetadata,
+  patchStoredTagFoundFields,
 } from './helpers'
 import { getKeyFromUrl } from './helpers'
 import TinyCache from 'tinycache'
@@ -22,6 +24,24 @@ export async function updateTag(
   cache?: typeof TinyCache
 ): Promise<BikeTagApiResponse<Tag>> {
   payload.folder = payload.folder ?? 'main'
+
+  if (payload.metadataOnly || payload.indexOnlyFoundRepair) {
+    if (payload.folder !== 'main' ||
+        !Number.isSafeInteger(payload.tagnumber) ||
+        payload.metadataOnly === payload.indexOnlyFoundRepair ||
+        payload.mysteryImage || payload.foundImage || payload.resize) {
+      return {
+        data: null,
+        success: false,
+        error: 'An AWS main index update requires a tag number, a single mode and no image uploads',
+        source: AvailableApis[AvailableApis.aws],
+        status: HttpStatusCode.BadRequest,
+      }
+    }
+    return payload.metadataOnly
+      ? updateStoredTagMetadata(client, { ...payload, tagnumber: payload.tagnumber! })
+      : patchStoredTagFoundFields(client, { ...payload, tagnumber: payload.tagnumber! })
+  }
 
   const logVerbose = payload.verbose ? console.log : () => {}
 
@@ -56,10 +76,16 @@ export async function updateTag(
 
     if (uploadResponse.success) {
       logVerbose('[updateTag] Image upload successful.')
-      payload.mysteryImageUrl = uploadResponse.data.mysteryImageUrl
-      payload.mysteryTime = uploadResponse.data.mysteryTime
-      payload.foundImageUrl = uploadResponse.data.foundImageUrl
-      payload.foundTime = uploadResponse.data.foundTime
+      // The upload response normalizes omitted image fields to empty defaults.
+      // Only copy back the image half that was actually supplied by this call.
+      if (needsMystery) {
+        payload.mysteryImageUrl = uploadResponse.data.mysteryImageUrl
+        payload.mysteryTime = uploadResponse.data.mysteryTime
+      }
+      if (needsFound) {
+        payload.foundImageUrl = uploadResponse.data.foundImageUrl
+        payload.foundTime = uploadResponse.data.foundTime
+      }
       payload.mysteryImage = undefined
       payload.foundImage = undefined
     } else {
@@ -135,7 +161,7 @@ export async function updateTag(
         payload.folder,
         payload.region
       )
-      const updatedTag = createTagObject(payload)
+      const updatedTag = createTagObject({ ...existingTag, ...payload })
 
       const existingIndex = index.findIndex(
         (t) => t.tagnumber === updatedTag.tagnumber
@@ -209,7 +235,7 @@ export async function updateTag(
   }
 
   return {
-    data: createTagObject(payload),
+    data: createTagObject({ ...existingTag, ...payload }),
     success,
     error,
     source: AvailableApis[AvailableApis.aws],

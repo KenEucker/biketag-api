@@ -309,3 +309,40 @@ continue using their existing single `index.json`. The current pointer is
 optional for existing games; no bulk migration or extra write permissions are
 required for reading tags. Full-history queries may involve more than one
 storage request, while current-tag requests require only one small object read.
+
+### AWS main tag edits and queue-found repairs
+
+The AWS adapter keeps `main/index.json`, numbered history pages, and
+`main/index-0.json` synchronized. The current pointer is a copy of the same
+complete `Tag` record that exists in its historical page.
+
+The public SDK continues exposing `updateTag()`. The AWS adapter alone
+understands two optional storage-specific flags on its **local**
+`src/aws/helpers.ts` `updateTagPayload` type. Neither flag belongs to
+the shared `src/common/payloads.ts` `updateTagPayload`.
+
+```ts
+// Existing main tag metadata; no uploaded or moved images.
+await client.updateTag(
+  { game: 'portland', tagnumber: 1700, hint: 'Updated hint',
+    metadataOnly: true },
+  { source: 'aws', folder: 'main' },
+)
+
+// Only patch the found half of an existing tag after the application
+// has validated and placed the orphaned image in main/.
+await client.updateTag(
+  { game: 'portland', tagnumber: 1699, foundPlayer: 'Finder',
+    foundImageUrl: 'https://portland-biketag.sfo2.cdn.digitaloceanspaces.com/main/portland-tag-1699--found.webp',
+    indexOnlyFoundRepair: true },
+  { source: 'aws', folder: 'main' },
+)
+```
+
+These AWS-specific flags are passed through by the SDK at runtime, but
+are not defined on the generic public payload. Regular `updateTag()`
+remains flexible and retains existing upload/move behavior. In both
+restricted modes the tag must already exist; the metadata mode updates
+only the relevant image metadata, and the repair mode updates the index
+without moving or copying images. No round creation or approval logic
+is introduced in the API.
