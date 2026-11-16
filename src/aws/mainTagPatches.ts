@@ -5,7 +5,6 @@ import {
 } from '@aws-sdk/client-s3'
 import { AvailableApis, HttpStatusCode } from '../common/enums'
 import type { Tag } from '../common/schema'
-import type { updateTagMetadataPayload, repairTagFoundIndexPayload } from '../common/payloads'
 import type { BikeTagApiResponse } from '../common/types'
 import {
   decodeMetadataValue,
@@ -98,9 +97,9 @@ const assertSameTagUrl = (
  * Preserve both halves of the tag and all unrelated image metadata.
  * The caller remains responsible for authorizing the edit.
  */
-export const updateTagMetadata = async (
+export const updateStoredTagMetadata = async (
   client: S3Client,
-  patch: updateTagMetadataPayload
+  patch: MainIndexPatch
 ): Promise<BikeTagApiResponse<Tag>> => {
   return patchIndexRecord(client, patch, async (existing) => {
     if (patch.game.toLowerCase() !== existing.game.toLowerCase()) {
@@ -188,9 +187,9 @@ export const updateTagMetadata = async (
  * Queue orphan repair: change only the found portion of an existing main index
  * entry. This intentionally does not upload, move or rewrite image objects.
  */
-export const repairTagFoundIndex = async (
+export const patchStoredTagFoundFields = async (
   client: S3Client,
-  patch: repairTagFoundIndexPayload
+  patch: MainIndexPatch
 ): Promise<BikeTagApiResponse<Tag>> => {
   return patchIndexRecord(client, patch, async (existing) => {
     const updated = { ...existing }
