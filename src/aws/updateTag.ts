@@ -15,7 +15,6 @@ import {
 } from './helpers'
 import { getKeyFromUrl } from './helpers'
 import TinyCache from 'tinycache'
-import { updateMainTagMetadata, repairMainFoundIndex } from './mainTagPatches'
 
 export async function updateTag(
   client: S3Client,
@@ -23,23 +22,6 @@ export async function updateTag(
   cache?: typeof TinyCache
 ): Promise<BikeTagApiResponse<Tag>> {
   payload.folder = payload.folder ?? 'main'
-
-  if (payload.metadataOnly === true || payload.indexOnlyFoundRepair === true) {
-    if (payload.folder !== 'main' || typeof payload.tagnumber !== 'number' ||
-        (payload.metadataOnly && payload.indexOnlyFoundRepair)) {
-      return {
-        data: null,
-        success: false,
-        error: 'A main index patch requires folder=main, a tag number, and only one patch mode',
-        source: AvailableApis[AvailableApis.aws],
-        status: HttpStatusCode.BadRequest,
-      }
-    }
-    const patch = { ...payload, game: payload.game, tagnumber: payload.tagnumber }
-    return payload.metadataOnly === true
-      ? updateMainTagMetadata(client, patch)
-      : repairMainFoundIndex(client, patch)
-  }
 
   const logVerbose = payload.verbose ? console.log : () => {}
 
