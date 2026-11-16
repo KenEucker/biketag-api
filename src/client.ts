@@ -740,6 +740,7 @@ export class BikeTagClient {
     this.gameContext = gameContext
     this.config(
       {
+        game: game.slug,
         imgur: {
           hash: game.mainhash,
           queuehash: game.queuehash,
