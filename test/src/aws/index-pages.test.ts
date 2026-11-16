@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import { GetObjectCommand, PutObjectCommand, type S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, PutObjectCommand, DeleteObjectCommand, type S3Client } from '@aws-sdk/client-s3'
 import { Readable } from 'node:stream'
 import { getTag } from '../../../src/aws/getTag'
 import { getTags } from '../../../src/aws/getTags'
@@ -14,6 +14,10 @@ const clientWithObjects = (initial: Record<string, Tag[] | Tag> = {}) => {
     if (command instanceof GetObjectCommand) {
       if (!objects.has(key)) throw Object.assign(new Error('NoSuchKey'), { name: 'NoSuchKey' })
       return { Body: Readable.from([objects.get(key)!]) }
+    }
+    if (command instanceof DeleteObjectCommand) {
+      objects.delete(key)
+      return {}
     }
     if (command instanceof PutObjectCommand) {
       objects.set(key, command.input.Body)
@@ -56,6 +60,17 @@ describe('AWS historical index pages', () => {
     expect(JSON.parse(objects.get('main/index-0.json')!).tagnumber).toBe(2001)
     const keys = send.mock.calls.map(([command]) => command.input.Key)
     expect(keys.at(-1)).toBe('main/index-0.json')
+  })
+
+  test('deleting newest page removes the stale index and updates the current pointer', async () => {
+    const { client, objects } = clientWithObjects({
+      'main/index-0.json': tag(2001),
+      'main/index.json': [tag(2000)],
+      'main/index-2.json': [tag(2001)],
+    })
+    await saveIndex(client, 'test-biketag', 'main', [tag(2000)])
+    expect(objects.has('main/index-2.json')).toBe(false)
+    expect(JSON.parse(objects.get('main/index-0.json')!).tagnumber).toBe(2000)
   })
 
   test('all tags omit duplicate pointer and limited reads load only newest page', async () => {
