@@ -56,6 +56,10 @@ export type updatePlayerPayload = Partial<Player> & SanityUploadPayload
 export type updateTagPayload = Partial<Tag> &
   SanityUploadPayload & {
     resize?: boolean
+    /** Change only explicitly editable metadata on an existing AWS main tag. */
+    metadataOnly?: boolean
+    /** Repair the found portion of an existing AWS main index entry without moving images. */
+    indexOnlyFoundRepair?: boolean
   } & CommonPayloadData
 
 export type uploadTagImagePayload = {
