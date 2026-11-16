@@ -30,6 +30,8 @@ import {
   getTagPayload,
   getTagsPayload,
   updateTagPayload,
+  updateTagMetadataPayload,
+  repairTagFoundIndexPayload,
   updateGamePayload,
   getGamePayload,
   uploadTagImagePayload,
@@ -1273,6 +1275,52 @@ export class BikeTagClient {
     } else {
       return Promise.reject(`updateTag ${Errors.NotImplemented} ${source}`)
     }
+  }
+
+  /**
+   * Updates editable metadata on an existing AWS main tag without replacing
+   * image objects or touching the other half of the tag.
+   */
+  updateTagMetadata(
+    payload: updateTagMetadataPayload,
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Tag>> {
+    const { client, options, api, source } = this.getClientAdapter(
+      payload, opts, DataTypes.tag, 'updateTagMetadata'
+    )
+    if (source !== AvailableApis.aws || !api.updateTagMetadata) {
+      return Promise.reject('updateTagMetadata requires AWS storage')
+    }
+    return api.updateTagMetadata(client, options).catch((e) => ({
+      status: HttpStatusCode.InternalServerError,
+      data: null,
+      error: e.code ?? e,
+      success: false,
+      source,
+    }))
+  }
+
+  /**
+   * Repairs only an existing AWS main tag's found-index fields. Does not move
+   * images, validate game progression, or create a new tag.
+   */
+  repairTagFoundIndex(
+    payload: repairTagFoundIndexPayload,
+    opts?: RequireAtLeastOne<Credentials>
+  ): Promise<BikeTagApiResponse<Tag>> {
+    const { client, options, api, source } = this.getClientAdapter(
+      payload, opts, DataTypes.tag, 'repairTagFoundIndex'
+    )
+    if (source !== AvailableApis.aws || !api.repairTagFoundIndex) {
+      return Promise.reject('repairTagFoundIndex requires AWS storage')
+    }
+    return api.repairTagFoundIndex(client, options).catch((e) => ({
+      status: HttpStatusCode.InternalServerError,
+      data: null,
+      error: e.code ?? e,
+      success: false,
+      source,
+    }))
   }
 
   /**
