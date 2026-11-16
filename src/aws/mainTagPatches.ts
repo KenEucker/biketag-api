@@ -1,224 +1,116 @@
-import {
-  CopyObjectCommand,
-  HeadObjectCommand,
-  type S3Client,
-} from '@aws-sdk/client-s3'
-import { AvailableApis, HttpStatusCode } from '../common/enums'
+import { CopyObjectCommand, HeadObjectCommand, type S3Client } from '@aws-sdk/client-s3'
 import type { Tag } from '../common/schema'
 import type { BikeTagApiResponse } from '../common/types'
+import { AvailableApis, HttpStatusCode } from '../common/enums'
 import {
-  decodeMetadataValue,
-  encodeMetadataValue,
-  getAwsBucketName,
-  getKeyFromUrl,
-  loadIndex,
-  saveIndex,
+  decodeMetadataValue, encodeMetadataValue, getAwsBucketName, getKeyFromUrl,
+  loadIndex, saveIndex,
 } from './helpers'
 
-type MainIndexPatch = Partial<Tag> & {
-  game: string
-  tagnumber: number
-  region?: string
-}
+type Patch = Partial<Tag> & { game: string; tagnumber: number; region?: string }
+const mysteryFields = ['mysteryPlayer', 'mysteryTime', 'hint', 'discussionUrl', 'mentionUrl', 'shareUrl'] as const
+const foundFields = ['foundPlayer', 'foundTime', 'foundLocation', 'gps', 'confirmedBoundary'] as const
+const repairFields = ['foundImageUrl', 'foundPlayer', 'playerId', 'foundTime', 'foundLocation', 'gps', 'title', 'description'] as const
 
-const mysteryFields = ['mysteryPlayer', 'mysteryTime', 'hint'] as const
-const foundFields = ['foundPlayer', 'foundTime', 'foundLocation', 'gps'] as const
-const foundRepairFields = [
-  'foundImageUrl', 'foundPlayer', 'playerId', 'foundTime',
-  'foundLocation', 'gps', 'title', 'description',
-] as const
-
-const result = (
-  success: boolean,
-  data: Tag | null,
-  error?: string
-): BikeTagApiResponse<Tag> => ({
-  data,
-  success,
-  error,
-  source: AvailableApis[AvailableApis.aws],
-  status: success ? HttpStatusCode.Ok : HttpStatusCode.BadRequest,
-})
-
-const patchIndexRecord = async (
-  client: S3Client,
-  patch: MainIndexPatch,
-  merge: (existing: Tag) => Promise<Tag>
-): Promise<BikeTagApiResponse<Tag>> => {
-  try {
-    if (!Number.isSafeInteger(patch.tagnumber) || patch.tagnumber < 1) {
-      throw new Error('A valid tag number is required')
-    }
-    if (!patch.game) throw new Error('Game is required')
-    const bucket = getAwsBucketName(patch.game)
-    const tags = await loadIndex(client, bucket, 'main', patch.region ?? '')
-    const index = tags.findIndex((tag) => tag.tagnumber === patch.tagnumber)
-    if (index < 0) throw new Error(`Tag #${patch.tagnumber} not found in main`)
-    const original = tags[index]
-    const updated = await merge(original)
-
-    // Another round may have been published while image metadata was copied.
-    // Reload immediately before writing and apply only fields that changed.
-    const latest = await loadIndex(client, bucket, 'main', patch.region ?? '')
-    const latestIndex = latest.findIndex((tag) => tag.tagnumber === patch.tagnumber)
-    if (latestIndex < 0) throw new Error(`Tag #${patch.tagnumber} disappeared from main`)
-    const changed = Object.fromEntries(
-      Object.keys(updated)
-        .filter((key) => JSON.stringify((updated as any)[key]) !== JSON.stringify((original as any)[key]))
-        .map((key) => [key, (updated as any)[key]])
-    )
-    const finalTag = { ...latest[latestIndex], ...changed } as Tag
-    latest[latestIndex] = finalTag
-    await saveIndex(client, bucket, 'main', latest)
-    return result(true, finalTag)
-  } catch (err: any) {
-    return result(false, null, err?.message ?? String(err))
-  }
-}
-
-const assertSameTagUrl = (
-  url: string,
-  game: string,
-  tagnumber: number,
-  type: 'mystery' | 'found'
-): string => {
+const imageKey = (url: string, game: string, n: number, side: 'mystery' | 'found') => {
   const key = getKeyFromUrl(url)
-  const name = game.toLowerCase()
-  const prefix = `main/${name}-tag-${tagnumber}--${type}.`
-  if (!key.startsWith(prefix) ||
-      !['webp', 'jpg', 'jpeg', 'png', 'gif', 'avif'].includes(key.slice(prefix.length))) {
-    throw new Error(`Invalid ${type} image URL for tag #${tagnumber}`)
+  if (!new RegExp(`^main/${game.toLowerCase()}-tag-${n}--${side}\\.(webp|jpe?g|png|gif|avif)$`).test(key)) {
+    throw new Error(`Image does not belong to tag #${n}`)
   }
   return key
 }
 
-/**
- * Update only explicitly editable fields on an existing main tag.
- * Preserve both halves of the tag and all unrelated image metadata.
- * The caller remains responsible for authorizing the edit.
- */
-export const updateStoredTagMetadata = async (
-  client: S3Client,
-  patch: MainIndexPatch
+/** Patch an existing main tag; never create a new tag or change its number. */
+const patchIndex = async (
+  client: S3Client, patch: Patch,
+  edit: (original: Tag, bucket: string) => Promise<Partial<Tag>>
 ): Promise<BikeTagApiResponse<Tag>> => {
-  return patchIndexRecord(client, patch, async (existing) => {
-    if (patch.game.toLowerCase() !== existing.game.toLowerCase()) {
-      throw new Error('Tag game does not match request game')
+  try {
+    if (!patch.game || !Number.isSafeInteger(patch.tagnumber) || patch.tagnumber < 1) {
+      throw new Error('A valid game and tag number are required')
     }
-    if (patch.mysteryImage || patch.foundImage) {
-      throw new Error('Image uploads are not supported when editing tag metadata')
-    }
-    for (const field of ['mysteryImageUrl', 'foundImageUrl'] as const) {
-      if (patch[field] !== undefined && patch[field] !== existing[field]) {
-        throw new Error(`${field} does not match tag #${existing.tagnumber}`)
-      }
-    }
-    const changes: Partial<Tag> = {}
-    for (const field of [...mysteryFields, ...foundFields]) {
-      if (patch[field] !== undefined) (changes as any)[field] = patch[field]
-    }
-    // General tag metadata remains editable through updateTag; this helper
-    // limits image metadata copies to the fields belonging to each image.
-    for (const field of [
-      'slug', 'name', 'playerId', 'discussionUrl', 'mentionUrl',
-      'shareUrl', 'confirmedBoundary',
-    ] as const) {
-      if (patch[field] !== undefined) (changes as any)[field] = patch[field]
-    }
-    const updated: Tag = { ...existing, ...changes }
     const bucket = getAwsBucketName(patch.game)
-    const copies: Array<{
-      key: string
-      metadata: Record<string, string>
-      contentType?: string
-      cacheControl?: string
-      contentDisposition?: string
-      contentEncoding?: string
-      contentLanguage?: string
-      expires?: Date
-    }> = []
-    for (const [type, fields] of [
-      ['mystery', mysteryFields],
-      ['found', foundFields],
-    ] as const) {
-      if (!fields.some((field) => patch[field] !== undefined)) continue
-      const url = existing[`${type}ImageUrl`]
-      if (!url) throw new Error(`Tag #${patch.tagnumber} has no ${type} image`)
-      const key = assertSameTagUrl(url, patch.game, patch.tagnumber, type)
-      const head = await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
-      let metadata: Record<string, any> = {}
-      if (head.Metadata?.data) {
-        metadata = JSON.parse(decodeMetadataValue(head.Metadata.data))
+    const tags = await loadIndex(client, bucket, 'main', patch.region ?? '')
+    const original = tags.find(t => t.tagnumber === patch.tagnumber)
+    if (!original) throw new Error(`Tag #${patch.tagnumber} not found in main`)
+    const changes = await edit(original, bucket)
+    // Re-read before writing so edits don't replace rounds published during image metadata copies.
+    const latest = await loadIndex(client, bucket, 'main', patch.region ?? '')
+    const i = latest.findIndex(t => t.tagnumber === patch.tagnumber)
+    if (i < 0) throw new Error(`Tag #${patch.tagnumber} no longer exists`)
+    const updated = { ...latest[i], ...changes } as Tag
+    latest[i] = updated
+    await saveIndex(client, bucket, 'main', latest)
+    return { success: true, data: updated, status: HttpStatusCode.Ok, source: AvailableApis[AvailableApis.aws] }
+  } catch (error: any) {
+    return {
+      success: false, data: null, error: error?.message ?? String(error),
+      status: HttpStatusCode.BadRequest, source: AvailableApis[AvailableApis.aws],
+    }
+  }
+}
+
+/** Apply an explicit metadata-only AWS update, copying metadata only on affected images. */
+export const updateStoredTagMetadata = (client: S3Client, patch: Patch) =>
+  patchIndex(client, patch, async (original, bucket) => {
+    if (patch.game.toLowerCase() !== original.game.toLowerCase()) throw new Error('Tag game mismatch')
+    for (const field of ['mysteryImageUrl', 'foundImageUrl'] as const) {
+      if (patch[field] !== undefined && patch[field] !== original[field]) {
+        throw new Error(`${field} does not match tag #${original.tagnumber}`)
       }
-      const data = type === 'mystery'
+    }
+    const changes = Object.fromEntries(
+      Object.entries(patch).filter(([key]) =>
+        [...mysteryFields, ...foundFields, 'slug', 'name', 'playerId'].includes(key as any)
+      )
+    ) as Partial<Tag>
+    const updated = { ...original, ...changes }
+
+    for (const side of ['mystery', 'found'] as const) {
+      const fields: readonly string[] = side === 'mystery' ? mysteryFields : foundFields
+      if (!Object.keys(changes).some(key => fields.includes(key))) continue
+      const url = original[`${side}ImageUrl`]
+      if (!url) throw new Error(`Tag #${patch.tagnumber} has no ${side} image`)
+      const key = imageKey(url, patch.game, patch.tagnumber, side)
+      const head = await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
+      const previous = head.Metadata?.data
+        ? JSON.parse(decodeMetadataValue(head.Metadata.data)) : {}
+      const fieldsToSave = side === 'mystery'
         ? { t: updated.tagnumber, p: updated.playerId, mp: updated.mysteryPlayer,
             mt: updated.mysteryTime, h: updated.hint, d: updated.discussionUrl,
-            s: updated.shareUrl, m: updated.mentionUrl }
+            m: updated.mentionUrl, s: updated.shareUrl }
         : { t: updated.tagnumber, p: updated.playerId, fp: updated.foundPlayer,
             ft: updated.foundTime, fl: updated.foundLocation, g: updated.gps,
             c: updated.confirmedBoundary }
-      copies.push({
-        key,
-        metadata: {
-          ...head.Metadata,
-          data: encodeMetadataValue(JSON.stringify({ ...metadata, ...data })),
-        },
-        contentType: head.ContentType,
-        cacheControl: head.CacheControl,
-        contentDisposition: head.ContentDisposition,
-        contentEncoding: head.ContentEncoding,
-        contentLanguage: head.ContentLanguage,
-        expires: head.Expires,
-      })
-    }
-    for (const copy of copies) {
       await client.send(new CopyObjectCommand({
-        Bucket: bucket,
-        CopySource: `${bucket}/${copy.key}`,
-        Key: copy.key,
-        MetadataDirective: 'REPLACE',
-        Metadata: copy.metadata,
-        ContentType: copy.contentType,
-        CacheControl: copy.cacheControl,
-        ContentDisposition: copy.contentDisposition,
-        ContentEncoding: copy.contentEncoding,
-        ContentLanguage: copy.contentLanguage,
-        Expires: copy.expires,
-        ACL: 'public-read',
+        Bucket: bucket, Key: key, CopySource: `${bucket}/${key}`,
+        MetadataDirective: 'REPLACE', ACL: 'public-read',
+        Metadata: { ...head.Metadata, data: encodeMetadataValue(JSON.stringify({ ...previous, ...fieldsToSave })) },
+        ContentType: head.ContentType, CacheControl: head.CacheControl,
+        ContentDisposition: head.ContentDisposition, ContentEncoding: head.ContentEncoding,
+        ContentLanguage: head.ContentLanguage, Expires: head.Expires,
       }))
     }
-    return updated
+    return changes
   })
-}
 
-/**
- * Queue orphan repair: change only the found portion of an existing main index
- * entry. This intentionally does not upload, move or rewrite image objects.
- */
-export const patchStoredTagFoundFields = async (
-  client: S3Client,
-  patch: MainIndexPatch
-): Promise<BikeTagApiResponse<Tag>> => {
-  return patchIndexRecord(client, patch, async (existing) => {
-    const updated = { ...existing }
-    for (const field of foundRepairFields) {
-      const value = patch[field as keyof Tag]
+/** Repair only the stored found fields; image copying and validation stay in Vue. */
+export const patchStoredTagFoundFields = (client: S3Client, patch: Patch) =>
+  patchIndex(client, patch, async (original) => {
+    const changes: Record<string, unknown> = {}
+    for (const field of repairFields) {
+      const value = (patch as any)[field]
       if (value === undefined || value === null || value === '') continue
       if (field === 'foundImageUrl') {
-        const newKey = assertSameTagUrl(String(value), patch.game, patch.tagnumber, 'found')
-        if (existing.foundImageUrl) {
-          const oldKey = getKeyFromUrl(existing.foundImageUrl)
-          // A queue URL is still repairable. Only a conflicting main/ URL
-          // indicates that the tag was already completed with another image.
-          if (oldKey.startsWith('main/') && oldKey !== newKey) {
-            throw new Error(`Tag #${patch.tagnumber} already points to a different found image`)
+        const next = imageKey(String(value), patch.game, patch.tagnumber, 'found')
+        if (original.foundImageUrl) {
+          const old = getKeyFromUrl(original.foundImageUrl)
+          if (old.startsWith('main/') && old !== next) {
+            throw new Error(`Tag #${patch.tagnumber} already points to a different main found image`)
           }
         }
-        updated.foundImageUrl = String(value)
-      } else {
-        ;(updated as any)[field] = value
       }
+      changes[field] = value
     }
-    return updated
+    return changes
   })
-}
