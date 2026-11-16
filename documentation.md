@@ -280,7 +280,7 @@ Support the BikeTag Project on [GitHub][github], [Patreon][patreon], or directly
 
 ### AWS tag indexes and pagination
 
-The AWS adapter uses `main/index-0.json` as a small, read-only current-tag pointer.
+The AWS adapter uses `main/index-0.json` as a small, read-only single-tag JSON object (rather than an array).
 The current tag is also included in its historical index file. `getTag()` reads
 `index-0.json` directly and, when that file has not yet been created for a legacy
 game, falls back to `getTags({ limit: 1 })` without writing storage objects.
