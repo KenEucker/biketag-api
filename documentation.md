@@ -312,36 +312,32 @@ storage request, while current-tag requests require only one small object read.
 
 ### AWS main tag edits and queue-found repairs
 
-The AWS adapter owns changes to `main/index.json`, numbered history pages, and
-`main/index-0.json` together. Both the current pointer and historical record
-contain the **same complete Tag object**. The found half of a completed round is
-never stored as a second, found-only record, and history reads exclude the
-duplicate current pointer.
+The AWS adapter keeps `main/index.json`, numbered history pages, and
+`main/index-0.json` synchronized. Each contains the same full `Tag` record
+for its tag number; the current index is only a fast duplicate pointer.
 
-Server-side callers that have already authorized an Ambassador or repair action
-can use two explicit data operations. Neither operation adds round-creation behavior:
+Use the existing `updateTag()` method for tag changes:
 
 ```ts
-// Edit only explicitly provided mystery/found metadata on an existing tag.
-// A mystery edit doesn't touch its found image, and vice versa.
-await client.updateTagMetadata(
+// Change one metadata field while preserving the existing found and mystery data.
+await client.updateTag(
   { game: 'portland', tagnumber: 1700, hint: 'Updated hint' },
   { source: 'aws', folder: 'main' },
 )
 
-// Repair the found portion of an existing main tag without moving images.
-// The supplied image URL must match this tag's main/ found-image key.
-await client.repairTagFoundIndex(
+// After an authorized queue repair has placed the found image in main/,
+// associate the existing main file with its tag, without moving the image again.
+await client.updateTag(
   { game: 'portland', tagnumber: 1699, foundPlayer: 'Finder',
-    foundImageUrl: 'https://portland-biketag.sfo2.cdn.digitaloceanspaces.com/main/portland-tag-1699--found.webp',
-  },
+    foundImageUrl: 'https://portland-biketag.sfo2.cdn.digitaloceanspaces.com/main/portland-tag-1699--found.webp' },
   { source: 'aws', folder: 'main' },
 )
 ```
 
-Neither method accepts new tag creation; the metadata method copies metadata only
-on the affected existing image and merges fields with the existing complete tag.
-The found-repair method patches index metadata without copying or moving images.
-Caller authorization and queue repair validation remain the application's
-responsibility. Do not use these methods for normal new-round publishing. The generic
-`updateTagPayload` is unchanged: it does not contain metadata/repair mode flags.
+For an existing main tag, an update without image bytes or a changed image URL
+merges metadata into the existing tag and updates only the affected image
+metadata. A changed found image URL pointing to a matching main/ tag image is
+an index-only correction. New image uploads and queue-to-main image movement
+continue through the existing upload path. Neither case adds round-creation
+or approval logic to the API, and no new client methods or operation flags
+are required in `updateTagPayload`.
