@@ -80,6 +80,37 @@ describe('AWS historical index pages', () => {
     expect(JSON.parse(objects.get('main/index-0.json')!).tagnumber).toBe(2000)
   })
 
+  test('AWS-only metadataOnly flag uses updateTag without invoking upload', async () => {
+    const current = {
+      ...tag(7), hint: 'old',
+      mysteryImageUrl: 'https://test-biketag.sfo2.cdn.digitaloceanspaces.com/main/test-tag-7--mystery.webp',
+    } as Tag
+    const { client, objects } = clientWithObjects({
+      'main/index-0.json': current, 'main/index.json': [current],
+      'main/test-tag-7--mystery.webp': current,
+    })
+    const response = await (updateTag as any).call({
+      getTags: () => { throw new Error('should use the index helper') },
+      uploadTagImage: () => { throw new Error('must not upload an image') },
+    }, client, { game: 'test', tagnumber: 7, region: 'sfo2', metadataOnly: true, hint: 'edited' })
+    expect(response.success).toBe(true)
+    expect(JSON.parse(objects.get('main/index-0.json')!).hint).toBe('edited')
+  })
+
+  test('AWS-only found repair flag does not invoke image upload', async () => {
+    const current = { ...tag(8), mysteryPlayer: 'keep' } as Tag
+    const { client, objects } = clientWithObjects({
+      'main/index-0.json': current, 'main/index.json': [current],
+    })
+    const response = await (updateTag as any).call({
+      uploadTagImage: () => { throw new Error('must not upload an image') },
+    }, client, { game: 'test', tagnumber: 8, region: 'sfo2',
+      indexOnlyFoundRepair: true, foundPlayer: 'winner' })
+    expect(response.success).toBe(true)
+    expect(JSON.parse(objects.get('main/index-0.json')!).mysteryPlayer).toBe('keep')
+    expect(JSON.parse(objects.get('main/index.json')!)[0].foundPlayer).toBe('winner')
+  })
+
   test('found-only image update cannot erase the existing mystery half', async () => {
     const original = {
       ...tag(42), mysteryPlayer: 'mystery-author', hint: 'keep',
