@@ -119,7 +119,16 @@ export const updateMainTagMetadata = async (
     }
     const updated: Tag = { ...existing, ...changes }
     const bucket = getAwsBucketName(patch.game)
-    const copies: Array<{ key: string; metadata: Record<string, string>; contentType?: string }> = []
+    const copies: Array<{
+      key: string
+      metadata: Record<string, string>
+      contentType?: string
+      cacheControl?: string
+      contentDisposition?: string
+      contentEncoding?: string
+      contentLanguage?: string
+      expires?: Date
+    }> = []
     for (const [type, fields] of [
       ['mystery', mysteryFields],
       ['found', foundFields],
@@ -147,6 +156,11 @@ export const updateMainTagMetadata = async (
           data: encodeMetadataValue(JSON.stringify({ ...metadata, ...data })),
         },
         contentType: head.ContentType,
+        cacheControl: head.CacheControl,
+        contentDisposition: head.ContentDisposition,
+        contentEncoding: head.ContentEncoding,
+        contentLanguage: head.ContentLanguage,
+        expires: head.Expires,
       })
     }
     for (const copy of copies) {
@@ -157,6 +171,11 @@ export const updateMainTagMetadata = async (
         MetadataDirective: 'REPLACE',
         Metadata: copy.metadata,
         ContentType: copy.contentType,
+        CacheControl: copy.cacheControl,
+        ContentDisposition: copy.contentDisposition,
+        ContentEncoding: copy.contentEncoding,
+        ContentLanguage: copy.contentLanguage,
+        Expires: copy.expires,
         ACL: 'public-read',
       }))
     }
