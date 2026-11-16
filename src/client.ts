@@ -696,7 +696,7 @@ export class BikeTagClient {
     payload: fetchSignedUrlPayload,
     opts?: RequireAtLeastOne<Credentials>
   ) {
-    const { client, api, source, options } = this.getClientAdapter(
+    const { client, api, source } = this.getClientAdapter(
       payload,
       opts,
       undefined,
@@ -705,7 +705,7 @@ export class BikeTagClient {
     const clientMethod = api.fetchSignedUrl
 
     if (clientMethod) {
-      return clientMethod(client, options)
+      return clientMethod(client, payload)
     } else {
       return Promise.reject(`fetchSignedUrl ${Errors.NotImplemented} ${source}`)
     }
@@ -740,7 +740,7 @@ export class BikeTagClient {
     this.gameContext = gameContext
     this.config(
       {
-        game: game.name,
+        game: game.slug,
         imgur: {
           hash: game.mainhash,
           queuehash: game.queuehash,
