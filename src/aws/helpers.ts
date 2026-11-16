@@ -106,7 +106,7 @@ export const getTagPrefix = (
   game: string,
   tagnumber: number
 ): string => {
-  return `${folder}/${game}-tag-${tagnumber}`
+  return `${folder}/${game.toLowerCase()}-tag-${tagnumber}`
 }
 
 export const getBikeTagImageKey = async (
@@ -121,7 +121,7 @@ export const getBikeTagImageKey = async (
   const postfix =
     folder === 'queue' ? `--${await getHashedPlayerSuffix(player)}` : ''
   const extension = contentType?.length ? getImageExtension(contentType) : ''
-  const key = `${folder}/${game}-tag-${tagnumber}${suffix}${postfix}${extension.length ? '.' + extension : ''}`
+  const key = `${folder}/${game.toLowerCase()}-tag-${tagnumber}${suffix}${postfix}${extension.length ? '.' + extension : ''}`
 
   return key
 }
@@ -534,7 +534,7 @@ export const resizeAndSaveVariants = async ({
 }): Promise<string> => {
   const delay = (ms: number) => new Promise((res) => setTimeout(res, ms))
 
-  const bucket = `${tag.game}-biketag`
+  const bucket = getAwsBucketName(tag.game)
   const url = imageType === 'mystery' ? tag.mysteryImageUrl : tag.foundImageUrl
   if (!url) throw new Error(`Missing ${imageType}ImageUrl for tag`)
 
