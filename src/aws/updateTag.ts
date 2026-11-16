@@ -74,10 +74,16 @@ export async function updateTag(
 
     if (uploadResponse.success) {
       logVerbose('[updateTag] Image upload successful.')
-      payload.mysteryImageUrl = uploadResponse.data.mysteryImageUrl
-      payload.mysteryTime = uploadResponse.data.mysteryTime
-      payload.foundImageUrl = uploadResponse.data.foundImageUrl
-      payload.foundTime = uploadResponse.data.foundTime
+      // The upload response normalizes omitted image fields to empty defaults.
+      // Only copy back the image half that was actually supplied by this call.
+      if (needsMystery) {
+        payload.mysteryImageUrl = uploadResponse.data.mysteryImageUrl
+        payload.mysteryTime = uploadResponse.data.mysteryTime
+      }
+      if (needsFound) {
+        payload.foundImageUrl = uploadResponse.data.foundImageUrl
+        payload.foundTime = uploadResponse.data.foundTime
+      }
       payload.mysteryImage = undefined
       payload.foundImage = undefined
     } else {
@@ -227,7 +233,7 @@ export async function updateTag(
   }
 
   return {
-    data: createTagObject(payload),
+    data: createTagObject({ ...existingTag, ...payload }),
     success,
     error,
     source: AvailableApis[AvailableApis.aws],
