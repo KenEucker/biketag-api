@@ -309,3 +309,37 @@ continue using their existing single `index.json`. The current pointer is
 optional for existing games; no bulk migration or extra write permissions are
 required for reading tags. Full-history queries may involve more than one
 storage request, while current-tag requests require only one small object read.
+
+### AWS main tag edits and queue-found repairs
+
+The AWS adapter owns changes to `main/index.json`, numbered history pages, and
+`main/index-0.json` together. Both the current pointer and historical record
+contain the **same complete Tag object**. The found half of a completed round is
+never stored as a second, found-only record, and history reads exclude the
+duplicate current pointer.
+
+Server-side callers that have already authorized an Ambassador or repair action
+can use the existing `updateTag` method with two narrowly scoped modes:
+
+```ts
+// Edit only explicitly provided mystery/found metadata on an existing tag.
+// A mystery edit doesn't touch its found image, and vice versa.
+await client.updateTag(
+  { game: 'portland', tagnumber: 1700, hint: 'Updated hint' },
+  { source: 'aws', folder: 'main', metadataOnly: true },
+)
+
+// Repair the found portion of an existing main tag without moving images.
+// The supplied image URL must match this tag's main/ found-image key.
+await client.updateTag(
+  { game: 'portland', tagnumber: 1699, foundPlayer: 'Finder',
+    foundImageUrl: 'https://portland-biketag.sfo2.cdn.digitaloceanspaces.com/main/portland-tag-1699--found.webp' },
+  { source: 'aws', folder: 'main', indexOnlyFoundRepair: true },
+)
+```
+
+Neither mode accepts new tag creation; the metadata mode copies metadata only
+on the affected existing image and merges fields with the existing complete tag.
+The found-repair mode patches index metadata without copying or moving images.
+Caller authorization and queue repair validation remain the application's
+responsibility. Do not use these modes for normal new-round publishing.
