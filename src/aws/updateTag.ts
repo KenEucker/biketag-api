@@ -25,11 +25,12 @@ export async function updateTag(
   payload.folder = payload.folder ?? 'main'
 
   if (payload.metadataOnly === true || payload.indexOnlyFoundRepair === true) {
-    if (payload.folder !== 'main') {
+    if (payload.folder !== 'main' || typeof payload.tagnumber !== 'number' ||
+        (payload.metadataOnly && payload.indexOnlyFoundRepair)) {
       return {
         data: null,
         success: false,
-        error: 'Main index patches require folder=main',
+        error: 'A main index patch requires folder=main, a tag number, and only one patch mode',
         source: AvailableApis[AvailableApis.aws],
         status: HttpStatusCode.BadRequest,
       }
