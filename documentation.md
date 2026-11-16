@@ -313,31 +313,36 @@ storage request, while current-tag requests require only one small object read.
 ### AWS main tag edits and queue-found repairs
 
 The AWS adapter keeps `main/index.json`, numbered history pages, and
-`main/index-0.json` synchronized. Each contains the same full `Tag` record
-for its tag number; the current index is only a fast duplicate pointer.
+`main/index-0.json` synchronized. The current pointer is a copy of the same
+complete `Tag` record that exists in its historical page.
 
-Use the existing `updateTag()` method for tag changes:
+The public SDK continues exposing `updateTag()`. The AWS adapter alone
+understands two optional storage-specific flags on its **local**
+`src/aws/helpers.ts` `updateTagPayload` type. Neither flag belongs to
+the shared `src/common/payloads.ts` `updateTagPayload`.
 
 ```ts
-// Change one metadata field while preserving the existing found and mystery data.
+// Existing main tag metadata; no uploaded or moved images.
 await client.updateTag(
-  { game: 'portland', tagnumber: 1700, hint: 'Updated hint' },
+  { game: 'portland', tagnumber: 1700, hint: 'Updated hint',
+    metadataOnly: true },
   { source: 'aws', folder: 'main' },
 )
 
-// After an authorized queue repair has placed the found image in main/,
-// associate the existing main file with its tag, without moving the image again.
+// Only patch the found half of an existing tag after the application
+// has validated and placed the orphaned image in main/.
 await client.updateTag(
   { game: 'portland', tagnumber: 1699, foundPlayer: 'Finder',
-    foundImageUrl: 'https://portland-biketag.sfo2.cdn.digitaloceanspaces.com/main/portland-tag-1699--found.webp' },
+    foundImageUrl: 'https://portland-biketag.sfo2.cdn.digitaloceanspaces.com/main/portland-tag-1699--found.webp',
+    indexOnlyFoundRepair: true },
   { source: 'aws', folder: 'main' },
 )
 ```
 
-For an existing main tag, an update without image bytes or a changed image URL
-merges metadata into the existing tag and updates only the affected image
-metadata. A changed found image URL pointing to a matching main/ tag image is
-an index-only correction. New image uploads and queue-to-main image movement
-continue through the existing upload path. Neither case adds round-creation
-or approval logic to the API, and no new client methods or operation flags
-are required in `updateTagPayload`.
+These AWS-specific flags are passed through by the SDK at runtime, but
+are not defined on the generic public payload. Regular `updateTag()`
+remains flexible and retains existing upload/move behavior. In both
+restricted modes the tag must already exist; the metadata mode updates
+only the relevant image metadata, and the repair mode updates the index
+without moving or copying images. No round creation or approval logic
+is introduced in the API.
