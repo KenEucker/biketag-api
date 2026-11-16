@@ -42,6 +42,16 @@ describe('game context', () => {
     expect(client.gameContext?.game.name).toBe('Portland')
   })
 
+  test('passes the configured slug to the queued upload signing adapter', async () => {
+    const client = new TestBikeTagClient({ game: 'portland' })
+    client.setGameContext(game({ name: 'Portland', slug: 'portland' }))
+    const signedUrlAdapter = vi.fn().mockResolvedValue({ success: true, data: 'signed-url' })
+    const sign = (client as any).getPassthroughApiMethod(signedUrlAdapter, client)
+    await sign({ key: 'queue/portland-tag-1393--found--c3328c.jpg', p_id: 'player-id', contentType: 'image/jpeg' })
+    expect(signedUrlAdapter).toHaveBeenCalledOnce()
+    expect(signedUrlAdapter.mock.calls[0][1].game).toBe('portland')
+  })
+
   test('does not initialize adapters from empty environment credentials', () => {
     const client = new TestBikeTagClient({
       game: 'portland',
