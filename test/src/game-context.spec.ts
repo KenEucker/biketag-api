@@ -35,8 +35,8 @@ class TestBikeTagClient extends BikeTagClient {
 }
 
 describe('game context', () => {
-  test('setting game context preserves the configured game identifier', () => {
-    const client = new TestBikeTagClient({ game: 'portland' })
+  test('sets canonical slug from loaded game metadata rather than display name', () => {
+    const client = new TestBikeTagClient({ game: 'previous-game' })
     client.setGameContext(game({ name: 'Portland', slug: 'portland' }))
     expect(client.config().biketag.game).toBe('portland')
     expect(client.gameContext?.game.name).toBe('Portland')
