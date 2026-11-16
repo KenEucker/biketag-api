@@ -35,11 +35,12 @@ class TestBikeTagClient extends BikeTagClient {
 }
 
 describe('game context', () => {
-  test('configures the canonical slug while preserving display metadata', () => {
+  test('setting game context preserves the configured game identifier', () => {
     const client = new TestBikeTagClient({ game: 'portland' })
     client.setGameContext(game({ name: 'Portland', slug: 'portland' }))
     expect(client.config().biketag.game).toBe('portland')
     expect(client.gameContext?.game.name).toBe('Portland')
+    expect(client.gameContext?.game.slug).toBe('portland')
   })
 
   test('passes the configured slug to the queued upload signing adapter', async () => {
