@@ -1099,7 +1099,12 @@ export type queueTagPayload = Partial<Tag> &
   CommonPayloadData
 export type updateTagPayload = Partial<Tag> &
   Partial<S3UploadPayload> &
-  CommonPayloadData
+  CommonPayloadData & {
+    /** Change only explicitly editable metadata in an existing main tag. */
+    metadataOnly?: boolean
+    /** Repair an existing main tag's found metadata without image changes. */
+    indexOnlyFoundRepair?: boolean
+  }
 
 export const supportedImageExtensions = [
   '.jpg',
