@@ -39,7 +39,7 @@ export async function getTag(
     ...payload,
     limit: isCurrent ? 1 : payload.limit,
     ...(payload.tagnumber ? { tagnumbers: [payload.tagnumber] } : {}),
-    ...(payload.slug && payload.slug !== 'current' ? { slugs: [payload.slug] } : {}),
+    ...(!payload.tagnumber && payload.slug && payload.slug !== 'current' ? { slugs: [payload.slug] } : {}),
   })
   return { ...response, data: data[0] ?? null }
 }
