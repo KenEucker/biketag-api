@@ -75,7 +75,7 @@ describe('AWS historical index pages', () => {
 
   test('all tags omit duplicate pointer and limited reads load only newest page', async () => {
     const { client, send } = clientWithObjects({
-      'main/index-0.json': [tag(2001)],
+      'main/index-0.json': tag(2001),
       'main/index.json': [tag(2000), tag(1)],
       'main/index-2.json': [tag(2001)],
     })
