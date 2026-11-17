@@ -26,6 +26,7 @@ export async function queueTag(
 
   const playerAlreadyQueuedError =
     !isCompleteQueuedTag &&
+    !!payload.foundPlayer &&
     queuedTags.some((t) => t.foundPlayer === payload.foundPlayer)
 
   if (playerAlreadyQueuedError) {
